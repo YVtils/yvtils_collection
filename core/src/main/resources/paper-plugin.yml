@@ -1,0 +1,11 @@
+name: YVtils-Collection
+version: 1.1.0
+main: yv.tils.core.YVtils
+api-version: '1.21'
+author: WolfiiYV
+website: 'https://yvtils.net/yvtils/'
+prefix: YVtils
+contributors:
+  - SlWed
+  - black_Kittys
+  - Silver
