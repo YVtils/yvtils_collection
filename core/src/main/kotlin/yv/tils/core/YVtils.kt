@@ -1,81 +1,45 @@
 package yv.tils.core
 
+import data.Data
+import dev.jorel.commandapi.CommandAPI
+import dev.jorel.commandapi.CommandAPIBukkitConfig
+import logger.Logger
+import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
+import yv.tils.essentials.EssentialYVtils
 
 class YVtils : JavaPlugin() {
     companion object {
         val yvtilsVersion = YVtils().pluginMeta.version
+        lateinit var instance: YVtils
+    }
+
+    override fun onLoad() {
+        instance = this
+
+        Logger.logger = componentLogger
+        Logger.debug("YVtils Collection v$yvtilsVersion is loading...")
+
+        Data.yvtilsVersion = yvtilsVersion
+        Data.instance = instance
+        Data.key = NamespacedKey(this, "yvtils")
+
+        CommandAPI.onLoad(CommandAPIBukkitConfig(instance).silentLogs(true).verboseOutput(false).setNamespace("yvtils"))
     }
 
     override fun onEnable() {
-        val loadedModules = mutableListOf<String>()
-        loadedModules.add("EXAMPLE 1")
-        loadedModules.add("EXAMPLE 2")
-        loadedModules.add("EXAMPLE 3")
+        Logger.debug("YVtils Collection v$yvtilsVersion is starting...")
 
-        val data = mutableMapOf(
-            1 to listOf("plugin.action.start"),
-            2 to loadedModules,
-        )
-        val log = printLogWithSplits(data)
-        log.forEach { logger.info(it) }
+        EssentialYVtils().enablePlugin()
 
-        CommonYVtils().test()
+        CommonYVtils().enablePlugin() // This should be the last one to load, as it handles the loading of all modules
     }
 
     override fun onDisable() {
-        val data = mutableMapOf(
-            1 to listOf("plugin.action.stop"),
-        )
+        Logger.debug("YVtils Collection v$yvtilsVersion is stopping...")
+        CommonYVtils().disablePlugin()
 
-        val log = printLogWithSplits(data)
-        log.forEach { logger.info(it) }
-    }
-
-    private fun printLogWithSplits(data: MutableMap<Int, List<String>>): MutableList<String> {
-        val lineLength = 40
-        val log = mutableListOf<String>()
-        val border = "+".repeat(lineLength)
-
-        log.add(border)
-
-        val message = "YVtils Collection v$yvtilsVersion"
-        val secondMessage = "https://yvtils.net"
-        val prefix = "|"
-        val suffix = "|"
-
-        fun getPadding(message: String): String {
-            val padding = (lineLength - message.length) / 2
-            return " ".repeat(padding + (if ((lineLength - message.length) % 2 != 0) 1 else 0))
-        }
-
-        log.add("$prefix${getPadding(message)}$message${" ".repeat(lineLength - message.length - getPadding(message).length)}$suffix")
-        log.add("$prefix${getPadding(secondMessage)}$secondMessage${" ".repeat(lineLength - secondMessage.length - getPadding(secondMessage).length)}$suffix")
-
-        log.add(border)
-
-        var lastKey: Int? = null
-        data.toSortedMap().forEach { (key, messages) ->
-            if (lastKey != null && key != lastKey) {
-                log.add("|----------------------------------------|")
-            }
-
-            messages.forEach { message ->
-                if (message.length > lineLength) {
-                    log.add("$prefix${message.substring(0, lineLength - 2)}$suffix")
-                    log.add("$prefix${message.substring(lineLength - 2)}${" ".repeat(lineLength - message.length - 2)}$suffix")
-                    return@forEach
-                }
-
-                log.add("$prefix${getPadding(message)}$message${" ".repeat(lineLength - message.length - getPadding(message).length)}$suffix")
-            }
-
-            lastKey = key
-        }
-
-        log.add(border)
-
-        return log
+        EssentialYVtils().disablePlugin()
     }
 }

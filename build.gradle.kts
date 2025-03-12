@@ -49,6 +49,10 @@ subprojects {
         // CommandAPI dependencies
         add("implementation", "dev.jorel:commandapi-bukkit-shade-mojang-mapped:$commandAPIVersion")
         add("implementation", "dev.jorel:commandapi-bukkit-kotlin:$commandAPIVersion")
+
+        // Other
+        add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+        add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     }
 
     tasks.withType<KotlinCompile> {

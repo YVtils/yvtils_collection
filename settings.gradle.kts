@@ -7,6 +7,9 @@ pluginManagement {
         id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+}
 
 rootProject.name = "yvtils_collection"
 include("core")
@@ -22,3 +25,4 @@ include("sit")
 include("status")
 include("waypoint")
 include("utils")
+include("essentials")
