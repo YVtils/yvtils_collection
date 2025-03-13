@@ -5,6 +5,8 @@ build/
 !**/src/test/**/build/
 gradle/
 
+run/
+
 ### IntelliJ IDEA ###
 .idea/*
 *.iws
