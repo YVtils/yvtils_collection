@@ -7,14 +7,13 @@ import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.playerArgument
 import language.LanguageHandler
 import org.bukkit.entity.Player
-import yv.tils.essentials.commands.handler.FlyHandler
+import yv.tils.essentials.commands.handler.PingHandler
 
-
-class FlyCMD {
-    val command = commandTree("fly") {
-        withPermission("yvtils.smp.command.fly")
-        withPermission(CommandPermission.OP)
-        withUsage("fly [player]")
+class PingCMD {
+    val command = commandTree("ping") {
+        withPermission("yvtils.smp.command.ping")
+        withPermission(CommandPermission.NONE)
+        withUsage("ping")
 
         playerArgument("player", true) {
             anyExecutor { sender, args ->
@@ -23,13 +22,13 @@ class FlyCMD {
                     return@anyExecutor
                 }
 
-                val flyHandler = FlyHandler()
+                val pingHandler = PingHandler()
 
                 if (args[0] is Player) {
                     val target = args[0] as Player
-                    flyHandler.flySwitch(target, sender)
+                    pingHandler.ping(target, sender)
                 } else {
-                    flyHandler.flySwitch(sender as Player)
+                    pingHandler.ping(sender as Player)
                 }
             }
         }

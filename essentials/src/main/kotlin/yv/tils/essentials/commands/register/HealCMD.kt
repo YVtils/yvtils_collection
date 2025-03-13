@@ -7,14 +7,13 @@ import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.playerArgument
 import language.LanguageHandler
 import org.bukkit.entity.Player
-import yv.tils.essentials.commands.handler.FlyHandler
+import yv.tils.essentials.commands.handler.HealHandler
 
-
-class FlyCMD {
-    val command = commandTree("fly") {
-        withPermission("yvtils.smp.command.fly")
+class HealCMD {
+    val command = commandTree("heal") {
+        withPermission("yvtils.smp.command.heal")
         withPermission(CommandPermission.OP)
-        withUsage("fly [player]")
+        withUsage("heal [player]")
 
         playerArgument("player", true) {
             anyExecutor { sender, args ->
@@ -23,13 +22,13 @@ class FlyCMD {
                     return@anyExecutor
                 }
 
-                val flyHandler = FlyHandler()
+                val healHandler = HealHandler()
 
                 if (args[0] is Player) {
                     val target = args[0] as Player
-                    flyHandler.flySwitch(target, sender)
+                    healHandler.playerHeal(target, sender)
                 } else {
-                    flyHandler.flySwitch(sender as Player)
+                    healHandler.playerHeal(sender as Player)
                 }
             }
         }

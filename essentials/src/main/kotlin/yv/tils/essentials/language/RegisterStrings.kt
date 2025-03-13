@@ -5,6 +5,27 @@ import language.FileTypes
 
 class RegisterStrings {
     fun registerStrings() {
+        registerNewString("gamemode.survival", mapOf(FileTypes.EN to "Survival", FileTypes.DE to "Überleben"))
+        registerNewString("gamemode.creative", mapOf(FileTypes.EN to "Creative", FileTypes.DE to "Kreativ"))
+        registerNewString("gamemode.adventure", mapOf(FileTypes.EN to "Adventure", FileTypes.DE to "Abenteuer"))
+        registerNewString("gamemode.spectator", mapOf(FileTypes.EN to "Spectator", FileTypes.DE to "Zuschauer"))
+
+        registerNewString(
+            "globalmute.try_to_write",
+            mapOf(
+                FileTypes.EN to "<prefix> <red>Global mute is enabled! You can't write messages!",
+                FileTypes.DE to "<prefix> <red>Global mute ist aktiviert! Du kannst keine Nachrichten schreiben!"
+            )
+        )
+
+        registerNewString(
+            "text.action.copy",
+            mapOf(
+                FileTypes.EN to "<gray>Click to copy!",
+                FileTypes.DE to "<gray>Klicke um zu kopieren!"
+            )
+        )
+
         registerNewString(
             "command.missing.player",
             mapOf(
@@ -12,6 +33,15 @@ class RegisterStrings {
                 FileTypes.DE to "<prefix> <red>Um diesen Command hier auszuführen, musst ein Spieler angeben werden!"
             )
         )
+
+        registerNewString(
+            "command.usage",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>Usage: <white><command>",
+                FileTypes.DE to "<prefix> <gray>Benutzung: <white><command>"
+            )
+        )
+
         registerNewString(
             "command.fly.enable.self",
             mapOf(
@@ -19,6 +49,7 @@ class RegisterStrings {
                 FileTypes.DE to "<prefix> <gray>Du kannst <green>nun <gray>fliegen!"
             )
         )
+
         registerNewString(
             "command.fly.enable.other",
             mapOf(
@@ -26,6 +57,7 @@ class RegisterStrings {
                 FileTypes.DE to "<prefix> <gray><player> kann <green>nun <gray>fliegen!"
             )
         )
+
         registerNewString(
             "command.fly.disable.self",
             mapOf(
@@ -33,11 +65,148 @@ class RegisterStrings {
                 FileTypes.DE to "<prefix> <gray>Du kannst nun <red>nicht mehr <gray>fliegen!"
             )
         )
+
         registerNewString(
             "command.fly.disable.other",
             mapOf(
                 FileTypes.EN to "<prefix> <gray><player> can <red>no longer <gray>fly!",
                 FileTypes.DE to "<prefix> <gray><player> kann nun <red>nicht mehr <gray>fliegen!"
+            )
+        )
+
+        registerNewString(
+            "command.gamemode.self",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>Your gamemode has been set to <green><gamemode><gray>!",
+                FileTypes.DE to "<prefix> <gray>Dein Spielmodus wurde zu <green><gamemode> <gray>geändert!"
+            )
+        )
+
+        registerNewString(
+            "command.gamemode.other",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray><player>'s gamemode has been set to <green><gamemode><gray>!",
+                FileTypes.DE to "<prefix> <gray>Der Spielmodus von <player> wurde zu <green><gamemode> <gray>geändert!"
+            )
+        )
+
+        registerNewString(
+            "command.globalmute.already",
+            mapOf(
+                FileTypes.EN to "<prefix> <red>Global mute is already in this state!",
+                FileTypes.DE to "<prefix> <red>Global mute ist bereits in diesem Zustand!"
+            )
+        )
+
+        registerNewString(
+            "command.globalmute.enable",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>Global mute has been <green>enabled<gray>!",
+                FileTypes.DE to "<prefix> <gray>Global mute wurde <green>aktiviert<gray>!"
+            )
+        )
+
+        registerNewString(
+            "command.globalmute.disable",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>Global mute has been <red>disabled<gray>!",
+                FileTypes.DE to "<prefix> <gray>Global mute wurde <red>deaktiviert<gray>!"
+            )
+        )
+
+        registerNewString(
+            "command.god.enable.self",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>You are now <green>invulnerable<gray>!",
+                FileTypes.DE to "<prefix> <gray>Du bist nun <green>unverwundbar<gray>!"
+            )
+        )
+
+        registerNewString(
+            "command.god.enable.other",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray><player> is now <green>invulnerable<gray>!",
+                FileTypes.DE to "<prefix> <gray><player> ist nun <green>unverwundbar<gray>!"
+            )
+        )
+
+        registerNewString(
+            "command.god.disable.self",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>You are no longer <red>invulnerable<gray>!",
+                FileTypes.DE to "<prefix> <gray>Du bist nun <red>nicht mehr <gray>unverwundbar!"
+            )
+        )
+
+        registerNewString(
+            "command.god.disable.other",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray><player> is no longer <red>invulnerable<gray>!",
+                FileTypes.DE to "<prefix> <gray><player> ist nun <red>nicht mehr <gray>unverwundbar!"
+            )
+        )
+
+        registerNewString(
+            "command.heal.self",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>You have been <green>healed<gray>!",
+                FileTypes.DE to "<prefix> <gray>Du wurdest <green>geheilt<gray>!"
+            )
+        )
+
+        registerNewString(
+            "command.heal.other",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray><player> has been <green>healed<gray>!",
+                FileTypes.DE to "<prefix> <gray><player> wurde <green>geheilt<gray>!"
+            )
+        )
+
+        registerNewString(
+            "command.ping.self",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>Your ping is <green><ping><gray>ms!",
+                FileTypes.DE to "<prefix> <gray>Dein Ping ist <green><ping><gray>ms!"
+            )
+        )
+
+        registerNewString(
+            "command.ping.other",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray><player>'s ping is <green><ping><gray>ms!",
+                FileTypes.DE to "<prefix> <gray>Der Ping von <player> ist <green><ping><gray>ms!"
+            )
+        )
+
+        registerNewString(
+            "command.speed.change.self",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>Your speed has been set to <green><speed><gray>!",
+                FileTypes.DE to "<prefix> <gray>Deine Geschwindigkeit wurde auf <green><speed><gray> gesetzt!"
+            )
+        )
+
+        registerNewString(
+            "command.speed.change.other",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray><player>'s speed has been set to <green><speed><gray>!",
+                FileTypes.DE to "<prefix> <gray>Die Geschwindigkeit von <player> wurde auf <green><speed><gray> gesetzt!"
+            )
+        )
+
+        registerNewString(
+            "command.speed.reset.self",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>Your speed has been reset!",
+                FileTypes.DE to "<prefix> <gray>Deine Geschwindigkeit wurde zurückgesetzt!"
+            )
+        )
+
+        registerNewString(
+            "command.speed.reset.other",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray><player>'s speed has been reset!",
+                FileTypes.DE to "<prefix> <gray>Die Geschwindigkeit von <player> wurde zurückgesetzt!"
             )
         )
     }

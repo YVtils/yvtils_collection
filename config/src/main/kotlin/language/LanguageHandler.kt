@@ -1,11 +1,11 @@
 package language
 
-import com.mojang.brigadier.Message
-import message.MessageUtils
 import logger.Logger
+import message.MessageUtils
 import net.kyori.adventure.text.Component
-import java.util.Locale
-import java.util.UUID
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
+import java.util.*
 
 class LanguageHandler {
     companion object {
@@ -15,8 +15,22 @@ class LanguageHandler {
         fun getMessage(key: String, uuid: UUID? = null): Component =
             MessageUtils.convert(getString(key, getLocale(uuid)))
 
+        fun getMessage(key: String, sender: CommandSender): Component =
+            if (sender is Player) {
+                getMessage(key, sender.uniqueId)
+            } else {
+                getMessage(key)
+            }
+
         fun getRawMessage(key: String, uuid: UUID? = null): String =
             getString(key, getLocale(uuid))
+
+        fun getRawMessage(key: String, sender: CommandSender): String =
+            if (sender is Player) {
+                getRawMessage(key, sender.uniqueId)
+            } else {
+                getRawMessage(key)
+            }
 
         fun getCleanMessage(key: String, uuid: UUID? = null): String =
             MessageUtils.strip(getString(key, getLocale(uuid)))
@@ -24,6 +38,14 @@ class LanguageHandler {
         fun getMessage(key: String, uuid: UUID? = null, params: Map<String, Any>): Component {
             val message = getString(key, getLocale(uuid))
             return MessageUtils.replacer(message, params)
+        }
+
+        fun getMessage(key: String, sender: CommandSender, params: Map<String, Any>): Component {
+            return if (sender is Player) {
+                getMessage(key, sender.uniqueId, params)
+            } else {
+                getMessage(key, params = params)
+            }
         }
 
         private fun getLocale(uuid: UUID?): Locale =
