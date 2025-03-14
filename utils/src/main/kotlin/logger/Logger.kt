@@ -12,6 +12,10 @@ class Logger {
             debugMode = enabled
         }
 
+        fun dev(message: String) {
+            logger?.info(message)
+        }
+
         fun debug(message: String) {
             if (debugMode) {
                 logger?.info(message)

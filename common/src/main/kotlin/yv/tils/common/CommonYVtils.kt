@@ -1,13 +1,16 @@
 package yv.tils.common
 
+import coroutine.CoroutineHandler
 import data.Data
-import message.MessageUtils
 import data.Data.Companion.yvtilsVersion
 import language.Language
 import language.LanguageHandler
 import logger.Logger
+import message.MessageUtils
 import net.kyori.adventure.text.Component
+import yv.tils.common.language.LoadPlayerLanguage
 import yv.tils.common.language.RegisterStrings
+import yv.tils.common.listeners.PlayerLocaleChange
 
 class CommonYVtils {
     companion object {
@@ -24,12 +27,17 @@ class CommonYVtils {
 
         Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
 
+        val modules = Data.loadedModules.sortedBy { it }.joinToString(", ")
+
         val data = mutableMapOf(
             1 to listOf(LanguageHandler.getMessage("plugin.action.start", params = mapOf("prefix" to Data.prefix))),
-            2 to MessageUtils.convert(Data.loadedModules),
+            2 to listOf(MessageUtils.convert(modules)),
         )
         val log = printLogWithSplits(data)
         log.forEach { Logger.log(Logger.Companion.Level.INFO, it) }
+
+        registerListeners()
+        registerCoroutines()
     }
 
     fun disablePlugin() {
@@ -39,6 +47,21 @@ class CommonYVtils {
 
         val log = printLogWithSplits(data)
         log.forEach { Logger.log(Logger.Companion.Level.INFO, it) }
+    }
+
+    private fun registerListeners() {
+        val plugin = Data.instance
+        val pm = plugin.server.pluginManager
+
+        pm.registerEvents(PlayerLocaleChange(), plugin)
+    }
+
+    private fun registerCoroutines() {
+        CoroutineHandler.launchTask(
+            suspend { LoadPlayerLanguage().asyncCleanup() },
+            "yvtils-async-cleanup",
+            afterDelay = 5 * 1000 * 60,
+        )
     }
 
     private fun printLogWithSplits(data: MutableMap<Int, List<Component>>): MutableList<Component> {
@@ -60,7 +83,6 @@ class CommonYVtils {
             return " ".repeat(leftPadding) to " ".repeat(rightPadding)
         }
 
-
         val (paddingLeft, paddingRight) = getPadding(message)
         log.add(MessageUtils.convert("$prefix$paddingLeft$message$paddingRight$suffix"))
         val (secondPaddingLeft, secondPaddingRight) = getPadding(secondMessage)
@@ -76,15 +98,25 @@ class CommonYVtils {
 
             messages.forEach { message ->
                 val tempMessage = MessageUtils.strip(message)
+                val words = tempMessage.split(" ")
+                var currentLine = ""
 
-                if (tempMessage.length > lineLength) {
-                    log.add(MessageUtils.joinedConvert(prefix, tempMessage.substring(0, lineLength - 2), suffix))
-                    log.add(MessageUtils.joinedConvert(prefix, tempMessage.substring(lineLength - 2), suffix))
-                    return@forEach
+                for (word in words) {
+                    val potentialLine = if (currentLine.isEmpty()) word else "$currentLine $word"
+
+                    if (potentialLine.length <= lineLength - 4) {
+                        currentLine = potentialLine
+                    } else {
+                        val (leftPad, rightPad) = getPadding(currentLine)
+                        log.add(MessageUtils.joinedConvert(prefix, leftPad, currentLine, rightPad, suffix))
+                        currentLine = word
+                    }
                 }
 
-                val (prefixPadding, suffixPadding) = getPadding(tempMessage)
-                log.add(MessageUtils.joinedConvert(prefix, prefixPadding, tempMessage, suffixPadding, suffix))
+                if (currentLine.isNotEmpty()) {
+                    val (leftPad, rightPad) = getPadding(currentLine)
+                    log.add(MessageUtils.joinedConvert(prefix, leftPad, currentLine, rightPad, suffix))
+                }
             }
 
             lastKey = key

@@ -38,7 +38,7 @@ class RegisterStrings {
             "command.usage",
             mapOf(
                 FileTypes.EN to "<prefix> <gray>Usage: <white><command>",
-                FileTypes.DE to "<prefix> <gray>Benutzung: <white><command>"
+                FileTypes.DE to "<prefix> <gray>Benutze: <white><command>"
             )
         )
 

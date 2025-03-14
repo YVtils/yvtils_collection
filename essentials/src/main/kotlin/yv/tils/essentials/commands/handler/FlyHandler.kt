@@ -34,12 +34,12 @@ class FlyHandler {
             player.isFlying = true
             if (!silent) {
                 player.sendMessage(
-                    LanguageHandler.getMessage("command.fly.enable.self", params = mapOf("prefix" to Data.prefix))
+                    LanguageHandler.getMessage("command.fly.enable.self", player.uniqueId, params = mapOf("prefix" to Data.prefix))
                 )
 
                 if (player != sender) {
                     sender.sendMessage(
-                        LanguageHandler.getMessage("command.fly.enable.other", params = mapOf("prefix" to Data.prefix, "player" to player.name))
+                        LanguageHandler.getMessage("command.fly.enable.other", sender, params = mapOf("prefix" to Data.prefix, "player" to player.name))
                     )
                 }
             }
@@ -56,12 +56,12 @@ class FlyHandler {
 
             if (!silent) {
                 player.sendMessage(
-                    LanguageHandler.getMessage("command.fly.disable.self", params = mapOf("prefix" to Data.prefix))
+                    LanguageHandler.getMessage("command.fly.disable.self", player.uniqueId, params = mapOf("prefix" to Data.prefix))
                 )
 
                 if (player != sender) {
                     sender.sendMessage(
-                        LanguageHandler.getMessage("command.fly.disable.other", params = mapOf("prefix" to Data.prefix, "player" to player.name))
+                        LanguageHandler.getMessage("command.fly.disable.other", sender, params = mapOf("prefix" to Data.prefix, "player" to player.name))
                     )
                 }
             }

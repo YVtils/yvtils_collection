@@ -9,7 +9,7 @@ import java.util.*
 
 class LanguageHandler {
     companion object {
-        private val playerLang = mutableMapOf<UUID, Locale>()
+        val playerLang = mutableMapOf<UUID, Locale>()
         private var serverDefaultLang: Locale = Locale.ENGLISH
 
         fun getMessage(key: String, uuid: UUID? = null): Component =

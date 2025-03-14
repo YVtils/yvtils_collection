@@ -65,6 +65,5 @@ class EssentialYVtils {
             "description" to "Bypass the global mute",
             "default" to PermissionDefault.OP
         )))
-
     }
 }

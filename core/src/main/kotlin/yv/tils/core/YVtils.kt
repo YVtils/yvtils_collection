@@ -1,5 +1,7 @@
 package yv.tils.core
 
+import ConfigYVtils
+import UtilsYVtils
 import data.Data
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIBukkitConfig
@@ -31,6 +33,8 @@ class YVtils : JavaPlugin() {
     override fun onEnable() {
         Logger.debug("YVtils Collection v$yvtilsVersion is starting...")
 
+        ConfigYVtils().enablePlugin()
+        UtilsYVtils().enablePlugin()
         EssentialYVtils().enablePlugin()
 
         CommonYVtils().enablePlugin() // This should be the last one to load, as it handles the loading of all modules
@@ -38,6 +42,9 @@ class YVtils : JavaPlugin() {
 
     override fun onDisable() {
         Logger.debug("YVtils Collection v$yvtilsVersion is stopping...")
+
+        ConfigYVtils().disablePlugin()
+        UtilsYVtils().disablePlugin()
         CommonYVtils().disablePlugin()
 
         EssentialYVtils().disablePlugin()
