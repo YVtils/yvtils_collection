@@ -11,7 +11,7 @@ import yv.tils.essentials.commands.handler.PingHandler
 
 class PingCMD {
     val command = commandTree("ping") {
-        withPermission("yvtils.smp.command.ping")
+        withPermission("yvtils.command.ping")
         withPermission(CommandPermission.NONE)
         withUsage("ping")
 

@@ -12,7 +12,7 @@ import yv.tils.essentials.commands.handler.FlyHandler
 
 class FlyCMD {
     val command = commandTree("fly") {
-        withPermission("yvtils.smp.command.fly")
+        withPermission("yvtils.command.fly")
         withPermission(CommandPermission.OP)
         withUsage("fly [player]")
 

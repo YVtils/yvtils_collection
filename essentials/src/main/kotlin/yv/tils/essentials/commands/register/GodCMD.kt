@@ -11,7 +11,7 @@ import yv.tils.essentials.commands.handler.GodHandler
 
 class GodCMD {
     val command = commandTree("god") {
-        withPermission("yvtils.smp.command.god")
+        withPermission("yvtils.command.god")
         withPermission(CommandPermission.OP)
         withUsage("god")
 

@@ -8,7 +8,7 @@ import yv.tils.essentials.commands.handler.SeedHandler
 
 class SeedCMD {
     val command = commandTree("seed") {
-        withPermission("yvtils.smp.command.seed")
+        withPermission("yvtils.command.seed")
         withPermission(CommandPermission.OP)
         withUsage("seed show")
 

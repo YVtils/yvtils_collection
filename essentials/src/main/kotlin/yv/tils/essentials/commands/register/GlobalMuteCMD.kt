@@ -9,7 +9,7 @@ import yv.tils.essentials.commands.handler.GlobalMuteHandler
 
 class GlobalMuteCMD {
     val command = commandTree("globalmute") {
-        withPermission("yvtils.smp.command.globalmute")
+        withPermission("yvtils.command.globalmute")
         withPermission(CommandPermission.OP)
         withUsage("globalmute [state]")
         withAliases("gmute")

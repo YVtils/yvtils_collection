@@ -10,6 +10,9 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.essentials.EssentialYVtils
+import yv.tils.message.MessageYVtils
+import yv.tils.multiMine.MultiMineYVtils
+import yv.tils.sit.SitYVtils
 
 class YVtils : JavaPlugin() {
     companion object {
@@ -36,6 +39,9 @@ class YVtils : JavaPlugin() {
         ConfigYVtils().enablePlugin()
         UtilsYVtils().enablePlugin()
         EssentialYVtils().enablePlugin()
+        SitYVtils().enablePlugin()
+        MessageYVtils().enablePlugin()
+        MultiMineYVtils().enablePlugin()
 
         CommonYVtils().enablePlugin() // This should be the last one to load, as it handles the loading of all modules
     }
@@ -45,8 +51,11 @@ class YVtils : JavaPlugin() {
 
         ConfigYVtils().disablePlugin()
         UtilsYVtils().disablePlugin()
-        CommonYVtils().disablePlugin()
-
         EssentialYVtils().disablePlugin()
+        SitYVtils().disablePlugin()
+        MessageYVtils().disablePlugin()
+        MultiMineYVtils().disablePlugin()
+
+        CommonYVtils().disablePlugin()
     }
 }

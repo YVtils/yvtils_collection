@@ -18,20 +18,29 @@ class CoroutineHandler {
 
         fun launchTask(
             task: suspend () -> Unit,
-            taskName: String,
+            taskName: String? = null,
             beforeDelay: Long = 0L,
-            afterDelay: Long = 0L
+            afterDelay: Long = 0L,
+            isOnce: Boolean = false
         ): String {
+            if (isOnce) {
+                Logger.debug("Launching one-time task $taskName with beforeDelay: $beforeDelay")
+                val taskData = launchOnceTaskLogic(task, taskName, beforeDelay)
+                return taskData.taskId
+            }
+
             Logger.debug("Launching task $taskName with beforeDelay: $beforeDelay and afterDelay: $afterDelay")
             val taskData = launchTaskLogic(task, taskName, beforeDelay, afterDelay)
             return taskData.taskId
         }
 
-        private fun launchTaskLogic(task: suspend () -> Unit, taskName: String, beforeDelay: Long, afterDelay: Long): Task {
-            if (tasks.containsKey(taskName)) {
+        private fun launchTaskLogic(task: suspend () -> Unit, taskName: String? = null, beforeDelay: Long, afterDelay: Long): Task {
+            if (tasks.containsKey(taskName) && taskName != null) {
                 Logger.debug("There is already a task with the name $taskName")
                 throw Exception("There is already a task with the name $taskName")
             }
+
+            val taskName = taskName ?: "yvtils-task-${System.currentTimeMillis()}"
 
             val taskId = System.currentTimeMillis().toString()
 
@@ -51,6 +60,36 @@ class CoroutineHandler {
             )
 
             tasks[taskName] = taskData
+            return taskData
+        }
+
+        private fun launchOnceTaskLogic(task: suspend () -> Unit, taskName: String? = null, beforeDelay: Long): Task {
+            if (tasks.containsKey(taskName) && taskName != null) {
+                Logger.debug("There is already a task with the name $taskName")
+                throw Exception("There is already a task with the name $taskName")
+            }
+
+            val taskName = taskName ?: "yvtils-task-${System.currentTimeMillis()}"
+
+            val taskId = System.currentTimeMillis().toString()
+
+            val job = coroutineScope.launch {
+                delay(beforeDelay)
+                task()
+                taskJobs.remove(taskId)
+                tasks.remove(taskName)
+                Logger.debug("Task $taskName completed and removed")
+            }
+            taskJobs[taskId] = job
+
+            val taskData = Task(
+                taskId = taskId,
+                taskName = taskName,
+                task = task
+            )
+
+            tasks[taskName] = taskData
+
             return taskData
         }
 

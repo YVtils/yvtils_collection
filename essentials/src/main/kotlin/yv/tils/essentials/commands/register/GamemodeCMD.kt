@@ -13,7 +13,7 @@ import yv.tils.essentials.commands.handler.GamemodeHandler
 
 class GamemodeCMD {
     val command = commandTree("gm") {
-        withPermission("yvtils.smp.command.gamemode")
+        withPermission("yvtils.command.gamemode")
         withPermission(CommandPermission.OP)
         withUsage("gm <gamemode> [player]")
         withAliases("gamemode")

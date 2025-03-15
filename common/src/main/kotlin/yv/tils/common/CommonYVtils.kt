@@ -59,7 +59,7 @@ class CommonYVtils {
     private fun registerCoroutines() {
         CoroutineHandler.launchTask(
             suspend { LoadPlayerLanguage().asyncCleanup() },
-            "yvtils-async-cleanup",
+            "yvtils-language-cleanup",
             afterDelay = 5 * 1000 * 60,
         )
     }

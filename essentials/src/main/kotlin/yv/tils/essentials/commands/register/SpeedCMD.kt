@@ -12,7 +12,7 @@ class SpeedCMD {
     private val speedHandler = SpeedHandler()
 
     val command = commandTree("speed") {
-        withPermission("yvtils.smp.command.speed")
+        withPermission("yvtils.command.speed")
         withPermission(CommandPermission.OP)
         withUsage("speed <speed> [player]")
 

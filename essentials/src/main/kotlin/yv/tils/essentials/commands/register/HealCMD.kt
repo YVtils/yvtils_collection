@@ -11,7 +11,7 @@ import yv.tils.essentials.commands.handler.HealHandler
 
 class HealCMD {
     val command = commandTree("heal") {
-        withPermission("yvtils.smp.command.heal")
+        withPermission("yvtils.command.heal")
         withPermission(CommandPermission.OP)
         withUsage("heal [player]")
 
