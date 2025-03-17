@@ -13,6 +13,7 @@ import yv.tils.essentials.EssentialYVtils
 import yv.tils.message.MessageYVtils
 import yv.tils.multiMine.MultiMineYVtils
 import yv.tils.sit.SitYVtils
+import yv.tils.status.StatusYVtils
 
 class YVtils : JavaPlugin() {
     companion object {
@@ -42,6 +43,7 @@ class YVtils : JavaPlugin() {
         SitYVtils().enablePlugin()
         MessageYVtils().enablePlugin()
         MultiMineYVtils().enablePlugin()
+        StatusYVtils().enablePlugin()
 
         CommonYVtils().enablePlugin() // This should be the last one to load, as it handles the loading of all modules
     }
@@ -55,6 +57,7 @@ class YVtils : JavaPlugin() {
         SitYVtils().disablePlugin()
         MessageYVtils().disablePlugin()
         MultiMineYVtils().disablePlugin()
+        StatusYVtils().disablePlugin()
 
         CommonYVtils().disablePlugin()
     }

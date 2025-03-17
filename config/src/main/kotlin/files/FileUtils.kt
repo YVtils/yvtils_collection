@@ -65,6 +65,9 @@ class FileUtils {
                 file.parentFile.mkdirs()
 
                 file.createNewFile()
+            } else {
+                Logger.debug("File already exists")
+                return
             }
 
             when (content) {

@@ -20,8 +20,6 @@ class LoadPlayerLanguage {
     }
 
     fun asyncCleanup() {
-        Logger.dev("Cleaning up player language data...")
-
         val iterator = LanguageHandler.playerLang.keys.iterator()
 
         val onlinePlayers = Data.instance.server.onlinePlayers

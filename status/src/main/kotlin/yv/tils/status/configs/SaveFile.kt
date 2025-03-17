@@ -1,4 +1,4 @@
-package yv.tils.multiMine.configs
+package yv.tils.status.configs
 
 import coroutine.CoroutineHandler
 import files.FileUtils
@@ -10,11 +10,13 @@ import java.util.*
 
 class SaveFile {
     companion object {
-        val saves = mutableMapOf<UUID, MultiMineSave>()
+        val saves = mutableMapOf<UUID, StatusSave>()
     }
 
+    private val filePath = "/status/save.json"
+
     fun loadConfig() {
-        val file = FileUtils.loadJSONFile("/multiMine/save.json")
+        val file = FileUtils.loadJSONFile(filePath)
         val jsonFile = file.content
         val saveList = jsonFile["saves"]?.jsonArray ?: return
 
@@ -27,23 +29,23 @@ class SaveFile {
             Logger.debug("Loading save: $save")
 
             val uuid = save.jsonObject["uuid"]?.toString()?.replace("\"", "") ?: continue
-            val toggled = save.jsonObject["toggled"]?.toString()?.toBoolean() ?: continue
+            val content = save.jsonObject["content"]?.toString() ?: continue
 
-            saves[UUID.fromString(uuid)] = MultiMineSave(uuid, toggled)
+            saves[UUID.fromString(uuid)] = StatusSave(uuid, content)
         }
     }
 
-    fun registerStrings(saveList: MutableList<MultiMineSave> = mutableListOf()) {
+    fun registerStrings(saveList: MutableList<StatusSave> = mutableListOf()) {
         val saveWrapper = mapOf("saves" to saveList)
-        val jsonFile = FileUtils.makeJSONFile("/multiMine/save.json", saveWrapper)
-        FileUtils.saveFile("/multiMine/save.json", jsonFile)
+        val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
+        FileUtils.saveFile(filePath, jsonFile)
     }
 
-    fun updatePlayerSetting(uuid: UUID, state: Boolean) {
+    fun updatePlayerSetting(uuid: UUID, content: String) {
         if (saves.containsKey(uuid)) {
-            saves[uuid]?.toggled = state
+            saves[uuid]?.content = content
         } else {
-            saves[uuid] = MultiMineSave(uuid.toString(), state)
+            saves[uuid] = StatusSave(uuid.toString(), content)
         }
 
         CoroutineHandler.launchTask(
@@ -54,8 +56,8 @@ class SaveFile {
     }
 
     @Serializable
-    data class MultiMineSave (
+    data class StatusSave (
         val uuid: String,
-        var toggled: Boolean,
+        var content: String,
     )
 }

@@ -1,19 +1,17 @@
-package yv.tils.multiMine
+package yv.tils.status
 
-import coroutine.CoroutineHandler
 import data.Data
 import logger.Logger
-import yv.tils.multiMine.commands.MultiMineCommand
-import yv.tils.multiMine.configs.ConfigFile
-import yv.tils.multiMine.configs.SaveFile
-import yv.tils.multiMine.language.RegisterStrings
-import yv.tils.multiMine.listeners.BlockBreak
-import yv.tils.multiMine.listeners.PlayerJoin
-import yv.tils.multiMine.logic.MultiMineHandler
+import yv.tils.status.commands.StatusCommand
+import yv.tils.status.configs.ConfigFile
+import yv.tils.status.configs.SaveFile
+import yv.tils.status.language.RegisterStrings
+import yv.tils.status.listeners.PlayerJoin
+import yv.tils.status.listeners.PlayerQuit
 
-class MultiMineYVtils {
+class StatusYVtils {
     companion object {
-        const val MODULENAME = "multiMine"
+        const val MODULENAME = "status"
         const val MODULEVERSION = "1.0.0"
     }
 
@@ -29,7 +27,6 @@ class MultiMineYVtils {
         registerCommands()
         registerListeners()
         registerCoroutines()
-        registerPermissions()
 
         loadConfigs()
     }
@@ -39,34 +36,24 @@ class MultiMineYVtils {
     }
 
     private fun registerCommands() {
-        MultiMineCommand()
+        StatusCommand()
     }
 
     private fun registerListeners() {
         val plugin = Data.instance
         val pm = plugin.server.pluginManager
 
-        pm.registerEvents(BlockBreak(), plugin)
         pm.registerEvents(PlayerJoin(), plugin)
+        pm.registerEvents(PlayerQuit(), plugin)
     }
 
     private fun registerCoroutines() {
-        CoroutineHandler.launchTask(
-            suspend { MultiMineHandler().cooldownHandler() },
-            "yvtils-multiMine-cooldownHandler",
-            1 * 1000L,
-        )
+
     }
 
     private fun registerPermissions() {
         val pm = Data.instance.server.pluginManager
 
-//        pm.addPermission(
-//            Permission.loadPermission("yvtils.use.multiMine", mapOf(
-//                "description" to "Use MultiMine",
-//                "default" to PermissionDefault.NOT_OP
-//            ))
-//        )
     }
 
     private fun loadConfigs() {

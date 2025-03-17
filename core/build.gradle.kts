@@ -6,4 +6,5 @@ dependencies {
     implementation(project(":sit"))
     implementation(project(":message"))
     implementation(project(":multiMine"))
+    implementation(project(":status"))
 }
