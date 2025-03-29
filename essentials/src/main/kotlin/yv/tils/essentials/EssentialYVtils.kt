@@ -8,17 +8,17 @@ import yv.tils.essentials.commands.register.*
 import yv.tils.essentials.language.RegisterStrings
 import yv.tils.essentials.listeners.*
 
-class EssentialYVtils {
+class EssentialYVtils : Data.YVtilsModule {
     companion object {
         const val MODULENAME = "essentials"
         const val MODULEVERSION = "1.0.0"
     }
 
-    init {
+    override fun onLoad() {
         RegisterStrings().registerStrings()
     }
 
-    fun enablePlugin() {
+    override fun enablePlugin() {
         Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
 
         unregisterCommands()
@@ -28,7 +28,7 @@ class EssentialYVtils {
         registerPermissions()
     }
 
-    fun disablePlugin() {
+    override fun disablePlugin() {
 
     }
 

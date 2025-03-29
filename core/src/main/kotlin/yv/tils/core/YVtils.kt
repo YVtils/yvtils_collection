@@ -21,6 +21,17 @@ class YVtils : JavaPlugin() {
         lateinit var instance: YVtils
     }
 
+    private val modules: List<Data.YVtilsModule> = listOf(
+        ConfigYVtils(),
+        UtilsYVtils(),
+        EssentialYVtils(),
+        SitYVtils(),
+        MessageYVtils(),
+        MultiMineYVtils(),
+        StatusYVtils(),
+        CommonYVtils()
+    )
+
     override fun onLoad() {
         instance = this
 
@@ -32,33 +43,34 @@ class YVtils : JavaPlugin() {
         Data.key = NamespacedKey(this, "yvtils")
 
         CommandAPI.onLoad(CommandAPIBukkitConfig(instance).silentLogs(true).verboseOutput(false).setNamespace("yvtils"))
+
+        try {
+            modules.forEach { it.onLoad() }
+        } catch (e: Exception) {
+            Logger.error("Error during YVtils loading: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     override fun onEnable() {
         Logger.debug("YVtils Collection v$yvtilsVersion is starting...")
 
-        ConfigYVtils().enablePlugin()
-        UtilsYVtils().enablePlugin()
-        EssentialYVtils().enablePlugin()
-        SitYVtils().enablePlugin()
-        MessageYVtils().enablePlugin()
-        MultiMineYVtils().enablePlugin()
-        StatusYVtils().enablePlugin()
-
-        CommonYVtils().enablePlugin() // This should be the last one to load, as it handles the loading of all modules
+        try {
+            modules.forEach { it.enablePlugin() }
+        } catch (e: Exception) {
+            Logger.error("Error during YVtils startup: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     override fun onDisable() {
         Logger.debug("YVtils Collection v$yvtilsVersion is stopping...")
 
-        ConfigYVtils().disablePlugin()
-        UtilsYVtils().disablePlugin()
-        EssentialYVtils().disablePlugin()
-        SitYVtils().disablePlugin()
-        MessageYVtils().disablePlugin()
-        MultiMineYVtils().disablePlugin()
-        StatusYVtils().disablePlugin()
-
-        CommonYVtils().disablePlugin()
+        try {
+            modules.forEach { it.disablePlugin() }
+        } catch (e: Exception) {
+            Logger.error("Error during YVtils shutdown: ${e.message}")
+            e.printStackTrace()
+        }
     }
 }

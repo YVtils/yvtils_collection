@@ -9,6 +9,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockStateMeta
 import org.bukkit.inventory.meta.BundleMeta
+import serverVersion.VersionUtils
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.configs.MultiMineConfig
 
@@ -139,22 +140,28 @@ class BlockManage {
     private fun bundleList(): MutableList<Material> {
         val bundleList = mutableListOf<Material>()
         bundleList.add(Material.BUNDLE)
-        bundleList.add(Material.BLACK_BUNDLE)
-        bundleList.add(Material.BLUE_BUNDLE)
-        bundleList.add(Material.BROWN_BUNDLE)
-        bundleList.add(Material.CYAN_BUNDLE)
-        bundleList.add(Material.GRAY_BUNDLE)
-        bundleList.add(Material.GREEN_BUNDLE)
-        bundleList.add(Material.LIGHT_BLUE_BUNDLE)
-        bundleList.add(Material.LIGHT_GRAY_BUNDLE)
-        bundleList.add(Material.LIME_BUNDLE)
-        bundleList.add(Material.MAGENTA_BUNDLE)
-        bundleList.add(Material.ORANGE_BUNDLE)
-        bundleList.add(Material.PINK_BUNDLE)
-        bundleList.add(Material.PURPLE_BUNDLE)
-        bundleList.add(Material.RED_BUNDLE)
-        bundleList.add(Material.WHITE_BUNDLE)
-        bundleList.add(Material.YELLOW_BUNDLE)
+
+        when (VersionUtils.serverVersion) {
+            "1.21.4" -> {
+                bundleList.add(Material.valueOf("BLACK_BUNDLE"))
+                bundleList.add(Material.valueOf("BLUE_BUNDLE"))
+                bundleList.add(Material.valueOf("BROWN_BUNDLE"))
+                bundleList.add(Material.valueOf("CYAN_BUNDLE"))
+                bundleList.add(Material.valueOf("GRAY_BUNDLE"))
+                bundleList.add(Material.valueOf("GREEN_BUNDLE"))
+                bundleList.add(Material.valueOf("LIGHT_BLUE_BUNDLE"))
+                bundleList.add(Material.valueOf("LIGHT_GRAY_BUNDLE"))
+                bundleList.add(Material.valueOf("LIME_BUNDLE"))
+                bundleList.add(Material.valueOf("MAGENTA_BUNDLE"))
+                bundleList.add(Material.valueOf("ORANGE_BUNDLE"))
+                bundleList.add(Material.valueOf("PINK_BUNDLE"))
+                bundleList.add(Material.valueOf("PURPLE_BUNDLE"))
+                bundleList.add(Material.valueOf("RED_BUNDLE"))
+                bundleList.add(Material.valueOf("WHITE_BUNDLE"))
+                bundleList.add(Material.valueOf("YELLOW_BUNDLE"))
+            }
+        }
+
         return bundleList
     }
 

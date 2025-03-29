@@ -6,14 +6,6 @@ import language.FileTypes
 class RegisterStrings {
     fun registerStrings() {
         registerNewString(
-            "command.executor.notPlayer",
-            mapOf(
-                FileTypes.EN to "<prefix> <white>This command can only be executed by a player!",
-                FileTypes.DE to "<prefix> <white>Dieser Befehl kann nur von einem Spieler ausgeführt werden!",
-            )
-        )
-
-        registerNewString(
             "command.multiMine.activate",
             mapOf(
                 FileTypes.EN to "<prefix> <white>MultiMine has been <yellow>activated<white>!",

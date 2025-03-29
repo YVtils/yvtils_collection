@@ -1,19 +1,22 @@
 import coroutine.CoroutineHandler
 import data.Data
+import serverVersion.VersionUtils
 
-class UtilsYVtils {
+class UtilsYVtils : Data.YVtilsModule {
     companion object {
         const val MODULENAME = "utils"
         const val MODULEVERSION = "1.0.0"
     }
 
-    fun enablePlugin() {
+    override fun onLoad() {}
+
+    override fun enablePlugin() {
         Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
 
-
+        VersionUtils().loadServerVersion()
     }
 
-    fun disablePlugin() {
+    override fun disablePlugin() {
         CoroutineHandler.cancelAllTasks()
     }
 }

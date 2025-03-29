@@ -11,15 +11,15 @@ import yv.tils.status.configs.SaveFile
 class StatusJoinQuit {
     fun loadPlayer(e: PlayerJoinEvent) {
         val player = e.player
-        val status = SaveFile.saves[player.uniqueId] as String? ?: return
+        val status = SaveFile.saves[player.uniqueId] ?: return
 
-        if (StatusHandler().setStatusDisplay(player, status)) {
+        if (StatusHandler().setStatusDisplay(player, status.content)) {
             val display = ConfigFile.config["display"] as String
 
             val displayCompo = MessageUtils.replacer(
                 MessageUtils.convert(display),
                 mapOf(
-                    "status" to status,
+                    "status" to status.content,
                     "playerName" to player.name
                 )
             )

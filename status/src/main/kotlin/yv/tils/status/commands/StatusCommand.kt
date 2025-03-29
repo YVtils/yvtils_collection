@@ -1,8 +1,10 @@
 package yv.tils.status.commands
 
+import data.Data
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
+import language.LanguageHandler
 import org.bukkit.entity.Player
 import yv.tils.status.logic.StatusHandler as handler
 
@@ -45,10 +47,29 @@ class StatusCommand {
                 withPermission("yvtils.command.status.clear.others")
                 withPermission(CommandPermission.OP)
                 anyExecutor { sender, args ->
+                    if (sender !is Player && args[0] == null) {
+                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
+                        return@anyExecutor
+                    }
+
+                    if (args[0] == null) {
+                        if (!sender.hasPermission("yvtils.command.status.clear.others")) {
+                            sender.sendMessage(LanguageHandler.getMessage(
+                                "command.status.clear.notAllowed",
+                                sender,
+                                mapOf(
+                                    "prefix" to Data.prefix,
+                                )
+                            ))
+                            return@anyExecutor
+                        }
+                    }
+
                     if (args[0] is Player) {
-                        handler().clearStatus(sender, args[0] as Player)
+                        val target = args[0] as Player
+                        handler().clearStatus(target, sender)
                     } else {
-                        handler().clearStatus(sender)
+                        handler().clearStatus(sender as Player)
                     }
                 }
             }

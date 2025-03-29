@@ -8,3 +8,9 @@ dependencies {
     implementation(project(":multiMine"))
     implementation(project(":status"))
 }
+
+tasks {
+    runServer {
+        minecraftVersion("1.21.4")
+    }
+}

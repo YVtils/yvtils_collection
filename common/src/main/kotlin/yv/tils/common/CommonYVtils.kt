@@ -12,17 +12,17 @@ import yv.tils.common.language.LoadPlayerLanguage
 import yv.tils.common.language.RegisterStrings
 import yv.tils.common.listeners.PlayerLocaleChange
 
-class CommonYVtils {
+class CommonYVtils : Data.YVtilsModule {
     companion object {
         const val MODULENAME = "common"
         const val MODULEVERSION = "1.0.0"
     }
 
-    init {
+    override fun onLoad() {
         RegisterStrings().registerStrings()
     }
 
-    fun enablePlugin() {
+    override fun enablePlugin() {
         Language().loadLanguageFiles()
 
         Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
@@ -40,7 +40,7 @@ class CommonYVtils {
         registerCoroutines()
     }
 
-    fun disablePlugin() {
+    override fun disablePlugin() {
         val data = mutableMapOf(
             1 to listOf(LanguageHandler.getMessage("plugin.action.stop", params = mapOf("prefix" to Data.prefix))),
         )

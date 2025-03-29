@@ -45,54 +45,23 @@ class StatusHandler {
         setStatusDisplayHandler(player, status)
     }
 
-    fun clearStatus(sender: CommandSender, target: Player? = null) {
-        if (target == null) {
-            if (sender !is Player) {
-                sender.sendMessage(LanguageHandler.getMessage(
-                    "command.missing.player",
-                    sender,
-                    mapOf(
-                        "prefix" to Data.prefix,
-                    )
-                ))
-                return
-            }
+    fun clearStatus(player: Player, sender: CommandSender = player) {
+        setStatusDisplay(player, "")
+        player.sendMessage(LanguageHandler.getMessage(
+            "command.status.clear.cleared.self",
+            sender,
+            mapOf(
+                "prefix" to Data.prefix,
+            )
+        ))
 
-            setStatusDisplay(sender, "")
-            sender.sendMessage(LanguageHandler.getMessage(
-                "command.status.clear.cleared.self",
-                sender,
-                mapOf(
-                    "prefix" to Data.prefix,
-                )
-            ))
-        } else {
-            if (!sender.hasPermission("yvtils.command.status.clear.others")) {
-                sender.sendMessage(LanguageHandler.getMessage(
-                    "command.status.clear.notAllowed",
-                    sender,
-                    mapOf(
-                        "prefix" to Data.prefix,
-                    )
-                ))
-                return
-            }
-
-            setStatusDisplay(target, "")
-
+        if (sender != player) {
             sender.sendMessage(LanguageHandler.getMessage(
                 "command.status.clear.cleared.other",
                 sender,
                 mapOf(
                     "prefix" to Data.prefix,
-                    "player" to target.name
-                )
-            ))
-            target.sendMessage(LanguageHandler.getMessage(
-                "command.status.clear.cleared.self",
-                target,
-                mapOf(
-                    "prefix" to Data.prefix
+                    "player" to player.name
                 )
             ))
         }

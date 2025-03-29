@@ -11,19 +11,19 @@ import yv.tils.multiMine.listeners.BlockBreak
 import yv.tils.multiMine.listeners.PlayerJoin
 import yv.tils.multiMine.logic.MultiMineHandler
 
-class MultiMineYVtils {
+class MultiMineYVtils : Data.YVtilsModule {
     companion object {
         const val MODULENAME = "multiMine"
         const val MODULEVERSION = "1.0.0"
     }
 
-    init {
+    override fun onLoad() {
         RegisterStrings().registerStrings()
         ConfigFile().registerStrings()
         SaveFile().registerStrings()
     }
 
-    fun enablePlugin() {
+    override fun enablePlugin() {
         Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
 
         registerCommands()
@@ -34,7 +34,7 @@ class MultiMineYVtils {
         loadConfigs()
     }
 
-    fun disablePlugin() {
+    override fun disablePlugin() {
 
     }
 

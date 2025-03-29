@@ -1,17 +1,19 @@
 
 import data.Data
 
-class ConfigYVtils {
+class ConfigYVtils : Data.YVtilsModule {
     companion object {
         const val MODULENAME = "config"
         const val MODULEVERSION = "1.0.0"
     }
 
-    fun enablePlugin() {
+    override fun onLoad() {}
+
+    override fun enablePlugin() {
         Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
     }
 
-    fun disablePlugin() {
+    override fun disablePlugin() {
 
     }
 }

@@ -8,17 +8,17 @@ import yv.tils.message.language.RegisterStrings
 import yv.tils.message.listeners.PlayerQuit
 import yv.tils.message.logic.MessageHandler
 
-class MessageYVtils {
+class MessageYVtils : Data.YVtilsModule {
     companion object {
         const val MODULENAME = "message"
         const val MODULEVERSION = "1.0.0"
     }
 
-    init {
+    override fun onLoad() {
         RegisterStrings().registerStrings()
     }
 
-    fun enablePlugin() {
+    override fun enablePlugin() {
         Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
 
         unregisterCommands()
@@ -27,7 +27,7 @@ class MessageYVtils {
         registerListeners()
     }
 
-    fun disablePlugin() {
+    override fun disablePlugin() {
         MessageHandler().clearSessions()
     }
 

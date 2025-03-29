@@ -9,19 +9,19 @@ import yv.tils.status.language.RegisterStrings
 import yv.tils.status.listeners.PlayerJoin
 import yv.tils.status.listeners.PlayerQuit
 
-class StatusYVtils {
+class StatusYVtils : Data.YVtilsModule {
     companion object {
         const val MODULENAME = "status"
         const val MODULEVERSION = "1.0.0"
     }
 
-    init {
+    override fun onLoad() {
         RegisterStrings().registerStrings()
         ConfigFile().registerStrings()
         SaveFile().registerStrings()
     }
 
-    fun enablePlugin() {
+    override fun enablePlugin() {
         Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
 
         registerCommands()
@@ -31,7 +31,7 @@ class StatusYVtils {
         loadConfigs()
     }
 
-    fun disablePlugin() {
+    override fun disablePlugin() {
 
     }
 

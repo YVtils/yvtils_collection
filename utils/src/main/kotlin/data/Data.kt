@@ -14,4 +14,10 @@ class Data {
 
         var loadedModules = mutableListOf<String>()
     }
+
+    interface YVtilsModule {
+        fun onLoad()
+        fun enablePlugin()
+        fun disablePlugin()
+    }
 }

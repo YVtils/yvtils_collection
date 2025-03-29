@@ -5,20 +5,22 @@ import yv.tils.sit.commands.SitCommand
 import yv.tils.sit.listeners.EntityDismount
 import yv.tils.sit.listeners.PlayerQuit
 
-class SitYVtils {
+class SitYVtils : Data.YVtilsModule {
     companion object {
         const val MODULENAME = "sit"
         const val MODULEVERSION = "1.0.0"
     }
 
-    fun enablePlugin() {
+    override fun onLoad() {}
+
+    override fun enablePlugin() {
         Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
 
         registerCommands()
         registerListeners()
     }
 
-    fun disablePlugin() {
+    override fun disablePlugin() {
 
     }
 

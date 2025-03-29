@@ -66,7 +66,10 @@ class FileUtils {
 
                 file.createNewFile()
             } else {
-                Logger.debug("File already exists")
+                Logger.debug("File ($path) already exists")
+
+                updateFile(path, content)
+
                 return
             }
 
@@ -74,6 +77,66 @@ class FileUtils {
                 is YAMLFile -> content.content.save(file)
                 is JSONFile -> file.writeText(Json.encodeToString(content.content))
                 else -> throw Exception("This file extension is not supported by this function!")
+            }
+        }
+
+        fun updateFile(path: String, content: Any, overwriteExisting: Boolean = false) {
+            Logger.debug("Updating file: $path")
+
+            val file = File(Data.instance.dataFolder, path)
+
+            if (!file.exists()) {
+                Logger.debug("File doesn't exist, creating new file: $path")
+                saveFile(path, content)
+                return
+            }
+
+            when {
+                path.endsWith(".yml", ignoreCase = true) -> {
+                    val existingYaml = loadYAMLFile(path)
+                    val newContent = (content as? YAMLFile)?.content
+                        ?: throw IllegalArgumentException("Content must be YAMLFile for .yml files")
+
+                    // Merge new content with existing, with optional overwrite
+                    newContent.getKeys(true).forEach { key ->
+                        if (overwriteExisting || !existingYaml.content.contains(key)) {
+                            existingYaml.content[key] = newContent[key]
+                        }
+                    }
+
+                    existingYaml.content.save(file)
+                    Logger.debug("YAML file updated: $path")
+                }
+
+                path.endsWith(".json", ignoreCase = true) -> {
+                    val existingJson = loadJSONFile(path)
+                    val newContent = when (content) {
+                        is JSONFile -> content.content
+                        else -> {
+                            val jsonString = json.encodeToString(content)
+                            json.decodeFromString(JsonObject.serializer(), jsonString)
+                        }
+                    }
+
+                    // Convert existing content to mutable map and add new content
+                    val existingMap = existingJson.content.toMutableMap()
+                    Logger.dev("Existing JSON content: $existingMap")
+                    newContent.forEach { (key, value) ->
+                        // Only add if overwriteExisting is true or key doesn't exist
+                        if (overwriteExisting || !existingMap.containsKey(key)) {
+                            Logger.dev("Adding key: $key with value: $value")
+                            existingMap[key] = value
+                        }
+                    }
+
+                    // Save the merged content
+                    val mergedJson = JsonObject(existingMap)
+                    file.writeText(Json.encodeToString(mergedJson))
+                    Logger.dev("Merged JSON content: $mergedJson")
+                    Logger.debug("JSON file updated: $path")
+                }
+
+                else -> throw IllegalArgumentException("Unsupported file extension: ${file.extension}")
             }
         }
 
@@ -91,13 +154,6 @@ class FileUtils {
 
             val yaml = makeYAML(content)
             val file = File(Data.instance.dataFolder, path)
-
-            if (!file.exists()) {
-                file.parentFile.mkdirs()
-                file.createNewFile()
-            }
-
-            yaml.save(file)
 
             return YAMLFile(file, yaml)
         }
@@ -121,13 +177,6 @@ class FileUtils {
             val jsonString = json.encodeToString(content)
             val jsonObject = json.decodeFromString(JsonObject.serializer(), jsonString)
             val file = File(Data.instance.dataFolder, path)
-
-            if (!file.exists()) {
-                file.parentFile.mkdirs()
-                file.createNewFile()
-            }
-
-            file.writeText(jsonString)
 
             return JSONFile(file, jsonObject)
         }

@@ -20,6 +20,38 @@ class RegisterStrings {
                 FileTypes.DE to "<prefix> <red>Plugin stoppt!"
             )
         )
+
+        registerNewString(
+            "text.action.copy",
+            mapOf(
+                FileTypes.EN to "<gray>Click to copy!",
+                FileTypes.DE to "<gray>Klicke um zu kopieren!"
+            )
+        )
+
+        registerNewString(
+            "command.missing.player",
+            mapOf(
+                FileTypes.EN to "<prefix> <red>To execute this command here, a player must be specified!",
+                FileTypes.DE to "<prefix> <red>Um diesen Command hier auszuführen, musst ein Spieler angeben werden!"
+            )
+        )
+
+        registerNewString(
+            "command.executor.notPlayer",
+            mapOf(
+                FileTypes.EN to "<prefix> <white>This command can only be executed by a player!",
+                FileTypes.DE to "<prefix> <white>Dieser Befehl kann nur von einem Spieler ausgeführt werden!",
+            )
+        )
+
+        registerNewString(
+            "command.usage",
+            mapOf(
+                FileTypes.EN to "<prefix> <gray>Usage: <white><command>",
+                FileTypes.DE to "<prefix> <gray>Benutze: <white><command>"
+            )
+        )
     }
 
     private fun registerNewString(langKey: String, translations: Map<FileTypes, String>) {

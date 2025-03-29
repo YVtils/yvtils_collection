@@ -36,7 +36,7 @@ class SaveFile {
     fun registerStrings(saveList: MutableList<MultiMineSave> = mutableListOf()) {
         val saveWrapper = mapOf("saves" to saveList)
         val jsonFile = FileUtils.makeJSONFile("/multiMine/save.json", saveWrapper)
-        FileUtils.saveFile("/multiMine/save.json", jsonFile)
+        FileUtils.updateFile("/multiMine/save.json", jsonFile)
     }
 
     fun updatePlayerSetting(uuid: UUID, state: Boolean) {

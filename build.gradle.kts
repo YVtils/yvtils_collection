@@ -2,8 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.1.10" apply false
-    kotlin("plugin.serialization") version "2.1.10" apply false
+    kotlin("jvm") version "2.1.20" apply false
+    kotlin("plugin.serialization") version "2.1.20" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1" apply false
     id("io.papermc.paperweight.userdev") version "2.0.0-SNAPSHOT" apply false
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false
@@ -43,7 +43,7 @@ subprojects {
 
     dependencies {
         // Paper API dependency
-        add("paperweightDevelopmentBundle", "io.papermc.paper:dev-bundle:1.21.4-R0.1-SNAPSHOT")
+        add("paperweightDevelopmentBundle", "io.papermc.paper:dev-bundle:1.21.1-R0.1-SNAPSHOT")
 
         // CommandAPI dependencies
         add("implementation", "dev.jorel:commandapi-bukkit-shade-mojang-mapped:$commandAPIVersion")
