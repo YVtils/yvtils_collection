@@ -10,9 +10,20 @@ class Data {
         lateinit var instance: JavaPlugin
         lateinit var key: NamespacedKey
 
-        var prefix = "<dark_gray>[<#${ColorUtils.MAIN_COLOR_CODE}>YVtils-Collection<dark_gray>]<white>"
+        var prefix = "<dark_gray>[<#${ColorUtils.MAIN.color}>YVtils-Collection<dark_gray>]<white>"
 
-        var loadedModules = mutableListOf<String>()
+        private val loadedModules = mutableListOf<String>()
+        fun addModule(module: String) {
+            loadedModules.add(module)
+        }
+
+        fun getModules(sorted: Boolean = false): String {
+            return if (sorted) {
+                loadedModules.sortedBy { it }.joinToString(", ")
+            } else {
+                loadedModules.joinToString(", ")
+            }
+        }
     }
 
     interface YVtilsModule {

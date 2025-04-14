@@ -10,8 +10,8 @@ import yv.tils.message.logic.MessageHandler
 
 class MessageYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULENAME = "message"
-        const val MODULEVERSION = "1.0.0"
+        const val MODULE_NAME = "message"
+        const val MODULE_VERSION = "1.0.0"
     }
 
     override fun onLoad() {
@@ -19,7 +19,7 @@ class MessageYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
+        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
 
         unregisterCommands()
 

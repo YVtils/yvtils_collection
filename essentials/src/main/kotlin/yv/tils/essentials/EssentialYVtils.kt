@@ -10,8 +10,8 @@ import yv.tils.essentials.listeners.*
 
 class EssentialYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULENAME = "essentials"
-        const val MODULEVERSION = "1.0.0"
+        const val MODULE_NAME = "essentials"
+        const val MODULE_VERSION = "1.0.0"
     }
 
     override fun onLoad() {
@@ -19,7 +19,7 @@ class EssentialYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
+        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
 
         unregisterCommands()
 

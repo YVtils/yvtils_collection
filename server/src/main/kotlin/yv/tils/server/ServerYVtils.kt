@@ -1,23 +1,24 @@
-package yv.tils.status
+package yv.tils.server
 
 import data.Data
-import yv.tils.status.commands.StatusCommand
-import yv.tils.status.configs.ConfigFile
-import yv.tils.status.configs.SaveFile
-import yv.tils.status.language.RegisterStrings
-import yv.tils.status.listeners.PlayerJoin
-import yv.tils.status.listeners.PlayerQuit
+import logger.Logger
+import yv.tils.server.configs.ConfigFile
+import yv.tils.server.language.RegisterStrings
+import yv.tils.server.listeners.PaperServerListPing
+import yv.tils.server.listeners.PlayerJoin
+import yv.tils.server.listeners.PlayerLogin
+import yv.tils.server.listeners.PlayerQuit
+import yv.tils.server.maintenance.MaintenanceCMD
 
-class StatusYVtils : Data.YVtilsModule {
+class ServerYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULE_NAME = "status"
+        const val MODULE_NAME = "server"
         const val MODULE_VERSION = "1.0.0"
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
         ConfigFile().registerStrings()
-        SaveFile().registerStrings()
     }
 
     override fun enablePlugin() {
@@ -26,7 +27,7 @@ class StatusYVtils : Data.YVtilsModule {
         registerCommands()
         registerListeners()
         registerCoroutines()
-
+        registerPermissions()
         loadConfigs()
     }
 
@@ -35,7 +36,7 @@ class StatusYVtils : Data.YVtilsModule {
     }
 
     private fun registerCommands() {
-        StatusCommand()
+        MaintenanceCMD()
     }
 
     private fun registerListeners() {
@@ -44,6 +45,8 @@ class StatusYVtils : Data.YVtilsModule {
 
         pm.registerEvents(PlayerJoin(), plugin)
         pm.registerEvents(PlayerQuit(), plugin)
+        pm.registerEvents(PaperServerListPing(), plugin)
+        pm.registerEvents(PlayerLogin(), plugin)
     }
 
     private fun registerCoroutines() {
@@ -56,7 +59,8 @@ class StatusYVtils : Data.YVtilsModule {
     }
 
     private fun loadConfigs() {
+        Logger.debug("Loading configs for $MODULE_NAME v$MODULE_VERSION")
+
         ConfigFile().loadConfig()
-        SaveFile().loadConfig()
     }
 }

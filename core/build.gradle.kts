@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":message"))
     implementation(project(":multiMine"))
     implementation(project(":status"))
+    implementation(project(":server"))
 }
 
 tasks {

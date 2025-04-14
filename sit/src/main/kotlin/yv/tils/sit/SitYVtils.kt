@@ -7,14 +7,14 @@ import yv.tils.sit.listeners.PlayerQuit
 
 class SitYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULENAME = "sit"
-        const val MODULEVERSION = "1.0.0"
+        const val MODULE_NAME = "sit"
+        const val MODULE_VERSION = "1.0.0"
     }
 
     override fun onLoad() {}
 
     override fun enablePlugin() {
-        Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
+        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
 
         registerCommands()
         registerListeners()

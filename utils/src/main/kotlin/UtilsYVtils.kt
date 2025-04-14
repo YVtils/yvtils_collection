@@ -4,14 +4,14 @@ import serverVersion.VersionUtils
 
 class UtilsYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULENAME = "utils"
-        const val MODULEVERSION = "1.0.0"
+        const val MODULE_NAME = "utils"
+        const val MODULE_VERSION = "1.0.0"
     }
 
     override fun onLoad() {}
 
     override fun enablePlugin() {
-        Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
+        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
 
         VersionUtils().loadServerVersion()
     }

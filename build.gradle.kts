@@ -39,7 +39,7 @@ subprojects {
     group = "yv.tils"
     version = "1.2.0"
 
-    val commandAPIVersion = "9.7.0"
+    val commandAPIVersion = "10.0.0"
 
     dependencies {
         // Paper API dependency

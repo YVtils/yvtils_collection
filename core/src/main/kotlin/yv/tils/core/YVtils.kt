@@ -12,6 +12,7 @@ import yv.tils.common.CommonYVtils
 import yv.tils.essentials.EssentialYVtils
 import yv.tils.message.MessageYVtils
 import yv.tils.multiMine.MultiMineYVtils
+import yv.tils.server.ServerYVtils
 import yv.tils.sit.SitYVtils
 import yv.tils.status.StatusYVtils
 
@@ -29,6 +30,7 @@ class YVtils : JavaPlugin() {
         MessageYVtils(),
         MultiMineYVtils(),
         StatusYVtils(),
+        ServerYVtils(),
         CommonYVtils()
     )
 

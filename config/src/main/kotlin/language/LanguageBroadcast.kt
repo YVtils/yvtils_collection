@@ -1,35 +1,28 @@
 package language
 
-import org.bukkit.Bukkit
+import data.Data
 
 class LanguageBroadcast {
     companion object {
         fun broadcast(key: String, params: Map<String, Any> = emptyMap()) {
-            val players = Bukkit.getOnlinePlayers()
-            for (p in players) {
-                p.sendMessage(
-                    LanguageHandler.getMessage(
-                        key,
-                        p.uniqueId,
-                        params
-                    )
+            Data.instance.server.broadcast(
+                LanguageHandler.getMessage(
+                    key,
+                    null,
+                    params
                 )
-            }
+            )
         }
 
-        fun broadcastWithPermission(key: String, permission: String, params: Map<String, Any> = emptyMap()) {
-            val players = Bukkit.getOnlinePlayers()
-            for (p in players) {
-                if (p.hasPermission(permission)) {
-                    p.sendMessage(
-                        LanguageHandler.getMessage(
-                            key,
-                            p.uniqueId,
-                            params
-                        )
-                    )
-                }
-            }
+        fun broadcast(key: String, permission: String, params: Map<String, Any> = emptyMap()) {
+            Data.instance.server.broadcast(
+                LanguageHandler.getMessage(
+                    key,
+                    null,
+                    params
+                ),
+                permission
+            )
         }
     }
 }

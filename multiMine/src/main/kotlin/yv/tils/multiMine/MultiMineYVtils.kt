@@ -2,7 +2,6 @@ package yv.tils.multiMine
 
 import coroutine.CoroutineHandler
 import data.Data
-import logger.Logger
 import yv.tils.multiMine.commands.MultiMineCommand
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.configs.SaveFile
@@ -13,8 +12,8 @@ import yv.tils.multiMine.logic.MultiMineHandler
 
 class MultiMineYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULENAME = "multiMine"
-        const val MODULEVERSION = "1.0.0"
+        const val MODULE_NAME = "multiMine"
+        const val MODULE_VERSION = "1.0.0"
     }
 
     override fun onLoad() {
@@ -24,7 +23,7 @@ class MultiMineYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.loadedModules.add("$MODULENAME v$MODULEVERSION")
+        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
 
         registerCommands()
         registerListeners()
@@ -70,8 +69,6 @@ class MultiMineYVtils : Data.YVtilsModule {
     }
 
     private fun loadConfigs() {
-        Logger.debug("Loading configs for $MODULENAME v$MODULEVERSION")
-
         ConfigFile().loadConfig()
         SaveFile().loadConfig()
     }
