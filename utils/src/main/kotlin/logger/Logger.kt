@@ -2,29 +2,33 @@ package logger
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger
+import net.kyori.adventure.text.minimessage.MiniMessage
 
 class Logger {
     companion object {
         var logger: ComponentLogger? = null
-        private var debugMode = false
+        private var debugMode = true
+        private var debugLevel = 3
 
-        fun setDebugMode(enabled: Boolean) {
+
+        fun setDebugMode(enabled: Boolean, level: Int) {
             debugMode = enabled
+            debugLevel = level
         }
 
         fun dev(message: String) {
             logger?.info(message)
         }
 
-        fun debug(message: String) {
-            if (debugMode) {
-                logger?.info(message)
+        fun debug(message: String, level: Int = -1) {
+            if (debugMode && (level == -1 || level <= debugLevel)) {
+                logger?.info("[$level] $message")
             }
         }
 
-        fun debug(message: Component) {
-            if (debugMode) {
-                logger?.info(message)
+        fun debug(message: Component, level: Int = -1) {
+            if (debugMode && (level == -1 || level <= debugLevel)) {
+                logger?.info(MiniMessage.miniMessage().deserialize("[$level]").append(message))
             }
         }
 

@@ -80,8 +80,10 @@ class FileUtils {
             }
         }
 
+        // TODO: Fix json overwrite on startup
         fun updateFile(path: String, content: Any, overwriteExisting: Boolean = false) {
-            Logger.debug("Updating file: $path")
+            Logger.debug("Updating file: $path | overwriteExisting: $overwriteExisting")
+            Logger.debug("Content: $content", 3)
 
             val file = File(Data.instance.dataFolder, path)
 
@@ -110,6 +112,8 @@ class FileUtils {
 
                 path.endsWith(".json", ignoreCase = true) -> {
                     val existingJson = loadJSONFile(path)
+
+                    // Convert content to JsonObject
                     val newContent = when (content) {
                         is JSONFile -> content.content
                         else -> {
@@ -118,22 +122,17 @@ class FileUtils {
                         }
                     }
 
-                    // Convert existing content to mutable map and add new content
-                    val existingMap = existingJson.content.toMutableMap()
-                    Logger.dev("Existing JSON content: $existingMap")
-                    newContent.forEach { (key, value) ->
-                        // Only add if overwriteExisting is true or key doesn't exist
-                        if (overwriteExisting || !existingMap.containsKey(key)) {
-                            Logger.dev("Adding key: $key with value: $value")
-                            existingMap[key] = value
-                        }
+                    // For complete replacement (like arrays), just use the new content directly
+                    if (overwriteExisting) {
+                        file.writeText(Json.encodeToString(newContent))
+                        Logger.debug("JSON file completely replaced: $path")
+                        return
                     }
 
-                    // Save the merged content
-                    val mergedJson = JsonObject(existingMap)
+                    // Otherwise, do a deep merge of the objects
+                    val mergedJson = mergeJsonObjects(existingJson.content, newContent)
                     file.writeText(Json.encodeToString(mergedJson))
-                    Logger.dev("Merged JSON content: $mergedJson")
-                    Logger.debug("JSON file updated: $path")
+                    Logger.debug("JSON file updated with merged content: $path")
                 }
 
                 else -> throw IllegalArgumentException("Unsupported file extension: ${file.extension}")
@@ -154,6 +153,8 @@ class FileUtils {
 
             val yaml = makeYAML(content)
             val file = File(Data.instance.dataFolder, path)
+
+            Logger.debug("YAML object: $yaml", 3)
 
             return YAMLFile(file, yaml)
         }
@@ -178,7 +179,34 @@ class FileUtils {
             val jsonObject = json.decodeFromString(JsonObject.serializer(), jsonString)
             val file = File(Data.instance.dataFolder, path)
 
+            Logger.debug("JSON object: $jsonObject", 3)
+
             return JSONFile(file, jsonObject)
+        }
+
+        /**
+         * Recursively merges two JsonObjects, preserving arrays and nested structures
+         */
+        private fun mergeJsonObjects(original: JsonObject, update: JsonObject): JsonObject {
+            val result = original.toMutableMap()
+
+            update.forEach { (key, value) ->
+                if (key in result) {
+                    val originalValue = result[key]
+                    if (originalValue is JsonObject && value is JsonObject) {
+                        // Recursively merge nested objects
+                        result[key] = mergeJsonObjects(originalValue, value)
+                    } else {
+                        // For arrays or other types, replace with new value
+                        result[key] = value
+                    }
+                } else {
+                    // Add new key-value pair
+                    result[key] = value
+                }
+            }
+
+            return JsonObject(result)
         }
     }
 }

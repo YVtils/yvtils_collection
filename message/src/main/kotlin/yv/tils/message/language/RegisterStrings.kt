@@ -17,16 +17,16 @@ class RegisterStrings {
         registerNewString(
             "command.msg.note",
             mapOf(
-                FileTypes.EN to "<#${ColorUtils.MAIN.color}>[<#${ColorUtils.SECONDARY.color}>Note<#${ColorUtils.MAIN.color}>]<white> <message>",
-                FileTypes.DE to "<#${ColorUtils.MAIN.color}>[<#${ColorUtils.SECONDARY.color}>Notiz<#${ColorUtils.MAIN.color}>]<white> <message>",
+                FileTypes.EN to "<${ColorUtils.MAIN.color}>[<${ColorUtils.SECONDARY.color}>Note<${ColorUtils.MAIN.color}>]<white> <message>",
+                FileTypes.DE to "<${ColorUtils.MAIN.color}>[<${ColorUtils.SECONDARY.color}>Notiz<${ColorUtils.MAIN.color}>]<white> <message>",
             )
         )
 
         registerNewString(
             "command.msg.message",
             mapOf(
-                FileTypes.EN to "<#${ColorUtils.MAIN.color}>[<#${ColorUtils.SECONDARY.color}><sender> <#${ColorUtils.MAIN.color}>-> <#${ColorUtils.SECONDARY.color}><receiver><#${ColorUtils.MAIN.color}>]<white> <message>",
-                FileTypes.DE to "<#${ColorUtils.MAIN.color}>[<#${ColorUtils.SECONDARY.color}><sender> <#${ColorUtils.MAIN.color}>-> <#${ColorUtils.SECONDARY.color}><receiver><#${ColorUtils.MAIN.color}>]<white> <message>",
+                FileTypes.EN to "<${ColorUtils.MAIN.color}>[<${ColorUtils.SECONDARY.color}><sender> <${ColorUtils.MAIN.color}>-> <${ColorUtils.SECONDARY.color}><receiver><${ColorUtils.MAIN.color}>]<white> <message>",
+                FileTypes.DE to "<${ColorUtils.MAIN.color}>[<${ColorUtils.SECONDARY.color}><sender> <${ColorUtils.MAIN.color}>-> <${ColorUtils.SECONDARY.color}><receiver><${ColorUtils.MAIN.color}>]<white> <message>",
             )
         )
     }

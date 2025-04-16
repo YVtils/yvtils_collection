@@ -10,7 +10,7 @@ class Data {
         lateinit var instance: JavaPlugin
         lateinit var key: NamespacedKey
 
-        var prefix = "<dark_gray>[<#${ColorUtils.MAIN.color}>YVtils-Collection<dark_gray>]<white>"
+        var prefix = "<dark_gray>[<${ColorUtils.MAIN.color}>YVtils-Collection<dark_gray>]<white>"
 
         private val loadedModules = mutableListOf<String>()
         fun addModule(module: String) {

@@ -6,7 +6,7 @@ import language.FileTypes
 class RegisterStrings {
     fun registerStrings() {
         registerNewString(
-            "plugin.action.start",
+            LangStrings.PLUGIN_START,
             mapOf(
                 FileTypes.EN to "<prefix> <green>Plugin starts!",
                 FileTypes.DE to "<prefix> <green>Plugin startet!"
@@ -14,7 +14,7 @@ class RegisterStrings {
         )
 
         registerNewString(
-            "plugin.action.stop",
+            LangStrings.PLUGIN_STOP,
             mapOf(
                 FileTypes.EN to "<prefix> <red>Plugin stops!",
                 FileTypes.DE to "<prefix> <red>Plugin stoppt!"
@@ -22,7 +22,7 @@ class RegisterStrings {
         )
 
         registerNewString(
-            "text.action.copy",
+            LangStrings.TEXT_COPY,
             mapOf(
                 FileTypes.EN to "<gray>Click to copy!",
                 FileTypes.DE to "<gray>Klicke um zu kopieren!"
@@ -30,7 +30,7 @@ class RegisterStrings {
         )
 
         registerNewString(
-            "command.missing.player",
+            LangStrings.COMMAND_MISSING_PLAYER,
             mapOf(
                 FileTypes.EN to "<prefix> <red>To execute this command here, a player must be specified!",
                 FileTypes.DE to "<prefix> <red>Um diesen Command hier auszuführen, musst ein Spieler angeben werden!"
@@ -38,15 +38,23 @@ class RegisterStrings {
         )
 
         registerNewString(
-            "command.executor.notPlayer",
+            LangStrings.COMMAND_EXECUTOR_NOT_PLAYER,
             mapOf(
-                FileTypes.EN to "<prefix> <white>This command can only be executed by a player!",
-                FileTypes.DE to "<prefix> <white>Dieser Befehl kann nur von einem Spieler ausgeführt werden!",
+                FileTypes.EN to "<prefix> <red>This command can only be executed by a player!",
+                FileTypes.DE to "<prefix> <red>Dieser Befehl kann nur von einem Spieler ausgeführt werden!",
             )
         )
 
         registerNewString(
-            "command.usage",
+            LangStrings.COMMAND_EXECUTOR_MISSING_PERMISSION,
+            mapOf(
+                FileTypes.EN to "<prefix> <red>You do not have permission to execute this command!",
+                FileTypes.DE to "<prefix> <red>Du hast keine Berechtigung, diesen Befehl auszuführen!"
+            )
+        )
+
+        registerNewString(
+            LangStrings.COMMAND_USAGE,
             mapOf(
                 FileTypes.EN to "<prefix> <gray>Usage: <white><command>",
                 FileTypes.DE to "<prefix> <gray>Benutze: <white><command>"
@@ -54,13 +62,23 @@ class RegisterStrings {
         )
     }
 
-    private fun registerNewString(langKey: String, translations: Map<FileTypes, String>) {
+    private fun registerNewString(langKey: LangStrings, translations: Map<FileTypes, String>) {
         for ((fileType, value) in translations) {
-            registerString(langKey, value, fileType)
+            registerString(langKey.key, value, fileType)
         }
     }
 
     private fun registerString(key: String, value: String, file: FileTypes) {
         BuildLanguage.registerString(BuildLanguage.RegisteredString(file, key, value))
     }
+}
+
+enum class LangStrings(val key: String) {
+    PLUGIN_START("plugin.action.start"),
+    PLUGIN_STOP("plugin.action.stop"),
+    TEXT_COPY("text.action.copy"),
+    COMMAND_MISSING_PLAYER("command.missing.player"),
+    COMMAND_EXECUTOR_NOT_PLAYER("command.executor.notPlayer"),
+    COMMAND_EXECUTOR_MISSING_PERMISSION("command.executor.missingPermission"),
+    COMMAND_USAGE("command.usage")
 }
