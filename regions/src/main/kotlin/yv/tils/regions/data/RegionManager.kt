@@ -1,6 +1,7 @@
 package yv.tils.regions.data
 
 import kotlinx.serialization.Serializable
+import logger.Logger
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
@@ -16,7 +17,7 @@ class RegionManager {
             name: String,
             loc1: Location,
             loc2: Location,
-        ): RegionData? {
+        ): RegionData {
             val world = loc1.world.name
             val x = loc1.blockX
             val z = loc1.blockZ
@@ -50,32 +51,30 @@ class RegionManager {
 
             val playerUUID = player.uniqueId
             if (players.containsKey(playerUUID)) {
-                players[playerUUID] = players[playerUUID]!! + playerRegion
+                players[playerUUID]!![rUUID] = playerRegion
             } else {
-                players[playerUUID] = listOf(playerRegion)
+                players[playerUUID] = mutableMapOf(rUUID to playerRegion)
             }
 
             RegionSaveFile().updateRegionSetting(rUUID, regionData)
-            PlayerSaveFile().updatePlayerSetting(playerUUID, playerRegion)
+            PlayerSaveFile().updatePlayerSetting(playerUUID, rUUID, playerRegion)
 
             return regionData
         }
 
         fun deleteRegion(rUUID: UUID): Boolean {
-            val region = regions[rUUID] ?: return false
-
+            regions[rUUID] ?: return false
             regions.remove(rUUID)
 
-            val playersInRegion = players.values.filter { it -> it.any { it.region == region.id } }
-
-            for (playerRegion in playersInRegion) {
-                val player = playerRegion.firstOrNull { it.region == region.id }
-                val uuid = UUID.fromString(player?.player ?: return false)
-                val playerRegions = players[uuid]
-                if (playerRegions != null) {
-                    players[uuid] = playerRegions.filter { it.region != region.id }
+            // Find players associated with this region
+            for ((playerUUID, playerRegions) in players) {
+                if (playerRegions.containsKey(rUUID)) {
+                    playerRegions.remove(rUUID)
+                    PlayerSaveFile().updatePlayerSetting(playerUUID, rUUID, null)
                 }
             }
+
+            RegionSaveFile().updateRegionSetting(rUUID, null)
 
             return true
         }
@@ -97,10 +96,14 @@ class RegionManager {
         }
 
         fun getRegions(player: Player, role: RegionRoles): List<RegionData> {
-            val regions = players[player.uniqueId]
+            val playerRegions = players[player.uniqueId]
             val permLevel = role.permLevel
 
-            return regions?.mapNotNull { region ->
+            if (permLevel == RegionRoles.NONE.permLevel) {
+                return getAllRegions()
+            }
+
+            return playerRegions?.values?.mapNotNull { region ->
                 val regionData = getRegion(region.region)
                 if (regionData != null && region.role.permLevel <= permLevel) {
                     regionData
@@ -117,6 +120,11 @@ class RegionManager {
             return regionList.firstOrNull()
         }
 
+        fun getPlayerRegion(player: Player, rUUID: UUID): PlayerRegion? {
+            val playerRegions = players[player.uniqueId]
+            return playerRegions?.get(rUUID)
+        }
+
         fun getRegions(world: World): List<RegionData> {
             return regions.values.filter { it.world == world.name }
         }
@@ -127,11 +135,65 @@ class RegionManager {
 
         fun getRegionOwner(id: UUID): String? {
             val region = regions[id] ?: return null
-            val playerRegion = players.values.flatten().firstOrNull { it.region == region.id }
-            return playerRegion?.player
+            
+            for (playerRegionMap in players.values) {
+                for (playerRegion in playerRegionMap.values) {
+                    if (playerRegion.region == region.id && playerRegion.role == RegionRoles.OWNER) {
+                        return playerRegion.player
+                    }
+                }
+            }
+            
+            return null
         }
 
-        private val players = mutableMapOf<UUID, List<PlayerRegion>>()
+        fun getRegionMembers(id: UUID): List<String>? {
+            val region = regions[id] ?: return null
+            val members = mutableListOf<String>()
+
+            for (playerRegionMap in players.values) {
+                for (playerRegion in playerRegionMap.values) {
+                    if (playerRegion.region == region.id && playerRegion.role != RegionRoles.OWNER) {
+                        members.add(playerRegion.player)
+                    }
+                }
+            }
+
+            return if (members.isEmpty()) null else members
+        }
+
+        fun loadRegion(uuid: UUID, regionData: RegionData?) {
+            if (regionData == null) {
+                Logger.dev("Removing region: $uuid")
+                regions.remove(uuid)
+                return
+            }
+            regions[uuid] = regionData
+        }
+
+        fun saveRegion(): MutableMap<UUID, RegionData> {
+            return regions
+        }
+
+        fun loadPlayer(uuid: UUID, rUUID: UUID, region: PlayerRegion?) {
+            if (region == null) {
+                Logger.dev("Removing player region: $uuid -> $rUUID")
+                players[uuid]?.remove(rUUID)
+                return
+            }
+
+            if (players.containsKey(uuid)) {
+                players[uuid]!![rUUID] = region
+            } else {
+                players[uuid] = mutableMapOf(rUUID to region)
+            }
+        }
+
+        fun savePlayer(): MutableMap<UUID, MutableMap<UUID, PlayerRegion>> {
+            return players
+        }
+
+        private val players = mutableMapOf<UUID, MutableMap<UUID, PlayerRegion>>()
         private val regions = mutableMapOf<UUID, RegionData>()
     }
 
@@ -162,11 +224,18 @@ class RegionManager {
     )
 }
 
+@Serializable
 enum class RegionRoles(val permLevel: Int) {
     OWNER(0),
     MODERATOR(1),
     MEMBER(2),
     NONE(-1);
+
+    companion object {
+        fun fromString(role: String): RegionRoles {
+            return entries.firstOrNull { it.name.equals(role, ignoreCase = true) } ?: NONE
+        }
+    }
 }
 
 enum class FlagType {

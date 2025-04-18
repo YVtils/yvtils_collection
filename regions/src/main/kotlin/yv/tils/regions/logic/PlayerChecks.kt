@@ -39,10 +39,9 @@ class PlayerChecks {
             return false
         }
 
-        fun regionRole(player: Player): RegionRoles {
-            return RegionRoles.NONE
+        fun regionRole(player: Player, region: RegionManager.RegionData): RegionRoles {
+            val playerRegion = RegionManager.getPlayerRegion(player, UUID.fromString(region.id))
+            return playerRegion?.role ?: RegionRoles.NONE
         }
-
-
     }
 }

@@ -22,19 +22,6 @@ class LanguageHandler {
                 getMessage(key)
             }
 
-        fun getRawMessage(key: String, uuid: UUID? = null): String =
-            getString(key, getLocale(uuid))
-
-        fun getRawMessage(key: String, sender: CommandSender): String =
-            if (sender is Player) {
-                getRawMessage(key, sender.uniqueId)
-            } else {
-                getRawMessage(key)
-            }
-
-        fun getCleanMessage(key: String, uuid: UUID? = null): String =
-            MessageUtils.strip(getString(key, getLocale(uuid)))
-
         fun getMessage(key: String, uuid: UUID? = null, params: Map<String, Any>): Component {
             val message = getString(key, getLocale(uuid))
             return MessageUtils.replacer(message, params)
@@ -47,6 +34,32 @@ class LanguageHandler {
                 getMessage(key, params = params)
             }
         }
+
+        fun getRawMessage(key: String, uuid: UUID? = null): String =
+            getString(key, getLocale(uuid))
+
+        fun getRawMessage(key: String, sender: CommandSender): String =
+            if (sender is Player) {
+                getRawMessage(key, sender.uniqueId)
+            } else {
+                getRawMessage(key)
+            }
+
+        fun getRawMessage(key: String, uuid: UUID? = null, params: Map<String, Any>): String {
+            val message = getString(key, getLocale(uuid))
+            return MessageUtils.convert(MessageUtils.replacer(message, params))
+        }
+
+        fun getRawMessage(key: String, sender: CommandSender, params: Map<String, Any>): String {
+            return if (sender is Player) {
+                getRawMessage(key, sender.uniqueId, params)
+            } else {
+                getRawMessage(key, params = params)
+            }
+        }
+
+        fun getCleanMessage(key: String, uuid: UUID? = null): String =
+            MessageUtils.strip(getString(key, getLocale(uuid)))
 
         private fun getLocale(uuid: UUID?): Locale =
             uuid?.let { playerLang.getOrDefault(it, serverDefaultLang) } ?: serverDefaultLang

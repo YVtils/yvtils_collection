@@ -4,16 +4,13 @@ import coroutine.CoroutineHandler
 import files.FileUtils
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import logger.Logger
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.data.RegionRoles
 import java.util.*
 
 class PlayerSaveFile {
-    companion object {
-        val saves = mutableMapOf<UUID, MutableMap<UUID, RegionManager.PlayerRegion>>()
-    }
-
     private val filePath = "/regions/player_save.json"
 
     fun loadConfig() {
@@ -28,23 +25,23 @@ class PlayerSaveFile {
 
         for (save in saveList) {
             Logger.debug("Loading save: $save")
-            val player =  save.jsonObject["player"]?.toString() ?: continue
-            val regionID = save.jsonObject["region"]?.toString() ?: continue
-            val role = save.jsonObject["role"]?.toString() ?: continue
+            val playerStr = save.jsonObject["player"]?.jsonPrimitive?.content ?: continue
+            val regionStr = save.jsonObject["region"]?.jsonPrimitive?.content ?: continue
+            val roleStr = save.jsonObject["role"]?.jsonPrimitive?.content ?: continue
 
-            val region = RegionManager.PlayerRegion(
-                player = player,
-                region = regionID,
-                role = RegionRoles.valueOf(role)
-            )
-            val playerUUID = UUID.fromString(player)
-
-            if (saves.containsKey(playerUUID)) {
-                saves[playerUUID]?.put(UUID.fromString(regionID), region)
-            } else {
-                saves[playerUUID] = mutableMapOf(
-                    UUID.fromString(regionID) to region
+            try {
+                val region = RegionManager.PlayerRegion(
+                    player = playerStr,
+                    region = regionStr,
+                    role = RegionRoles.fromString(roleStr)
                 )
+                val playerUUID = UUID.fromString(playerStr)
+                val regionUUID = UUID.fromString(regionStr)
+
+                RegionManager.loadPlayer(playerUUID, regionUUID, region)
+            } catch (e: IllegalArgumentException) {
+                Logger.error("Failed to parse UUID: player=$playerStr, region=$regionStr")
+                Logger.error("Error: ${e.message}")
             }
         }
     }
@@ -55,25 +52,25 @@ class PlayerSaveFile {
         FileUtils.updateFile(filePath, jsonFile)
     }
 
-    fun updatePlayerSetting(uuid: UUID, content: RegionManager.PlayerRegion) {
-        val regionID = UUID.fromString(content.region)
-        if (saves.containsKey(uuid)) {
-            saves[uuid]?.put(regionID, content)
-        } else {
-            saves[uuid] = mutableMapOf(
-                regionID to content
-            )
-        }
+    fun updatePlayerSetting(uuid: UUID, rUUID: UUID, content: RegionManager.PlayerRegion?) {
+        RegionManager.loadPlayer(uuid, rUUID, content)
 
         Logger.debug("Updating player save: $uuid -> $content")
 
         CoroutineHandler.launchTask(
             suspend {
-                val allRegions = saves.values.flatMap { it.values }.toMutableList()
-                registerStrings(allRegions)
+                val allRegions = RegionManager.savePlayer().values.flatMap { it.values }.toMutableList()
+                Logger.dev("All player regions: $allRegions")
+                upgradeStrings(allRegions)
             },
             null,
             isOnce = true,
         )
+    }
+
+    private fun upgradeStrings(saveList: MutableList<RegionManager.PlayerRegion> = mutableListOf()) {
+        val saveWrapper = mapOf("players" to saveList)
+        val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
+        FileUtils.updateFile(filePath, jsonFile, true)
     }
 }

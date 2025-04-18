@@ -82,39 +82,45 @@ class RegionLogic {
         if (sender !is Player) {
             val regions = RegionManager.getRegions(regionName)
 
-            if (regions.size > 1) {
-                val regionList: MutableList<String> = mutableListOf()
-                for (region in regions) {
-                    val owner = RegionManager.getRegionOwner(UUID.fromString(region.id))
-                    regionList.add("${region.name}: ${region.id} (${owner})")
+            when (getRegionListSize(regionName)) {
+                1 -> {
+                    finalRegion = regions[0]
+
+                    RegionManager.deleteRegion(UUID.fromString(regions[0].id))
                 }
+                0 -> {
+                    sender.sendMessage(LanguageHandler.getMessage(
+                        LangStrings.REGION_GENERIC_NONE.key,
+                        sender,
+                        mapOf<String, Any>(
+                            "region" to regionName
+                        )
+                    ))
+                    return
+                }
+                else -> {
+                    val regionList: MutableList<String> = mutableListOf()
+                    for (region in regions) {
+                        val owner = RegionManager.getRegionOwner(UUID.fromString(region.id))
+                        regionList.add("${region.name}: ${region.id} (${owner})")
+                    }
 
-                sender.sendMessage(LanguageHandler.getMessage(
-                    LangStrings.REGION_DELETE_FAIL_MULTIPLE.key,
-                    sender,
-                    mapOf<String, Any>(
-                        "region" to regionName
-                    )
-                ))
-            } else if (regions.isEmpty()) {
-                sender.sendMessage(LanguageHandler.getMessage(
-                    LangStrings.REGION_DELETE_FAIL_NONE.key,
-                    sender,
-                    mapOf<String, Any>(
-                        "region" to regionName
-                    )
-                ))
-                return
-            } else {
-                finalRegion = regions[0]
+                    sender.sendMessage(LanguageHandler.getMessage(
+                        LangStrings.REGION_GENERIC_MULTIPLE.key,
+                        sender,
+                        mapOf<String, Any>(
+                            "regions" to regionList
+                        )
+                    ))
 
-                RegionManager.deleteRegion(UUID.fromString(regions[0].id))
+                    return
+                }
             }
         } else {
             val region = RegionManager.getRegions(sender, RegionRoles.OWNER, regionName)
             if (region == null) {
                 sender.sendMessage(LanguageHandler.getMessage(
-                    LangStrings.REGION_DELETE_FAIL_NONE.key,
+                    LangStrings.REGION_GENERIC_NONE.key,
                     sender,
                     mapOf<String, Any>(
                         "region" to regionName
@@ -137,5 +143,14 @@ class RegionLogic {
                 "region" to region.name
             )
         ))
+    }
+
+    fun getRegionListSize(regionName: String): Int {
+        val regions = RegionManager.getRegions(regionName)
+
+        if (regions.isEmpty()) {
+            return 0
+        }
+        return regions.size
     }
 }

@@ -3,6 +3,7 @@ package files
 import data.Data
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import logger.Logger
 import org.bukkit.configuration.file.YamlConfiguration
@@ -80,7 +81,6 @@ class FileUtils {
             }
         }
 
-        // TODO: Fix json overwrite on startup
         fun updateFile(path: String, content: Any, overwriteExisting: Boolean = false) {
             Logger.debug("Updating file: $path | overwriteExisting: $overwriteExisting")
             Logger.debug("Content: $content", 3)
@@ -111,6 +111,8 @@ class FileUtils {
                 }
 
                 path.endsWith(".json", ignoreCase = true) -> {
+                    // Avoid overwriting existing data on startup with empty arrays
+                    // Only proceed with update if not empty or if explicitly requested
                     val existingJson = loadJSONFile(path)
 
                     // Convert content to JsonObject
@@ -122,21 +124,75 @@ class FileUtils {
                         }
                     }
 
-                    // For complete replacement (like arrays), just use the new content directly
+                    // Skip updating if new content contains empty arrays and we're not forcing overwrite
+                    if (!overwriteExisting && isEmptyArraysOnly(newContent)) {
+                        Logger.debug("Skipping update with empty arrays: $path")
+                        return
+                    }
+
+                    // For complete replacement, just use the new content directly
                     if (overwriteExisting) {
                         file.writeText(Json.encodeToString(newContent))
                         Logger.debug("JSON file completely replaced: $path")
                         return
                     }
 
-                    // Otherwise, do a deep merge of the objects
-                    val mergedJson = mergeJsonObjects(existingJson.content, newContent)
+                    // Otherwise, do a smart merge of the objects
+                    val mergedJson = mergeJsonObjectsWithArrayAppend(existingJson.content, newContent)
                     file.writeText(Json.encodeToString(mergedJson))
                     Logger.debug("JSON file updated with merged content: $path")
                 }
 
                 else -> throw IllegalArgumentException("Unsupported file extension: ${file.extension}")
             }
+        }
+
+        /**
+         * Checks if the JsonObject only contains empty arrays
+         */
+        private fun isEmptyArraysOnly(jsonObject: JsonObject): Boolean {
+            if (jsonObject.isEmpty()) return true
+
+            return jsonObject.all { (_, value) ->
+                when (value) {
+                    is JsonArray -> value.isEmpty()
+                    is JsonObject -> isEmptyArraysOnly(value)
+                    else -> false
+                }
+            }
+        }
+
+        /**
+         * Recursively merges two JsonObjects, handling arrays by appending items rather than replacing
+         */
+        private fun mergeJsonObjectsWithArrayAppend(original: JsonObject, update: JsonObject): JsonObject {
+            val result = original.toMutableMap()
+
+            update.forEach { (key, updateValue) ->
+                if (key in result) {
+                    val originalValue = result[key]
+                    when {
+                        originalValue is JsonObject && updateValue is JsonObject -> {
+                            // Recursively merge nested objects
+                            result[key] = mergeJsonObjectsWithArrayAppend(originalValue, updateValue)
+                        }
+                        originalValue is JsonArray && updateValue is JsonArray -> {
+                            // For arrays, append new items rather than replacing
+                            val combinedArray = JsonArray(originalValue + updateValue)
+                            result[key] = combinedArray
+                        }
+                        else -> {
+                            // For other types, replace with new value
+                            result[key] = updateValue
+                        }
+                    }
+                } else {
+                    // Add new key-value pair
+                    result[key] = updateValue
+                }
+            }
+
+            return JsonObject(result)
         }
 
         fun makeYAML(content: Map<String, Any>): YamlConfiguration {

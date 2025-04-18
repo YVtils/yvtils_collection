@@ -6,10 +6,12 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.LocationType
 import dev.jorel.commandapi.kotlindsl.*
 import dev.jorel.commandapi.wrappers.Location2D
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.regions.data.Permissions
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.data.RegionRoles
+import yv.tils.regions.logic.InformationalLogic
 import yv.tils.regions.logic.RegionLogic
 
 class RegionCommand {
@@ -83,14 +85,73 @@ class RegionCommand {
 
         literalArgument("info") {
             // Command to get information about a region
+            //withPermission(Permissions.REGION_INFO.permission) TODO
+            withPermission(CommandPermission.NONE)
+
+            textArgument("regionName", true) {
+                replaceSuggestions(ArgumentSuggestions.strings { sender ->
+                    getRegions(sender.sender)
+                })
+
+                anyExecutor { sender, args ->
+                    val regionName = args["regionName"] as String?
+
+                    CoroutineHandler.launchTask(
+                        suspend {
+                            InformationalLogic.getRegionInfoAsMessage(sender, regionName)
+                        },
+                        null,
+                        isOnce = true,
+                    )
+                }
+            }
         }
 
-        literalArgument("list") {
+        // /regions list <role> <player>
+        literalArgument("list", false) {
+            //withPermission(Permissions.REGION_LIST_SELF.permission) TODO
+            withPermission(CommandPermission.NONE)
             // Command to list all regions
+
+            val literals = RegionRoles.entries.map { it.name }.toTypedArray()
+
+            multiLiteralArgument("role", *literals, optional = true) {
+                //withPermission(Permissions.REGION_LIST_OTHER.permission) TODO
+                withPermission(CommandPermission.NONE)
+
+                entitySelectorArgumentManyPlayers("player", optional = true) {
+                    //withPermission(Permissions.REGION_LIST_OTHER.permission) TODO
+                    withPermission(CommandPermission.OP)
+
+                    anyExecutor { sender, args ->
+                        val player = args["player"] as Collection<*>?
+                        val role = args["role"] as String?
+
+                        CoroutineHandler.launchTask(
+                            suspend {
+                                InformationalLogic.listRegionsAsMessage(sender, player, role)
+                            },
+                            null,
+                            isOnce = true,
+                        )
+                    }
+                }
+            }
         }
 
         literalArgument("player") {
             // Command to manage players in a region
         }
+    }
+
+    private fun getRegions(sender: CommandSender, role: RegionRoles = RegionRoles.NONE): Array<String> {
+        if (sender !is Player) {
+            // List all regions
+            val regions = RegionManager.getAllRegions()
+            return regions.map { it.name }.toTypedArray()
+        }
+
+        // List regions owned by the player
+        return RegionManager.getRegions(sender, role).map { it.name }.toTypedArray()
     }
 }
