@@ -1,11 +1,11 @@
-package yv.tils.regions.listeners
+package yv.tils.regions.listeners.cause
 
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
-import yv.tils.regions.listeners.custom.PlayerEntryRegionEvent
-import yv.tils.regions.listeners.custom.PlayerLeaveRegionEvent
+import yv.tils.regions.listeners.custom.regions.PlayerEntryRegionEvent
+import yv.tils.regions.listeners.custom.regions.PlayerLeaveRegionEvent
 import yv.tils.regions.logic.RegionLogic
 
 class PlayerMove : Listener {
@@ -17,6 +17,7 @@ class PlayerMove : Listener {
 
         val oldRegion = RegionLogic.getRegion(from)
         val region = RegionLogic.getRegion(to)
+
         if (oldRegion == null && region != null) {
             val playerEntryRegion = PlayerEntryRegionEvent(player, null, region)
             playerEntryRegion.callEvent()

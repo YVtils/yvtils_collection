@@ -24,10 +24,19 @@ class PlayerChecks {
         fun getPlayersInRegion(region: RegionManager.RegionData): List<UUID> {
             return playersInRegions[region] ?: emptyList()
         }
+        fun getPlayer(player: Player): RegionManager.RegionData? {
+            for ((rg, players) in playersInRegions) {
+                if (players.contains(player.uniqueId)) {
+                    return rg
+                }
+            }
+            return null
+        }
 
         /**
          * Checks if the player is in a region.
          * @param player The player to check.
+         * @param region The region to check against.
          * @return The region data if the player is in a region, null otherwise.
          */
         fun inSameRegion(player: Player, region: RegionManager.RegionData): Boolean {

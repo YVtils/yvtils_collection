@@ -6,9 +6,14 @@ import yv.tils.regions.configs.ConfigFile
 import yv.tils.regions.configs.PlayerSaveFile
 import yv.tils.regions.configs.RegionSaveFile
 import yv.tils.regions.language.RegisterStrings
+import yv.tils.regions.listeners.BlockFlagTrigger
 import yv.tils.regions.listeners.PlayerEntryRegion
+import yv.tils.regions.listeners.PlayerFlagTrigger
 import yv.tils.regions.listeners.PlayerLeaveRegion
-import yv.tils.regions.listeners.PlayerMove
+import yv.tils.regions.listeners.cause.BlockBreak
+import yv.tils.regions.listeners.cause.BlockPlace
+import yv.tils.regions.listeners.cause.EntityDamageByEntity
+import yv.tils.regions.listeners.cause.PlayerMove
 
 class RegionsYVtils : Data.YVtilsModule {
     companion object {
@@ -50,8 +55,14 @@ class RegionsYVtils : Data.YVtilsModule {
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(PlayerMove(), plugin)
+        pm.registerEvents(BlockBreak(), plugin)
+        pm.registerEvents(BlockPlace(), plugin)
+        pm.registerEvents(EntityDamageByEntity(), plugin)
+
         pm.registerEvents(PlayerEntryRegion(), plugin)
         pm.registerEvents(PlayerLeaveRegion(), plugin)
+        pm.registerEvents(BlockFlagTrigger(), plugin)
+        pm.registerEvents(PlayerFlagTrigger(), plugin)
     }
 
     private fun loadConfigs() {

@@ -34,6 +34,8 @@ enum class LangStrings(val key: String) {
     REGION_LIST_SUCCESS("command.regions.list.success"),
     REGION_LIST_LINE("command.regions.list.line"),
 
-    REGION_GENERIC_MULTIPLE("command.regions.generic.multiple"),
-    REGION_GENERIC_NONE("command.regions.generic.none"),
+    REGION_GENERIC_MULTIPLE("regions.generic.multiple"),
+    REGION_GENERIC_NONE("regions.generic.none"),
+
+    FLAG_TRIGGER_DENIED("regions.flag.trigger.denied"),
 }

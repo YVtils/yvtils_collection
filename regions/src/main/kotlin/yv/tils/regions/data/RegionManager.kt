@@ -7,8 +7,8 @@ import org.bukkit.World
 import org.bukkit.entity.Player
 import yv.tils.regions.configs.PlayerSaveFile
 import yv.tils.regions.configs.RegionSaveFile
+import yv.tils.regions.data.FlagType.*
 import java.util.*
-
 
 class RegionManager {
     companion object {
@@ -26,6 +26,19 @@ class RegionManager {
 
             val rUUID = data.UUID.generateUUID()
 
+            val defaultGlobalFlags = mapOf(
+                PVP to true,
+            )
+
+            val defaultRoleBasedFlags = mapOf(
+                PLACE to 3,
+                DESTROY to 3,
+                CONTAINER       to 3,
+                INTERACT        to 3,
+                USE             to 3,
+                TELEPORT        to 3
+            )
+
             val regionData = RegionData(
                 id = rUUID.toString(),
                 name = name,
@@ -36,8 +49,8 @@ class RegionManager {
                 z2 = z2,
                 created = System.currentTimeMillis(),
                 flags = RegionFlags(
-                    global = emptyMap(),
-                    roleBased = emptyMap()
+                    global = defaultGlobalFlags,
+                    roleBased = defaultRoleBasedFlags
                 )
             )
 
@@ -217,9 +230,30 @@ class RegionManager {
         val role: RegionRoles,
     )
 
+    /**
+     * Data class representing the flags for a region.
+     *
+     * @property global A map of global flags and their values.
+     * @property roleBased A map of role-based flags and their values.
+     */
     @Serializable
     data class RegionFlags(
+        /**
+         * Map of global flags and their values.
+         * The key is the flag type and the value is a boolean indicating if the flag is set.
+         *
+         * @property FlagType The type of flag.
+         * @property Boolean The value of the flag. If true, the action is allowed, if false, it is not.
+         */
         val global: Map<FlagType, Boolean>,
+        /**
+         * Map of role-based flags and their values.
+         * The key is the flag type,
+         * and the value is an integer indicating the permission level required to set the flag.
+         *
+         * @property FlagType The type of flag.
+         * @property Int The minimum permission level required setting the flag.
+         */
         val roleBased: Map<FlagType, Int>
     )
 }
@@ -238,9 +272,16 @@ enum class RegionRoles(val permLevel: Int) {
     }
 }
 
+/**
+ * Enum class representing the different types of flags that can be set in a region.
+ *
+ * @property PVP Flag for player vs player combat.
+ * @property PLACE Flag for building in the region.
+ *
+ */
 enum class FlagType {
     PVP,
-    BUILD,
+    PLACE,
     DESTROY,
     CONTAINER,
     INTERACT,

@@ -1,9 +1,11 @@
 package yv.tils.regions.logic
 
 import language.LanguageHandler
+import logger.Logger
 import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import yv.tils.regions.data.FlagType
 import yv.tils.regions.data.Permissions
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.data.RegionRoles
@@ -17,9 +19,50 @@ class RegionLogic {
             val x = loc.blockX
             val z = loc.blockZ
 
-            return RegionManager.getRegions(world).firstOrNull { region ->
-                x in region.x..region.x2 && z in region.z..region.z2
+            val regions = RegionManager.getAllRegions()
+            for (region in regions) {
+                val cX1 = region.x
+                val cZ1 = region.z
+                val cX2 = region.x2
+                val cZ2 = region.z2
+                val worldName = region.world
+
+                if (worldName == world.name) {
+                    if (x in minOf(cX1, cX2)..maxOf(cX1, cX2) && z in minOf(cZ1, cZ2)..maxOf(cZ1, cZ2)) {
+                        return region
+                    }
+                }
             }
+
+            return null
+        }
+
+        fun flagCheck(region: RegionManager.RegionData, flag: FlagType, playerRole: RegionRoles): Boolean {
+            val globalFlag = region.flags.global[flag]
+            val roleBasedFlag = region.flags.roleBased[flag]
+
+            if (globalFlag != null) {
+                Logger.dev("Global flag: $globalFlag")
+                return globalFlag
+            }
+
+            if (roleBasedFlag != null) {
+                Logger.dev("Role based flag: $roleBasedFlag")
+                if (roleBasedFlag == RegionRoles.NONE.permLevel) {
+                    Logger.dev("Role based flag: $roleBasedFlag is NONE")
+                    return true
+                }
+
+                if (roleBasedFlag >= playerRole.permLevel && playerRole != RegionRoles.NONE) {
+                    Logger.dev("Role based flag: $roleBasedFlag is greater than or equal to player role: ${playerRole.permLevel}")
+                    return true
+                }
+
+                return false
+            }
+
+            return false
+
         }
     }
 
@@ -37,22 +80,6 @@ class RegionLogic {
         // TODO: Add checks for region name -> owner can only create one region with the same name
 
         val region = RegionManager.createRegion(player, name, loc1, loc2)
-
-        if (region == null) {
-            player.sendMessage(LanguageHandler.getMessage(
-                LangStrings.REGION_CREATE_FAIL_GENERIC.key,
-                player.uniqueId,
-                mapOf<String, Any>(
-                    "region" to name,
-                    "world" to loc1.world.name,
-                    "x" to loc1.blockX.toString(),
-                    "z" to loc1.blockZ.toString(),
-                    "x2" to loc2.blockX.toString(),
-                    "z2" to loc2.blockZ.toString(),
-                )
-            ))
-            return
-        }
 
         player.sendMessage(LanguageHandler.getMessage(
             LangStrings.REGION_CREATE_SUCCESS.key,
@@ -77,7 +104,7 @@ class RegionLogic {
             return
         }
 
-        var finalRegion: RegionManager.RegionData? = null
+        val finalRegion: RegionManager.RegionData?
 
         if (sender !is Player) {
             val regions = RegionManager.getRegions(regionName)
@@ -134,7 +161,7 @@ class RegionLogic {
             }
         }
 
-        val region = finalRegion ?: return
+        val region = finalRegion
 
         sender.sendMessage(LanguageHandler.getMessage(
             LangStrings.REGION_DELETE_SUCCESS.key,

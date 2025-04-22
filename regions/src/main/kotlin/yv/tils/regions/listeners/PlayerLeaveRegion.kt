@@ -4,7 +4,7 @@ import logger.Logger
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import yv.tils.regions.listeners.custom.PlayerLeaveRegionEvent
+import yv.tils.regions.listeners.custom.regions.PlayerLeaveRegionEvent
 import yv.tils.regions.logic.PlayerChecks
 
 class PlayerLeaveRegion : Listener {

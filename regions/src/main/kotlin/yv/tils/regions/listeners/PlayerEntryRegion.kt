@@ -4,7 +4,7 @@ import logger.Logger
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import yv.tils.regions.listeners.custom.PlayerEntryRegionEvent
+import yv.tils.regions.listeners.custom.regions.PlayerEntryRegionEvent
 import yv.tils.regions.logic.PlayerChecks
 
 class PlayerEntryRegion : Listener {
