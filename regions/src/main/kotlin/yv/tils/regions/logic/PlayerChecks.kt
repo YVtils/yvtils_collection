@@ -1,6 +1,7 @@
 package yv.tils.regions.logic
 
-import org.bukkit.entity.Player
+import org.bukkit.OfflinePlayer
+import yv.tils.regions.data.PlayerManager
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.data.RegionRoles
 import java.util.*
@@ -13,18 +14,18 @@ class PlayerChecks {
          * The key is the region data, and the value is a list of player UUIDs.
          */
         private var playersInRegions = mutableMapOf<RegionManager.RegionData, List<UUID>>()
-        fun addPlayerToRegion(region: RegionManager.RegionData, player: Player) {
+        fun addPlayerToRegion(region: RegionManager.RegionData, player: OfflinePlayer) {
             val players = playersInRegions[region] ?: emptyList()
             playersInRegions[region] = players + player.uniqueId
         }
-        fun removePlayerFromRegion(region: RegionManager.RegionData, player: Player) {
+        fun removePlayerFromRegion(region: RegionManager.RegionData, player: OfflinePlayer) {
             val players = playersInRegions[region] ?: emptyList()
             playersInRegions[region] = players - player.uniqueId
         }
         fun getPlayersInRegion(region: RegionManager.RegionData): List<UUID> {
             return playersInRegions[region] ?: emptyList()
         }
-        fun getPlayer(player: Player): RegionManager.RegionData? {
+        fun getPlayer(player: OfflinePlayer): RegionManager.RegionData? {
             for ((rg, players) in playersInRegions) {
                 if (players.contains(player.uniqueId)) {
                     return rg
@@ -39,7 +40,7 @@ class PlayerChecks {
          * @param region The region to check against.
          * @return The region data if the player is in a region, null otherwise.
          */
-        fun inSameRegion(player: Player, region: RegionManager.RegionData): Boolean {
+        fun inSameRegion(player: OfflinePlayer, region: RegionManager.RegionData): Boolean {
             for ((rg, players) in playersInRegions) {
                 if (players.contains(player.uniqueId) && rg == region) {
                     return true
@@ -48,8 +49,8 @@ class PlayerChecks {
             return false
         }
 
-        fun regionRole(player: Player, region: RegionManager.RegionData): RegionRoles {
-            val playerRegion = RegionManager.getPlayerRegion(player, UUID.fromString(region.id))
+        fun regionRole(player: OfflinePlayer, region: RegionManager.RegionData): RegionRoles {
+            val playerRegion = PlayerManager.getPlayerRegion(player, UUID.fromString(region.id))
             return playerRegion?.role ?: RegionRoles.NONE
         }
     }

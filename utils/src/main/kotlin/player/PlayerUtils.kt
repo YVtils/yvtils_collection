@@ -1,7 +1,9 @@
 package player
 
 import data.Data
+import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
+import java.util.*
 
 class PlayerUtils {
     companion object {
@@ -54,6 +56,42 @@ class PlayerUtils {
                 }
             }
             return players
+        }
+
+        /**
+         * Parses a UUID to a Player object.
+         * @param uuid The UUID string to parse.
+         * @return OfflinePlayer object.
+         */
+        fun uuidToPlayer(uuid: UUID): OfflinePlayer {
+            return Data.instance.server.getOfflinePlayer(uuid)
+        }
+
+        /**
+         * Parses a UUID to a name string.
+         * @param uuid The UUID string to parse.
+         * @return The name string of the player.
+         */
+        fun uuidToName(uuid: UUID): String? {
+            return uuidToPlayer(uuid).name
+        }
+
+        /**
+         * Parses a name string to a Player object.
+         * @param name The name string to parse.
+         * @return OfflinePlayer object.
+         */
+        fun nameToPlayer(name: String): OfflinePlayer {
+            return Data.instance.server.getOfflinePlayer(name)
+        }
+
+        /**
+         * Parses a name string to a UUID object.
+         * @param name The name string to parse.
+         * @return UUID object.
+         */
+        fun nameToUUID(name: String): UUID {
+            return nameToPlayer(name).uniqueId
         }
     }
 }

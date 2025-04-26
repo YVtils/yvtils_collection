@@ -6,14 +6,19 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.LocationType
 import dev.jorel.commandapi.kotlindsl.*
 import dev.jorel.commandapi.wrappers.Location2D
+import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import yv.tils.common.other.AsyncActionAnnounce
 import yv.tils.regions.data.Permissions
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.data.RegionRoles
 import yv.tils.regions.logic.InformationalLogic
+import yv.tils.regions.logic.MemberLogic
 import yv.tils.regions.logic.RegionLogic
+import java.util.concurrent.CompletableFuture
 
+@Suppress("UNCHECKED_CAST")
 class RegionCommand {
     val command = commandTree("regions") {
         withPermission("yvtils.command.regions")
@@ -55,6 +60,11 @@ class RegionCommand {
             }
         }
 
+        /**
+         * Command to delete a region.
+         * /region delete <regionName>
+         *     regionName: The name of the region. [String]
+         */
         literalArgument("delete") {
             withPermission(Permissions.REGION_DELETE.permission)
             withPermission(CommandPermission.NONE)
@@ -83,11 +93,14 @@ class RegionCommand {
             }
         }
 
+        /**
+         * Command to get information about a region.
+         * /region info <regionName>
+         *     regionName: The name of the region. [String]
+         */
         literalArgument("info") {
-            // Command to get information about a region
-            //withPermission(Permissions.REGION_INFO.permission) TODO
+            withPermission(Permissions.REGION_INFO.permission)
             withPermission(CommandPermission.NONE)
-
             textArgument("regionName", true) {
                 replaceSuggestions(ArgumentSuggestions.strings { sender ->
                     getRegions(sender.sender)
@@ -107,20 +120,24 @@ class RegionCommand {
             }
         }
 
-        // /regions list <role> <player>
+        /**
+         * Command to list all regions.
+         * /region list [role] [player]
+         *     role: The role of the player in the region. [RegionRoles]
+         *     player: The player to list regions for. [Player]
+         */
         literalArgument("list", false) {
-            //withPermission(Permissions.REGION_LIST_SELF.permission) TODO
+            withPermission(Permissions.REGION_LIST.permission)
             withPermission(CommandPermission.NONE)
-            // Command to list all regions
 
             val literals = RegionRoles.entries.map { it.name }.toTypedArray()
 
             multiLiteralArgument("role", *literals, optional = true) {
-                //withPermission(Permissions.REGION_LIST_OTHER.permission) TODO
+                withPermission(Permissions.REGION_LIST_ROLE.permission)
                 withPermission(CommandPermission.NONE)
 
                 entitySelectorArgumentManyPlayers("player", optional = true) {
-                    //withPermission(Permissions.REGION_LIST_OTHER.permission) TODO
+                    withPermission(Permissions.REGION_LIST_OTHER.permission)
                     withPermission(CommandPermission.OP)
 
                     anyExecutor { sender, args ->
@@ -139,8 +156,123 @@ class RegionCommand {
             }
         }
 
-        literalArgument("player") {
-            // Command to manage players in a region
+        /**
+         * Command to manage a member of a region.
+         * /region members ...
+         */
+        literalArgument("members", false) {
+            withPermission(Permissions.REGION_MEMBER.permission)
+            withPermission(CommandPermission.NONE)
+
+            /**
+             * Command to add a member to a region.
+             * /region members add <regionName> <player> [role]
+             *     regionName: The name of the region. [String]
+             *     player: The player to add. [Player]
+             *     role: The role of the player. [RegionRoles]
+             */
+            literalArgument("add") {
+                withPermission(Permissions.REGION_MEMBER.permission)
+                withPermission(CommandPermission.NONE)
+
+                textArgument("regionName", false) {
+                    replaceSuggestions(ArgumentSuggestions.strings { sender ->
+                        getRegions(sender.sender, RegionRoles.MODERATOR)
+                    })
+
+                    asyncOfflinePlayerArgument("player", false) {
+                        withPermission(Permissions.REGION_MEMBER_ADD.permission)
+                        withPermission(CommandPermission.OP)
+
+                        val literals = RegionRoles.entries.map { it.name }.toTypedArray()
+
+                        multiLiteralArgument("role", *literals, optional = true) {
+                            withPermission(Permissions.REGION_MEMBER_ROLE.permission)
+                            withPermission(CommandPermission.NONE)
+
+                            anyExecutor { sender, args ->
+                                val regionName = args["regionName"] as String
+                                val player = args["player"] as CompletableFuture<OfflinePlayer>
+                                val role = args["role"] as String?
+
+                                AsyncActionAnnounce.announceAction(sender)
+
+                                player.thenAccept { offlinePlayer ->
+                                    CoroutineHandler.launchTask(
+                                        suspend {
+                                            MemberLogic.addPlayerToRegion(
+                                                regionName,
+                                                offlinePlayer,
+                                                role,
+                                                sender,
+                                            )
+                                        },
+                                        null,
+                                        isOnce = true,
+                                    )
+                                }.exceptionally { throwable ->
+                                    val cause = throwable.cause
+                                    val rootCause = if (cause is RuntimeException) cause.cause else cause
+
+                                    sender.sendMessage(rootCause?.message ?: "An error occurred")
+                                    null
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            literalArgument("remove") {
+                withPermission(Permissions.REGION_MEMBER.permission)
+                withPermission(CommandPermission.NONE)
+
+                textArgument("regionName", false) {
+                    replaceSuggestions(ArgumentSuggestions.strings { sender ->
+                        getRegions(sender.sender, RegionRoles.MODERATOR)
+                    })
+
+                    asyncOfflinePlayerArgument("player", false) {
+                        withPermission(Permissions.REGION_MEMBER_REMOVE.permission)
+                        withPermission(CommandPermission.OP)
+                        replaceSuggestions(ArgumentSuggestions.strings { sender ->
+                                // TODO
+                            arrayOf(
+                                "player1",
+                                "player2",
+                                "player3",
+                            )
+                        })
+
+                        anyExecutor { sender, args ->
+                            val regionName = args["regionName"] as String
+                            val player = args["player"] as CompletableFuture<OfflinePlayer>
+
+                            AsyncActionAnnounce.announceAction(sender)
+
+                            player.thenAccept { offlinePlayer ->
+                                CoroutineHandler.launchTask(
+                                    suspend {
+                                        MemberLogic.removePlayerFromRegion(
+                                            regionName,
+                                            offlinePlayer,
+                                            sender,
+                                        )
+                                    },
+                                    null,
+                                    isOnce = true,
+                                )
+                            }.exceptionally { throwable ->
+                                val cause = throwable.cause
+                                val rootCause = if (cause is RuntimeException) cause.cause else cause
+
+                                sender.sendMessage(rootCause?.message ?: "An error occurred")
+                                null
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

@@ -60,6 +60,14 @@ class RegisterStrings {
                 FileTypes.DE to "<prefix> <gray>Benutze: <white><command>"
             )
         )
+
+        registerNewString(
+            LangStrings.COMMAND_EXECUTOR_ASYNC_ACTION,
+            mapOf(
+                FileTypes.EN to "<prefix> <yellow>The command is processing data in the background. Please be patient...",
+                FileTypes.DE to "<prefix> <yellow>Der Befehl wird im Hintergrund verarbeitet. Bitte etwas Geduld...",
+            )
+        )
     }
 
     private fun registerNewString(langKey: LangStrings, translations: Map<FileTypes, String>) {
@@ -80,5 +88,6 @@ enum class LangStrings(val key: String) {
     COMMAND_MISSING_PLAYER("command.missing.player"),
     COMMAND_EXECUTOR_NOT_PLAYER("command.executor.notPlayer"),
     COMMAND_EXECUTOR_MISSING_PERMISSION("command.executor.missingPermission"),
-    COMMAND_USAGE("command.usage")
+    COMMAND_USAGE("command.usage"),
+    COMMAND_EXECUTOR_ASYNC_ACTION("command.executor.asyncAction"),
 }

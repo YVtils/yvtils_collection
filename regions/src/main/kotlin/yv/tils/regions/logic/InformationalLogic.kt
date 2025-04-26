@@ -3,6 +3,7 @@ package yv.tils.regions.logic
 import language.LanguageHandler
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import yv.tils.regions.data.PlayerManager
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.data.RegionRoles
 import yv.tils.regions.language.LangStrings
@@ -116,8 +117,8 @@ class InformationalLogic {
             PlayerChecks.regionRole(sender, region)
         }
 
-        val regionOwner = RegionManager.getRegionOwner(rUUID)
-        val regionMembers = RegionManager.getRegionMembers(rUUID)
+        val regionOwner = PlayerManager.getRegionOwnerAsPlayer(rUUID)
+        val regionMembers = PlayerManager.getRegionMembersAsPlayers(rUUID)
 
         val creationDate = java.text.SimpleDateFormat("dd.MM.yyyy, HH:mm:ss").format(Date(region.created))
 
@@ -126,9 +127,9 @@ class InformationalLogic {
             world = region.world,
             location1 = "${region.x}, ${region.z}",
             location2 = "${region.x2}, ${region.z2}",
-            owner = regionOwner ?: "-",
+            owner = regionOwner?.name ?: "-",
             role = senderRole,
-            members = (regionMembers ?: listOf("-")).joinToString(", ") { it },
+            members = regionMembers?.joinToString(", ") { it.name ?: "-" } ?: "-",
             created = creationDate,
             flags = ""
         )

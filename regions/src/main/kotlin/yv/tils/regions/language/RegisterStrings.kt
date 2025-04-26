@@ -24,8 +24,19 @@ enum class LangStrings(val key: String) {
     REGION_CREATE_FAIL_GENERIC("command.regions.create.fail.generic"),
     REGION_CREATE_FAIL_ALREADY_EXISTS("command.regions.create.fail.already.exists"),
     REGION_CREATE_FAIL_TOO_BIG("command.regions.create.fail.too.big"),
+
     REGION_DELETE_SUCCESS("command.regions.delete.success"),
     REGION_DELETE_FAIL_GENERIC("command.regions.delete.fail.generic"),
+
+    REGION_MEMBERS_INFO("command.regions.members.info"),
+    REGION_MEMBER_ADD_SUCCESS("command.regions.members.add.success"),
+    REGION_MEMBER_ADD_FAILED("command.regions.members.add.failed"),
+    REGION_MEMBER_REMOVE_SUCCESS("command.regions.members.remove.success"),
+    REGION_MEMBER_REMOVE_FAILED("command.regions.members.remove.failed"),
+    REGION_MEMBER_PROMOTE_SUCCESS("command.regions.members.promote.success"),
+    REGION_MEMBER_PROMOTE_FAILED("command.regions.members.promote.failed"),
+    REGION_MEMBER_DEMOTE_SUCCESS("command.regions.members.demote.success"),
+    REGION_MEMBER_DEMOTE_FAILED("command.regions.members.demote.failed"),
 
     REGION_INFO_SUCCESS("command.regions.info.success"),
     REGION_INFO_FAIL_GENERIC("command.regions.info.fail.generic"),

@@ -6,7 +6,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import logger.Logger
-import yv.tils.regions.data.RegionManager
+import yv.tils.regions.data.PlayerManager
 import yv.tils.regions.data.RegionRoles
 import java.util.*
 
@@ -30,15 +30,15 @@ class PlayerSaveFile {
             val roleStr = save.jsonObject["role"]?.jsonPrimitive?.content ?: continue
 
             try {
-                val region = RegionManager.PlayerRegion(
-                    player = playerStr,
+                val region = PlayerManager.PlayerRegion(
+                    uuid = playerStr,
                     region = regionStr,
                     role = RegionRoles.fromString(roleStr)
                 )
                 val playerUUID = UUID.fromString(playerStr)
                 val regionUUID = UUID.fromString(regionStr)
 
-                RegionManager.loadPlayer(playerUUID, regionUUID, region)
+                PlayerManager.loadPlayer(playerUUID, regionUUID, region)
             } catch (e: IllegalArgumentException) {
                 Logger.error("Failed to parse UUID: player=$playerStr, region=$regionStr")
                 Logger.error("Error: ${e.message}")
@@ -46,20 +46,20 @@ class PlayerSaveFile {
         }
     }
 
-    fun registerStrings(saveList: MutableList<RegionManager.PlayerRegion> = mutableListOf()) {
+    fun registerStrings(saveList: MutableList<PlayerManager.PlayerRegion> = mutableListOf()) {
         val saveWrapper = mapOf("players" to saveList)
         val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
         FileUtils.updateFile(filePath, jsonFile)
     }
 
-    fun updatePlayerSetting(uuid: UUID, rUUID: UUID, content: RegionManager.PlayerRegion?) {
-        RegionManager.loadPlayer(uuid, rUUID, content)
+    fun updatePlayerSetting(uuid: UUID, rUUID: UUID, content: PlayerManager.PlayerRegion?) {
+        PlayerManager.loadPlayer(uuid, rUUID, content)
 
         Logger.debug("Updating player save: $uuid -> $content")
 
         CoroutineHandler.launchTask(
             suspend {
-                val allRegions = RegionManager.savePlayer().values.flatMap { it.values }.toMutableList()
+                val allRegions = PlayerManager.savePlayer().values.flatMap { it.values }.toMutableList()
                 Logger.dev("All player regions: $allRegions")
                 upgradeStrings(allRegions)
             },
@@ -68,7 +68,7 @@ class PlayerSaveFile {
         )
     }
 
-    private fun upgradeStrings(saveList: MutableList<RegionManager.PlayerRegion> = mutableListOf()) {
+    private fun upgradeStrings(saveList: MutableList<PlayerManager.PlayerRegion> = mutableListOf()) {
         val saveWrapper = mapOf("players" to saveList)
         val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
         FileUtils.updateFile(filePath, jsonFile, true)

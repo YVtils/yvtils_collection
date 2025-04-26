@@ -5,10 +5,7 @@ import logger.Logger
 import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.regions.data.FlagType
-import yv.tils.regions.data.Permissions
-import yv.tils.regions.data.RegionManager
-import yv.tils.regions.data.RegionRoles
+import yv.tils.regions.data.*
 import yv.tils.regions.language.LangStrings
 import java.util.*
 
@@ -128,8 +125,8 @@ class RegionLogic {
                 else -> {
                     val regionList: MutableList<String> = mutableListOf()
                     for (region in regions) {
-                        val owner = RegionManager.getRegionOwner(UUID.fromString(region.id))
-                        regionList.add("${region.name}: ${region.id} (${owner})")
+                        val owner = PlayerManager.getRegionOwner(UUID.fromString(region.id))
+                        regionList.add("<click:suggest_command:/rg remove ${region.id}>${region.name}: ${region.id} (${owner})</click>")
                     }
 
                     sender.sendMessage(LanguageHandler.getMessage(

@@ -1,5 +1,6 @@
 package message
 
+import data.Data
 import logger.Logger
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -123,6 +124,8 @@ class MessageUtils {
                 val oldString = "<$i>"
                 text = text.replace(oldString, replace[i].toString())
             }
+
+            text = text.replace("<prefix>", Data.prefix)
 
             if (text.startsWith(" ")) {
                 text = text.replaceFirst(" ", "")

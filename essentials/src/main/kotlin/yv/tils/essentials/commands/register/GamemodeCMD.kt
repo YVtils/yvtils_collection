@@ -11,6 +11,7 @@ import language.LanguageHandler
 import org.bukkit.entity.Player
 import yv.tils.essentials.commands.handler.GamemodeHandler
 
+// TODO: Switch to multiLiteralArgument
 class GamemodeCMD {
     val command = commandTree("gm") {
         withPermission("yvtils.command.gamemode")
