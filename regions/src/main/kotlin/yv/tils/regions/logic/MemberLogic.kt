@@ -4,7 +4,6 @@ import language.LanguageHandler
 import logger.Logger
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import player.PlayerUtils
 import yv.tils.regions.data.PlayerManager
 import yv.tils.regions.data.RegionManager
@@ -107,60 +106,47 @@ class MemberLogic {
             }
         }
 
-        fun promotePlayerInRegion(region: RegionManager.RegionData, player: Player, role: RegionRoles, sender: CommandSender) {
-            val isSuccessful = MemberLogic().changeRoleInRegion(region, player, role)
+        fun changePlayerRoleInRegion(region: String, player: OfflinePlayer, sender: CommandSender, role: String?) {
+            val regionData = RegionManager.getRegionByNameOrID(region)
+            val role = RegionRoles.fromString(role ?: "MEMBER")
 
-            Logger.debug("Promoted player ${player.name} in region ${region.name} to role $role")
-
-            if (isSuccessful) {
+            if (regionData == null) {
                 sender.sendMessage(
                     LanguageHandler.getMessage(
-                        LangStrings.REGION_MEMBER_PROMOTE_SUCCESS.key,
+                        LangStrings.REGION_MEMBER_ROLE_FAILED.key,
                         sender,
                         mapOf(
-                            "region" to region.name,
-                            "player" to player.name
+                            "region" to region,
+                            "player" to (player.name ?: "-"),
                         )
                     )
                 )
-            } else {
-                sender.sendMessage(
-                    LanguageHandler.getMessage(
-                        LangStrings.REGION_MEMBER_PROMOTE_FAILED.key,
-                        sender,
-                        mapOf(
-                            "region" to region.name,
-                            "player" to player.name
-                        )
-                    )
-                )
+                return
             }
-        }
 
-        fun demotePlayerInRegion(region: RegionManager.RegionData, player: Player, role: RegionRoles, sender: CommandSender) {
-            val isSuccessful = MemberLogic().changeRoleInRegion(region, player, role)
+            val isSuccessful = MemberLogic().changeRoleInRegion(regionData, player, role)
 
-            Logger.debug("Demoted player ${player.name} in region ${region.name} to role $role")
+            Logger.debug("Changed player ${player.name} role in region ${regionData.name} to $role")
 
             if (isSuccessful) {
                 sender.sendMessage(
                     LanguageHandler.getMessage(
-                        LangStrings.REGION_MEMBER_DEMOTE_SUCCESS.key,
+                        LangStrings.REGION_MEMBER_ROLE_SUCCESS.key,
                         sender,
                         mapOf(
-                            "region" to region.name,
-                            "player" to player.name
+                            "region" to regionData.name,
+                            "player" to (player.name ?: "-"),
                         )
                     )
                 )
             } else {
                 sender.sendMessage(
                     LanguageHandler.getMessage(
-                        LangStrings.REGION_MEMBER_DEMOTE_FAILED.key,
+                        LangStrings.REGION_MEMBER_ROLE_FAILED.key,
                         sender,
                         mapOf(
-                            "region" to region.name,
-                            "player" to player.name
+                            "region" to regionData.name,
+                            "player" to (player.name ?: "-"),
                         )
                     )
                 )

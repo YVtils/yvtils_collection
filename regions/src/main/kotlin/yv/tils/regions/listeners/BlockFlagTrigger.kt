@@ -12,8 +12,8 @@ import org.bukkit.event.Listener
 import yv.tils.regions.data.FlagType
 import yv.tils.regions.language.LangStrings
 import yv.tils.regions.listeners.custom.flags.BlockFlagTriggerEvent
+import yv.tils.regions.logic.FlagLogic
 import yv.tils.regions.logic.PlayerChecks
-import yv.tils.regions.logic.RegionLogic
 
 class BlockFlagTrigger: Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -27,7 +27,7 @@ class BlockFlagTrigger: Listener {
 
         val playerRole = PlayerChecks.regionRole(player, region)
 
-        if (RegionLogic.flagCheck(region, flagType, playerRole)) {
+        if (FlagLogic.flagCheck(region, flagType, playerRole)) {
             Logger.debug("Flag trigger event: ${e.flagType} for player ${e.player.name} in region ${e.region.name} is allowed")
             return
         } else {

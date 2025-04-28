@@ -28,11 +28,11 @@ class RegionManager {
 
             val rUUID = data.UUID.generateUUID()
 
-            val defaultGlobalFlags = mapOf(
+            val defaultGlobalFlags = mutableMapOf(
                 PVP to true,
             )
 
-            val defaultRoleBasedFlags = mapOf(
+            val defaultRoleBasedFlags = mutableMapOf(
                 PLACE to 3,
                 DESTROY to 3,
                 CONTAINER       to 3,
@@ -113,7 +113,7 @@ class RegionManager {
         fun getRegionByNameOrID(name: String): RegionData? {
             val uuid = try {
                 UUID.fromString(name)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 null
             }
 
@@ -215,37 +215,23 @@ class RegionManager {
     @Serializable
     data class RegionFlags(
         /**
-         * Map of global flags and their values.
+         * MutableMap of global flags and their values.
          * The key is the flag type and the value is a boolean indicating if the flag is set.
          *
          * @property FlagType The type of flag.
          * @property Boolean The value of the flag. If true, the action is allowed, if false, it is not.
          */
-        val global: Map<FlagType, Boolean>,
+        val global: MutableMap<FlagType, Boolean>,
         /**
-         * Map of role-based flags and their values.
+         * MutableMap of role-based flags and their values.
          * The key is the flag type,
          * and the value is an integer indicating the permission level required to set the flag.
          *
          * @property FlagType The type of flag.
          * @property Int The minimum permission level required setting the flag.
          */
-        val roleBased: Map<FlagType, Int>
+        val roleBased: MutableMap<FlagType, Int>
     )
-}
-
-@Serializable
-enum class RegionRoles(val permLevel: Int) {
-    OWNER(0),
-    MODERATOR(1),
-    MEMBER(2),
-    NONE(-1);
-
-    companion object {
-        fun fromString(role: String): RegionRoles {
-            return entries.firstOrNull { it.name.equals(role, ignoreCase = true) } ?: NONE
-        }
-    }
 }
 
 /**
@@ -262,5 +248,18 @@ enum class FlagType {
     CONTAINER,
     INTERACT,
     USE,
-    TELEPORT
+    TELEPORT;
+
+    companion object {
+        /**
+         * Get flag type from string.
+         * @param role The string representation of the flag type.
+         * @return The corresponding FlagType.
+         * @throws IllegalArgumentException if the string does not match any flag type.
+         */
+        fun fromString(role: String): FlagType {
+            return FlagType.entries.firstOrNull { it.name.equals(role, ignoreCase = true) }
+                ?: throw IllegalArgumentException("Invalid flag type: $role")
+        }
+    }
 }

@@ -33,10 +33,8 @@ enum class LangStrings(val key: String) {
     REGION_MEMBER_ADD_FAILED("command.regions.members.add.failed"),
     REGION_MEMBER_REMOVE_SUCCESS("command.regions.members.remove.success"),
     REGION_MEMBER_REMOVE_FAILED("command.regions.members.remove.failed"),
-    REGION_MEMBER_PROMOTE_SUCCESS("command.regions.members.promote.success"),
-    REGION_MEMBER_PROMOTE_FAILED("command.regions.members.promote.failed"),
-    REGION_MEMBER_DEMOTE_SUCCESS("command.regions.members.demote.success"),
-    REGION_MEMBER_DEMOTE_FAILED("command.regions.members.demote.failed"),
+    REGION_MEMBER_ROLE_SUCCESS("command.regions.members.role.success"),
+    REGION_MEMBER_ROLE_FAILED("command.regions.members.role.failed"),
 
     REGION_INFO_SUCCESS("command.regions.info.success"),
     REGION_INFO_FAIL_GENERIC("command.regions.info.fail.generic"),

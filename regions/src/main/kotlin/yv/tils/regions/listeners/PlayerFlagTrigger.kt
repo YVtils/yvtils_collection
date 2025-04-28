@@ -13,8 +13,8 @@ import yv.tils.regions.data.FlagType
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.language.LangStrings
 import yv.tils.regions.listeners.custom.flags.PlayerFlagTriggerEvent
+import yv.tils.regions.logic.FlagLogic
 import yv.tils.regions.logic.PlayerChecks
-import yv.tils.regions.logic.RegionLogic
 
 class PlayerFlagTrigger: Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -46,7 +46,7 @@ class PlayerFlagTrigger: Listener {
         }
 
         val playerRole = PlayerChecks.regionRole(player, region)
-        if (RegionLogic.flagCheck(region, flagType, playerRole)) {
+        if (FlagLogic.flagCheck(region, flagType, playerRole)) {
             Logger.debug("Flag trigger event: ${flagType} for player ${player.name} in region ${region.name} is allowed")
             return true
         } else {

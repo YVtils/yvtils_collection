@@ -1,11 +1,13 @@
 package yv.tils.regions.logic
 
 import language.LanguageHandler
-import logger.Logger
 import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.regions.data.*
+import yv.tils.regions.data.Permissions
+import yv.tils.regions.data.PlayerManager
+import yv.tils.regions.data.RegionManager
+import yv.tils.regions.data.RegionRoles
 import yv.tils.regions.language.LangStrings
 import java.util.*
 
@@ -32,34 +34,6 @@ class RegionLogic {
             }
 
             return null
-        }
-
-        fun flagCheck(region: RegionManager.RegionData, flag: FlagType, playerRole: RegionRoles): Boolean {
-            val globalFlag = region.flags.global[flag]
-            val roleBasedFlag = region.flags.roleBased[flag]
-
-            if (globalFlag != null) {
-                Logger.dev("Global flag: $globalFlag")
-                return globalFlag
-            }
-
-            if (roleBasedFlag != null) {
-                Logger.dev("Role based flag: $roleBasedFlag")
-                if (roleBasedFlag == RegionRoles.NONE.permLevel) {
-                    Logger.dev("Role based flag: $roleBasedFlag is NONE")
-                    return true
-                }
-
-                if (roleBasedFlag >= playerRole.permLevel && playerRole != RegionRoles.NONE) {
-                    Logger.dev("Role based flag: $roleBasedFlag is greater than or equal to player role: ${playerRole.permLevel}")
-                    return true
-                }
-
-                return false
-            }
-
-            return false
-
         }
     }
 

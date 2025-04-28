@@ -10,9 +10,11 @@ import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.common.other.AsyncActionAnnounce
+import yv.tils.regions.data.FlagType
 import yv.tils.regions.data.Permissions
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.data.RegionRoles
+import yv.tils.regions.logic.FlagLogic
 import yv.tils.regions.logic.InformationalLogic
 import yv.tils.regions.logic.MemberLogic
 import yv.tils.regions.logic.RegionLogic
@@ -26,9 +28,15 @@ class RegionCommand {
         withAliases("rg", "region", "claim")
         withUsage("/region <subcommand>")
 
+        /**
+         * Command to open the region management GUI.
+         * /region [manage]
+         */
         literalArgument("manage", true) {
-            // Default command if no subcommand is provided
-            // Opens GUI for management
+            playerExecutor { sender, _ ->
+                sender.sendMessage("Not implemented yet")
+                // TODO: Implement GUI
+            }
         }
 
         /**
@@ -42,8 +50,8 @@ class RegionCommand {
             withPermission(Permissions.REGION_CREATE.permission)
             withPermission(CommandPermission.NONE)
             textArgument("regionName", false) {
-                location2DArgument("corner1", LocationType.BLOCK_POSITION, false) {
-                    location2DArgument("corner2", LocationType.BLOCK_POSITION, false) {
+                location2DArgument("corner1", LocationType.BLOCK_POSITION) {
+                    location2DArgument("corner2", LocationType.BLOCK_POSITION) {
                         playerExecutor { player, args ->
                             val regionName = args["regionName"] as String
                             val corner1 = args["corner1"] as Location2D
@@ -223,6 +231,12 @@ class RegionCommand {
                 }
             }
 
+            /**
+             * Command to remove a member from a region.
+             * /region members remove <regionName> <player>
+             *     regionName: The name of the region. [String]
+             *     player: The player to remove. [Player]
+             */
             literalArgument("remove") {
                 withPermission(Permissions.REGION_MEMBER.permission)
                 withPermission(CommandPermission.NONE)
@@ -235,14 +249,6 @@ class RegionCommand {
                     asyncOfflinePlayerArgument("player", false) {
                         withPermission(Permissions.REGION_MEMBER_REMOVE.permission)
                         withPermission(CommandPermission.OP)
-                        replaceSuggestions(ArgumentSuggestions.strings { sender ->
-                                // TODO
-                            arrayOf(
-                                "player1",
-                                "player2",
-                                "player3",
-                            )
-                        })
 
                         anyExecutor { sender, args ->
                             val regionName = args["regionName"] as String
@@ -269,6 +275,160 @@ class RegionCommand {
                                 sender.sendMessage(rootCause?.message ?: "An error occurred")
                                 null
                             }
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Command to change the role of a member in a region.
+             * /region members role <regionName> <player> <role>
+             *     regionName: The name of the region. [String]
+             *     player: The player to change the role for. [Player]
+             *     role: The new role of the player. [RegionRoles]
+             */
+            literalArgument("role") {
+                withPermission(Permissions.REGION_MEMBER.permission)
+                withPermission(CommandPermission.NONE)
+
+                textArgument("regionName", false) {
+                    replaceSuggestions(ArgumentSuggestions.strings { sender ->
+                        getRegions(sender.sender, RegionRoles.MODERATOR)
+                    })
+
+                    asyncOfflinePlayerArgument("player", false) {
+                        withPermission(Permissions.REGION_MEMBER_ROLE.permission)
+                        withPermission(CommandPermission.OP)
+
+                        val literals = RegionRoles.entries.map { it.name }.toTypedArray()
+
+                        multiLiteralArgument("role", *literals, optional = true) {
+                            withPermission(Permissions.REGION_MEMBER_ROLE.permission)
+                            withPermission(CommandPermission.NONE)
+
+                            anyExecutor { sender, args ->
+                                val regionName = args["regionName"] as String
+                                val player = args["player"] as CompletableFuture<OfflinePlayer>
+                                val role = args["role"] as String?
+
+                                AsyncActionAnnounce.announceAction(sender)
+
+                                player.thenAccept { offlinePlayer ->
+                                    CoroutineHandler.launchTask(
+                                        suspend {
+                                            MemberLogic.changePlayerRoleInRegion(
+                                                regionName,
+                                                offlinePlayer,
+                                                sender,
+                                                role,
+                                            )
+                                        },
+                                        null,
+                                        isOnce = true,
+                                    )
+                                }.exceptionally { throwable ->
+                                    val cause = throwable.cause
+                                    val rootCause = if (cause is RuntimeException) cause.cause else cause
+
+                                    sender.sendMessage(rootCause?.message ?: "An error occurred")
+                                    null
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * Command to manage region flags.
+         * /region flags ...
+         */
+        literalArgument("flags", false) {
+            withPermission(Permissions.REGION_FLAGS.permission)
+            withPermission(CommandPermission.NONE)
+
+            val flags = FlagType.entries.map { it.name }.toTypedArray()
+
+            /**
+             * Command to manage global flags.
+             * /region flags global <flagType> <enabled> [regionName]
+             *     flagType: The type of flag. [FlagType]
+             *     enabled: Whether the flag is enabled or disabled. [Boolean]
+             *     regionName: The name of the region. [String]
+             */
+            multiLiteralArgument("global_flags", *flags) {
+                withPermission(Permissions.REGION_FLAGS_GLOBAL.permission)
+                withPermission(CommandPermission.NONE)
+
+                booleanArgument("enabled", false) {
+                    textArgument("regionName", true) {
+                        replaceSuggestions(ArgumentSuggestions.strings { sender ->
+                            getRegions(sender.sender, RegionRoles.MODERATOR)
+                        })
+
+                        anyExecutor { sender, args ->
+                            val flagType = args["global_flags"] as String
+                            val enabled = args["enabled"] as Boolean
+                            val regionName = args["regionName"] as String?
+
+                            CoroutineHandler.launchTask(
+                                suspend {
+                                    FlagLogic.changeFlag(sender,
+                                        regionName,
+                                        flagType,
+                                        enabled,
+                                        null,
+                                        )
+                                },
+                                null,
+                                isOnce = true,
+                            )
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Command to manage role-based flags.
+             * /region flags role <flagType> <role> [regionName]
+             *     flagType: The type of flag. [FlagType]
+             *     role: The role of the player. [RegionRoles]
+             *     regionName: The name of the region. [String]
+             */
+            multiLiteralArgument("role_flags", *flags) {
+                withPermission(Permissions.REGION_FLAGS_ROLE.permission)
+                withPermission(CommandPermission.NONE)
+
+                val literals = RegionRoles.entries.map { it.name }.toTypedArray()
+
+                multiLiteralArgument("role", *literals) {
+                    withPermission(Permissions.REGION_FLAGS.permission)
+                    withPermission(CommandPermission.NONE)
+
+                    textArgument("regionName", true) {
+                        replaceSuggestions(ArgumentSuggestions.strings { sender ->
+                            getRegions(sender.sender, RegionRoles.MODERATOR)
+                        })
+
+                        anyExecutor { sender, args ->
+                            val flagType = args["role_flags"] as String
+                            val role = args["role"] as String
+                            val regionName = args["regionName"] as String?
+
+                            CoroutineHandler.launchTask(
+                                suspend {
+                                    FlagLogic.changeFlag(
+                                        sender,
+                                        regionName,
+                                        flagType,
+                                        null,
+                                        RegionRoles.valueOf(role),
+                                    )
+                                },
+                                null,
+                                isOnce = true,
+                            )
                         }
                     }
                 }

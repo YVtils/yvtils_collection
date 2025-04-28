@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -34,6 +35,11 @@ subprojects {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+    }
+
+    val compileKotlin: KotlinCompile by tasks
+    compileKotlin.compilerOptions {
+        languageVersion.set(KotlinVersion.KOTLIN_2_2)
     }
 
     group = "yv.tils"

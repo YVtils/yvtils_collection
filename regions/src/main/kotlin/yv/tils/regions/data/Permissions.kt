@@ -11,4 +11,7 @@ enum class Permissions(val permission: String) {
     REGION_MEMBER_ROLE("yvtils.command.regions.members.role"),
     REGION_MEMBER_ADD("yvtils.command.regions.members.add"),
     REGION_MEMBER_REMOVE("yvtils.command.regions.members.remove"),
+    REGION_FLAGS("yvtils.command.regions.flags.generic"),
+    REGION_FLAGS_GLOBAL("yvtils.command.regions.flags.global"),
+    REGION_FLAGS_ROLE("yvtils.command.regions.flags.role"),
 }

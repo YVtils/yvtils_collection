@@ -25,9 +25,19 @@ class PlayerSaveFile {
 
         for (save in saveList) {
             Logger.debug("Loading save: $save")
-            val playerStr = save.jsonObject["player"]?.jsonPrimitive?.content ?: continue
-            val regionStr = save.jsonObject["region"]?.jsonPrimitive?.content ?: continue
-            val roleStr = save.jsonObject["role"]?.jsonPrimitive?.content ?: continue
+            val playerStr = save.jsonObject["uuid"]?.jsonPrimitive?.content ?: run {
+                Logger.debug("Player UUID is empty, skipping.")
+                continue
+            }
+
+            val regionStr = save.jsonObject["region"]?.jsonPrimitive?.content ?: run {
+                Logger.debug("Region UUID is empty, skipping.")
+                continue
+            }
+            val roleStr = save.jsonObject["role"]?.jsonPrimitive?.content ?: run {
+                Logger.debug("Role is empty, skipping.")
+                continue
+            }
 
             try {
                 val region = PlayerManager.PlayerRegion(

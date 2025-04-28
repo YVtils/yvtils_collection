@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import logger.Logger
 import org.bukkit.OfflinePlayer
 import player.PlayerUtils
+import yv.tils.regions.configs.PlayerSaveFile
 import yv.tils.regions.data.RegionManager.Companion.regions
 import java.util.*
 
@@ -125,11 +126,20 @@ class PlayerManager {
                 region = region.id,
                 role = role
             )
-            loadPlayer(player.uniqueId, UUID.fromString(region.id), playerRegion)
+
+            PlayerSaveFile().updatePlayerSetting(
+                player.uniqueId,
+                UUID.fromString(region.id),
+                playerRegion
+            )
         }
 
         fun removePlayerFromRegion(player: OfflinePlayer, region: RegionManager.RegionData) {
-            loadPlayer(player.uniqueId, UUID.fromString(region.id), null)
+            PlayerSaveFile().updatePlayerSetting(
+                player.uniqueId,
+                UUID.fromString(region.id),
+                null
+            )
         }
 
         fun changeRoleInRegion(player: OfflinePlayer, region: RegionManager.RegionData, role: RegionRoles) {
@@ -138,7 +148,11 @@ class PlayerManager {
                 region = region.id,
                 role = role
             )
-            loadPlayer(player.uniqueId, UUID.fromString(region.id), playerRegion)
+            PlayerSaveFile().updatePlayerSetting(
+                player.uniqueId,
+                UUID.fromString(region.id),
+                playerRegion
+            )
         }
 
         val players = mutableMapOf<UUID, MutableMap<UUID, PlayerRegion>>()
@@ -150,4 +164,18 @@ class PlayerManager {
         val region: String,
         val role: RegionRoles,
     )
+}
+
+@Serializable
+enum class RegionRoles(val permLevel: Int) {
+    OWNER(0),
+    MODERATOR(1),
+    MEMBER(2),
+    NONE(-1);
+
+    companion object {
+        fun fromString(role: String): RegionRoles {
+            return entries.firstOrNull { it.name.equals(role, ignoreCase = true) } ?: NONE
+        }
+    }
 }
