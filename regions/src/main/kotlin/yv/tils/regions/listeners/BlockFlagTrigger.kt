@@ -9,7 +9,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import yv.tils.regions.data.FlagType
+import yv.tils.regions.data.Flag
 import yv.tils.regions.language.LangStrings
 import yv.tils.regions.listeners.custom.flags.BlockFlagTriggerEvent
 import yv.tils.regions.logic.FlagLogic
@@ -18,32 +18,32 @@ import yv.tils.regions.logic.PlayerChecks
 class BlockFlagTrigger: Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     fun onEvent(e: BlockFlagTriggerEvent) {
-        Logger.debug("Flag trigger event: ${e.flagType} for player ${e.player.name} in region ${e.region.name}")
+        Logger.debug("Flag trigger event: ${e.flag} for player ${e.player.name} in region ${e.region.name}")
         val player = e.player
         val region = e.region
-        val flagType = e.flagType
+        val flagType = e.flag
 
         val loc = e.block.location
 
         val playerRole = PlayerChecks.regionRole(player, region)
 
         if (FlagLogic.flagCheck(region, flagType, playerRole)) {
-            Logger.debug("Flag trigger event: ${e.flagType} for player ${e.player.name} in region ${e.region.name} is allowed")
+            Logger.debug("Flag trigger event: ${e.flag} for player ${e.player.name} in region ${e.region.name} is allowed")
             return
         } else {
-            Logger.debug("Flag trigger event: ${e.flagType} for player ${e.player.name} in region ${e.region.name} is denied")
+            Logger.debug("Flag trigger event: ${e.flag} for player ${e.player.name} in region ${e.region.name} is denied")
             e.isCancelled = true
             displayFeedback(player, loc, flagType)
             return
         }
     }
 
-    private fun displayFeedback(player: Player, loc: Location, flag: FlagType) {
+    private fun displayFeedback(player: Player, loc: Location, flag: Flag) {
         val visualFeedbackFlags = mutableListOf(
-            FlagType.DESTROY,
-            FlagType.PLACE,
-            FlagType.INTERACT,
-            FlagType.USE,
+            Flag.DESTROY,
+            Flag.PLACE,
+            Flag.INTERACT,
+            Flag.USE,
         )
 
         if (flag in visualFeedbackFlags) {

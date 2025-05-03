@@ -9,7 +9,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import yv.tils.regions.data.FlagType
+import yv.tils.regions.data.Flag
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.language.LangStrings
 import yv.tils.regions.listeners.custom.flags.PlayerFlagTriggerEvent
@@ -19,48 +19,48 @@ import yv.tils.regions.logic.PlayerChecks
 class PlayerFlagTrigger: Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     fun onEvent(e: PlayerFlagTriggerEvent) {
-        Logger.debug("Flag trigger event: ${e.flagType} for player ${e.player.name} in region ${e.playerRegion?.name} to region ${e.targetRegion?.name}")
+        Logger.debug("Flag trigger event: ${e.flag} for player ${e.player.name} in region ${e.playerRegion?.name} to region ${e.targetRegion?.name}")
         val player = e.player
         val playerRegion = e.playerRegion
         val targetRegion = e.targetRegion
-        val flagType = e.flagType
+        val flagType = e.flag
 
         val playerFlag = eventLogic(player, playerRegion, flagType)
         val targetFlag = eventLogic(player, targetRegion, flagType)
 
         if (playerFlag && targetFlag) {
-            Logger.debug("Flag trigger event: ${e.flagType} for player ${e.player.name} in region ${e.playerRegion?.name} to region ${e.targetRegion?.name} is allowed")
+            Logger.debug("Flag trigger event: ${e.flag} for player ${e.player.name} in region ${e.playerRegion?.name} to region ${e.targetRegion?.name} is allowed")
             return
         } else {
-            Logger.debug("Flag trigger event: ${e.flagType} for player ${e.player.name} in region ${e.playerRegion?.name} to region ${e.targetRegion?.name} is denied")
+            Logger.debug("Flag trigger event: ${e.flag} for player ${e.player.name} in region ${e.playerRegion?.name} to region ${e.targetRegion?.name} is denied")
             e.isCancelled = true
             displayFeedback(player, player.location, flagType)
             return
         }
     }
 
-    private fun eventLogic(player: Player, region: RegionManager.RegionData?, flagType: FlagType): Boolean {
+    private fun eventLogic(player: Player, region: RegionManager.RegionData?, flag: Flag): Boolean {
         if (region == null) {
-            Logger.debug("Flag trigger event: ${flagType} for player ${player.name} in region is null")
+            Logger.debug("Flag trigger event: ${flag} for player ${player.name} in region is null")
             return true
         }
 
         val playerRole = PlayerChecks.regionRole(player, region)
-        if (FlagLogic.flagCheck(region, flagType, playerRole)) {
-            Logger.debug("Flag trigger event: ${flagType} for player ${player.name} in region ${region.name} is allowed")
+        if (FlagLogic.flagCheck(region, flag, playerRole)) {
+            Logger.debug("Flag trigger event: ${flag} for player ${player.name} in region ${region.name} is allowed")
             return true
         } else {
-            Logger.debug("Flag trigger event: ${flagType} for player ${player.name} in region ${region.name} is denied")
+            Logger.debug("Flag trigger event: ${flag} for player ${player.name} in region ${region.name} is denied")
             return false
         }
     }
 
-    private fun displayFeedback(player: Player, loc: Location, flag: FlagType) {
+    private fun displayFeedback(player: Player, loc: Location, flag: Flag) {
         val visualFeedbackFlags = mutableListOf(
-            FlagType.DESTROY,
-            FlagType.PLACE,
-            FlagType.INTERACT,
-            FlagType.USE,
+            Flag.DESTROY,
+            Flag.PLACE,
+            Flag.INTERACT,
+            Flag.USE,
         )
 
         if (flag in visualFeedbackFlags) {

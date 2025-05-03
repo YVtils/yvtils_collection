@@ -10,7 +10,7 @@ import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.common.other.AsyncActionAnnounce
-import yv.tils.regions.data.FlagType
+import yv.tils.regions.data.Flag
 import yv.tils.regions.data.Permissions
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.data.RegionRoles
@@ -348,7 +348,7 @@ class RegionCommand {
             withPermission(Permissions.REGION_FLAGS.permission)
             withPermission(CommandPermission.NONE)
 
-            val flags = FlagType.entries.map { it.name }.toTypedArray()
+            val flags = Flag.entries.map { it.name }.toTypedArray()
 
             /**
              * Command to manage global flags.

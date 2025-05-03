@@ -5,7 +5,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import yv.tils.regions.data.FlagType
+import yv.tils.regions.data.Flag
 import yv.tils.regions.listeners.custom.flags.PlayerFlagTriggerEvent
 import yv.tils.regions.logic.RegionLogic
 
@@ -26,7 +26,7 @@ class EntityDamageByEntity: Listener {
 
         if (region == null && targetRegion == null) return
 
-        val flagTrigger = PlayerFlagTriggerEvent(player, target, region, targetRegion, FlagType.PVP)
+        val flagTrigger = PlayerFlagTriggerEvent(player, target, region, targetRegion, Flag.PVP)
         flagTrigger.callEvent()
         if (flagTrigger.isCancelled) {
             e.isCancelled = true

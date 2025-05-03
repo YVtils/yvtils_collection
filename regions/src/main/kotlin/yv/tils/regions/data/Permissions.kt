@@ -14,4 +14,5 @@ enum class Permissions(val permission: String) {
     REGION_FLAGS("yvtils.command.regions.flags.generic"),
     REGION_FLAGS_GLOBAL("yvtils.command.regions.flags.global"),
     REGION_FLAGS_ROLE("yvtils.command.regions.flags.role"),
+    REGION_FLAGS_LOCKED("yvtils.command.regions.flags.locked"),
 }

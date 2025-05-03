@@ -8,7 +8,6 @@ import org.bukkit.World
 import org.bukkit.entity.Player
 import yv.tils.regions.configs.PlayerSaveFile
 import yv.tils.regions.configs.RegionSaveFile
-import yv.tils.regions.data.FlagType.*
 import yv.tils.regions.data.PlayerManager.Companion.players
 import java.util.*
 
@@ -28,18 +27,35 @@ class RegionManager {
 
             val rUUID = data.UUID.generateUUID()
 
-            val defaultGlobalFlags = mutableMapOf(
-                PVP to true,
-            )
+            val defaultGlobalFlags: MutableMap<Flag, Boolean> = mutableMapOf()
+            val defaultRoleBasedFlags: MutableMap<Flag, Int> = mutableMapOf()
+            val defaultLockedGlobalFlags: MutableMap<Flag, Boolean> = mutableMapOf()
+            val defaultLockedRoleBasedFlags: MutableMap<Flag, Int> = mutableMapOf()
 
-            val defaultRoleBasedFlags = mutableMapOf(
-                PLACE to 3,
-                DESTROY to 3,
-                CONTAINER       to 3,
-                INTERACT        to 3,
-                USE             to 3,
-                TELEPORT        to 3
-            )
+            val flags = FlagManager.flagEntryList
+            for (flag in flags) {
+                val flagType = flag.value.type
+
+                when (flagType) {
+                    FlagType.GLOBAL -> {
+                        defaultGlobalFlags[flag.key] = flag.value.value as Boolean
+                    }
+                    FlagType.ROLE_BASED -> {
+                        val role = RegionRoles.fromString(flag.value.value as String)
+
+                        defaultRoleBasedFlags[flag.key] = role.permLevel
+                    }
+                    FlagType.LOCKED_GLOBAL -> {
+                        defaultLockedGlobalFlags[flag.key] = flag.value.value as Boolean
+                    }
+                    FlagType.LOCKED_ROLE_BASED -> {
+                        val role = RegionRoles.fromString(flag.value.value as String)
+
+                        defaultLockedRoleBasedFlags[flag.key] = role.permLevel
+                    }
+                }
+            }
+
 
             val regionData = RegionData(
                 id = rUUID.toString(),
@@ -50,9 +66,11 @@ class RegionManager {
                 x2 = x2,
                 z2 = z2,
                 created = System.currentTimeMillis(),
-                flags = RegionFlags(
+                flags = FlagManager.RegionFlags(
                     global = defaultGlobalFlags,
-                    roleBased = defaultRoleBasedFlags
+                    roleBased = defaultRoleBasedFlags,
+                    lockedGlobal = defaultLockedGlobalFlags,
+                    lockedRoleBased = defaultLockedRoleBasedFlags
                 )
             )
 
@@ -201,65 +219,6 @@ class RegionManager {
         val x2: Int,
         val z2: Int,
         val created: Long,
-        val flags: RegionFlags,
+        var flags: FlagManager.RegionFlags,
     )
-
-
-
-    /**
-     * Data class representing the flags for a region.
-     *
-     * @property global A map of global flags and their values.
-     * @property roleBased A map of role-based flags and their values.
-     */
-    @Serializable
-    data class RegionFlags(
-        /**
-         * MutableMap of global flags and their values.
-         * The key is the flag type and the value is a boolean indicating if the flag is set.
-         *
-         * @property FlagType The type of flag.
-         * @property Boolean The value of the flag. If true, the action is allowed, if false, it is not.
-         */
-        val global: MutableMap<FlagType, Boolean>,
-        /**
-         * MutableMap of role-based flags and their values.
-         * The key is the flag type,
-         * and the value is an integer indicating the permission level required to set the flag.
-         *
-         * @property FlagType The type of flag.
-         * @property Int The minimum permission level required setting the flag.
-         */
-        val roleBased: MutableMap<FlagType, Int>
-    )
-}
-
-/**
- * Enum class representing the different types of flags that can be set in a region.
- *
- * @property PVP Flag for player vs player combat.
- * @property PLACE Flag for building in the region.
- *
- */
-enum class FlagType {
-    PVP,
-    PLACE,
-    DESTROY,
-    CONTAINER,
-    INTERACT,
-    USE,
-    TELEPORT;
-
-    companion object {
-        /**
-         * Get flag type from string.
-         * @param role The string representation of the flag type.
-         * @return The corresponding FlagType.
-         * @throws IllegalArgumentException if the string does not match any flag type.
-         */
-        fun fromString(role: String): FlagType {
-            return FlagType.entries.firstOrNull { it.name.equals(role, ignoreCase = true) }
-                ?: throw IllegalArgumentException("Invalid flag type: $role")
-        }
-    }
 }

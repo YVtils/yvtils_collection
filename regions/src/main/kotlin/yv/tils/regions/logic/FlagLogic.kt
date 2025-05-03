@@ -4,10 +4,9 @@ import logger.Logger
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.regions.configs.RegionSaveFile
-import yv.tils.regions.data.FlagType
-import yv.tils.regions.data.RegionManager
-import yv.tils.regions.data.RegionRoles
+import yv.tils.regions.data.*
 import java.util.*
+import javax.naming.NoPermissionException
 
 class FlagLogic {
     companion object {
@@ -15,7 +14,13 @@ class FlagLogic {
 
         }
 
-        fun changeFlag(sender: CommandSender, region: String?, flagType: String, value: Boolean? = null, role: RegionRoles? = null) {
+        fun changeFlag(
+            sender: CommandSender,
+            region: String?,
+            flagType: String,
+            value: Boolean? = null,
+            role: RegionRoles? = null
+        ) {
             if ((value == null && role == null) || (value != null && role != null)) {
                 // TODO
                 Logger.dev("Invalid flag change request: $value, $role")
@@ -42,10 +47,10 @@ class FlagLogic {
                 }
             }
 
-            val flag: FlagType
+            val flag: Flag
 
             try {
-                flag = FlagType.fromString(flagType.uppercase())
+                flag = Flag.fromString(flagType.uppercase())
             } catch (_: IllegalArgumentException) {
                 // TODO
                 Logger.dev("Invalid flag type: $flagType")
@@ -54,24 +59,21 @@ class FlagLogic {
 
             val regionFlags = regionData.flags
 
-            if (value != null) {
-                regionFlags.global[flag] = value
+            try {
+                val isSuccessful = FlagManager.setFlagEntry(flag, value ?: role!!, regionData, sender)
+                if (!isSuccessful) {
+                    // TODO
+                    Logger.dev("Failed to set flag $flag for region ${regionData.name}")
+                    return
+                }
+            } catch (_: NoPermissionException) {
+                // TODO
+                Logger.dev("Sender ${sender.name} does not have permission to set flag $flag")
+                return
             }
-
-            if (role != null) {
-                regionFlags.roleBased[flag] = role.permLevel
-            }
-
-            Logger.debug("Changed flag $flag to $value for region ${regionData.name} with role $role")
-            // TODO
-
-            RegionSaveFile().updateRegionSetting(
-                UUID.fromString(regionData.id),
-                regionData
-            )
         }
 
-        fun flagCheck(region: RegionManager.RegionData, flag: FlagType, playerRole: RegionRoles): Boolean {
+        fun flagCheck(region: RegionManager.RegionData, flag: Flag, playerRole: RegionRoles): Boolean {
             val globalFlag = region.flags.global[flag]
             val roleBasedFlag = region.flags.roleBased[flag]
 
@@ -97,5 +99,14 @@ class FlagLogic {
 
             return false
         }
+    }
+
+    /**
+     * Returns if flag is global or role based.
+     * @param flag The flag to check.
+     * @return The flag type.
+     */
+    fun getFlagType(flag: Flag): FlagType? {
+        return FlagManager.flagEntryList[flag]?.type
     }
 }

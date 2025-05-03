@@ -5,7 +5,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
-import yv.tils.regions.data.FlagType
+import yv.tils.regions.data.Flag
 import yv.tils.regions.data.RegionManager
 
 /**
@@ -14,9 +14,9 @@ import yv.tils.regions.data.RegionManager
  * @param player The player who triggered the flag.
  * @param block The block that triggered the flag.
  * @param region The region where the flag was triggered.
- * @param flagType The type of flag that was triggered.
+ * @param flag The type of flag that was triggered.
  */
-class BlockFlagTriggerEvent(val player: Player, val block: Block, val region: RegionManager.RegionData, val flagType: FlagType): Event(), Cancellable {
+class BlockFlagTriggerEvent(val player: Player, val block: Block, val region: RegionManager.RegionData, val flag: Flag): Event(), Cancellable {
     companion object {
         private val HANDLERS = HandlerList()
 

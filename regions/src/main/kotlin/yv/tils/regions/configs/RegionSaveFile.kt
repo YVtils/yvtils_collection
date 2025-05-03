@@ -6,7 +6,8 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import logger.Logger
-import yv.tils.regions.data.FlagType
+import yv.tils.regions.data.Flag
+import yv.tils.regions.data.FlagManager
 import yv.tils.regions.data.RegionManager
 import java.util.*
 
@@ -39,14 +40,14 @@ class RegionSaveFile {
                 val globalFlags = flags["global"]?.jsonObject ?: continue
                 val roleBasedFlags = flags["roleBased"]?.jsonObject ?: continue
 
-                val global = mutableMapOf<FlagType, Boolean>()
-                val roleBased = mutableMapOf<FlagType, Int>()
+                val global = mutableMapOf<Flag, Boolean>()
+                val roleBased = mutableMapOf<Flag, Int>()
                 for (flag in globalFlags) {
-                    val flagKey = FlagType.valueOf(flag.key)
+                    val flagKey = Flag.valueOf(flag.key)
                     global[flagKey] = flag.value.jsonPrimitive.content.toBoolean()
                 }
                 for (flag in roleBasedFlags) {
-                    val flagKey = FlagType.valueOf(flag.key)
+                    val flagKey = Flag.valueOf(flag.key)
                     roleBased[flagKey] = flag.value.jsonPrimitive.content.toInt()
                 }
 
@@ -59,7 +60,7 @@ class RegionSaveFile {
                     x2 = x2,
                     z2 = z2,
                     created = created,
-                    flags = RegionManager.RegionFlags(
+                    flags = FlagManager.RegionFlags(
                         global = global,
                         roleBased = roleBased
                     )
