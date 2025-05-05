@@ -12,8 +12,10 @@ class LanguageHandler {
         val playerLang = mutableMapOf<UUID, Locale>()
         private var serverDefaultLang: Locale = Locale.ENGLISH
 
-        fun getMessage(key: String, uuid: UUID? = null): Component =
-            MessageUtils.convert(getString(key, getLocale(uuid)))
+        fun getMessage(key: String, uuid: UUID? = null): Component {
+            val message = getString(key, getLocale(uuid))
+            return MessageUtils.replacer(message, mapOf())
+        }
 
         fun getMessage(key: String, sender: CommandSender): Component =
             if (sender is Player) {
@@ -24,6 +26,11 @@ class LanguageHandler {
 
         fun getMessage(key: String, uuid: UUID? = null, params: Map<String, Any>): Component {
             val message = getString(key, getLocale(uuid))
+            return MessageUtils.replacer(message, params)
+        }
+
+        fun getMessage(key: String, params: Map<String, Any>): Component {
+            val message = getString(key, serverDefaultLang)
             return MessageUtils.replacer(message, params)
         }
 

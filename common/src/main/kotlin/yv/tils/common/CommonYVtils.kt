@@ -2,12 +2,12 @@ package yv.tils.common
 
 import coroutine.CoroutineHandler
 import data.Data
-import data.Data.Companion.yvtilsVersion
 import language.Language
 import language.LanguageHandler
 import logger.Logger
 import message.MessageUtils
 import net.kyori.adventure.text.Component
+import yv.tils.common.config.ConfigFile
 import yv.tils.common.language.LoadPlayerLanguage
 import yv.tils.common.language.RegisterStrings
 import yv.tils.common.listeners.PlayerLocaleChange
@@ -20,6 +20,7 @@ class CommonYVtils : Data.YVtilsModule {
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
+        ConfigFile().registerStrings()
     }
 
     override fun enablePlugin() {
@@ -38,6 +39,10 @@ class CommonYVtils : Data.YVtilsModule {
 
         registerListeners()
         registerCoroutines()
+
+        loadConfigs()
+
+        PluginVersion().launchVersionCheck()
     }
 
     override fun disablePlugin() {
@@ -49,11 +54,21 @@ class CommonYVtils : Data.YVtilsModule {
         log.forEach { Logger.log(Logger.Companion.Level.INFO, it) }
     }
 
+    private fun loadConfigs() {
+        ConfigFile().loadConfig()
+
+        Logger.setDebugMode(
+            ConfigFile.getValueAsBoolean("debug.active") ?: false,
+            ConfigFile.getValueAsInt("debug.level") ?: 3
+        )
+    }
+
     private fun registerListeners() {
         val plugin = Data.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(PlayerLocaleChange(), plugin)
+        pm.registerEvents(PlayerJoin(), plugin)
     }
 
     private fun registerCoroutines() {
@@ -71,8 +86,12 @@ class CommonYVtils : Data.YVtilsModule {
 
         log.add(MessageUtils.convert(border))
 
-        val message = "YVtils Collection v$yvtilsVersion"
-        val secondMessage = "https://yvtils.net"
+        val hardMessages = listOf(
+            "YVtils Collection v$yvtilsVersion",
+            ">>> ${Data.pluginName} <<<",
+            "https://yvtils.net",
+        )
+
         val prefix = "|"
         val suffix = "|"
 
@@ -83,10 +102,10 @@ class CommonYVtils : Data.YVtilsModule {
             return " ".repeat(leftPadding) to " ".repeat(rightPadding)
         }
 
-        val (paddingLeft, paddingRight) = getPadding(message)
-        log.add(MessageUtils.convert("$prefix$paddingLeft$message$paddingRight$suffix"))
-        val (secondPaddingLeft, secondPaddingRight) = getPadding(secondMessage)
-        log.add(MessageUtils.convert("$prefix$secondPaddingLeft$secondMessage$secondPaddingRight$suffix"))
+        hardMessages.forEach { hardMessage ->
+            val (paddingLeft, paddingRight) = getPadding(hardMessage)
+            log.add(MessageUtils.convert("$prefix$paddingLeft$hardMessage$paddingRight$suffix"))
+        }
 
         log.add(MessageUtils.convert(border))
 

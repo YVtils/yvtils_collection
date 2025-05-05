@@ -7,9 +7,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 class Logger {
     companion object {
         var logger: ComponentLogger? = null
-        private var debugMode = true
-        private var debugLevel = 3
-
+        private var debugMode = false
+        private var debugLevel = 0
 
         fun setDebugMode(enabled: Boolean, level: Int) {
             debugMode = enabled

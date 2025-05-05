@@ -22,6 +22,38 @@ class RegisterStrings {
         )
 
         registerNewString(
+            LangStrings.PLUGIN_VERSION_UP_TO_DATE,
+            mapOf(
+                FileTypes.EN to "<prefix> <white>You are using the latest version of the plugin.",
+                FileTypes.DE to "<prefix> <white>Du verwendest bereits die neueste Plugin-Version."
+            )
+        )
+
+        registerNewString(
+            LangStrings.PLUGIN_VERSION_OUTDATED_PATCH,
+            mapOf(
+                FileTypes.EN to "<prefix> <yellow>A patch update is available! <newline><white>Current version: <gray><oldVersion><newline><white>Latest version: <gray><newVersion><newline><white>Download: <gray><link>",
+                FileTypes.DE to "<prefix> <yellow>Ein Patch-Update ist verfügbar! <newline><white>Aktuelle Version: <gray><oldVersion><newline><white>Neueste Version: <gray><newVersion><newline><white>Download: <gray><link>"
+            )
+        )
+
+        registerNewString(
+            LangStrings.PLUGIN_VERSION_OUTDATED_MINOR,
+            mapOf(
+                FileTypes.EN to "<prefix> <#FF8349>A new minor version is available! <newline><white>Current version: <gray><oldVersion><newline><white>Latest version: <gray><newVersion><newline><white>Download: <gray><link>",
+                FileTypes.DE to "<prefix> <#FF8349>Eine neue Minor-Version ist verfügbar! <newline><white>Aktuelle Version: <gray><oldVersion><newline><white>Neueste Version: <gray><newVersion><newline><white>Download: <gray><link>"
+            )
+        )
+
+        registerNewString(
+            LangStrings.PLUGIN_VERSION_OUTDATED_MAJOR,
+            mapOf(
+                FileTypes.EN to "<prefix> <red>A new major version is available! <newline><white>Current version: <gray><oldVersion><newline><white>Latest version: <gray><newVersion><newline><white>Download: <gray><link>",
+                FileTypes.DE to "<prefix> <red>Eine neue Major-Version ist verfügbar! <newline><white>Aktuelle Version: <gray><oldVersion><newline><white>Neueste Version: <gray><newVersion><newline><white>Download: <gray><link>"
+            )
+        )
+
+        registerNewString(
             LangStrings.TEXT_COPY,
             mapOf(
                 FileTypes.EN to "<gray>Click to copy!",
@@ -84,6 +116,10 @@ class RegisterStrings {
 enum class LangStrings(val key: String) {
     PLUGIN_START("plugin.action.start"),
     PLUGIN_STOP("plugin.action.stop"),
+    PLUGIN_VERSION_UP_TO_DATE("plugin.version.upToDate"),
+    PLUGIN_VERSION_OUTDATED_PATCH("plugin.version.outdated.patch"),
+    PLUGIN_VERSION_OUTDATED_MINOR("plugin.version.outdated.minor"),
+    PLUGIN_VERSION_OUTDATED_MAJOR("plugin.version.outdated.major"),
     TEXT_COPY("text.action.copy"),
     COMMAND_MISSING_PLAYER("command.missing.player"),
     COMMAND_EXECUTOR_NOT_PLAYER("command.executor.notPlayer"),

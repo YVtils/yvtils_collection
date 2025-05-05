@@ -1,87 +1,173 @@
 package yv.tils.common.updateChecker
 
-import kotlinx.coroutines.*
+import coroutine.CoroutineHandler
+import data.Data
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import yv.tils.common.language.LangStrings
 import java.net.HttpURLConnection
 import java.net.URI
 
 class PluginVersion {
     companion object {
-        var cloudVersion = "x.x.x"
-        var serverVersion = "x.x.x"
+        var cloudVersion: String? = null
+        var serverVersion: String? = null
         var versionState = VersionState.UNKNOWN
+
+        var moderatorMessageKeyOnJoin: LangStrings? = null
+        var firstBroadcast = true
     }
 
-    private val scope = CoroutineScope(Dispatchers.Default)
-
     fun launchVersionCheck() {
-        if (false) { // TODO
+        if (ConfigFile.getValueAsBoolean("updateCheck.enabled") != true) {
             return
         }
 
-        scope.launch {
-            asyncVersionCheck()
+        CoroutineHandler.launchTask(
+            suspend {
+                checkForUpdates()
+            },
+            "yvtils-update-check",
+            afterDelay = 60 * 1000 * 60
+        )
+    }
+
+    private fun checkForUpdates() {
+        val latestVersion = getLatestVersion(Data.pluginShortName)
+        if (latestVersion == null) {
+            Logger.warn("Failed to fetch latest plugin version from API.")
+            return
+        }
+
+        val currentVersion = getPluginVersion()
+        if (currentVersion == null) {
+            Logger.warn("Failed to fetch current plugin version.")
+            return
+        }
+
+        versionState = compareVersions(latestVersion, currentVersion)
+
+        when (versionState) {
+            VersionState.UP_TO_DATE -> {
+                if (!firstBroadcast) {
+                    return
+                }
+
+                Logger.info(
+                    LanguageHandler.getMessage(
+                        LangStrings.PLUGIN_VERSION_UP_TO_DATE.key
+                    )
+                )
+
+                moderatorMessageKeyOnJoin = null
+            }
+            VersionState.OUTDATED_PATCH -> {
+                Logger.warn(
+                    LanguageHandler.getMessage(
+                        LangStrings.PLUGIN_VERSION_OUTDATED_PATCH.key,
+                        mapOf(
+                            "oldVersion" to currentVersion,
+                            "newVersion" to latestVersion,
+                            "link" to Data.pluginURL,
+                        )
+                    )
+                )
+
+                moderatorMessageKeyOnJoin = LangStrings.PLUGIN_VERSION_OUTDATED_PATCH
+            }
+            VersionState.OUTDATED_MINOR -> {
+                Logger.warn(
+                    LanguageHandler.getMessage(
+                        LangStrings.PLUGIN_VERSION_OUTDATED_MINOR.key,
+                        mapOf(
+                            "oldVersion" to currentVersion,
+                            "newVersion" to latestVersion,
+                            "link" to Data.pluginURL,
+                        )
+                    )
+                )
+
+                moderatorMessageKeyOnJoin = LangStrings.PLUGIN_VERSION_OUTDATED_MINOR
+            }
+            VersionState.OUTDATED_MAJOR -> {
+                Logger.warn(
+                    LanguageHandler.getMessage(
+                        LangStrings.PLUGIN_VERSION_OUTDATED_MAJOR.key,
+                        mapOf(
+                            "oldVersion" to currentVersion,
+                            "newVersion" to latestVersion,
+                            "link" to Data.pluginURL,
+                        )
+                    )
+                )
+
+                moderatorMessageKeyOnJoin = LangStrings.PLUGIN_VERSION_OUTDATED_MAJOR
+            }
+            VersionState.UNKNOWN -> {
+                Logger.error("Failed to compare plugin versions. One of the versions is unknown.")
+
+                moderatorMessageKeyOnJoin = null
+            }
         }
     }
 
-    private suspend fun asyncVersionCheck() {
-        while (true) {
-
-            delay(60 * 60 * 1000) // 1 hour
-        }
-    }
-
-    private fun getNewestVersion(pluginName: String? = null): String {
+    private fun getLatestVersion(pluginName: String? = null): String? {
         if (pluginName == null) {
-            return "x.x.x"
+            return null
         }
 
-        val url = "https://api.yvtils.net/plugins/version?plugin=$pluginName"
+        val url = "https://api.yvtils.net/versions/$pluginName"
 
-        val connection = URI(url).toURL().openConnection() as HttpURLConnection
-        connection.requestMethod = "GET"
+        try {
+            val connection = URI(url).toURL().openConnection() as HttpURLConnection
 
-        val response = connection.inputStream.bufferedReader().use { it.readText() }
-        val responseCode = connection.responseCode
-        connection.disconnect()
+            connection.requestMethod = "GET"
 
-        if (responseCode != 200) {
-            return "x.x.x"
+            val responseCode = connection.responseCode
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                val reader = BufferedReader(InputStreamReader(connection.inputStream))
+                val response = StringBuilder()
+                var line: String?
+                while (reader.readLine().also { line = it } != null) {
+                    response.append(line)
+                }
+                reader.close()
+                val json = Json { ignoreUnknownKeys = true }
+                val versionData = json.decodeFromString<VersionData>(response.toString())
+                cloudVersion = versionData.version
+                return versionData.version
+            } else {
+                Logger.debug("Failed to fetch data from API (URL: $url). Response code: $responseCode")
+                return null
+            }
+        } catch (e: Exception) {
+            Logger.debug("Error while fetching plugin version: ${e.message}")
+            return null
         }
-
-        val json = Json { ignoreUnknownKeys = true }
-        val parsedResponse = json.decodeFromString<VersionData>(response)
-
-        return "x.x.x"
     }
 
-    private fun getPluginVersion(): String {
-        return "x.x.x"
+    private fun getPluginVersion(): String? {
+        val version = Data.yvtilsVersion
+
+        if (version == "") {
+            return null
+        }
+
+        serverVersion = version
+        return version
     }
 
     private fun compareVersions(cloudVersion: String, serverVersion: String): VersionState {
-        val splitCloud = cloudVersion.split(".")
-        val splitServer = serverVersion.split(".")
+        val cloud = SemVer.parse(cloudVersion) ?: return VersionState.UNKNOWN
+        val server = SemVer.parse(serverVersion) ?: return VersionState.UNKNOWN
 
-        for (bit in splitCloud + splitServer) {
-            if (bit == "x") {
-                return VersionState.UNKNOWN
-            }
+        return when {
+            cloud > server && cloud.major > server.major -> VersionState.OUTDATED_MAJOR
+            cloud > server && cloud.minor > server.minor -> VersionState.OUTDATED_MINOR
+            cloud > server && cloud.patch > server.patch -> VersionState.OUTDATED_PATCH
+            cloud == server -> VersionState.UP_TO_DATE
+            else -> VersionState.UP_TO_DATE
         }
-
-        if (splitCloud[0] > splitServer[0]) {
-            return VersionState.OUTDATED_MAJOR
-        }
-
-        if (splitCloud[1] > splitServer[1]) {
-            return VersionState.OUTDATED_MINOR
-        }
-
-        if (splitCloud[2] > splitServer[2]) {
-            return VersionState.OUTDATED_PATCH
-        }
-
-        return VersionState.UP_TO_DATE
     }
 }
 
@@ -93,6 +179,46 @@ enum class VersionState {
     UNKNOWN
 }
 
+@Serializable
 data class VersionData(
     val version: String
 )
+
+data class SemVer(
+    val major: Int,
+    val minor: Int,
+    val patch: Int,
+    val preRelease: String? = null
+) : Comparable<SemVer> {
+
+    companion object {
+        fun parse(version: String): SemVer? {
+            val mainAndPre = version.split("-", limit = 2)
+            val parts = mainAndPre[0].split(".")
+
+            if (parts.size != 3) return null
+
+            val major = parts[0].toIntOrNull() ?: return null
+            val minor = parts[1].toIntOrNull() ?: return null
+            val patch = parts[2].toIntOrNull() ?: return null
+
+            return SemVer(major, minor, patch, mainAndPre.getOrNull(1))
+        }
+    }
+
+    override fun compareTo(other: SemVer): Int {
+        if (this.major != other.major) return this.major - other.major
+        if (this.minor != other.minor) return this.minor - other.minor
+        if (this.patch != other.patch) return this.patch - other.patch
+
+        return comparePreRelease(this.preRelease, other.preRelease)
+    }
+
+    private fun comparePreRelease(a: String?, b: String?): Int {
+        if (a == null && b == null) return 0
+        if (a == null) return 1
+        if (b == null) return -1
+
+        return a.compareTo(b)
+    }
+}

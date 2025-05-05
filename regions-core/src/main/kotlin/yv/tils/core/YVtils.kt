@@ -8,15 +8,17 @@ import dev.jorel.commandapi.CommandAPIBukkitConfig
 import logger.Logger
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
-import yv.tils.regions.RegionsYVtils
 import yv.tils.common.CommonYVtils
+import yv.tils.regions.RegionsYVtils
 
 class YVtils : JavaPlugin() {
     companion object {
         val yvtilsVersion = YVtils().pluginMeta.version
         lateinit var instance: YVtils
 
-        const val PLUGIN_NAME = "YVtils-Claim"
+        const val PLUGIN_NAME_FULL = "YVtils-Regions"
+        const val PLUGIN_NAME = "Regions"
+        const val PLUGIN_NAME_SHORT = "rg"
         const val PLUGIN_COLOR = "#4CAF50"
     }
 
@@ -31,11 +33,14 @@ class YVtils : JavaPlugin() {
         instance = this
 
         Logger.logger = componentLogger
-        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is loading...")
+        Logger.debug("$PLUGIN_NAME_FULL v$yvtilsVersion is loading...")
 
         Data.yvtilsVersion = yvtilsVersion
         Data.instance = instance
         Data.key = NamespacedKey(this, "yvtils")
+        Data.pluginName = PLUGIN_NAME
+        Data.pluginShortName = PLUGIN_NAME_SHORT
+        Data.pluginURL = "https://modrinth.com/plugin/yvtils_rg"
 
         CommandAPI.onLoad(CommandAPIBukkitConfig(instance).silentLogs(true).verboseOutput(false).setNamespace("yvtils"))
 

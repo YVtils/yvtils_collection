@@ -10,7 +10,16 @@ class Data {
         lateinit var instance: JavaPlugin
         lateinit var key: NamespacedKey
 
-        var prefix = "<dark_gray>[<${ColorUtils.MAIN.color}>YVtils-Collection<dark_gray>]<white>"
+        var pluginURL = "https://modrinth.com/organization/yvtils"
+        var pluginName = "null"
+        var pluginShortName = "null"
+        var prefix: String
+            set(value) {
+                "<dark_gray>[<${ColorUtils.MAIN.color}>YVtils $value<dark_gray>]<white>"
+            }
+            get() {
+                return "<dark_gray>[<${ColorUtils.MAIN.color}>YVtils $pluginName<dark_gray>]<white>"
+            }
 
         private val loadedModules = mutableListOf<String>()
         fun addModule(module: String) {
