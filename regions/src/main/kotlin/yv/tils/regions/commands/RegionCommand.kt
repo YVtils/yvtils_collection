@@ -22,6 +22,20 @@ import java.util.concurrent.CompletableFuture
 
 @Suppress("UNCHECKED_CAST")
 class RegionCommand {
+    /**
+     * Command to manage regions.
+     * /region <subcommand>
+     *     subcommand: The subcommand to execute. [String]
+     *
+     *     subcommands:
+     *     - manage: Open the region management GUI.
+     *     - create: Create a new region.
+     *     - delete: Delete a region.
+     *     - info: Get information about a region.
+     *     - list: List all regions.
+     *     - members: Manage members of a region.
+     *     - flags: Manage flags of a region.
+     */
     val command = commandTree("regions") {
         withPermission("yvtils.command.regions")
         withPermission(CommandPermission.NONE)
