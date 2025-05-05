@@ -49,7 +49,7 @@ subprojects {
 
     dependencies {
         // Paper API dependency
-        add("paperweightDevelopmentBundle", "io.papermc.paper:dev-bundle:1.21.1-R0.1-SNAPSHOT")
+        add("paperweightDevelopmentBundle", "io.papermc.paper:dev-bundle:1.21.5-R0.1-SNAPSHOT")
 
         // CommandAPI dependencies
         add("implementation", "dev.jorel:commandapi-bukkit-shade-mojang-mapped:$commandAPIVersion")
