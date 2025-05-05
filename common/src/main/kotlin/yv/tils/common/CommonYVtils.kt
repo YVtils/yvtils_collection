@@ -2,6 +2,7 @@ package yv.tils.common
 
 import coroutine.CoroutineHandler
 import data.Data
+import data.Data.Companion.yvtilsVersion
 import language.Language
 import language.LanguageHandler
 import logger.Logger
@@ -10,7 +11,9 @@ import net.kyori.adventure.text.Component
 import yv.tils.common.config.ConfigFile
 import yv.tils.common.language.LoadPlayerLanguage
 import yv.tils.common.language.RegisterStrings
+import yv.tils.common.listeners.PlayerJoin
 import yv.tils.common.listeners.PlayerLocaleChange
+import yv.tils.common.updateChecker.PluginVersion
 
 class CommonYVtils : Data.YVtilsModule {
     companion object {
