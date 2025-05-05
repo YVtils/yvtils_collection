@@ -56,7 +56,7 @@ subprojects {
         add("implementation", "dev.jorel:commandapi-bukkit-kotlin:$commandAPIVersion")
 
         // Other
-        add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+        add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
         add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     }
 
