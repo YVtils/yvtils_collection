@@ -8,7 +8,9 @@ import language.LanguageHandler
 import logger.Logger
 import message.MessageUtils
 import net.kyori.adventure.text.Component
+import org.bukkit.permissions.Permission
 import yv.tils.common.config.ConfigFile
+import yv.tils.common.data.Permissions
 import yv.tils.common.language.LoadPlayerLanguage
 import yv.tils.common.language.RegisterStrings
 import yv.tils.common.listeners.PlayerJoin
@@ -42,6 +44,7 @@ class CommonYVtils : Data.YVtilsModule {
 
         registerListeners()
         registerCoroutines()
+        registerPermissions()
 
         loadConfigs()
 
@@ -72,6 +75,19 @@ class CommonYVtils : Data.YVtilsModule {
 
         pm.registerEvents(PlayerLocaleChange(), plugin)
         pm.registerEvents(PlayerJoin(), plugin)
+    }
+
+    private fun registerPermissions() {
+        val pm = Data.instance.server.pluginManager
+
+        for (perm in Permissions.entries) {
+            if (pm.getPermission(perm.permission) == null) {
+                pm.addPermission(Permission.loadPermission(perm.permission, mapOf(
+                    "description" to perm.description,
+                    "default" to perm.default
+                )))
+            }
+        }
     }
 
     private fun registerCoroutines() {

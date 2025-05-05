@@ -52,6 +52,8 @@ class PluginVersion {
 
         versionState = compareVersions(latestVersion, currentVersion)
 
+        val formatedPluginURL = "<click:open_url:${Data.pluginURL}>${Data.pluginURL}</click>"
+
         when (versionState) {
             VersionState.UP_TO_DATE -> {
                 if (!firstBroadcast) {
@@ -73,7 +75,7 @@ class PluginVersion {
                         mapOf(
                             "oldVersion" to currentVersion,
                             "newVersion" to latestVersion,
-                            "link" to Data.pluginURL,
+                            "link" to formatedPluginURL,
                         )
                     )
                 )
@@ -87,7 +89,7 @@ class PluginVersion {
                         mapOf(
                             "oldVersion" to currentVersion,
                             "newVersion" to latestVersion,
-                            "link" to Data.pluginURL,
+                            "link" to formatedPluginURL,
                         )
                     )
                 )
@@ -101,7 +103,7 @@ class PluginVersion {
                         mapOf(
                             "oldVersion" to currentVersion,
                             "newVersion" to latestVersion,
-                            "link" to Data.pluginURL,
+                            "link" to formatedPluginURL,
                         )
                     )
                 )
@@ -166,14 +168,17 @@ class PluginVersion {
         val cloud = SemVer.parse(cloudVersion) ?: return VersionState.UNKNOWN
         val server = SemVer.parse(serverVersion) ?: return VersionState.UNKNOWN
 
+        if (cloud == server) return VersionState.UP_TO_DATE
+        if (cloud < server) return VersionState.UP_TO_DATE
+
         return when {
-            cloud > server && cloud.major > server.major -> VersionState.OUTDATED_MAJOR
-            cloud > server && cloud.minor > server.minor -> VersionState.OUTDATED_MINOR
-            cloud > server && cloud.patch > server.patch -> VersionState.OUTDATED_PATCH
-            cloud == server -> VersionState.UP_TO_DATE
-            else -> VersionState.UP_TO_DATE
+            cloud.major > server.major -> VersionState.OUTDATED_MAJOR
+            cloud.minor > server.minor -> VersionState.OUTDATED_MINOR
+            cloud.patch > server.patch || cloud.preRelease == null && server.preRelease != null -> VersionState.OUTDATED_PATCH
+            else -> VersionState.OUTDATED_PATCH
         }
     }
+
 }
 
 enum class VersionState {

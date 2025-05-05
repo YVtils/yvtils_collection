@@ -1,5 +1,5 @@
 name: YVtils-Regions
-version: 1.0.0
+version: 1.0.0-beta.1
 main: yv.tils.core.YVtils
 api-version: '1.21'
 author: WolfiiYV

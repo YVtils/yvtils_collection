@@ -7,6 +7,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import yv.tils.common.config.ConfigFile
+import yv.tils.common.data.Permissions
 import yv.tils.common.updateChecker.PluginVersion
 
 class PlayerJoin : Listener {
@@ -14,7 +15,7 @@ class PlayerJoin : Listener {
     fun onPlayerJoin(e: PlayerJoinEvent) {
         val player = e.player
 
-        if (!player.hasPermission("") && !player.isOp) return
+        if (!player.hasPermission(Permissions.COMMON_UPDATE_CHECK.permission) && !player.isOp) return
         if (ConfigFile.getValueAsBoolean("updateCheck.sendToOps") == true) {
             val messageKey = PluginVersion.moderatorMessageKeyOnJoin?.key ?: return
             val latestVersion = PluginVersion.cloudVersion ?: return
@@ -27,7 +28,7 @@ class PlayerJoin : Listener {
                     mapOf(
                         "oldVersion" to currentVersion,
                         "newVersion" to latestVersion,
-                        "link" to Data.pluginURL,
+                        "link" to "<click:open_url:${Data.pluginURL}>${Data.pluginURL}</click>",
                     )
                 )
             )
