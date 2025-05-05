@@ -57,7 +57,7 @@ subprojects {
 
         // Other
         add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-        add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+        add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     }
 
     tasks.withType<KotlinCompile> {
