@@ -1,10 +1,12 @@
 package yv.tils.regions.logic
 
+import language.LanguageHandler
 import logger.Logger
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.regions.configs.RegionSaveFile
 import yv.tils.regions.data.*
+import yv.tils.regions.language.LangStrings
 import java.util.*
 import javax.naming.NoPermissionException
 
@@ -22,27 +24,43 @@ class FlagLogic {
             role: RegionRoles? = null
         ) {
             if ((value == null && role == null) || (value != null && role != null)) {
-                // TODO
-                Logger.dev("Invalid flag change request: $value, $role")
+                sender.sendMessage(
+                    LanguageHandler.getMessage(
+                        LangStrings.REGION_FLAG_CHANGE_FAIL_INVALID.key,
+                        sender,
+                    )
+                )
                 return
             }
 
             val regionData = if (region == null) {
                 if (sender is Player) {
                     RegionLogic.getRegion(sender.location) ?: run {
-                        // TODO
-                        Logger.dev("Region not found for player ${sender.name}")
+                        sender.sendMessage(
+                            LanguageHandler.getMessage(
+                                LangStrings.REGION_GENERIC_NONE.key,
+                                sender.uniqueId,
+                            )
+                        )
                         return
                     }
                 } else {
-                    // TODO
-                    Logger.dev("Region not found for console sender")
+                    sender.sendMessage(
+                        LanguageHandler.getMessage(
+                            LangStrings.REGION_GENERIC_NONE.key,
+                            sender,
+                        )
+                    )
                     return
                 }
             } else {
                 RegionManager.getRegionByNameOrID(region) ?: run {
-                    // TODO
-                    Logger.dev("Region not found for region $region")
+                    sender.sendMessage(
+                        LanguageHandler.getMessage(
+                            LangStrings.REGION_GENERIC_NONE.key,
+                            sender,
+                        )
+                    )
                     return
                 }
             }
@@ -52,8 +70,13 @@ class FlagLogic {
             try {
                 flag = Flag.fromString(flagType.uppercase())
             } catch (_: IllegalArgumentException) {
-                // TODO
-                Logger.dev("Invalid flag type: $flagType")
+                sender.sendMessage(
+                    LanguageHandler.getMessage(
+                        LangStrings.REGION_FLAG_CHANGE_FAIL_INVALID.key,
+                        sender,
+                        mapOf("flag" to flagType)
+                    )
+                )
                 return
             }
 
@@ -62,13 +85,34 @@ class FlagLogic {
             try {
                 val isSuccessful = FlagManager.setFlagEntry(flag, value ?: role!!, regionData, sender)
                 if (!isSuccessful) {
-                    // TODO
-                    Logger.dev("Failed to set flag $flag for region ${regionData.name}")
+                    sender.sendMessage(
+                        LanguageHandler.getMessage(
+                            LangStrings.REGION_FLAG_CHANGE_FAIL_INVALID.key,
+                            sender,
+                            mapOf("flag" to flagType)
+                        )
+                    )
                     return
                 }
+
+                sender.sendMessage(
+                    LanguageHandler.getMessage(
+                        LangStrings.REGION_FLAG_CHANGE_SUCCESS.key,
+                        sender,
+                        mapOf(
+                            "flag" to flagType,
+                            "value" to (value ?: role.toString()),
+                            "region" to regionData.name
+                        )
+                    )
+                )
             } catch (_: NoPermissionException) {
-                // TODO
-                Logger.dev("Sender ${sender.name} does not have permission to set flag $flag")
+                sender.sendMessage(
+                    LanguageHandler.getMessage(
+                        LangStrings.REGION_FLAG_CHANGE_FAIL_NO_PERMISSION.key,
+                        sender,
+                    )
+                )
                 return
             }
         }

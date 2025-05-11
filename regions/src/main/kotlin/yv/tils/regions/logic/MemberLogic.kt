@@ -43,6 +43,7 @@ class MemberLogic {
                         mapOf(
                             "region" to regionData.name,
                             "player" to (player.name ?: "-"),
+                            "role" to userRole.toString()
                         )
                     )
                 )
@@ -136,6 +137,7 @@ class MemberLogic {
                         mapOf(
                             "region" to regionData.name,
                             "player" to (player.name ?: "-"),
+                            "role" to role.toString(),
                         )
                     )
                 )
@@ -169,7 +171,6 @@ class MemberLogic {
                     LangStrings.REGION_MEMBERS_INFO.key,
                     sender,
                     mapOf(
-                        "region" to region.name,
                         "members" to membersList
                     )
                 )

@@ -11,7 +11,6 @@ class PlayerEntryRegion : Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onEvent(e: PlayerEntryRegionEvent) {
         Logger.debug("Player ${e.player.name} entered region ${e.newRegion.name} from region ${e.oldRegion?.name}")
-        Logger.dev("Player ${e.player.name} entered region ${e.newRegion.name} from region ${e.oldRegion?.name}")
 
         PlayerChecks.addPlayerToRegion(e.newRegion, e.player)
     }

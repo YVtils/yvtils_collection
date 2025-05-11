@@ -46,12 +46,12 @@ class RegionCommand {
          * Command to open the region management GUI.
          * /region [manage]
          */
-        literalArgument("manage", true) {
-            playerExecutor { sender, _ ->
-                sender.sendMessage("Not implemented yet")
-                // TODO: Implement GUI
-            }
-        }
+//        literalArgument("manage", true) {
+//            playerExecutor { sender, _ ->
+//                sender.sendMessage("Not implemented yet")
+//                // TODO: Implement GUI
+//            }
+//        }
 
         /**
          * Command to create a region.

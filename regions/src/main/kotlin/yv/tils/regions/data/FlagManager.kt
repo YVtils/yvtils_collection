@@ -36,8 +36,6 @@ class FlagManager {
             val entry = flagEntryList[flag]
             val flagType: FlagType = entry?.type ?: return false
 
-            Logger.dev("Setting flag $flag with flagType $flagType to $value for region ${region.name}")
-
             if (sender != null) {
                 if (flagType == FlagType.LOCKED_GLOBAL || flagType == FlagType.LOCKED_ROLE_BASED) {
                     if (sender.hasPermission(Permissions.REGION_FLAGS_LOCKED.permission) || sender.isOp) {

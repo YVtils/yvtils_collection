@@ -1,7 +1,6 @@
 package yv.tils.regions.data
 
 import kotlinx.serialization.Serializable
-import logger.Logger
 import org.bukkit.Location
 import org.bukkit.OfflinePlayer
 import org.bukkit.World
@@ -195,7 +194,6 @@ class RegionManager {
 
         fun loadRegion(uuid: UUID, regionData: RegionData?) {
             if (regionData == null) {
-                Logger.dev("Removing region: $uuid")
                 regions.remove(uuid)
                 return
             }
@@ -204,6 +202,11 @@ class RegionManager {
 
         fun saveRegion(): MutableMap<UUID, RegionData> {
             return regions
+        }
+
+        fun hasRegionWithName(name: String, player: OfflinePlayer): Boolean {
+            val regions = getRegions(player)
+            return regions.any { it.name.equals(name, ignoreCase = true) }
         }
 
         val regions = mutableMapOf<UUID, RegionData>()

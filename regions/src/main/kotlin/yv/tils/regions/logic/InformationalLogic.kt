@@ -17,11 +17,11 @@ class InformationalLogic {
                 regionName = RegionLogic.getRegion(sender.location)?.name
 
                 if (regionName == null) {
-                    sender.sendMessage(LanguageHandler.getRawMessage(LangStrings.REGION_GENERIC_NONE.key, sender))
+                    sender.sendMessage(LanguageHandler.getMessage(LangStrings.REGION_GENERIC_NONE.key, sender))
                     return
                 }
             } else if (regionName == null) {
-                sender.sendMessage(LanguageHandler.getRawMessage(LangStrings.REGION_INFO_FAIL_GENERIC.key, sender))
+                sender.sendMessage(LanguageHandler.getMessage(LangStrings.REGION_INFO_FAIL_GENERIC.key, sender))
                 return
             }
 
@@ -29,7 +29,7 @@ class InformationalLogic {
 
             when (RegionLogic().getRegionListSize(regionName)) {
                 0 ->  {
-                    sender.sendMessage(LanguageHandler.getRawMessage(LangStrings.REGION_GENERIC_NONE.key, sender))
+                    sender.sendMessage(LanguageHandler.getMessage(LangStrings.REGION_GENERIC_NONE.key, sender))
                     return
                 }
                 1 -> {
@@ -37,31 +37,47 @@ class InformationalLogic {
                     val rUUID = UUID.fromString(region[0].id)
 
                     regionInfo = InformationalLogic().getRegionInfo(rUUID, sender)
+
+                    if (regionInfo == null) {
+                        sender.sendMessage(LanguageHandler.getMessage(LangStrings.REGION_GENERIC_NONE.key, sender))
+                        return
+                    }
                 }
                 else -> {
-                    sender.sendMessage(LanguageHandler.getRawMessage(LangStrings.REGION_GENERIC_MULTIPLE.key, sender))
+                    val regions = RegionManager.getRegions(regionName)
+                    val regionList: MutableList<String> = mutableListOf()
+                    for (region in regions) {
+                        val owner = PlayerManager.getRegionOwner(UUID.fromString(region.id))
+                        regionList.add("<click:suggest_command:/rg remove ${region.id}>${region.name}: ${region.id} (${owner})</click>")
+                    }
+
+                    sender.sendMessage(LanguageHandler.getMessage(
+                        LangStrings.REGION_GENERIC_MULTIPLE.key,
+                        sender,
+                        mapOf<String, Any>(
+                            "regions" to regionList
+                        )
+                    ))
+
                     return
                 }
             }
 
-            if (regionInfo == null) {
-                sender.sendMessage(LanguageHandler.getRawMessage(LangStrings.REGION_GENERIC_NONE.key, sender))
-                return
-            }
-
-            LanguageHandler.getMessage(
-                LangStrings.REGION_INFO_SUCCESS.key,
-                sender,
-                mapOf(
-                    "name" to regionInfo.name,
-                    "world" to regionInfo.world,
-                    "location1" to regionInfo.location1,
-                    "location2" to regionInfo.location2,
-                    "owner" to regionInfo.owner,
-                    "role" to regionInfo.role.toString(),
-                    "members" to regionInfo.members,
-                    "created" to regionInfo.created,
-                    "flags" to regionInfo.flags
+            sender.sendMessage(
+                LanguageHandler.getMessage(
+                    LangStrings.REGION_INFO_SUCCESS.key,
+                    sender,
+                    mapOf(
+                        "name" to regionInfo.name,
+                        "world" to regionInfo.world,
+                        "location1" to regionInfo.location1,
+                        "location2" to regionInfo.location2,
+                        "owner" to regionInfo.owner,
+                        "role" to regionInfo.role.toString(),
+                        "members" to regionInfo.members,
+                        "created" to regionInfo.created,
+                        "flags" to regionInfo.flags
+                    )
                 )
             )
         }
@@ -70,7 +86,7 @@ class InformationalLogic {
             val regions = InformationalLogic().getRegionList(sender, targets, role)
 
             if (regions.isEmpty()) {
-                sender.sendMessage(LanguageHandler.getRawMessage(LangStrings.REGION_GENERIC_NONE.key, sender))
+                sender.sendMessage(LanguageHandler.getMessage(LangStrings.REGION_GENERIC_NONE.key, sender))
                 return
             }
 
@@ -135,7 +151,17 @@ class InformationalLogic {
         )
 
         if (senderRole.permLevel <= RegionRoles.MEMBER.permLevel && senderRole != RegionRoles.NONE) {
-            regionInfo.flags = region.flags.global.toString()
+            var flags = ""
+
+            for (flag in region.flags.global) {
+                flags += "${flag.key}: ${flag.value}, "
+            }
+
+            for (flag in region.flags.roleBased) {
+                flags += "${flag.key}: ${RegionRoles.fromID(flag.value)}, "
+            }
+
+            regionInfo.flags = flags
         } else {
             regionInfo.flags = LanguageHandler.getRawMessage(LangStrings.REGION_INFO_FLAGS_NOT_ALLOWED.key, sender)
         }
@@ -147,19 +173,18 @@ class InformationalLogic {
         val targetList: MutableList<Player> = mutableListOf()
         val role = RegionRoles.fromString(role ?: "")
 
-        if (targets != null) {
-            if (targets.isEmpty() && sender is Player) {
-                targetList.add(sender)
-            } else if (targets.isEmpty()) {
-                sender.sendMessage(LanguageHandler.getMessage(
-                    yv.tils.common.language.LangStrings.COMMAND_MISSING_PLAYER.key,
-                    sender
-                ))
-            } else {
-                for (target in targets) {
-                    if (target is Player) {
-                        targetList.add(target)
-                    }
+        if ((targets == null || targets.isEmpty()) && sender is Player) {
+            targetList.add(sender)
+        } else if (targets == null || targets.isEmpty()) {
+            sender.sendMessage(LanguageHandler.getMessage(
+                yv.tils.common.language.LangStrings.COMMAND_MISSING_PLAYER.key,
+                sender
+            ))
+            return emptyList()
+        } else {
+            for (target in targets) {
+                if (target is Player) {
+                    targetList.add(target)
                 }
             }
         }

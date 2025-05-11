@@ -4,12 +4,14 @@ import language.LanguageHandler
 import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import yv.tils.regions.configs.ConfigFile
 import yv.tils.regions.data.Permissions
 import yv.tils.regions.data.PlayerManager
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.data.RegionRoles
 import yv.tils.regions.language.LangStrings
 import java.util.*
+import kotlin.math.abs
 
 class RegionLogic {
     companion object {
@@ -46,23 +48,56 @@ class RegionLogic {
             return
         }
 
-        // TODO: Add checks for overlapping regions
-        // TODO: Add checks for region size
-        // TODO: Add checks for region name -> owner can only create one region with the same name
+        if (isOverlappingWithExistingRegions(loc1, loc2)) {
+            player.sendMessage(LanguageHandler.getMessage(
+                LangStrings.REGION_CREATE_FAIL_OVERLAP.key,
+                player.uniqueId,
+            ))
+            return
+        }
 
-        val region = RegionManager.createRegion(player, name, loc1, loc2)
+        val regionSize = calcNewRegionSize(loc1, loc2)
+        val maxSize = ConfigFile.getValueAsInt("settings.region.max.size") ?: -1
+        val minSize = ConfigFile.getValueAsInt("settings.region.min.size") ?: -1
+        when {
+            (regionSize > maxSize && maxSize != -1) -> {
+                player.sendMessage(LanguageHandler.getMessage(
+                    LangStrings.REGION_CREATE_FAIL_SIZE_MAX.key,
+                    player.uniqueId,
+                    mapOf<String, Any>(
+                        "maxSize" to maxSize.toString()
+                    )
+                ))
+                return
+            }
+            (regionSize < minSize && minSize != -1) -> {
+                player.sendMessage(LanguageHandler.getMessage(
+                    LangStrings.REGION_CREATE_FAIL_SIZE_MIN.key,
+                    player.uniqueId,
+                    mapOf<String, Any>(
+                        "minSize" to minSize.toString()
+                    )
+                ))
+                return
+            }
+        }
+
+        if (RegionManager.hasRegionWithName(name, player)) {
+            player.sendMessage(LanguageHandler.getMessage(
+                LangStrings.REGION_CREATE_FAIL_ALREADY_EXISTS.key,
+                player.uniqueId,
+                mapOf<String, Any>(
+                    "region" to name
+                )
+            ))
+            return
+        }
+
+        RegionManager.createRegion(player, name, loc1, loc2)
 
         player.sendMessage(LanguageHandler.getMessage(
             LangStrings.REGION_CREATE_SUCCESS.key,
             player.uniqueId,
-            mapOf<String, Any>(
-                "region" to region.name,
-                "world" to region.world,
-                "x" to region.x.toString(),
-                "z" to region.z.toString(),
-                "x2" to region.x2.toString(),
-                "z2" to region.z2.toString()
-            )
         ))
     }
 
@@ -150,5 +185,43 @@ class RegionLogic {
             return 0
         }
         return regions.size
+    }
+
+    private fun calcNewRegionSize(loc1: Location, loc2: Location): Int {
+        val x = abs(loc1.blockX - loc2.blockX)
+        val z = abs(loc1.blockZ - loc2.blockZ)
+
+        return x * z
+    }
+
+    /**
+     * Check if the new region overlaps with any existing regions.
+     * @param loc1 The first location of the new region.
+     * @param loc2 The second location of the new region.
+     * @return True if the new region overlaps with any existing regions, false otherwise.
+     */
+    private fun isOverlappingWithExistingRegions(loc1: Location, loc2: Location): Boolean {
+        val world = loc1.world ?: return false
+
+        val newMinX = minOf(loc1.blockX, loc2.blockX)
+        val newMaxX = maxOf(loc1.blockX, loc2.blockX)
+        val newMinZ = minOf(loc1.blockZ, loc2.blockZ)
+        val newMaxZ = maxOf(loc1.blockZ, loc2.blockZ)
+
+        val existingRegions = RegionManager.getRegions(world)
+
+        for (region in existingRegions) {
+            val existingMinX = minOf(region.x, region.x2)
+            val existingMaxX = maxOf(region.x, region.x2)
+            val existingMinZ = minOf(region.z, region.z2)
+            val existingMaxZ = maxOf(region.z, region.z2)
+
+            if (!(newMaxX < existingMinX || newMinX > existingMaxX ||
+                  newMaxZ < existingMinZ || newMinZ > existingMaxZ)) {
+                return true
+            }
+        }
+
+        return false
     }
 }

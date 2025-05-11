@@ -70,7 +70,6 @@ class PlayerSaveFile {
         CoroutineHandler.launchTask(
             suspend {
                 val allRegions = PlayerManager.savePlayer().values.flatMap { it.values }.toMutableList()
-                Logger.dev("All player regions: $allRegions")
                 upgradeStrings(allRegions)
             },
             null,

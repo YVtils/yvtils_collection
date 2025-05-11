@@ -11,7 +11,6 @@ class PlayerLeaveRegion : Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     fun onEvent(e: PlayerLeaveRegionEvent) {
         Logger.debug("Player ${e.player.name} left region ${e.oldRegion.name} to region ${e.newRegion?.name}")
-        Logger.dev("Player ${e.player.name} left region ${e.oldRegion.name} to region ${e.newRegion?.name}")
 
         PlayerChecks.removePlayerFromRegion(e.oldRegion, e.player)
     }

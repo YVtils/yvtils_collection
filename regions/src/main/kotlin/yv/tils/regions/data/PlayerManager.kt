@@ -1,7 +1,6 @@
 package yv.tils.regions.data
 
 import kotlinx.serialization.Serializable
-import logger.Logger
 import org.bukkit.OfflinePlayer
 import player.PlayerUtils
 import yv.tils.regions.configs.PlayerSaveFile
@@ -16,7 +15,6 @@ class PlayerManager {
 
         fun loadPlayer(uuid: UUID, rUUID: UUID, region: PlayerRegion?) {
             if (region == null) {
-                Logger.dev("Removing player region: $uuid -> $rUUID")
                 players[uuid]?.remove(rUUID)
                 return
             }
@@ -176,6 +174,10 @@ enum class RegionRoles(val permLevel: Int) {
     companion object {
         fun fromString(role: String): RegionRoles {
             return entries.firstOrNull { it.name.equals(role, ignoreCase = true) } ?: NONE
+        }
+
+        fun fromID(role: Int): RegionRoles {
+            return entries.firstOrNull { it.permLevel == role } ?: NONE
         }
     }
 }
