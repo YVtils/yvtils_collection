@@ -46,6 +46,14 @@ class RegisterStrings {
         )
 
         registerNewString(
+            LangStrings.REGION_CREATE_FAIL_OWNED_MAX,
+            mapOf(
+                FileTypes.EN to "<prefix> <red>You already own the maximum number of regions: <maxRegions>!",
+                FileTypes.DE to "<prefix> <red>Du besitzt bereits die maximale Anzahl an Regionen: <maxRegions>!"
+            )
+        )
+
+        registerNewString(
             LangStrings.REGION_DELETE_SUCCESS,
             mapOf(
                 FileTypes.EN to "<prefix> <green>The region <region> has been deleted!",
@@ -74,6 +82,22 @@ class RegisterStrings {
             mapOf(
                 FileTypes.EN to "<prefix> <red>Failed to add <player> to the region <region>!",
                 FileTypes.DE to "<prefix> <red>Fehler beim Hinzufügen von <player> zur Region <region>!"
+            )
+        )
+
+        registerNewString(
+            LangStrings.REGION_MEMBER_ADD_FAILED_MAX_MEMBERSHIPS,
+            mapOf(
+                FileTypes.EN to "<prefix> <red>The player you are trying to add already has the maximum number of region memberships: <maxRegions>!",
+                FileTypes.DE to "<prefix> <red>Der Spieler, den du hinzufügen möchtest, hat bereits die maximale Anzahl an Regionsmitgliedschaften: <maxRegions>!"
+            )
+        )
+
+        registerNewString(
+            LangStrings.REGION_MEMBER_ADD_FAILED_MAX_MEMBERS,
+            mapOf(
+                FileTypes.EN to "<prefix> <red>The region already has the maximum number of members: <maxRegions>!",
+                FileTypes.DE to "<prefix> <red>Die Region hat bereits die maximale Anzahl an Mitgliedern: <maxRegions>!"
             )
         )
 
@@ -215,12 +239,15 @@ enum class LangStrings(val key: String) {
     REGION_CREATE_FAIL_OVERLAP("command.regions.create.fail.overlap"),
     REGION_CREATE_FAIL_SIZE_MAX("command.regions.create.fail.size.max"),
     REGION_CREATE_FAIL_SIZE_MIN("command.regions.create.fail.size.min"),
+    REGION_CREATE_FAIL_OWNED_MAX("command.regions.create.fail.owned.max"),
 
     REGION_DELETE_SUCCESS("command.regions.delete.success"),
 
     REGION_MEMBERS_INFO("command.regions.members.info"),
     REGION_MEMBER_ADD_SUCCESS("command.regions.members.add.success"),
-    REGION_MEMBER_ADD_FAILED("command.regions.members.add.failed"),
+    REGION_MEMBER_ADD_FAILED("command.regions.members.add.failed.generic"),
+    REGION_MEMBER_ADD_FAILED_MAX_MEMBERSHIPS("command.regions.members.add.failed.max.memberships"),
+    REGION_MEMBER_ADD_FAILED_MAX_MEMBERS("command.regions.members.add.failed.max.members"),
     REGION_MEMBER_REMOVE_SUCCESS("command.regions.members.remove.success"),
     REGION_MEMBER_REMOVE_FAILED("command.regions.members.remove.failed"),
     REGION_MEMBER_ROLE_SUCCESS("command.regions.members.role.success"),

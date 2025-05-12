@@ -177,6 +177,25 @@ class RegionManager {
             } ?: emptyList()
         }
 
+        fun getRegions(player: OfflinePlayer, role: RegionRoles, negativeRole: RegionRoles): List<RegionData> {
+            val playerRegions = players[player.uniqueId]
+            val permLevel = role.permLevel
+            val negativePermLevel = negativeRole.permLevel
+
+            if (permLevel == RegionRoles.NONE.permLevel) {
+                return getAllRegions()
+            }
+
+            return playerRegions?.values?.mapNotNull { region ->
+                val regionData = getRegion(region.region)
+                if (regionData != null && region.role.permLevel <= permLevel && region.role.permLevel != negativePermLevel) {
+                    regionData
+                } else {
+                    null
+                }
+            } ?: emptyList()
+        }
+
         fun getRegions(player: OfflinePlayer, role: RegionRoles, name: String): RegionData? {
             val regions = getRegions(player, role)
             val regionList = regions.filter { it.name.equals(name, ignoreCase = true) }

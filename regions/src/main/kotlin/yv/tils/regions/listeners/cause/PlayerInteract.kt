@@ -1,5 +1,12 @@
 package yv.tils.regions.listeners.cause
 
+import org.bukkit.block.data.AnaloguePowerable
+import org.bukkit.block.data.Lightable
+import org.bukkit.block.data.Powerable
+import org.bukkit.block.data.type.Door
+import org.bukkit.block.data.type.Gate
+import org.bukkit.block.data.type.Switch
+import org.bukkit.block.data.type.TrapDoor
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -15,10 +22,20 @@ class PlayerInteract: Listener {
         val block = e.clickedBlock ?: return
         val region = RegionLogic.getRegion(block.location) ?: return
 
-        val flagTrigger = BlockFlagTriggerEvent(player, block, region, Flag.INTERACT)
-        flagTrigger.callEvent()
-        if (flagTrigger.isCancelled) {
-            e.isCancelled = true
+        if (
+            block.blockData is Door || // Doors
+            block.blockData is TrapDoor || // Trapdoors
+            block.blockData is Switch || // Buttons, Levers
+            block.blockData is Gate || // Fence gates
+            block.blockData is Powerable || // Redstone items (a.e. Pressure Plates)
+            block.blockData is Lightable || // Lightable items (a.e. candles)
+            block.blockData is AnaloguePowerable // Analogue powerable items (a.e. target block)
+        ) {
+            val flagTrigger = BlockFlagTriggerEvent(player, block, region, Flag.INTERACT)
+            flagTrigger.callEvent()
+            if (flagTrigger.isCancelled) {
+                e.isCancelled = true
+            }
         }
     }
 }

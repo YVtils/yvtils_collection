@@ -43,11 +43,21 @@ class RegionSaveFile {
                 val global = mutableMapOf<Flag, Boolean>()
                 val roleBased = mutableMapOf<Flag, Int>()
                 for (flag in globalFlags) {
-                    val flagKey = Flag.valueOf(flag.key)
+                    val flagKey = try {
+                        Flag.valueOf(flag.key)
+                    } catch (e: IllegalArgumentException) {
+                        Logger.warn("Invalid flag key ${flag.key} for region $id: ${e.message}")
+                        continue
+                    }
                     global[flagKey] = flag.value.jsonPrimitive.content.toBoolean()
                 }
                 for (flag in roleBasedFlags) {
-                    val flagKey = Flag.valueOf(flag.key)
+                    val flagKey = try {
+                        Flag.valueOf(flag.key)
+                    } catch (e: IllegalArgumentException) {
+                        Logger.warn("Invalid flag key ${flag.key} for region $id: ${e.message}")
+                        continue
+                    }
                     roleBased[flagKey] = flag.value.jsonPrimitive.content.toInt()
                 }
 

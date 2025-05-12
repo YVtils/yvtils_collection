@@ -173,7 +173,6 @@ enum class Flag(val defaultValue: Any, val defaultGroup: FlagType) {
     DESTROY(3, FlagType.ROLE_BASED),
     CONTAINER(3, FlagType.ROLE_BASED),
     INTERACT(3, FlagType.ROLE_BASED),
-    USE(3, FlagType.ROLE_BASED),
     TELEPORT(3, FlagType.ROLE_BASED),;
 
     companion object {

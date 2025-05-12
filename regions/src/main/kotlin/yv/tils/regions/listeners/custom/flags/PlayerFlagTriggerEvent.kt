@@ -16,7 +16,7 @@ import yv.tils.regions.data.RegionManager
  * @param targetRegion The region where the target player is located.
  * @param flag The type of flag that was triggered.
  */
-class PlayerFlagTriggerEvent(val player: Player, val target: Player, val playerRegion: RegionManager.RegionData?, val targetRegion: RegionManager.RegionData?, val flag: Flag): Event(), Cancellable {
+class PlayerFlagTriggerEvent(val player: Player, val target: Player?, val playerRegion: RegionManager.RegionData?, val targetRegion: RegionManager.RegionData?, val flag: Flag): Event(), Cancellable {
     companion object {
         private val HANDLERS = HandlerList()
 

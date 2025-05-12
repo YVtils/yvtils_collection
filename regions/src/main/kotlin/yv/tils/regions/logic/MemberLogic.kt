@@ -5,6 +5,7 @@ import logger.Logger
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import player.PlayerUtils
+import yv.tils.regions.configs.ConfigFile
 import yv.tils.regions.data.PlayerManager
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.data.RegionRoles
@@ -28,6 +29,32 @@ class MemberLogic {
                         )
                     )
                 )
+                return
+            }
+
+            val regionMembershipCount = RegionManager.getRegions(player, RegionRoles.MEMBER, RegionRoles.OWNER)
+            val maxRegions = ConfigFile.getValueAsInt("settings.region.max.members") ?: -1
+            if (regionMembershipCount.size >= maxRegions && maxRegions != -1) {
+                sender.sendMessage(LanguageHandler.getMessage(
+                    LangStrings.REGION_MEMBER_ADD_FAILED_MAX_MEMBERSHIPS.key,
+                    sender,
+                    mapOf<String, Any>(
+                        "maxRegions" to maxRegions.toString()
+                    )
+                ))
+                return
+            }
+
+            val regionMembersCount = PlayerManager.getRegionMembers(UUID.fromString(regionData.id)) ?: emptyList()
+            val maxMembers = ConfigFile.getValueAsInt("settings.region.max.members") ?: -1
+            if (regionMembersCount.size >= maxMembers && maxMembers != -1) {
+                sender.sendMessage(LanguageHandler.getMessage(
+                    LangStrings.REGION_MEMBER_ADD_FAILED_MAX_MEMBERS.key,
+                    sender,
+                    mapOf<String, Any>(
+                        "maxRegions" to maxMembers.toString()
+                    )
+                ))
                 return
             }
 

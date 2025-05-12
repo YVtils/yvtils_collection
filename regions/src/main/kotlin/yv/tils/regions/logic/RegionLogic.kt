@@ -82,6 +82,19 @@ class RegionLogic {
             }
         }
 
+        val ownedRegions = RegionManager.getRegions(player, RegionRoles.OWNER)
+        val maxRegions = ConfigFile.getValueAsInt("settings.region.max.owned") ?: -1
+        if (ownedRegions.size >= maxRegions && maxRegions != -1) {
+            player.sendMessage(LanguageHandler.getMessage(
+                LangStrings.REGION_CREATE_FAIL_OWNED_MAX.key,
+                player.uniqueId,
+                mapOf<String, Any>(
+                    "maxRegions" to maxRegions.toString()
+                )
+            ))
+            return
+        }
+
         if (RegionManager.hasRegionWithName(name, player)) {
             player.sendMessage(LanguageHandler.getMessage(
                 LangStrings.REGION_CREATE_FAIL_ALREADY_EXISTS.key,

@@ -60,7 +60,6 @@ class PlayerFlagTrigger: Listener {
             Flag.DESTROY,
             Flag.PLACE,
             Flag.INTERACT,
-            Flag.USE,
         )
 
         if (flag in visualFeedbackFlags) {

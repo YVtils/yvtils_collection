@@ -4,7 +4,6 @@ import files.FileUtils
 import logger.Logger
 import yv.tils.regions.data.Flag
 import yv.tils.regions.data.FlagType
-import yv.tils.regions.data.RegionRoles
 
 class ConfigFile {
     companion object {
@@ -134,9 +133,9 @@ class ConfigFile {
             content["documentation"] = "https://docs.yvtils.net/status/config.yml"
         }
 
-        content["settings.player.max.own"] = 10
-        content["settings.player.max.member"] = 10
-        content["settings.region.max.size"] = 10
+        content["settings.player.max.own"] = 5
+        content["settings.player.max.member"] = -1
+        content["settings.region.max.size"] = 1000
         content["settings.region.min.size"] = 1
         content["settings.region.max.members"] = -1
 
@@ -144,15 +143,14 @@ class ConfigFile {
         content["flags.locked.role_based"] = mutableMapOf<String, String>()
 
         content["flags.global"] = mutableMapOf(
-            Flag.PVP.name to true,
+            Flag.PVP.name to Flag.PVP.defaultValue,
         )
         content["flags.role_based"] = mutableMapOf(
-            Flag.PLACE.name to RegionRoles.MEMBER.name,
-            Flag.DESTROY.name to RegionRoles.MEMBER.name,
-            Flag.CONTAINER.name to RegionRoles.MEMBER.name,
-            Flag.INTERACT.name to RegionRoles.MEMBER.name,
-            Flag.USE.name to RegionRoles.MEMBER.name,
-            Flag.TELEPORT.name to RegionRoles.MEMBER.name
+            Flag.PLACE.name to Flag.PLACE.defaultGroup,
+            Flag.DESTROY.name to Flag.DESTROY.defaultGroup,
+            Flag.CONTAINER.name to Flag.CONTAINER.defaultGroup,
+            Flag.INTERACT.name to Flag.INTERACT.defaultGroup,
+            Flag.TELEPORT.name to Flag.TELEPORT.defaultGroup
         )
 
         val ymlFile = FileUtils.makeYAMLFile(filePath, content)

@@ -59,6 +59,9 @@ class RegionsYVtils : Data.YVtilsModule {
         pm.registerEvents(BlockPlace(), plugin)
         pm.registerEvents(PlayerInteract(), plugin)
         pm.registerEvents(EntityDamageByEntity(), plugin)
+        pm.registerEvents(InventoryOpen(), plugin)
+        pm.registerEvents(PlayerItemFrameChange(), plugin)
+        pm.registerEvents(PlayerTeleport(), plugin)
 
         pm.registerEvents(PlayerEntryRegion(), plugin)
         pm.registerEvents(PlayerLeaveRegion(), plugin)
