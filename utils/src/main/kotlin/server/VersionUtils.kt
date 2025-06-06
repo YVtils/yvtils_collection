@@ -1,4 +1,4 @@
-package serverVersion
+package server
 
 import data.Data
 import logger.Logger

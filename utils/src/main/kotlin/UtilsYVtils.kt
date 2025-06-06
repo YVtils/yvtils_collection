@@ -1,6 +1,6 @@
 import coroutine.CoroutineHandler
 import data.Data
-import serverVersion.VersionUtils
+import server.VersionUtils
 
 class UtilsYVtils : Data.YVtilsModule {
     companion object {

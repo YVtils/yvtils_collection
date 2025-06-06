@@ -16,7 +16,7 @@ import yv.tils.regions.listeners.cause.*
 class RegionsYVtils : Data.YVtilsModule {
     companion object {
         const val MODULE_NAME = "regions"
-        const val MODULE_VERSION = "1.0.0-beta.1"
+        const val MODULE_VERSION = "1.0.0-beta.2"
     }
 
     override fun onLoad() {

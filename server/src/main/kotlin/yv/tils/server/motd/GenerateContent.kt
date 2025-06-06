@@ -5,7 +5,7 @@ import message.MessageUtils
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import player.PlayerUtils
-import serverVersion.VersionUtils
+import server.VersionUtils
 import yv.tils.server.configs.ConfigFile
 import java.text.SimpleDateFormat
 import java.util.*

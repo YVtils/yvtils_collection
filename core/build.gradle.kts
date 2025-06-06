@@ -8,6 +8,8 @@ dependencies {
     implementation(project(":multiMine"))
     implementation(project(":status"))
     implementation(project(":server"))
+    implementation(project(":regions"))
+    implementation(project(":discord"))
 }
 
 tasks {

@@ -169,11 +169,11 @@ class FlagManager {
  */
 enum class Flag(val defaultValue: Any, val defaultGroup: FlagType) {
     PVP(true, FlagType.GLOBAL),
-    PLACE(3, FlagType.ROLE_BASED),
-    DESTROY(3, FlagType.ROLE_BASED),
-    CONTAINER(3, FlagType.ROLE_BASED),
-    INTERACT(3, FlagType.ROLE_BASED),
-    TELEPORT(3, FlagType.ROLE_BASED),;
+    PLACE(2, FlagType.ROLE_BASED),
+    DESTROY(2, FlagType.ROLE_BASED),
+    CONTAINER(2, FlagType.ROLE_BASED),
+    INTERACT(2, FlagType.ROLE_BASED),
+    TELEPORT(2, FlagType.ROLE_BASED), ;
 
     companion object {
         /**

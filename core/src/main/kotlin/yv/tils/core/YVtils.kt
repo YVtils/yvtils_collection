@@ -9,9 +9,11 @@ import logger.Logger
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
+import yv.tils.discord.DiscordYVtils
 import yv.tils.essentials.EssentialYVtils
 import yv.tils.message.MessageYVtils
 import yv.tils.multiMine.MultiMineYVtils
+import yv.tils.regions.RegionsYVtils
 import yv.tils.server.ServerYVtils
 import yv.tils.sit.SitYVtils
 import yv.tils.status.StatusYVtils
@@ -31,6 +33,8 @@ class YVtils : JavaPlugin() {
         MultiMineYVtils(),
         StatusYVtils(),
         ServerYVtils(),
+        RegionsYVtils(),
+        DiscordYVtils(),
         CommonYVtils()
     )
 

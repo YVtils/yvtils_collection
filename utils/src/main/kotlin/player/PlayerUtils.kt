@@ -34,6 +34,11 @@ class PlayerUtils {
                 return onlinePlayersAsPlayers()
             }
 
+        val maxOnlinePlayers: Int
+            get() {
+                return Data.instance.server.maxPlayers
+            }
+
         /**
          * Returns a list of online players with or without the specified permission.
          *

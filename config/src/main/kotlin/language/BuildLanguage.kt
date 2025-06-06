@@ -60,6 +60,7 @@ class BuildLanguage {
     data class RegisteredString(val file: FileTypes, val key: String, val value: String)
 }
 
+
 enum class FileTypes {
     EN,
     DE,
