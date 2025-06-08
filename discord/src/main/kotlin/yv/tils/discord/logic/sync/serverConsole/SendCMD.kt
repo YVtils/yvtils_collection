@@ -1,6 +1,6 @@
 package yv.tils.discord.logic.sync.serverConsole
 
-import colors.ColorUtils
+import colors.Colors
 import coroutine.CoroutineHandler
 import data.Data
 import logger.Logger
@@ -37,11 +37,17 @@ class SendCMD : ListenerAdapter() {
         CoroutineHandler.launchTask(
             task = {
                 e.message.addReaction(Emoji.fromUnicode("🖥️")).queue()
-                Logger.info(MessageUtils.convert("<gray>[<${ColorUtils.MAIN.color}>DC Console<gray>]<white> $content"))
+                Logger.info(MessageUtils.convert("<gray>[<${Colors.MAIN.color}>DC Console<gray>]<white> $content"))
                 // Clear history before executing new command
                 GetConsole().clearHistory()
-                Data.instance.server.dispatchCommand(Data.instance.server.consoleSender, content)
-            },
+                Data.instance.server.scheduler.runTask(Data.instance, Runnable {
+                    try {
+                        Data.instance.server.dispatchCommand(Data.instance.server.consoleSender, content)
+                    } catch (ex: Exception) {
+                        Logger.error(MessageUtils.convert("<red>Error executing command: <white>$content<red> - ${ex.message}")) // TODO: Replace with actual error message
+                    }
+                } )
+                   },
             isOnce = true
         )
     }
