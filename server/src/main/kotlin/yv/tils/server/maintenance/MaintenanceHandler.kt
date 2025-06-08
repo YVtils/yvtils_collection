@@ -6,6 +6,7 @@ import language.LanguageBroadcast
 import language.LanguageHandler
 import org.bukkit.command.CommandSender
 import player.PlayerUtils
+import server.ServerUtils
 import yv.tils.server.configs.ConfigFile
 
 class MaintenanceHandler {
@@ -100,6 +101,7 @@ class MaintenanceHandler {
 
     private fun saveState() {
         ConfigFile.set("maintenance.enabled", maintenance)
+        ServerUtils.setServerMaintenance(maintenance)
     }
 
     fun loadState() {

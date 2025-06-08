@@ -14,12 +14,11 @@ class UUID {
         fun generateUUID(): UUID {
             val uuid = UUID.randomUUID()
 
-            if (uuids.contains(uuid)) {
-                return generateUUID()
+            if (registerUUID(uuid)) {
+                return uuid
             }
 
-            uuids.add(uuid)
-            return uuid
+            return generateUUID()
         }
 
         /**

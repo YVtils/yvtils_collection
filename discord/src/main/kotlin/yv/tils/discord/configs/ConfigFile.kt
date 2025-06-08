@@ -60,8 +60,9 @@ class ConfigFile {
             content["syncFeature.chatSync.channel"] = "CHANNEL ID"
             content["syncFeature.chatSync.settings.syncMinecraftMessages"] = true
             content["syncFeature.chatSync.settings.syncDiscordMessages"] = true
-            content["syncFeature.chatSync.settings.syncAchievements"] = true
+            content["syncFeature.chatSync.settings.syncAdvancements"] = true
             content["syncFeature.chatSync.settings.syncJoinLeaveMessages"] = true
+            content["syncFeature.chatSync.settings.ignoreBotMessages"] = true
 
             content["syncFeature.consoleSync.enabled"] = true
             content["syncFeature.consoleSync.channel"] = "CHANNEL ID"

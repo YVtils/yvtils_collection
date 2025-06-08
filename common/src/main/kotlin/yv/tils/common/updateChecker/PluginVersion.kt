@@ -66,6 +66,7 @@ class PluginVersion {
                     )
                 )
 
+                firstBroadcast = false
                 moderatorMessageKeyOnJoin = null
             }
             VersionState.OUTDATED_PATCH -> {

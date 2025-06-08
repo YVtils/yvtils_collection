@@ -1,6 +1,6 @@
 package yv.tils.message.language
 
-import colors.ColorUtils
+import colors.Colors
 import language.BuildLanguage
 import language.FileTypes
 
@@ -17,16 +17,16 @@ class RegisterStrings {
         registerNewString(
             "command.msg.note",
             mapOf(
-                FileTypes.EN to "<${ColorUtils.MAIN.color}>[<${ColorUtils.SECONDARY.color}>Note<${ColorUtils.MAIN.color}>]<white> <message>",
-                FileTypes.DE to "<${ColorUtils.MAIN.color}>[<${ColorUtils.SECONDARY.color}>Notiz<${ColorUtils.MAIN.color}>]<white> <message>",
+                FileTypes.EN to "<${Colors.MAIN.color}>[<${Colors.SECONDARY.color}>Note<${Colors.MAIN.color}>]<white> <message>",
+                FileTypes.DE to "<${Colors.MAIN.color}>[<${Colors.SECONDARY.color}>Notiz<${Colors.MAIN.color}>]<white> <message>",
             )
         )
 
         registerNewString(
             "command.msg.message",
             mapOf(
-                FileTypes.EN to "<${ColorUtils.MAIN.color}>[<${ColorUtils.SECONDARY.color}><sender> <${ColorUtils.MAIN.color}>-> <${ColorUtils.SECONDARY.color}><receiver><${ColorUtils.MAIN.color}>]<white> <message>",
-                FileTypes.DE to "<${ColorUtils.MAIN.color}>[<${ColorUtils.SECONDARY.color}><sender> <${ColorUtils.MAIN.color}>-> <${ColorUtils.SECONDARY.color}><receiver><${ColorUtils.MAIN.color}>]<white> <message>",
+                FileTypes.EN to "<${Colors.MAIN.color}>[<${Colors.SECONDARY.color}><sender> <${Colors.MAIN.color}>-> <${Colors.SECONDARY.color}><receiver><${Colors.MAIN.color}>]<white> <message>",
+                FileTypes.DE to "<${Colors.MAIN.color}>[<${Colors.SECONDARY.color}><sender> <${Colors.MAIN.color}>-> <${Colors.SECONDARY.color}><receiver><${Colors.MAIN.color}>]<white> <message>",
             )
         )
     }

@@ -8,7 +8,11 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import org.apache.logging.log4j.LogManager
+import yv.tils.discord.commands.JDACommandsListener
+import yv.tils.discord.commands.JDACommandsRegister
 import yv.tils.discord.configs.ConfigFile
+import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager
+import yv.tils.discord.logic.sync.serverChats.SyncChats
 import yv.tils.discord.logic.sync.serverConsole.GetConsole
 import yv.tils.discord.logic.sync.serverConsole.SendCMD
 import yv.tils.discord.logic.sync.serverStats.CollectStats
@@ -69,6 +73,9 @@ class AppLogic {
 
     private fun eventListeners() {
         builder.addEventListeners(SendCMD())
+        builder.addEventListeners(SyncChats())
+        builder.addEventListeners(JDACommandsRegister())
+        builder.addEventListeners(JDACommandsListener())
     }
 
     private fun checkToken(): Boolean {
@@ -109,7 +116,7 @@ class AppLogic {
             jda.awaitReady() // Wait for JDA to be ready
             started = true
             appID = jda.selfUser.id // Get the bot's application ID
-            launchRoutines() // Start background tasks
+            launchFeatures() // Start background tasks
             Logger.info("Discord bot started successfully.") // TODO: Replace with actual success message
         } catch (e: Exception) {
             Logger.error("Failed to start Discord bot: ${e.message}") // TODO: Replace with actual error message
@@ -117,7 +124,9 @@ class AppLogic {
         }
     }
 
-    private fun launchRoutines() {
+    private fun launchFeatures() {
+        ServerChatsSyncManager().loadChannelFromID()
+
         CollectStats().collect()
 
         val appender = GetConsole()

@@ -92,6 +92,10 @@ class LanguageHandler {
         playerLang.remove(uuid)
     }
 
+    fun setServerDefaultLanguage(locale: String) {
+        setServerDefaultLanguage(Language().stringToLocale(locale))
+    }
+
     fun setServerDefaultLanguage(locale: Locale) {
         Logger.debug("Setting server default language to locale: $locale")
         serverDefaultLang = locale

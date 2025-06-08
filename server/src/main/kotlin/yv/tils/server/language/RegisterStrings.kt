@@ -1,6 +1,6 @@
 package yv.tils.server.language
 
-import colors.ColorUtils
+import colors.Colors
 import language.BuildLanguage
 import language.FileTypes
 
@@ -9,16 +9,16 @@ class RegisterStrings {
         registerNewString(
             "event.player.join",
             mapOf(
-                FileTypes.EN to "<${ColorUtils.GREEN.color}>» <white><player>",
-                FileTypes.DE to "<${ColorUtils.GREEN.color}>» <white><player>",
+                FileTypes.EN to "<${Colors.GREEN.color}>» <white><player>",
+                FileTypes.DE to "<${Colors.GREEN.color}>» <white><player>",
             )
         )
 
         registerNewString(
             "event.player.quit",
             mapOf(
-                FileTypes.EN to "<${ColorUtils.RED.color}>« <white><player>",
-                FileTypes.DE to "<${ColorUtils.RED.color}>« <white><player>",
+                FileTypes.EN to "<${Colors.RED.color}>« <white><player>",
+                FileTypes.DE to "<${Colors.RED.color}>« <white><player>",
             )
         )
     }

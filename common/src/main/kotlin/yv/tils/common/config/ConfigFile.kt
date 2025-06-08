@@ -41,6 +41,13 @@ class ConfigFile {
         if (content.isEmpty()) {
             content["documentation"] = "https://docs.yvtils.net/config.yml"
 
+            content["language"] = "en"
+
+            content["serverIP"] = "smp.net"
+            content["serverPort"] = -1
+
+            content["timezone"] = "default"
+
             content["updateCheck.enabled"] = true
             content["updateCheck.sendToOps"] = true
 

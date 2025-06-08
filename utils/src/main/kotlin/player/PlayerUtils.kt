@@ -1,6 +1,8 @@
 package player
 
 import data.Data
+import message.MessageUtils
+import net.kyori.adventure.text.Component
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import java.util.*
@@ -61,6 +63,28 @@ class PlayerUtils {
                 }
             }
             return players
+        }
+
+        /**
+         * Broadcasts a message to all online players with the specified permission.
+         * @param message The message to broadcast.
+         * @param permission The permission to check for. If empty, the message will be sent to all online players.
+         * @param needPerm If true, only players with the permission will receive the message. If false, only players without the permission will receive the message.
+         */
+        fun broadcast(message: String, permission: String = "", needPerm: Boolean = true) {
+            broadcast(MessageUtils.convert(message), permission, needPerm)
+        }
+
+        /**
+         * Broadcasts a message to all online players with the specified permission.
+         * @param message The message to broadcast.
+         * @param permission The permission to check for. If empty, the message will be sent to all online players.
+         * @param needPerm If true, only players with the permission will receive the message. If false, only players without the permission will receive the message.
+         */
+        fun broadcast(message: Component, permission: String = "", needPerm: Boolean = true) {
+            for (player in onlinePlayersAsPlayers(permission, needPerm)) {
+                player.sendMessage(message)
+            }
         }
 
         /**

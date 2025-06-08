@@ -9,6 +9,8 @@ import logger.Logger
 import message.MessageUtils
 import net.kyori.adventure.text.Component
 import org.bukkit.permissions.Permission
+import server.ServerUtils
+import time.TimeUtils
 import yv.tils.common.config.ConfigFile
 import yv.tils.common.data.Permissions
 import yv.tils.common.language.LoadPlayerLanguage
@@ -67,6 +69,12 @@ class CommonYVtils : Data.YVtilsModule {
             ConfigFile.getValueAsBoolean("debug.active") ?: false,
             ConfigFile.getValueAsInt("debug.level") ?: 3
         )
+
+        LanguageHandler().setServerDefaultLanguage(ConfigFile.getValueAsString("language") ?: "en")
+
+        TimeUtils.timeZone = ConfigFile.getValueAsString("timezone") ?: "default"
+        ServerUtils.serverIP  = ConfigFile.getValueAsString("serverIP") ?: "smp.net"
+        ServerUtils.serverPort = ConfigFile.getValueAsInt("serverPort") ?: -1
     }
 
     private fun registerListeners() {

@@ -1,6 +1,6 @@
 package data
 
-import colors.ColorUtils
+import colors.Colors
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -15,10 +15,10 @@ class Data {
         var pluginShortName = "null"
         var prefix: String
             set(value) {
-                "<dark_gray>[<${ColorUtils.MAIN.color}>YVtils $value<dark_gray>]<white>"
+                "<dark_gray>[<${Colors.MAIN.color}>YVtils $value<dark_gray>]<white>"
             }
             get() {
-                return "<dark_gray>[<${ColorUtils.MAIN.color}>YVtils $pluginName<dark_gray>]<white>"
+                return "<dark_gray>[<${Colors.MAIN.color}>YVtils $pluginName<dark_gray>]<white>"
             }
 
         private val loadedModules = mutableListOf<String>()

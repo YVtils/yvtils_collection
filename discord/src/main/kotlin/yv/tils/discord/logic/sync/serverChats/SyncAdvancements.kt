@@ -1,0 +1,32 @@
+package yv.tils.discord.logic.sync.serverChats
+
+import logger.Logger
+import org.bukkit.advancement.Advancement
+import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerAdvancementDoneEvent
+import yv.tils.discord.data.Permissions
+import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.active
+import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.channel
+import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.syncAdvancements
+
+class SyncAdvancements {
+    fun announceOnDiscord(e: PlayerAdvancementDoneEvent) {
+        val advancement = e.advancement
+
+        if (!active) return
+        if (!syncAdvancements) return // Check if advancement sync is enabled
+        if (advancement.display == null) return // Skip if no display information is available
+        if (!e.player.hasPermission(Permissions.SYNC_ADVANCEMENTS.permission)) return // Check for permission
+
+        sendDiscordMessage(e.player, advancement)
+    }
+
+    private fun sendDiscordMessage(sender: Player, advancement: Advancement) {
+        try {
+            channel.sendMessageEmbeds(MessageEmbeds().embedForAdvancement(sender, advancement).build()).queue()
+        } catch (_: UninitializedPropertyAccessException) {
+            Logger.warn("Discord channel for chat sync is not initialized. Please check your configuration.") // TODO: Replace with actual warning message
+            active = false
+        }
+    }
+}

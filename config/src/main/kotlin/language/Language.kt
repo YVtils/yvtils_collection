@@ -2,7 +2,7 @@ package language
 
 import files.FileUtils
 import logger.Logger
-import java.util.Locale
+import java.util.*
 
 class Language {
     companion object {
@@ -63,5 +63,15 @@ class Language {
     fun localeToShortLanguage(locale: Locale): String {
         Logger.debug("Converting locale to short language: $locale")
         return locale.language
+    }
+
+    fun stringToLocale(language: String): Locale {
+        Logger.debug("Converting string to locale: $language")
+        return if (language.contains("_")) {
+            val parts = language.split("_")
+            Locale.of(parts[1], parts[0])
+        } else {
+            Locale.of(language)
+        }
     }
 }
