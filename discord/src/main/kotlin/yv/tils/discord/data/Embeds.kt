@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.User
 import player.PlayerUtils
 import server.ServerUtils
 import server.VersionUtils
-import yv.tils.discord.logic.whitelist.WhitelistConfig
+import yv.tils.discord.logic.whitelist.WhitelistLogic
 
 class Embeds {
     companion object {
@@ -46,8 +46,10 @@ class Embeds {
         val userID = user.id
         var minecraftName = "-"
 
-        if (WhitelistConfig().reader(dc = userID)[0] == userID) {
-            minecraftName = WhitelistConfig().reader(dc = userID)[1]
+        val entry = WhitelistLogic.getEntryByDiscordID(userID)
+
+        if (entry != null) {
+            minecraftName = entry.minecraftName
         }
 
         return builder

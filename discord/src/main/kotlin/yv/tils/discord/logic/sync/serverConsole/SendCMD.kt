@@ -18,7 +18,7 @@ class SendCMD : ListenerAdapter() {
     override fun onMessageReceived(e: MessageReceivedEvent) {
         if (!active) return
 
-        if (ConfigFile.getValueAsBoolean("syncFeature.consoleSync.settings.ignoreBotMessages") == true && e.author.isBot) {
+        if (ConfigFile.getValueAsBoolean("general.settings.ignoreBotMessages") == true && e.author.isBot) {
             return
         } else {
             if (e.author.id == AppLogic.appID) return
@@ -47,7 +47,7 @@ class SendCMD : ListenerAdapter() {
                         Logger.error(MessageUtils.convert("<red>Error executing command: <white>$content<red> - ${ex.message}")) // TODO: Replace with actual error message
                     }
                 } )
-                   },
+            },
             isOnce = true
         )
     }

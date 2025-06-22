@@ -3,6 +3,7 @@ package yv.tils.discord.configs
 import files.FileUtils
 import logger.Logger
 
+// TODO: Add option to allow multiple whitelist channels
 class ConfigFile {
     companion object {
         val config: MutableMap<String, Any> = mutableMapOf()
@@ -48,8 +49,10 @@ class ConfigFile {
             content["embedSettings.author"] = "YVtils SMP"
             content["embedSettings.authorIconURL"] = "URL"
 
+            content["general.settings.ignoreBotMessages"] = true
+
             content["whitelistFeature.channel"] = "CHANNEL ID"
-            content["whitelistFeature.role"] = "ROLE ID 1, ROLE ID 2, ROLE ID ..."
+            content["whitelistFeature.roles"] = "ROLE ID 1, ROLE ID 2, ROLE ID ..."
             content["whitelistFeature.settings.checkMinecraftAccount"] = true
 
             content["command.serverInfoCommand.permission"] = "PERMISSION"
@@ -62,7 +65,6 @@ class ConfigFile {
             content["syncFeature.chatSync.settings.syncDiscordMessages"] = true
             content["syncFeature.chatSync.settings.syncAdvancements"] = true
             content["syncFeature.chatSync.settings.syncJoinLeaveMessages"] = true
-            content["syncFeature.chatSync.settings.ignoreBotMessages"] = true
 
             content["syncFeature.consoleSync.enabled"] = true
             content["syncFeature.consoleSync.channel"] = "CHANNEL ID"

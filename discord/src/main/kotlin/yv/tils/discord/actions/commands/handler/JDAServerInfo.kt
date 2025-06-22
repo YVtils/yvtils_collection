@@ -1,4 +1,4 @@
-package yv.tils.discord.commands.handler
+package yv.tils.discord.actions.commands.handler
 
 import language.LanguageHandler
 import net.dv8tion.jda.api.Permission
@@ -13,6 +13,7 @@ import yv.tils.discord.data.Embeds
 import yv.tils.discord.language.RegisterStrings
 import java.io.File
 
+// TODO: Fix command descriptions showing as keys
 class JDAServerInfo {
     companion object {
         val cmdPermission = ConfigFile.getValueAsString("command.serverInfoCommand.permission") ?: "MESSAGE_SEND"
@@ -24,7 +25,7 @@ class JDAServerInfo {
      * @param e The SlashCommandInteractionEvent containing the command event.
      * @param args The arguments passed to the command, if any.
      */
-    fun executeCommand(e: SlashCommandInteractionEvent, args: String?) {
+    fun executeCommand(e: SlashCommandInteractionEvent) {
         val serverIcon = File("./server-icon.png")
 
         if (serverIcon.exists()) {

@@ -57,7 +57,10 @@ class SyncChats : ListenerAdapter() {
             if (!e.member!!.hasPermission(Permission.MESSAGE_SEND)) return
         }
 
-        PlayerUtils.broadcast("<gray>[<#7289da>DISCORD<gray>]<white> $author<gray>:<white> $message")
+        val compMessage = MessageUtils.convert("<gray>[<#7289da>DISCORD<gray>]<white> $author<gray>:<white> $message")
+
+        PlayerUtils.broadcast(compMessage)
+        Logger.info(compMessage)
     }
 
     override fun onMessageReceived(e: MessageReceivedEvent) {

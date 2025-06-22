@@ -8,14 +8,16 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import org.apache.logging.log4j.LogManager
-import yv.tils.discord.commands.JDACommandsListener
-import yv.tils.discord.commands.JDACommandsRegister
+import yv.tils.discord.actions.buttons.JDAButtonsListener
+import yv.tils.discord.actions.commands.JDACommandsListener
+import yv.tils.discord.actions.commands.JDACommandsRegister
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager
 import yv.tils.discord.logic.sync.serverChats.SyncChats
 import yv.tils.discord.logic.sync.serverConsole.GetConsole
 import yv.tils.discord.logic.sync.serverConsole.SendCMD
 import yv.tils.discord.logic.sync.serverStats.CollectStats
+import yv.tils.discord.logic.whitelist.WhitelistManage
 import java.time.Duration
 
 class AppLogic {
@@ -73,9 +75,15 @@ class AppLogic {
 
     private fun eventListeners() {
         builder.addEventListeners(SendCMD())
+
         builder.addEventListeners(SyncChats())
+
         builder.addEventListeners(JDACommandsRegister())
         builder.addEventListeners(JDACommandsListener())
+
+        builder.addEventListeners(JDAButtonsListener())
+
+        builder.addEventListeners(WhitelistManage())
     }
 
     private fun checkToken(): Boolean {

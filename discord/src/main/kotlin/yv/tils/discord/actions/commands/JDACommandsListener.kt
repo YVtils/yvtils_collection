@@ -1,9 +1,9 @@
-package yv.tils.discord.commands
+package yv.tils.discord.actions.commands
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import yv.tils.discord.commands.handler.JDAServerInfo
-import yv.tils.discord.commands.handler.JDAWhitelist
+import yv.tils.discord.actions.commands.handler.JDAServerInfo
+import yv.tils.discord.actions.commands.handler.JDAWhitelist
 
 class JDACommandsListener : ListenerAdapter() {
     override fun onSlashCommandInteraction(e: SlashCommandInteractionEvent) {
@@ -12,10 +12,10 @@ class JDACommandsListener : ListenerAdapter() {
 
         when (command) {
             "mcinfo" -> {
-                JDAServerInfo().executeCommand(e, args)
+                JDAServerInfo().executeCommand(e)
             }
             "whitelist" -> {
-                JDAWhitelist().executeCommand(e, args)
+                JDAWhitelist().executeCommand(e)
             }
         }
     }

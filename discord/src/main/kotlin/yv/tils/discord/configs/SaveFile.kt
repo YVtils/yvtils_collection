@@ -1,16 +1,13 @@
 package yv.tils.discord.configs
 
 import files.FileUtils
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import logger.Logger
+import yv.tils.discord.logic.whitelist.WhitelistEntry
+import yv.tils.discord.logic.whitelist.WhitelistLogic
 
 class SaveFile {
-    companion object {
-        val saves = mutableMapOf<String, DiscordSave>()
-    }
-
     private val filePath = "/discord/save.json"
 
     fun loadConfig() {
@@ -30,7 +27,7 @@ class SaveFile {
             val minecraftName = save.jsonObject["minecraftName"]?.toString()?.replace("\"", "") ?: continue
             val minecraftUUID = save.jsonObject["minecraftUUID"]?.toString()?.replace("\"", "") ?: continue
 
-            saves[discordUserID] = DiscordSave(
+            WhitelistLogic.whitelistMap[discordUserID] = WhitelistEntry(
                 discordUserID = discordUserID,
                 minecraftName = minecraftName,
                 minecraftUUID = minecraftUUID
@@ -38,39 +35,30 @@ class SaveFile {
         }
     }
 
-    fun registerStrings(saveList: MutableList<DiscordSave> = mutableListOf()) {
+    fun registerStrings(saveList: MutableList<WhitelistEntry> = mutableListOf()) {
         val saveWrapper = mapOf("saves" to saveList)
         val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
         FileUtils.updateFile(filePath, jsonFile)
     }
 
+    private fun upgradeStrings(saveList: MutableList<WhitelistEntry> = mutableListOf()) {
+        val saveWrapper = mapOf("saves" to saveList)
+        val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
+        FileUtils.updateFile(filePath, jsonFile, true)
+    }
+
     fun addSave(discordUserID: String, minecraftName: String, minecraftUUID: String) {
-        val newSave = DiscordSave(
+        val newSave = WhitelistEntry(
             discordUserID = discordUserID,
             minecraftName = minecraftName,
             minecraftUUID = minecraftUUID
         )
-        saves[discordUserID] = newSave
-        registerStrings(saves.values.toMutableList())
+        WhitelistLogic.whitelistMap[discordUserID] = newSave
+        upgradeStrings(WhitelistLogic.getAllEntries().toMutableList())
     }
 
     fun removeSave(discordUserID: String) {
-        saves.remove(discordUserID)
-        registerStrings(saves.values.toMutableList())
+        WhitelistLogic.whitelistMap.remove(discordUserID)
+        upgradeStrings(WhitelistLogic.getAllEntries().toMutableList())
     }
-
-    fun getSave(discordUserID: String): DiscordSave? {
-        return saves[discordUserID]
-    }
-
-    fun getAllSaves(): List<DiscordSave> {
-        return saves.values.toList()
-    }
-
-    @Serializable
-    data class DiscordSave (
-        val discordUserID: String,
-        val minecraftName: String,
-        val minecraftUUID: String,
-    )
 }

@@ -15,7 +15,7 @@ class ServerChatsSyncManager {
         val syncDiscordMessages = ConfigFile.getValueAsBoolean("syncFeature.chatSync.settings.syncDiscordMessages") ?: true
         val syncAdvancements = ConfigFile.getValueAsBoolean("syncFeature.chatSync.settings.syncAdvancements") ?: true
         val syncJoinLeaveMessages = ConfigFile.getValueAsBoolean("syncFeature.chatSync.settings.syncJoinLeaveMessages") ?: true
-        val ignoreBotMessages = ConfigFile.getValueAsBoolean("syncFeature.chatSync.settings.ignoreBotMessages") ?: true
+        val ignoreBotMessages = ConfigFile.getValueAsBoolean("general.settings.ignoreBotMessages") ?: true
 
         lateinit var channel: TextChannel
     }

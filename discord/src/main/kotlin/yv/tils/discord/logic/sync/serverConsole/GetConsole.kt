@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 
-class GetConsole : AbstractAppender("YVtilsSMPLogger", null, null, true, null) {
+class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
     companion object {
         var active = ConfigFile.getValueAsBoolean("syncFeature.consoleSync.enabled") ?: true
         val channelID = ConfigFile.getValueAsString("syncFeature.consoleSync.channel") ?: ""
