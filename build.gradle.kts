@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "2.1.21" apply false
-    kotlin("plugin.serialization") version "2.1.21" apply false
+    kotlin("plugin.serialization") version "2.2.0" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1" apply false
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.16" apply false
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false
