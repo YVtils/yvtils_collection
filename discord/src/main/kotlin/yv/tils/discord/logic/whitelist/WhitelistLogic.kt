@@ -234,6 +234,49 @@ class WhitelistLogic {
                 }
             }
         }
+
+        /**
+         * Gets a paginated list of whitelist entries for a specific site.
+         * Each site contains 25 entries.
+         *
+         * @param site The site number (1-based index).
+         * @return A list of WhitelistEntry objects for the specified site, or an empty list if the site is out of range.
+         */
+        fun getEntriesBySite(site: Int): List<WhitelistEntry> {
+            val allEntries = getAllEntries()
+
+            Logger.dev("Getting entries for site $site, total entries: ${allEntries.size}")
+
+            val startIndex = (site - 1) * 25
+            if (startIndex < 0 || startIndex >= allEntries.size) {
+                return emptyList()
+            }
+            val endIndex = minOf(startIndex + 25, allEntries.size)
+            return allEntries.subList(startIndex, endIndex)
+        }
+
+        /**
+         * Gets the total number of whitelist entries.
+         *
+         * @return The total count of WhitelistEntry objects in the whitelist.
+         */
+        fun getTotalEntriesCount(): Int {
+            return getAllEntries().size
+        }
+
+        /**
+         * Gets the total number of pages for the whitelist entries.
+         * Each page contains 25 entries.
+         * If there are no entries, it returns 0.
+         * Rounds up to ensure that any remaining entries that do not fill a complete page are counted as an additional page.
+         *
+         * @return The total number of pages needed to display all whitelist entries.
+         */
+        fun getTotalPagesCount(): Int {
+            val totalEntries = getTotalEntriesCount()
+            Logger.dev("Total entries in whitelist: $totalEntries")
+            return if (totalEntries == 0) 0 else (totalEntries + 24) / 25
+        }
     }
 }
 

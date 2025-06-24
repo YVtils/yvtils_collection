@@ -12,11 +12,12 @@ import yv.tils.discord.logic.whitelist.WhitelistLogic
 
 class Embeds {
     companion object {
-        val authorName = "YVtils"
-        val authorIcon = "https://api.yvtils.net/images/yvtils_logo"
-        val authorLink = "https://yvtils.net"
-        val footerText = "YVtils • https://yvtils.net"
-        val footerIcon = "https://api.yvtils.net/images/yvtils_logo"
+        const val AUTHOR_NAME = "YVtils"
+        const val AUTHOR_ICON = "https://api.yvtils.net/images/yvtils_logo"
+        const val AUTHOR_LINK = "https://yvtils.net"
+        const val FOOTER_TEXT = "YVtils • https://yvtils.net"
+        const val FOOTER_TEXT_CUSTOMIZABLE = "YVtils-SMP • %s • https://yvtils.net"
+        const val FOOTER_ICON = "https://api.yvtils.net/images/yvtils_logo"
 
         val errorColor = ColorUtils.colorFromHex(Colors.RED.color)
         val warningColor = ColorUtils.colorFromHex(Colors.YELLOW.color)
@@ -64,11 +65,11 @@ class Embeds {
             .addField("Difficulty", Data.instance.server.worlds[0].difficulty.name, true)
             .addField("Linked Account", minecraftName, false)
             .setColor(infoColor)
-            .setFooter(footerText, footerIcon)
+            .setFooter(FOOTER_TEXT, FOOTER_ICON)
             .setAuthor(
-                authorName + if (serverIP.isNotEmpty()) " • $serverIP" else "",
-                authorLink,
-                authorIcon
+                AUTHOR_NAME + if (serverIP.isNotEmpty()) " • $serverIP" else "",
+                AUTHOR_LINK,
+                AUTHOR_ICON
             )
     }
 }

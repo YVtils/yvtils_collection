@@ -2,6 +2,7 @@ package yv.tils.discord.actions.commands.handler
 
 import coroutine.CoroutineHandler
 import language.LanguageHandler
+import logger.Logger
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionContextType
@@ -11,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
+import net.dv8tion.jda.api.interactions.components.ActionRow
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.WhitelistEmbeds
@@ -88,12 +90,7 @@ class JDAWhitelist {
     }
 
     fun handleForceRemove(e: SlashCommandInteractionEvent) {
-        // Get all options from the command
-        // If dc_user or minecraft_name is provided, remove the entry directly
-        // If site is provided send an embed with a list of entries, each site has 25, of the specified site
-        // If no options are provided, send an embed with a list of all entries splited in pages starting from 0
-
-        val site = e.getOption("site")?.asLong ?: 0L
+        val site = e.getOption("site")?.asInt ?: 1
         val discordUser = e.getOption("discord_user")?.asUser
         val minecraftName = e.getOption("minecraft_name")?.asString
         val guildID: String = e.guild?.id ?: return
@@ -101,21 +98,64 @@ class JDAWhitelist {
         CoroutineHandler.launchTask(
             task = {
                 if (discordUser != null || minecraftName != null) {
+                    var discordEntry: WhitelistEntry? = null
+                    var minecraftEntry: WhitelistEntry? = null
+
+                    if (discordUser != null) {
+                        val entry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
+                        if (entry == null) {
+                            if (minecraftName == null) {
+                                Logger.dev("No entry found for discord user: $discordUser")
+                                // TODO: Add reply
+                                return@launchTask
+                            }
+                            discordEntry = null
+                        } else {
+                            discordEntry = entry
+                        }
+                    }
+
+                    if (minecraftName != null) {
+                        val entry = WhitelistLogic.getEntryByMinecraftName(minecraftName)
+                        if (entry == null) {
+                            if (discordEntry == null) {
+                                Logger.dev("No entry found for minecraft name: $minecraftName")
+                                // TODO: Add reply
+                                return@launchTask
+                            }
+                            minecraftEntry = null
+                        } else {
+                            minecraftEntry = entry
+                        }
+                    }
+
+                    if (discordEntry != minecraftEntry && discordEntry != null && minecraftEntry != null) {
+                        Logger.dev("Discord entry and Minecraft entry do not match: $discordEntry vs $minecraftEntry")
+                        // TODO: Add reply
+                        return@launchTask
+                    }
+
+                    val discordUserID = discordEntry?.discordUserID ?: minecraftEntry?.discordUserID ?: return@launchTask
+
+                    WhitelistManage().unlinkAccount(discordUserID, guildID)
+
+                    Logger.dev("Removed account: $discordUserID from the whitelist")
+
+                    // TODO: Add reply
 
                     return@launchTask
                 }
 
-                val entries = WhitelistLogic.getEntriesBySite(site) ?: WhitelistLogic.getEntriesBySite(0L)
-                if (entries.isEmpty()) {
-                    // Send an embed with deactivates dropdown and a message that no entries were found
-                }
+                val entries = WhitelistLogic.getEntriesBySite(site)
 
-                val embed = WhitelistEmbeds().forceRemoveEmbed(entries, site)
+                val embed = WhitelistEmbeds().forceRemoveEmbed(site)
                 e.replyEmbeds(embed.build())
-                    .addActionRow(WhitelistEmbeds().forceRemoveActionRow(site, entries.size))
+                    .setComponents(
+                        ActionRow.of(WhitelistEmbeds().forceRemoveActionRowDropdown(entries).build()),
+                        ActionRow.of(WhitelistEmbeds().forceRemoveActionRowButtons(site))
+                    )
                     .setEphemeral(true)
                     .queue()
-
             },
             isOnce = true
         )

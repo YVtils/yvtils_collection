@@ -16,7 +16,7 @@ class Logger {
         }
 
         fun dev(message: String) {
-            logger?.info(message)
+            logger?.info("[DEV] $message")
         }
 
         fun debug(message: String, level: Int = -1) {

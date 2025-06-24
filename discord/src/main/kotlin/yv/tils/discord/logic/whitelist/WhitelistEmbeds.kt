@@ -3,14 +3,20 @@ package yv.tils.discord.logic.whitelist
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.Button
-import yv.tils.discord.data.Embeds.Companion.authorIcon
-import yv.tils.discord.data.Embeds.Companion.authorLink
-import yv.tils.discord.data.Embeds.Companion.authorName
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
+import server.ServerUtils
+import yv.tils.discord.data.Embeds.Companion.AUTHOR_ICON
+import yv.tils.discord.data.Embeds.Companion.AUTHOR_LINK
+import yv.tils.discord.data.Embeds.Companion.AUTHOR_NAME
+import yv.tils.discord.data.Embeds.Companion.FOOTER_ICON
+import yv.tils.discord.data.Embeds.Companion.FOOTER_TEXT
+import yv.tils.discord.data.Embeds.Companion.FOOTER_TEXT_CUSTOMIZABLE
 import yv.tils.discord.data.Embeds.Companion.errorColor
-import yv.tils.discord.data.Embeds.Companion.footerIcon
-import yv.tils.discord.data.Embeds.Companion.footerText
+import yv.tils.discord.data.Embeds.Companion.infoColor
 import yv.tils.discord.data.Embeds.Companion.successColor
 import yv.tils.discord.data.Embeds.Companion.warningColor
+import yv.tils.discord.logic.AppLogic
 
 // TODO: Add correct messages for titles and descriptions
 class WhitelistEmbeds {
@@ -24,8 +30,8 @@ class WhitelistEmbeds {
             .setTitle(title)
             .setDescription(description)
             .setColor(successColor)
-            .setFooter(footerText, footerIcon)
-            .setAuthor(authorName, authorLink, authorIcon)
+            .setFooter(FOOTER_TEXT, FOOTER_ICON)
+            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
     }
 
     fun accountRemoveEmbed(accountName: String): EmbedBuilder {
@@ -38,8 +44,8 @@ class WhitelistEmbeds {
             .setTitle(title)
             .setDescription(description)
             .setColor(successColor)
-            .setFooter(footerText, footerIcon)
-            .setAuthor(authorName, authorLink, authorIcon)
+            .setFooter(FOOTER_TEXT, FOOTER_ICON)
+            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
     }
 
     fun accountAlreadyListedEmbed(accountName: String): EmbedBuilder {
@@ -52,8 +58,8 @@ class WhitelistEmbeds {
             .setTitle(title)
             .setDescription(description)
             .setColor(warningColor)
-            .setFooter(footerText, footerIcon)
-            .setAuthor(authorName, authorLink, authorIcon)
+            .setFooter(FOOTER_TEXT, FOOTER_ICON)
+            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
     }
 
     fun invalidAccountEmbed(accName: String): EmbedBuilder {
@@ -66,8 +72,8 @@ class WhitelistEmbeds {
             .setTitle(title)
             .setDescription(description)
             .setColor(errorColor)
-            .setFooter(footerText, footerIcon)
-            .setAuthor(authorName, authorLink, authorIcon)
+            .setFooter(FOOTER_TEXT, FOOTER_ICON)
+            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
     }
 
     fun accountChangeEmbed(oldName: String, newName: String): EmbedBuilder {
@@ -80,8 +86,8 @@ class WhitelistEmbeds {
             .setTitle(title)
             .setDescription(description)
             .setColor(successColor)
-            .setFooter(footerText, footerIcon)
-            .setAuthor(authorName, authorLink, authorIcon)
+            .setFooter(FOOTER_TEXT, FOOTER_ICON)
+            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
     }
 
     fun accountChangeActionRow(): List<Button> {
@@ -108,7 +114,87 @@ class WhitelistEmbeds {
             .setTitle(title)
             .setDescription(description)
             .setColor(errorColor)
-            .setFooter(footerText, footerIcon)
-            .setAuthor(authorName, authorLink, authorIcon)
+            .setFooter(FOOTER_TEXT, FOOTER_ICON)
+            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
+    }
+
+    fun forceRemoveEmbed(site: Int): EmbedBuilder {
+        val builder = EmbedBuilder()
+
+        val title = "Force Remove Whitelist Entries"
+        val description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor." // TODO: Add a proper description
+        val fieldWhitelistedPlayersCount = WhitelistLogic.getTotalEntriesCount()
+        val fieldWhitelistStatus = if (ServerUtils.isWhitelistActive) "on" else "off"
+
+        val maxSite = WhitelistLogic.getTotalPagesCount()
+
+        val customFooter = FOOTER_TEXT_CUSTOMIZABLE
+            .replace("%s", "Site $site / $maxSite")
+
+        return builder
+            .setTitle(title)
+            .setDescription(description)
+            .addField("Whitelisted Players:", fieldWhitelistedPlayersCount.toString(), true)
+            .addField("Whitelist Status:", fieldWhitelistStatus, true)
+            .setColor(infoColor)
+            .setFooter(customFooter, FOOTER_ICON)
+            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
+    }
+
+    fun forceRemoveActionRowButtons(site: Int): List<Button> {
+        val buttons = mutableListOf<Button>()
+
+        val maxSite = WhitelistLogic.getTotalPagesCount()
+
+        val isPreviousButtonDisabled = site <= 1
+        val isNextButtonDisabled = site >= maxSite
+
+        buttons.add(
+            if (isPreviousButtonDisabled)
+                Button.danger("whitelist:force:remove:site:previous", "«").asDisabled()
+            else
+                Button.danger("whitelist:force:remove:site:previous", "«")
+        )
+
+        buttons.add(
+            if (isNextButtonDisabled)
+                Button.success("whitelist:force:remove:site:next", "»").asDisabled()
+            else
+                Button.success("whitelist:force:remove:site:next", "»")
+        )
+
+        return buttons
+    }
+
+    fun forceRemoveActionRowDropdown(entries: List<WhitelistEntry>): StringSelectMenu.Builder {
+        if (entries.isEmpty()) {
+            return StringSelectMenu.create("whitelist:force:remove")
+                .setPlaceholder("No entries available") // TODO: Replace with a proper message
+                .setDisabled(true)
+                .addOption("null", "null")
+        }
+
+        val options = mutableListOf<SelectOption>()
+
+        for (entry in entries) {
+            val discordUserID = entry.discordUserID
+            val discordUserName: String = if (discordUserID.startsWith("~")) {
+                discordUserID
+            } else {
+                try {
+                    AppLogic.jda.retrieveUserById(discordUserID).complete()?.name ?: "Unknown User ($discordUserID)"
+                } catch (_: Exception) {
+                    "Unknown User ($discordUserID)"
+                }
+            }
+
+
+            options.add(SelectOption.of("${entry.minecraftName} (${discordUserName})", entry.discordUserID))
+        }
+
+        return StringSelectMenu.create("whitelist:force:remove")
+            .setPlaceholder("Minecraft Name (Discord User)")
+            .addOptions(options)
+            .setRequiredRange(1, 1)
     }
 }
