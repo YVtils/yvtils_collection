@@ -23,17 +23,15 @@ import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.AlreadyWhitelis
 import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.InvalidAccountException
 import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.accountReplaceCache
 
-// TODO: Fix command descriptions showing as keys
 class JDAWhitelist {
     companion object {
         val cmdPermission = ConfigFile.getValueAsString("command.whitelistCommand.permission") ?: "MANAGE_CHANNEL"
     }
 
-    fun handleForceAdd(e: SlashCommandInteractionEvent) {
+    private fun handleForceAdd(e: SlashCommandInteractionEvent) {
         val minecraftName = e.getOption("minecraft_name")?.asString ?: return
         val discordUserID = e.getOption("discord_user")?.asUser?.id ?: "~$minecraftName"
         val guildID: String = e.guild?.id ?: return
-
 
         CoroutineHandler.launchTask(
             task = {
@@ -56,6 +54,10 @@ class JDAWhitelist {
 
                 try {
                     WhitelistManage().linkAccount(minecraftName, discordUserID, guildID)
+
+                    e.replyEmbeds(
+                        WhitelistEmbeds().accountAddEmbed(minecraftName).build()
+                    ).setEphemeral(true).queue()
                 } catch (ex: Exception) {
                     when (ex) {
                         is AlreadyWhitelistedException -> {
@@ -89,7 +91,7 @@ class JDAWhitelist {
         )
     }
 
-    fun handleForceRemove(e: SlashCommandInteractionEvent) {
+    private fun handleForceRemove(e: SlashCommandInteractionEvent) {
         val site = e.getOption("site")?.asInt ?: 1
         val discordUser = e.getOption("discord_user")?.asUser
         val minecraftName = e.getOption("minecraft_name")?.asString
@@ -161,15 +163,58 @@ class JDAWhitelist {
         )
     }
 
-    fun handleCheck(e: SlashCommandInteractionEvent) {
-        // Handle the check subcommand logic here
+    private fun handleCheck(e: SlashCommandInteractionEvent) {
+        val minecraftName = e.getOption("minecraft_name")?.asString
+        val discordUser = e.getOption("discord_user")?.asUser
+
+        CoroutineHandler.launchTask(
+            task = {
+                var entry: WhitelistEntry? = null
+
+                if (minecraftName == null && discordUser == null) {
+                    val selfUser = e.user
+                    entry = WhitelistLogic.getEntryByDiscordID(selfUser.id)
+                }
+
+                if (minecraftName != null && discordUser != null) {
+                    val minecraftEntry = WhitelistLogic.getEntryByMinecraftName(minecraftName)
+                    val discordEntry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
+
+                    if (discordEntry != minecraftEntry && discordEntry != null && minecraftEntry != null) {
+                        Logger.dev("Discord entry and Minecraft entry do not match: $discordEntry vs $minecraftEntry")
+                        // TODO: Add reply
+                        return@launchTask
+                    }
+
+                    entry = minecraftEntry ?: discordEntry
+                } else if (minecraftName != null) {
+                    entry = WhitelistLogic.getEntryByMinecraftName(minecraftName)
+                } else if (discordUser != null) {
+                    entry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
+                }
+
+                if (entry == null) {
+                    e.replyEmbeds(
+                        WhitelistEmbeds().invalidAccountEmbed(
+                            minecraftName ?: discordUser?.name ?: "Unknown"
+                        ).build()
+                    ).setEphemeral(true).queue()
+                    return@launchTask
+                }
+
+                val embed = WhitelistEmbeds().checkEmbed(entry)
+                e.replyEmbeds(embed.build())
+                    .setEphemeral(true)
+                    .queue()
+            },
+            isOnce = true
+        )
     }
 
     /**
      * Executes the whitelist command with the provided arguments.
      *
      * @param e The SlashCommandInteractionEvent containing the command event.
-     * @param args The arguments passed to the command, if any.
      */
     fun executeCommand(e: SlashCommandInteractionEvent) {
         when (e.subcommandName) {
