@@ -1,6 +1,7 @@
 package yv.tils.discord.actions.commands.handler
 
 import language.LanguageHandler
+import logger.Logger
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionContextType
@@ -13,7 +14,6 @@ import yv.tils.discord.data.Embeds
 import yv.tils.discord.language.RegisterStrings
 import java.io.File
 
-// TODO: Fix command descriptions showing as keys
 class JDAServerInfo {
     companion object {
         val cmdPermission = ConfigFile.getValueAsString("command.serverInfoCommand.permission") ?: "MESSAGE_SEND"
@@ -23,7 +23,6 @@ class JDAServerInfo {
      * Executes the /mcinfo command.
      *
      * @param e The SlashCommandInteractionEvent containing the command event.
-     * @param args The arguments passed to the command, if any.
      */
     fun executeCommand(e: SlashCommandInteractionEvent) {
         val serverIcon = File("./server-icon.png")
@@ -37,22 +36,26 @@ class JDAServerInfo {
     }
 
     /**
-     * Registers the /mcinfo command for the JDA bot.
+     * Registers the /mcinfo command for the JDA App.
      *
      * @return SlashCommandData for the /mcinfo command.
      */
     fun registerCommand(): SlashCommandData {
+        val description = LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_MCINFO_DESCRIPTION.key)
+
+        Logger.dev("Registering /mcinfo command with description: $description")
+
         val data = try {
             Commands.slash(
                 "mcinfo",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_MCINFO_DESCRIPTION.key)
+                description
             )
                 .setContexts(InteractionContextType.GUILD)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.valueOf(cmdPermission)))
         } catch (_: Exception) {
             Commands.slash(
                 "mcinfo",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_MCINFO_DESCRIPTION.key)
+                description
             )
                 .setContexts(InteractionContextType.GUILD)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MESSAGE_SEND))

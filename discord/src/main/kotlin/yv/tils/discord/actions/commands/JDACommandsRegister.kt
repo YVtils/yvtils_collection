@@ -1,17 +1,17 @@
 package yv.tils.discord.actions.commands
 
-import net.dv8tion.jda.api.events.session.ReadyEvent
-import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import yv.tils.discord.actions.commands.handler.JDAServerInfo
 import yv.tils.discord.actions.commands.handler.JDAWhitelist
+import yv.tils.discord.logic.AppLogic
 
-class JDACommandsRegister : ListenerAdapter() {
-    override fun onReady(e: ReadyEvent) {
+class JDACommandsRegister {
+
+    fun registerCommands() {
         val commandData: MutableList<CommandData> = mutableListOf()
         serverInfoCMD(commandData)
         whitelistCMD(commandData)
-        e.jda.updateCommands().addCommands(commandData).queue()
+        AppLogic.jda.updateCommands().addCommands(commandData).queue()
     }
 
     private fun serverInfoCMD(commandData: MutableList<CommandData>) {
