@@ -1,5 +1,7 @@
 package yv.tils.discord.logic
 
+import language.Language
+import language.LanguageHandler
 import logger.Logger
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
@@ -8,10 +10,12 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import org.apache.logging.log4j.LogManager
+import yv.tils.discord.actions.select.JDASelectListener
 import yv.tils.discord.actions.buttons.JDAButtonsListener
 import yv.tils.discord.actions.commands.JDACommandsListener
 import yv.tils.discord.actions.commands.JDACommandsRegister
 import yv.tils.discord.configs.ConfigFile
+import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager
 import yv.tils.discord.logic.sync.serverChats.SyncChats
 import yv.tils.discord.logic.sync.serverConsole.GetConsole
@@ -48,7 +52,7 @@ class AppLogic {
 
     fun stopApp() {
         if (started) {
-            Logger.info("Stopping Discord bot...") // TODO: Replace with actual stopping message
+            Logger.info(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_STOP_SHUTDOWN.key))
 
             CollectStats().serverShutdown()
 
@@ -64,12 +68,19 @@ class AppLogic {
                     jda.awaitShutdown()
                 }
             } catch (e: Exception) {
-                Logger.error("Failed to shut down Discord bot: ${e.message}") // TODO: Replace with actual error message
+                Logger.error(
+                    LanguageHandler.getMessage(
+                        RegisterStrings.LangStrings.BOT_STOP_FAILED.key,
+                        mapOf<String, Any>(
+                            "error" to (e.message ?: "Unknown error occurred")
+                        )
+                    )
+                )
             }
-            Logger.info("Discord bot stopped successfully.") // TODO: Replace with actual success message
+            Logger.info(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_STOP_SUCCESS.key))
             started = false
         } else {
-            Logger.warn("Discord bot is not running. No action taken.") // TODO: Replace with actual warning message
+            Logger.warn(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_STOP_NOT_RUNNING.key))
         }
     }
 
@@ -78,10 +89,12 @@ class AppLogic {
 
         builder.addEventListeners(SyncChats())
 
-        builder.addEventListeners(JDACommandsRegister())
+//        builder.addEventListeners(JDACommandsRegister())
         builder.addEventListeners(JDACommandsListener())
 
         builder.addEventListeners(JDAButtonsListener())
+
+        builder.addEventListeners(JDASelectListener())
 
         builder.addEventListeners(WhitelistManage())
     }

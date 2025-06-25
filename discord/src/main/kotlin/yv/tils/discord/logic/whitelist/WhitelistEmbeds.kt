@@ -195,6 +195,25 @@ class WhitelistEmbeds {
         return StringSelectMenu.create("whitelist:force:remove")
             .setPlaceholder("Minecraft Name (Discord User)")
             .addOptions(options)
-            .setRequiredRange(1, 1)
+            .setMinValues(1)
+            .setMaxValues(25)
+    }
+
+    fun checkEmbed(entry: WhitelistEntry): EmbedBuilder {
+        val builder = EmbedBuilder()
+
+        val title = "Whitelist Check"
+        val description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor." // TODO: Add a proper description
+        val fieldMinecraftName = entry.minecraftName
+        val fieldDiscordUserID = entry.discordUserID
+
+        return builder
+            .setTitle(title)
+            .setDescription(description)
+            .addField("Minecraft Name:", fieldMinecraftName, true)
+            .addField("Discord User ID:", fieldDiscordUserID, true)
+            .setColor(successColor)
+            .setFooter(FOOTER_TEXT, FOOTER_ICON)
+            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
     }
 }
