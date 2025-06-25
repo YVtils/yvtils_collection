@@ -10,6 +10,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.discord.DiscordYVtils
+import yv.tils.discord.actions.commands.JDACommandsRegister
 
 class YVtils : JavaPlugin() {
     companion object {
@@ -59,6 +60,19 @@ class YVtils : JavaPlugin() {
             modules.forEach { it.enablePlugin() }
         } catch (e: Exception) {
             Logger.error("Error during YVtils startup: ${e.message}")
+            e.printStackTrace()
+        }
+
+        onLateEnablePlugin()
+    }
+
+    fun onLateEnablePlugin() {
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is performing late enable...")
+
+        try {
+            modules.forEach { it.onLateEnablePlugin() }
+        } catch (e: Exception) {
+            Logger.error("Error during YVtils late startup: ${e.message}")
             e.printStackTrace()
         }
     }

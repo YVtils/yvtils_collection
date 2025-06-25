@@ -22,6 +22,11 @@ class YVtils : JavaPlugin() {
     companion object {
         val yvtilsVersion = YVtils().pluginMeta.version
         lateinit var instance: YVtils
+
+        const val PLUGIN_NAME_FULL = "YVtils Collection"
+        const val PLUGIN_NAME = "Collection"
+        const val PLUGIN_NAME_SHORT = "c"
+        const val PLUGIN_COLOR = "#4CAF50"
     }
 
     private val modules: List<Data.YVtilsModule> = listOf(
@@ -42,11 +47,14 @@ class YVtils : JavaPlugin() {
         instance = this
 
         Logger.logger = componentLogger
-        Logger.debug("YVtils Collection v$yvtilsVersion is loading...")
+        Logger.debug("$PLUGIN_NAME_FULL v$yvtilsVersion is loading...")
 
         Data.yvtilsVersion = yvtilsVersion
         Data.instance = instance
         Data.key = NamespacedKey(this, "yvtils")
+        Data.pluginName = PLUGIN_NAME
+        Data.pluginShortName = PLUGIN_NAME_SHORT
+        Data.pluginURL = "none"
 
         CommandAPI.onLoad(CommandAPIBukkitConfig(instance).silentLogs(true).verboseOutput(false).setNamespace("yvtils"))
 
@@ -59,7 +67,7 @@ class YVtils : JavaPlugin() {
     }
 
     override fun onEnable() {
-        Logger.debug("YVtils Collection v$yvtilsVersion is starting...")
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is starting...")
 
         try {
             modules.forEach { it.enablePlugin() }
@@ -67,10 +75,23 @@ class YVtils : JavaPlugin() {
             Logger.error("Error during YVtils startup: ${e.message}")
             e.printStackTrace()
         }
+
+        onLateEnablePlugin()
+    }
+
+    fun onLateEnablePlugin() {
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is performing late enable...")
+
+        try {
+            modules.forEach { it.onLateEnablePlugin() }
+        } catch (e: Exception) {
+            Logger.error("Error during YVtils late startup: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     override fun onDisable() {
-        Logger.debug("YVtils Collection v$yvtilsVersion is stopping...")
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is stopping...")
 
         try {
             modules.forEach { it.disablePlugin() }

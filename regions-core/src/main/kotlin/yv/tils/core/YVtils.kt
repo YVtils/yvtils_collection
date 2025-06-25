@@ -61,6 +61,18 @@ class YVtils : JavaPlugin() {
             Logger.error("Error during YVtils startup: ${e.message}")
             e.printStackTrace()
         }
+        onLateEnablePlugin()
+    }
+
+    fun onLateEnablePlugin() {
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is performing late enable...")
+
+        try {
+            modules.forEach { it.onLateEnablePlugin() }
+        } catch (e: Exception) {
+            Logger.error("Error during YVtils late startup: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     override fun onDisable() {

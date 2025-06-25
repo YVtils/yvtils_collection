@@ -13,6 +13,10 @@ class ConfigYVtils : Data.YVtilsModule {
         Data.addModule("$MODULE_NAME v$MODULE_VERSION")
     }
 
+    override fun onLateEnablePlugin() {
+
+    }
+
     override fun disablePlugin() {
 
     }

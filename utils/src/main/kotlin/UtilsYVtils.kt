@@ -16,6 +16,10 @@ class UtilsYVtils : Data.YVtilsModule {
         VersionUtils().loadServerVersion()
     }
 
+    override fun onLateEnablePlugin() {
+
+    }
+
     override fun disablePlugin() {
         CoroutineHandler.cancelAllTasks()
     }

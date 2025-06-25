@@ -39,6 +39,10 @@ class RegionsYVtils : Data.YVtilsModule {
         FlagManager().initFlagList()
     }
 
+    override fun onLateEnablePlugin() {
+
+    }
+
     override fun disablePlugin() {
     }
 

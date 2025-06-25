@@ -1,6 +1,7 @@
 package yv.tils.discord
 
 import data.Data
+import yv.tils.discord.actions.commands.JDACommandsRegister
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.configs.SaveFile
 import yv.tils.discord.configs.StatsSyncSaveFile
@@ -34,6 +35,10 @@ class DiscordYVtils : Data.YVtilsModule {
         loadConfigs()
 
         AppLogic().startApp()
+    }
+
+    override fun onLateEnablePlugin() {
+        JDACommandsRegister().registerCommands()
     }
 
     override fun disablePlugin() {

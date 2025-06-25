@@ -13,6 +13,7 @@ import server.ServerUtils
 import time.TimeUtils
 import yv.tils.common.config.ConfigFile
 import yv.tils.common.data.Permissions
+import yv.tils.common.language.LangStrings
 import yv.tils.common.language.LoadPlayerLanguage
 import yv.tils.common.language.RegisterStrings
 import yv.tils.common.listeners.PlayerJoin
@@ -53,6 +54,10 @@ class CommonYVtils : Data.YVtilsModule {
         PluginVersion().launchVersionCheck()
     }
 
+    override fun onLateEnablePlugin() {
+
+    }
+
     override fun disablePlugin() {
         val data = mutableMapOf(
             1 to listOf(LanguageHandler.getMessage("plugin.action.stop", params = mapOf("prefix" to Data.prefix))),
@@ -75,6 +80,8 @@ class CommonYVtils : Data.YVtilsModule {
         TimeUtils.timeZone = ConfigFile.getValueAsString("timezone") ?: "default"
         ServerUtils.serverIP  = ConfigFile.getValueAsString("serverIP") ?: "smp.net"
         ServerUtils.serverPort = ConfigFile.getValueAsInt("serverPort") ?: -1
+
+        TimeUtils.CONFIG_ERROR_INVALID_TIMEZONE = LanguageHandler.getRawMessage(LangStrings.CONFIG_ERROR_INVALID_TIMEZONE.key)
     }
 
     private fun registerListeners() {

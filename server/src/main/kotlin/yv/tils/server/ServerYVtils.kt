@@ -31,6 +31,10 @@ class ServerYVtils : Data.YVtilsModule {
         loadConfigs()
     }
 
+    override fun onLateEnablePlugin() {
+
+    }
+
     override fun disablePlugin() {
 
     }

@@ -36,8 +36,28 @@ class Data {
     }
 
     interface YVtilsModule {
+        /**
+         * onLoad is called, when the plugin is loaded.
+         * Extends the default JavaPlugin.onLoad() method.
+         */
         fun onLoad()
+
+        /**
+         * onEnable is called, when the plugin is enabled.
+         * Extends the default JavaPlugin.onEnable() method.
+         */
         fun enablePlugin()
+
+        /**
+         * Called when the plugin is enabled after all modules have been loaded.
+         * This is useful for modules that need to wait for other modules to be loaded.
+         */
+        fun onLateEnablePlugin()
+
+        /**
+         * onDisable is called, when the plugin is disabled.
+         * Extends the default JavaPlugin.onDisable() method.
+         */
         fun disablePlugin()
     }
 }

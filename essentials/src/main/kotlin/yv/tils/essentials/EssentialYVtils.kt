@@ -28,6 +28,10 @@ class EssentialYVtils : Data.YVtilsModule {
         registerPermissions()
     }
 
+    override fun onLateEnablePlugin() {
+
+    }
+
     override fun disablePlugin() {
 
     }

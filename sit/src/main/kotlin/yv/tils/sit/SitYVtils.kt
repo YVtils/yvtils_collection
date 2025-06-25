@@ -20,6 +20,10 @@ class SitYVtils : Data.YVtilsModule {
         registerListeners()
     }
 
+    override fun onLateEnablePlugin() {
+
+    }
+
     override fun disablePlugin() {
 
     }
