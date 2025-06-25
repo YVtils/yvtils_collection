@@ -2,7 +2,8 @@ package yv.tils.discord.actions.select.handler
 
 import logger.Logger
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
-import yv.tils.discord.logic.whitelist.WhitelistManage
+import net.dv8tion.jda.api.interactions.components.ActionRow
+import yv.tils.discord.logic.whitelist.*
 
 class JDAAccountRemove {
     fun handleForceRemove(e: StringSelectInteractionEvent) {
@@ -12,17 +13,28 @@ class JDAAccountRemove {
             return
         }
 
+        e.deferEdit().queue()
+        val hook = e.hook
+
+        val removedEntries = mutableListOf<WhitelistEntry>()
+
         for (value in values) {
-            Logger.dev("Removing account: $value from whitelist")
             try {
-                WhitelistManage().unlinkAccount(value, guild?.id)
+                val entry = WhitelistManage().unlinkAccount(value, guild?.id)
+                removedEntries.add(entry)
             } catch (ex: Exception) {
                 Logger.error("Failed to remove account: $value from whitelist - ${ex.message}")
-                e.reply("Failed to remove account: $value").setEphemeral(true).queue()
-                return
+                continue
             }
         }
 
-        e.reply("You selected: $values").setEphemeral(true).queue()
+        val entries = WhitelistLogic.getEntriesBySite(1)
+
+        hook.editOriginalEmbeds(
+            WhitelistEmbeds().forceRemoveEmbed(1, removedEntries).build()
+        ).setComponents(
+            ActionRow.of(WhitelistEmbeds().forceRemoveActionRowDropdown(entries).build()),
+            ActionRow.of(WhitelistEmbeds().forceRemoveActionRowButtons(1))
+        ).queue()
     }
 }

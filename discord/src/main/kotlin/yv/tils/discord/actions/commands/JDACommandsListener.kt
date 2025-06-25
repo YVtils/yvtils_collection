@@ -8,7 +8,6 @@ import yv.tils.discord.actions.commands.handler.JDAWhitelist
 class JDACommandsListener : ListenerAdapter() {
     override fun onSlashCommandInteraction(e: SlashCommandInteractionEvent) {
         val command = e.name
-        val args = e.subcommandName
 
         when (command) {
             "mcinfo" -> {

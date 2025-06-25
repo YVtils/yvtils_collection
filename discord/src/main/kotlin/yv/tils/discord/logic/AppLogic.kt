@@ -1,19 +1,15 @@
 package yv.tils.discord.logic
 
-import language.Language
 import language.LanguageHandler
 import logger.Logger
-import net.dv8tion.jda.api.JDA
-import net.dv8tion.jda.api.JDABuilder
-import net.dv8tion.jda.api.OnlineStatus
+import net.dv8tion.jda.api.*
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import org.apache.logging.log4j.LogManager
-import yv.tils.discord.actions.select.JDASelectListener
 import yv.tils.discord.actions.buttons.JDAButtonsListener
 import yv.tils.discord.actions.commands.JDACommandsListener
-import yv.tils.discord.actions.commands.JDACommandsRegister
+import yv.tils.discord.actions.select.JDASelectListener
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager
@@ -101,7 +97,7 @@ class AppLogic {
 
     private fun checkToken(): Boolean {
         if (appToken == null || appToken.isEmpty() || appToken.isBlank()) {
-            Logger.error("App token is not set. Please configure it in the config file.") // TODO: Replace with actual error message
+            Logger.error("App token is not set. Please configure it in the config file of the discord module.")
             return false
         }
         builder = JDABuilder.createDefault(appToken)
@@ -112,7 +108,7 @@ class AppLogic {
         try {
             builder.setStatus(OnlineStatus.fromKey(status))
         } catch (e: IllegalArgumentException) {
-            Logger.warn("Invalid online status: $status. Defaulting to 'online'.") // TODO: Replace with actual warning message
+            Logger.warn("Invalid online status: $status. Defaulting to 'online'.")
             builder.setStatus(OnlineStatus.ONLINE)
         }
 
@@ -134,13 +130,13 @@ class AppLogic {
     private fun buildJDA() {
         try {
             jda = builder.build()
-            jda.awaitReady() // Wait for JDA to be ready
+            jda.awaitReady()
             started = true
-            appID = jda.selfUser.id // Get the bot's application ID
-            launchFeatures() // Start background tasks
-            Logger.info("Discord bot started successfully.") // TODO: Replace with actual success message
+            appID = jda.selfUser.id
+            launchFeatures()
+            Logger.info(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_START_SUCCESS.key))
         } catch (e: Exception) {
-            Logger.error("Failed to start Discord bot: ${e.message}") // TODO: Replace with actual error message
+            Logger.error("Failed to start Discord app: ${e.message}")
             started = false
         }
     }

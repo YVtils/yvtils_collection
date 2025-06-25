@@ -4,10 +4,8 @@ import language.LanguageHandler
 import logger.Logger
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.regions.configs.RegionSaveFile
 import yv.tils.regions.data.*
 import yv.tils.regions.language.LangStrings
-import java.util.*
 import javax.naming.NoPermissionException
 
 class FlagLogic {
@@ -80,7 +78,7 @@ class FlagLogic {
                 return
             }
 
-            val regionFlags = regionData.flags
+            regionData.flags
 
             try {
                 val isSuccessful = FlagManager.setFlagEntry(flag, value ?: role!!, regionData, sender)

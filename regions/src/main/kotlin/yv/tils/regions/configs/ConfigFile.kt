@@ -2,9 +2,7 @@ package yv.tils.regions.configs
 
 import files.FileUtils
 import logger.Logger
-import yv.tils.regions.data.Flag
-import yv.tils.regions.data.FlagType
-import yv.tils.regions.data.RegionRoles
+import yv.tils.regions.data.*
 
 class ConfigFile {
     companion object {
@@ -159,8 +157,6 @@ class ConfigFile {
     }
 
     private fun parseIDToName(id: Int): String {
-        Logger.dev("Parsing ID $id to name")
-
         return RegionRoles.fromID(id).name
     }
 }

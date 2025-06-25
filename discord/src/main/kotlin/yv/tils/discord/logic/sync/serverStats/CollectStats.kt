@@ -69,7 +69,7 @@ class CollectStats {
 
                     else -> {
                         active = false
-                        Logger.warn("Invalid stats mode: $statsMode. Please check your configuration.") // TODO: Replace with actual warning message
+                        Logger.error("The provided stats mode '$statsMode' is not supported. Please check your configuration.")
                         CoroutineHandler.cancelTask(taskID)
                     }
                 }

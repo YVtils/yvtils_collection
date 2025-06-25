@@ -55,7 +55,7 @@ class StatusYVtils : Data.YVtilsModule {
     }
 
     private fun registerPermissions() {
-        val pm = Data.instance.server.pluginManager
+        Data.instance.server.pluginManager
 
     }
 

@@ -4,10 +4,7 @@ import data.Data
 import logger.Logger
 import yv.tils.server.configs.ConfigFile
 import yv.tils.server.language.RegisterStrings
-import yv.tils.server.listeners.PaperServerListPing
-import yv.tils.server.listeners.PlayerJoin
-import yv.tils.server.listeners.PlayerLogin
-import yv.tils.server.listeners.PlayerQuit
+import yv.tils.server.listeners.*
 import yv.tils.server.maintenance.MaintenanceCMD
 
 class ServerYVtils : Data.YVtilsModule {
@@ -58,7 +55,7 @@ class ServerYVtils : Data.YVtilsModule {
     }
 
     private fun registerPermissions() {
-        val pm = Data.instance.server.pluginManager
+        Data.instance.server.pluginManager
 
     }
 

@@ -32,7 +32,7 @@ class SyncChats : ListenerAdapter() {
         try {
             channel.sendMessageEmbeds(MessageEmbeds().embedForChat(sender, message).build()).queue()
         } catch (_: UninitializedPropertyAccessException) {
-            Logger.warn("Discord channel for chat sync is not initialized. Please check your configuration.") // TODO: Replace with actual warning message
+            Logger.warn("Discord app was not able to establish chat sync bridge between minecraft and discord. Please check your channel configuration.")
             active = false
         }
     }
@@ -53,7 +53,7 @@ class SyncChats : ListenerAdapter() {
         try {
             if (!e.member!!.hasPermission(Permission.valueOf(ServerChatsSyncManager.permission))) return
         } catch (_: Exception) {
-            Logger.warn("Invalid permission '${ServerChatsSyncManager.permission}' for Discord chat sync. Please check your configuration.") // TODO: Replace with actual warning message
+            Logger.debug("Invalid permission '${ServerChatsSyncManager.permission}' for Discord chat sync. Please check your configuration.")
             if (!e.member!!.hasPermission(Permission.MESSAGE_SEND)) return
         }
 

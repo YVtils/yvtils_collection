@@ -38,13 +38,12 @@ class SendCMD : ListenerAdapter() {
             task = {
                 e.message.addReaction(Emoji.fromUnicode("🖥️")).queue()
                 Logger.info(MessageUtils.convert("<gray>[<${Colors.MAIN.color}>DC Console<gray>]<white> $content"))
-                // Clear history before executing new command
                 GetConsole().clearHistory()
                 Data.instance.server.scheduler.runTask(Data.instance, Runnable {
                     try {
                         Data.instance.server.dispatchCommand(Data.instance.server.consoleSender, content)
                     } catch (ex: Exception) {
-                        Logger.error(MessageUtils.convert("<red>Error executing command: <white>$content<red> - ${ex.message}")) // TODO: Replace with actual error message
+                        Logger.error("Error executing command from discord console: ${ex.message}")
                     }
                 } )
             },

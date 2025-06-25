@@ -30,7 +30,7 @@ class SyncPlayerConnectionChange {
         try {
             channel.sendMessageEmbeds(MessageEmbeds().embedForJoinLeave(sender, action).build()).queue()
         } catch (_: UninitializedPropertyAccessException) {
-            Logger.warn("Discord channel for chat sync is not initialized. Please check your configuration.") // TODO: Replace with actual warning message
+            Logger.warn("Discord app was not able to establish chat sync bridge between minecraft and discord. Please check your channel configuration.")
             active = false
         }
     }

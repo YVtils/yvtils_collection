@@ -62,7 +62,7 @@ class MultiMineYVtils : Data.YVtilsModule {
     }
 
     private fun registerPermissions() {
-        val pm = Data.instance.server.pluginManager
+        Data.instance.server.pluginManager
 
 //        pm.addPermission(
 //            Permission.loadPermission("yvtils.use.multiMine", mapOf(

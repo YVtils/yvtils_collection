@@ -1,5 +1,6 @@
 package yv.tils.discord.logic.whitelist
 
+import language.LanguageHandler
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.Button
@@ -16,29 +17,20 @@ import yv.tils.discord.data.Embeds.Companion.errorColor
 import yv.tils.discord.data.Embeds.Companion.infoColor
 import yv.tils.discord.data.Embeds.Companion.successColor
 import yv.tils.discord.data.Embeds.Companion.warningColor
+import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.AppLogic
 
-// TODO: Add correct messages for titles and descriptions
 class WhitelistEmbeds {
     fun accountAddEmbed(accountName: String): EmbedBuilder {
         val builder = EmbedBuilder()
 
-        val title = "Account Added"
-        val description = "The account **$accountName** has been successfully added to the whitelist."
-
-        return builder
-            .setTitle(title)
-            .setDescription(description)
-            .setColor(successColor)
-            .setFooter(FOOTER_TEXT, FOOTER_ICON)
-            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
-    }
-
-    fun accountRemoveEmbed(accountName: String): EmbedBuilder {
-        val builder = EmbedBuilder()
-
-        val title = "Account Removed"
-        val description = "The account **$accountName** has been successfully removed from the whitelist."
+        val title = LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_ACCOUNT_ADD_TITLE.key)
+        val description = LanguageHandler.getRawMessage(
+            RegisterStrings.LangStrings.EMBED_WHITELIST_ACCOUNT_ADD_DESCRIPTION.key,
+            params = mapOf<String, Any>(
+                "accountName" to accountName
+            )
+        )
 
         return builder
             .setTitle(title)
@@ -51,8 +43,14 @@ class WhitelistEmbeds {
     fun accountAlreadyListedEmbed(accountName: String): EmbedBuilder {
         val builder = EmbedBuilder()
 
-        val title = "Account Already Listed"
-        val description = "The account **$accountName** is already whitelisted."
+        val title =
+            LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_ACCOUNT_ALREADY_LISTED_TITLE.key)
+        val description = LanguageHandler.getRawMessage(
+            RegisterStrings.LangStrings.EMBED_WHITELIST_ACCOUNT_ALREADY_LISTED_DESCRIPTION.key,
+            params = mapOf<String, Any>(
+                "accountName" to accountName
+            )
+        )
 
         return builder
             .setTitle(title)
@@ -65,8 +63,13 @@ class WhitelistEmbeds {
     fun invalidAccountEmbed(accName: String): EmbedBuilder {
         val builder = EmbedBuilder()
 
-        val title = "Invalid Account"
-        val description = "The account **$accName** is not valid or does not exist."
+        val title = LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_ACCOUNT_INVALID_TITLE.key)
+        val description = LanguageHandler.getRawMessage(
+            RegisterStrings.LangStrings.EMBED_WHITELIST_ACCOUNT_INVALID_DESCRIPTION.key,
+            params = mapOf<String, Any>(
+                "accountName" to accName
+            )
+        )
 
         return builder
             .setTitle(title)
@@ -76,11 +79,18 @@ class WhitelistEmbeds {
             .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
     }
 
-    fun accountChangeEmbed(oldName: String, newName: String): EmbedBuilder {
+    fun accountChangePromptEmbed(oldName: String, newName: String): EmbedBuilder {
         val builder = EmbedBuilder()
 
-        val title = "Account Changed"
-        val description = "The account **$oldName** has been replaced with **$newName** in the whitelist."
+        val title =
+            LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_TITLE.key)
+        val description = LanguageHandler.getRawMessage(
+            RegisterStrings.LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_DESCRIPTION.key,
+            params = mapOf<String, Any>(
+                "oldName" to oldName,
+                "newName" to newName
+            )
+        )
 
         return builder
             .setTitle(title)
@@ -107,8 +117,13 @@ class WhitelistEmbeds {
     fun accountErrorEmbed(error: String): EmbedBuilder {
         val builder = EmbedBuilder()
 
-        val title = "Error"
-        val description = "An error occurred: $error"
+        val title = LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_ERROR_TITLE.key)
+        val description = LanguageHandler.getRawMessage(
+            RegisterStrings.LangStrings.EMBED_WHITELIST_ERROR_DESCRIPTION.key,
+            params = mapOf<String, Any>(
+                "error" to error
+            )
+        )
 
         return builder
             .setTitle(title)
@@ -118,11 +133,16 @@ class WhitelistEmbeds {
             .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
     }
 
-    fun forceRemoveEmbed(site: Int): EmbedBuilder {
+    fun forceRemoveEmbed(site: Int, removedEntry: List<WhitelistEntry> = listOf()): EmbedBuilder {
         val builder = EmbedBuilder()
 
-        val title = "Force Remove Whitelist Entries"
-        val description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor." // TODO: Add a proper description
+        val title = LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_FORCE_REMOVE_TITLE.key)
+        val description =
+            LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_FORCE_REMOVE_DESCRIPTION.key)
+        val noEntriesDescription =
+            LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_FORCE_REMOVE_NO_ENTRIES_DESCRIPTION.key)
+        val removeFieldName =
+            LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_FORCE_REMOVE_REMOVED_FIELD_NAME.key)
         val fieldWhitelistedPlayersCount = WhitelistLogic.getTotalEntriesCount()
         val fieldWhitelistStatus = if (ServerUtils.isWhitelistActive) "on" else "off"
 
@@ -131,7 +151,7 @@ class WhitelistEmbeds {
         val customFooter = FOOTER_TEXT_CUSTOMIZABLE
             .replace("%s", "Site $site / $maxSite")
 
-        return builder
+        builder
             .setTitle(title)
             .setDescription(description)
             .addField("Whitelisted Players:", fieldWhitelistedPlayersCount.toString(), true)
@@ -139,6 +159,22 @@ class WhitelistEmbeds {
             .setColor(infoColor)
             .setFooter(customFooter, FOOTER_ICON)
             .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
+
+        if (WhitelistLogic.getTotalEntriesCount() == 0) {
+            builder.setDescription(noEntriesDescription)
+        }
+
+        if (removedEntry.isNotEmpty()) {
+            val removedNames = removedEntry.joinToString(", ") { it.minecraftName }
+
+            if (removedNames.length > 1024) {
+                builder.addField(removeFieldName, "${removedNames.take(1021)}...", false)
+            } else {
+                builder.addField(removeFieldName, removedNames, false)
+            }
+        }
+
+        return builder
     }
 
     fun forceRemoveActionRowButtons(site: Int): List<Button> {
@@ -169,7 +205,7 @@ class WhitelistEmbeds {
     fun forceRemoveActionRowDropdown(entries: List<WhitelistEntry>): StringSelectMenu.Builder {
         if (entries.isEmpty()) {
             return StringSelectMenu.create("whitelist:force:remove")
-                .setPlaceholder("No entries available") // TODO: Replace with a proper message
+                .setPlaceholder(LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_FORCE_REMOVE_NO_ENTRIES_DESCRIPTION.key))
                 .setDisabled(true)
                 .addOption("null", "null")
         }
@@ -188,8 +224,13 @@ class WhitelistEmbeds {
                 }
             }
 
+            val optionLabel = "${entry.minecraftName} (${discordUserName})"
 
-            options.add(SelectOption.of("${entry.minecraftName} (${discordUserName})", entry.discordUserID))
+            if (optionLabel.length > 100) {
+                options.add(SelectOption.of(entry.minecraftName, entry.discordUserID))
+            } else {
+                options.add(SelectOption.of(optionLabel, entry.discordUserID))
+            }
         }
 
         return StringSelectMenu.create("whitelist:force:remove")
@@ -202,14 +243,12 @@ class WhitelistEmbeds {
     fun checkEmbed(entry: WhitelistEntry): EmbedBuilder {
         val builder = EmbedBuilder()
 
-        val title = "Whitelist Check"
-        val description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor." // TODO: Add a proper description
+        val title = LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_CHECK_TITLE.key)
         val fieldMinecraftName = entry.minecraftName
         val fieldDiscordUserID = entry.discordUserID
 
         return builder
             .setTitle(title)
-            .setDescription(description)
             .addField("Minecraft Name:", fieldMinecraftName, true)
             .addField("Discord User ID:", fieldDiscordUserID, true)
             .setColor(successColor)

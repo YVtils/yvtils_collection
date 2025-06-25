@@ -8,20 +8,15 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
-import net.dv8tion.jda.api.interactions.commands.build.Commands
-import net.dv8tion.jda.api.interactions.commands.build.OptionData
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData
+import net.dv8tion.jda.api.interactions.commands.build.*
 import net.dv8tion.jda.api.interactions.components.ActionRow
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.language.RegisterStrings
-import yv.tils.discord.logic.whitelist.WhitelistEmbeds
-import yv.tils.discord.logic.whitelist.WhitelistEntry
-import yv.tils.discord.logic.whitelist.WhitelistLogic
-import yv.tils.discord.logic.whitelist.WhitelistManage
+import yv.tils.discord.logic.whitelist.*
 import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.AlreadyWhitelistedException
 import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.InvalidAccountException
 import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.accountReplaceCache
+import yv.tils.discord.utils.DiscordUser
 
 class JDAWhitelist {
     companion object {
@@ -41,7 +36,7 @@ class JDAWhitelist {
                     accountReplaceCache[discordUserID] = minecraftName
 
                     e.replyEmbeds(
-                        WhitelistEmbeds().accountChangeEmbed(
+                        WhitelistEmbeds().accountChangePromptEmbed(
                             oldName = oldName,
                             newName = minecraftName
                         ).build()
@@ -58,6 +53,17 @@ class JDAWhitelist {
                     e.replyEmbeds(
                         WhitelistEmbeds().accountAddEmbed(minecraftName).build()
                     ).setEphemeral(true).queue()
+
+                    Logger.info(
+                        LanguageHandler.getMessage(
+                            RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ADDED.key,
+                            mapOf(
+                                "discordAccount" to DiscordUser.parseIDToName(discordUserID),
+                                "minecraftAccount" to minecraftName,
+                                "user" to e.user.effectiveName,
+                            )
+                        )
+                    )
                 } catch (ex: Exception) {
                     when (ex) {
                         is AlreadyWhitelistedException -> {
@@ -65,7 +71,16 @@ class JDAWhitelist {
                                 WhitelistEmbeds().accountAlreadyListedEmbed(minecraftName).build()
                             ).setEphemeral(true).queue()
 
-                            // TODO: Add console message for "xxx tried to whitelist their account yyy, but it is already whitelisted"
+                            Logger.info(
+                                LanguageHandler.getMessage(
+                                    RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ALREADY_LISTED.key,
+                                    mapOf(
+                                        "discordAccount" to DiscordUser.parseIDToName(discordUserID),
+                                        "minecraftAccount" to minecraftName,
+                                        "user" to e.user.effectiveName,
+                                    )
+                                )
+                            )
                             return@launchTask
                         }
                         is InvalidAccountException -> {
@@ -73,7 +88,16 @@ class JDAWhitelist {
                                 WhitelistEmbeds().invalidAccountEmbed(minecraftName).build()
                             ).setEphemeral(true).queue()
 
-                            // TODO: Add console message for "xxx tried to whitelist their account yyy, but it is invalid"
+                            Logger.info(
+                                LanguageHandler.getMessage(
+                                    RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_INVALID.key,
+                                    mapOf(
+                                        "discordAccount" to DiscordUser.parseIDToName(discordUserID),
+                                        "minecraftAccount" to minecraftName,
+                                        "user" to e.user.effectiveName,
+                                    )
+                                )
+                            )
                             return@launchTask
                         }
                         else -> {
@@ -81,7 +105,17 @@ class JDAWhitelist {
                                 WhitelistEmbeds().accountErrorEmbed(ex.message ?: "-").build()
                             ).setEphemeral(true).queue()
 
-                            // TODO: Add console message for "xxx tried to whitelist their account yyy, but an error occurred"
+                            Logger.warn(
+                                LanguageHandler.getMessage(
+                                    RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ERROR.key,
+                                    mapOf(
+                                        "discordAccount" to DiscordUser.parseIDToName(discordUserID),
+                                        "minecraftAccount" to minecraftName,
+                                        "user" to e.user.effectiveName,
+                                        "error" to (ex.message ?: "Unknown error")
+                                    )
+                                )
+                            )
                             return@launchTask
                         }
                     }

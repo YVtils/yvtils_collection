@@ -5,15 +5,16 @@ import apis.MojangAPI.ErrorResponse
 import apis.MojangAPI.SuccessfulResponse
 import coroutine.CoroutineHandler
 import data.Data
+import language.LanguageHandler
 import logger.Logger
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import yv.tils.discord.configs.ConfigFile
+import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.AppLogic
+import yv.tils.discord.utils.DiscordUser
 import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
-import kotlin.math.truncate
 
 class WhitelistManage: ListenerAdapter() {
     companion object {
@@ -53,7 +54,7 @@ class WhitelistManage: ListenerAdapter() {
                     accountReplaceCache[userID] = name
 
                     channel.sendMessageEmbeds(
-                        WhitelistEmbeds().accountChangeEmbed(
+                        WhitelistEmbeds().accountChangePromptEmbed(
                             oldName = oldName,
                             newName = name
                         ).build()
@@ -72,15 +73,34 @@ class WhitelistManage: ListenerAdapter() {
                         WhitelistEmbeds().accountAddEmbed(name).build()
                     ).complete().delete().queueAfter(5, TimeUnit.SECONDS)
 
-                    // TODO: Add console message for "xxx has whitelisted their account yyy"
-                } catch (e: Exception) {
-                    when (e) {
+                    Logger.info(
+                        LanguageHandler.getMessage(
+                            RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ADDED.key,
+                            mapOf(
+                                "discordAccount" to DiscordUser.parseIDToName(userID),
+                                "minecraftAccount" to name,
+                                "user" to e.author.effectiveName,
+                            )
+                        )
+                    )
+                } catch (ex: Exception) {
+                    when (ex) {
                         is AlreadyWhitelistedException -> {
                             channel.sendMessageEmbeds(
                                 WhitelistEmbeds().accountAlreadyListedEmbed(name).build()
                             ).complete().delete().queueAfter(15, TimeUnit.SECONDS)
 
-                            // TODO: Add console message for "xxx tried to whitelist their account yyy, but it is already whitelisted"
+                            Logger.info(
+                                LanguageHandler.getMessage(
+                                    RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ALREADY_LISTED.key,
+                                    mapOf(
+                                        "discordAccount" to DiscordUser.parseIDToName(userID),
+                                        "minecraftAccount" to name,
+                                        "user" to e.author.effectiveName,
+                                    )
+                                )
+                            )
+
                             return@launchTask
                         }
                         is InvalidAccountException -> {
@@ -88,7 +108,16 @@ class WhitelistManage: ListenerAdapter() {
                                 WhitelistEmbeds().invalidAccountEmbed(name).build()
                             ).complete().delete().queueAfter(15, TimeUnit.SECONDS)
 
-                            // TODO: Add console message for "xxx tried to whitelist their account yyy, but it is invalid"
+                            Logger.info(
+                                LanguageHandler.getMessage(
+                                    RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_INVALID.key,
+                                    mapOf(
+                                        "discordAccount" to DiscordUser.parseIDToName(userID),
+                                        "minecraftAccount" to name,
+                                        "user" to e.author.effectiveName,
+                                    )
+                                )
+                            )
                             return@launchTask
                         }
                         else -> {
@@ -96,7 +125,18 @@ class WhitelistManage: ListenerAdapter() {
                                 WhitelistEmbeds().accountErrorEmbed(e.message ?: "-").build()
                             ).complete().delete().queueAfter(15, TimeUnit.SECONDS)
 
-                            // TODO: Add console message for "xxx tried to whitelist their account yyy, but an error occurred"
+                            Logger.warn(
+                                LanguageHandler.getMessage(
+                                    RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ERROR.key,
+                                    mapOf(
+                                        "discordAccount" to DiscordUser.parseIDToName(userID),
+                                        "minecraftAccount" to name,
+                                        "user" to e.author.effectiveName,
+                                        "error" to (ex.message ?: "Unknown error")
+                                    )
+                                )
+                            )
+
                             return@launchTask
                         }
                     }
@@ -109,16 +149,23 @@ class WhitelistManage: ListenerAdapter() {
     /**
      * Unlinks a Minecraft account from a Discord user.
      * @param userID The Discord user ID to unlink the account from.
+     * @param guildID Optional Discord guild ID to remove roles from the user.
      * @throws InvalidAccountException if the account is not found or cannot be unlinked.
+     * @throws Exception for any other errors that occur during the unlinking process.
+     * @return The WhitelistEntry that was unlinked, or null if not found.
      */
-    fun unlinkAccount(userID: String, guildID: String? = null) {
+    fun unlinkAccount(userID: String, guildID: String? = null): WhitelistEntry {
+        val removedEntry: WhitelistEntry
+
         try {
             val entry = WhitelistLogic.getEntryByDiscordID(userID) ?: throw InvalidAccountException()
             val player = MojangAPI().nameToOfflinePlayer(entry.minecraftName)
 
             WhitelistLogic.removeEntry(userID, player)
+
+            removedEntry = entry
         } catch (e: Exception) {
-            Logger.error("Failed to unlink account for user ID $userID: ${e.message}") // TODO: error handling...
+            Logger.error("Failed to unlink account for user ID $userID: ${e.message}")
             throw InvalidAccountException()
         }
 
@@ -127,8 +174,10 @@ class WhitelistManage: ListenerAdapter() {
                 WhitelistLogic.removeRolesFromMember(userID, guildID)
             }
         } catch (e: Exception) {
-            Logger.error("Failed to remove roles from member for user ID $userID in guild $guildID: ${e.message}. The user was still unlinked, but roles could not be removed.") // TODO: error handling...
+            Logger.error("Failed to remove roles from member with user ID $userID in guild $guildID: ${e.message}. The user was still unlinked, but roles could not be removed.")
         }
+
+        return removedEntry
     }
 
     /**
@@ -147,12 +196,12 @@ class WhitelistManage: ListenerAdapter() {
                 val response = MojangAPI().verifyMinecraftAccount(player.uniqueId)
                 when (response) {
                     is ErrorResponse -> {
-                        Logger.error("Failed to verify Minecraft account: ${response.errorMessage}") // TODO: error handling...
+                        Logger.error("Failed to verify Minecraft account: ${response.errorMessage}")
                         throw InvalidAccountException()
                     }
                     is SuccessfulResponse -> {
                         if (response.name != name) {
-                            Logger.error("Minecraft account name mismatch: expected $name, got ${response.name}") // TODO: error handling...
+                            Logger.error("Minecraft account name mismatch: expected $name, got ${response.name}")
                             throw InvalidAccountException()
                         }
                     }
@@ -183,7 +232,7 @@ class WhitelistManage: ListenerAdapter() {
                 WhitelistLogic.addRolesToMember(userID, guildID)
             }
         } catch (e: Exception) {
-            Logger.error("Failed to add roles to member for user ID $userID in guild $guildID: ${e.message}. The user was still whitelisted, but roles could not be assigned.") // TODO: error handling...
+            Logger.error("Failed to add roles to member with user ID $userID in guild $guildID: ${e.message}. The user was still whitelisted, but roles could not be assigned.")
         }
     }
 }

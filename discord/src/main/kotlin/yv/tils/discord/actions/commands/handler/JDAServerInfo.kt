@@ -1,7 +1,6 @@
 package yv.tils.discord.actions.commands.handler
 
 import language.LanguageHandler
-import logger.Logger
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionContextType
@@ -42,8 +41,6 @@ class JDAServerInfo {
      */
     fun registerCommand(): SlashCommandData {
         val description = LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_MCINFO_DESCRIPTION.key)
-
-        Logger.dev("Registering /mcinfo command with description: $description")
 
         val data = try {
             Commands.slash(

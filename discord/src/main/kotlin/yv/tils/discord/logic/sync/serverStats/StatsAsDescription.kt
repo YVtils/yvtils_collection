@@ -15,7 +15,7 @@ class StatsAsDescription {
 
     private fun updateDescription(serverStats: CollectStats.ServerStats) {
         if (channelID.isNullOrEmpty()) {
-            Logger.warn("Channel ID for server stats is not set. Please check your configuration.") // TODO: Replace with actual warning message
+            Logger.warn("Channel ID for server stats is not set. Please check your configuration.")
             return
         }
 
@@ -27,8 +27,7 @@ class StatsAsDescription {
                         serverStats.lastRefreshed
             )?.queue()
         } catch (e: Exception) {
-            Logger.error("Failed to update Discord channel topic: ${e.message}") // TODO: Replace with actual error message
-            Logger.warn("Please check if the channel ID is correct and the bot has permission to manage the channel.") // TODO: Replace with actual warning message
+            Logger.error("Failed to update Discord channel topic for server stats: ${e.message}")
         }
     }
 

@@ -89,7 +89,7 @@ class WhitelistLogic {
                     entry.minecraftUUID
                 )
             } else {
-                throw IllegalArgumentException("Invalid Minecraft username: ${entry.minecraftName}") // TODO: Look over error message
+                throw IllegalArgumentException("Invalid Minecraft username: ${entry.minecraftName}")
             }
         }
 
@@ -245,8 +245,6 @@ class WhitelistLogic {
         fun getEntriesBySite(site: Int): List<WhitelistEntry> {
             val allEntries = getAllEntries()
 
-            Logger.dev("Getting entries for site $site, total entries: ${allEntries.size}")
-
             val startIndex = (site - 1) * 25
             if (startIndex < 0 || startIndex >= allEntries.size) {
                 return emptyList()
@@ -274,7 +272,6 @@ class WhitelistLogic {
          */
         fun getTotalPagesCount(): Int {
             val totalEntries = getTotalEntriesCount()
-            Logger.dev("Total entries in whitelist: $totalEntries")
             return if (totalEntries == 0) 0 else (totalEntries + 24) / 25
         }
     }

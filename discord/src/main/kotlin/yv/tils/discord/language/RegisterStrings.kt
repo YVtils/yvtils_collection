@@ -103,6 +103,14 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
+            LangStrings.BOT_START_SUCCESS,
+            mapOf(
+                FileTypes.EN to "Discord app started successfully.",
+                FileTypes.DE to "Discord-App wurde erfolgreich gestartet.",
+            )
+        )
+
+        registerNewString(
             LangStrings.BOT_STOP_SHUTDOWN,
             mapOf(
                 FileTypes.EN to "Shutting down Discord app...",
@@ -133,6 +141,158 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
                 FileTypes.DE to "Die Discord-App kann nicht heruntergefahren werden, da sie nicht läuft.",
             )
         )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ACCOUNT_ADD_TITLE,
+            mapOf(
+                FileTypes.EN to "The Minecraft account has been successfully added to the whitelist!",
+                FileTypes.DE to "Der Minecraft Account wurde erfolgreich zur Whitelist hinzugefügt!",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ACCOUNT_ADD_DESCRIPTION,
+            mapOf(
+                FileTypes.EN to "Account: <accountName>",
+                FileTypes.DE to "Account: <accountName>",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ACCOUNT_ALREADY_LISTED_TITLE,
+            mapOf(
+                FileTypes.EN to "The account is already whitelisted",
+                FileTypes.DE to "Der Account ist bereits auf der Whitelist",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ACCOUNT_ALREADY_LISTED_DESCRIPTION,
+            mapOf(
+                FileTypes.EN to "Account: <accountName> • This account is already whitelisted!",
+                FileTypes.DE to "Account: <accountName> • Dieser Account ist bereits auf der Whitelist!",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ACCOUNT_INVALID_TITLE,
+            mapOf(
+                FileTypes.EN to "The account is invalid or does not exist",
+                FileTypes.DE to "Der Account ist ungültig oder existiert nicht",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ACCOUNT_INVALID_DESCRIPTION,
+            mapOf(
+                FileTypes.EN to "Account: <accountName> • The account is invalid or does not exist.",
+                FileTypes.DE to "Account: <accountName> • Der Account ist ungültig oder existiert nicht.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_TITLE,
+            mapOf(
+                FileTypes.EN to "Are you sure you want to change your account?",
+                FileTypes.DE to "Bist du sicher, dass du deinen Account ändern möchtest?",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_DESCRIPTION,
+            mapOf(
+                FileTypes.EN to "You will replace your current whitelisted account (<oldName>) with the new one (<newName>).",
+                FileTypes.DE to "Du wirst deinen aktuellen Whitelist-Account (<oldName>) mit dem neuen Account (<newName>) ersetzen.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ERROR_TITLE,
+            mapOf(
+                FileTypes.EN to "An error occurred while processing your request",
+                FileTypes.DE to "Ein Fehler ist bei der Verarbeitung deiner Anfrage aufgetreten",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ERROR_DESCRIPTION,
+            mapOf(
+                FileTypes.EN to "An error occurred while processing your request. Please try again later. Error: <error>",
+                FileTypes.DE to "Ein Fehler ist bei der Verarbeitung deiner Anfrage aufgetreten. Bitte versuche es später erneut. Fehler: <error>",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_FORCE_REMOVE_TITLE,
+            mapOf(
+                FileTypes.EN to "Which whitelist entries do you want to remove?",
+                FileTypes.DE to "Welche Whitelist-Einträge möchtest du entfernen?",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_FORCE_REMOVE_DESCRIPTION,
+            mapOf(
+                FileTypes.EN to "Select the entries you want to remove from the whitelist. You can select multiple entries.",
+                FileTypes.DE to "Wähle die Einträge aus, die du von der Whitelist entfernen möchtest. Du kannst mehrere Einträge auswählen.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_FORCE_REMOVE_NO_ENTRIES_DESCRIPTION,
+            mapOf(
+                FileTypes.EN to "No entries found. Please try again later.",
+                FileTypes.DE to "Keine Einträge gefunden. Bitte versuche es später erneut.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_FORCE_REMOVE_REMOVED_FIELD_NAME,
+            mapOf(
+                FileTypes.EN to "Removed Accounts:",
+                FileTypes.DE to "Entfernte Accounts:",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_CHECK_TITLE,
+            mapOf(
+                FileTypes.EN to "Whitelist Check",
+                FileTypes.DE to "Whitelist Überprüfung",
+            )
+        )
+
+        registerNewString(
+            LangStrings.CONSOLE_WHITELIST_ACCOUNT_ADDED,
+            mapOf(
+                FileTypes.EN to "Discord Account <discordAccount> has been linked to Minecraft account <minecraftAccount> and added to the whitelist by <user>.",
+                FileTypes.DE to "Discord Account <discordAccount> wurde mit dem Minecraft Account <minecraftAccount> verknüpft und von <user> zur Whitelist hinzugefügt.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.CONSOLE_WHITELIST_ACCOUNT_ALREADY_LISTED,
+            mapOf(
+                FileTypes.EN to "Discord User <user> tried to link Discord account <discordAccount> with Minecraft account <minecraftAccount>, but it is already whitelisted.",
+                FileTypes.DE to "Discord-Benutzer <user> hat versucht, den Discord-Account <discordAccount> mit dem Minecraft-Account <minecraftAccount> zu verknüpfen, aber dieser ist bereits auf der Whitelist.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.CONSOLE_WHITELIST_ACCOUNT_INVALID,
+            mapOf(
+                FileTypes.EN to "Discord User <user> tried to link Discord account <discordAccount> with Minecraft account <minecraftAccount>, but the account is invalid or does not exist.",
+                FileTypes.DE to "Discord-Benutzer <user> hat versucht, den Discord-Account <discordAccount> mit dem Minecraft-Account <minecraftAccount> zu verknüpfen, aber der Account ist ungültig oder existiert nicht.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.CONSOLE_WHITELIST_ACCOUNT_ERROR,
+            mapOf(
+                FileTypes.EN to "An error occurred while processing the whitelist request by <user> for Discord account <discordAccount> and Minecraft account <minecraftAccount>. Error: <error>",
+                FileTypes.DE to "Ein Fehler ist bei der Verarbeitung der Whitelist-Anfrage von <user> für den Discord-Account <discordAccount> und den Minecraft-Account <minecraftAccount> aufgetreten. Fehler: <error>",
+            )
+        )
     }
 
     enum class LangStrings(override val key: String) : LanguageProvider.LangStrings {
@@ -149,10 +309,35 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_CHECK_ARGS_DISCORDUSER_DESCRIPTION("discord.slashcommands.whitelist.subcommands.check.args.discordUser.description"),
         SLASHCOMMANDS_MCINFO_DESCRIPTION("discord.slashcommands.mcinfo.description"),
 
+        BOT_START_SUCCESS("discord.bot.start.success"),
+
         BOT_STOP_SHUTDOWN("discord.bot.stop.shutdown"),
         BOT_STOP_FAILED("discord.bot.stop.failed"),
         BOT_STOP_SUCCESS("discord.bot.stop.success"),
-        BOT_STOP_NOT_RUNNING("discord.bot.stop.notRunning")
+        BOT_STOP_NOT_RUNNING("discord.bot.stop.notRunning"),
+
+        EMBED_WHITELIST_ACCOUNT_ADD_TITLE("discord.embed.whitelist.account.add.title"),
+        EMBED_WHITELIST_ACCOUNT_ADD_DESCRIPTION("discord.embed.whitelist.account.add.description"),
+        EMBED_WHITELIST_ACCOUNT_ALREADY_LISTED_TITLE("discord.embed.whitelist.account.alreadyListed.title"),
+        EMBED_WHITELIST_ACCOUNT_ALREADY_LISTED_DESCRIPTION("discord.embed.whitelist.account.alreadyListed.description"),
+        EMBED_WHITELIST_ACCOUNT_INVALID_TITLE("discord.embed.whitelist.account.invalid.title"),
+        EMBED_WHITELIST_ACCOUNT_INVALID_DESCRIPTION("discord.embed.whitelist.account.invalid.description"),
+        EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_TITLE("discord.embed.whitelist.account.change.prompt.title"),
+        EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_DESCRIPTION("discord.embed.whitelist.account.change.prompt.description"),
+        EMBED_WHITELIST_ERROR_TITLE("discord.embed.whitelist.error.title"),
+        EMBED_WHITELIST_ERROR_DESCRIPTION("discord.embed.whitelist.error.description"),
+        EMBED_WHITELIST_FORCE_REMOVE_TITLE("discord.embed.whitelist.force.remove.title"),
+        EMBED_WHITELIST_FORCE_REMOVE_DESCRIPTION("discord.embed.whitelist.force.remove.description"),
+        EMBED_WHITELIST_FORCE_REMOVE_NO_ENTRIES_DESCRIPTION("discord.embed.whitelist.force.remove.noEntriesDescription"),
+        EMBED_WHITELIST_FORCE_REMOVE_REMOVED_FIELD_NAME("discord.embed.whitelist.force.remove.removedFieldName"),
+
+        EMBED_WHITELIST_CHECK_TITLE("discord.embed.whitelist.check.title"),
+
+
+        CONSOLE_WHITELIST_ACCOUNT_ADDED("discord.console.whitelist.account.added"),
+        CONSOLE_WHITELIST_ACCOUNT_ALREADY_LISTED("discord.console.whitelist.account.alreadyListed"),
+        CONSOLE_WHITELIST_ACCOUNT_INVALID("discord.console.whitelist.account.invalid"),
+        CONSOLE_WHITELIST_ACCOUNT_ERROR("discord.console.whitelist.account.error")
         ;
     }
 }
