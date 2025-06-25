@@ -101,6 +101,38 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
                 FileTypes.DE to "Erhalte Informationen über den Minecraft-Server.",
             )
         )
+
+        registerNewString(
+            LangStrings.BOT_STOP_SHUTDOWN,
+            mapOf(
+                FileTypes.EN to "Shutting down Discord app...",
+                FileTypes.DE to "Discord-App wird heruntergefahren...",
+            )
+        )
+
+        registerNewString(
+            LangStrings.BOT_STOP_FAILED,
+            mapOf(
+                FileTypes.EN to "The discord app could not be stopped. Error: <error>",
+                FileTypes.DE to "Die Discord-App konnte nicht gestoppt werden. Fehler: <error>",
+            )
+        )
+
+        registerNewString(
+            LangStrings.BOT_STOP_SUCCESS,
+            mapOf(
+                FileTypes.EN to "Discord app stopped successfully.",
+                FileTypes.DE to "Discord-App wurde erfolgreich gestoppt.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.BOT_STOP_NOT_RUNNING,
+            mapOf(
+                FileTypes.EN to "Can not shutdown Discord app, because it is not running.",
+                FileTypes.DE to "Die Discord-App kann nicht heruntergefahren werden, da sie nicht läuft.",
+            )
+        )
     }
 
     enum class LangStrings(override val key: String) : LanguageProvider.LangStrings {
@@ -117,6 +149,10 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_CHECK_ARGS_DISCORDUSER_DESCRIPTION("discord.slashcommands.whitelist.subcommands.check.args.discordUser.description"),
         SLASHCOMMANDS_MCINFO_DESCRIPTION("discord.slashcommands.mcinfo.description"),
 
+        BOT_STOP_SHUTDOWN("discord.bot.stop.shutdown"),
+        BOT_STOP_FAILED("discord.bot.stop.failed"),
+        BOT_STOP_SUCCESS("discord.bot.stop.success"),
+        BOT_STOP_NOT_RUNNING("discord.bot.stop.notRunning")
         ;
     }
 }

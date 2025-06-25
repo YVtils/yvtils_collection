@@ -100,6 +100,14 @@ class RegisterStrings {
                 FileTypes.DE to "<prefix> <yellow>Der Befehl wird im Hintergrund verarbeitet. Bitte etwas Geduld...",
             )
         )
+
+        registerNewString(
+            LangStrings.CONFIG_ERROR_INVALID_TIMEZONE,
+            mapOf(
+                FileTypes.EN to "<prefix> <red>Invalid timezone specified in the config file! Please check your settings.",
+                FileTypes.DE to "<prefix> <red>Ungültige Zeitzone in der Konfig angegeben! Bitte überprüfe deine Einstellungen."
+            )
+        )
     }
 
     private fun registerNewString(langKey: LangStrings, translations: Map<FileTypes, String>) {
@@ -126,4 +134,5 @@ enum class LangStrings(val key: String) {
     COMMAND_EXECUTOR_MISSING_PERMISSION("command.executor.missingPermission"),
     COMMAND_USAGE("command.usage"),
     COMMAND_EXECUTOR_ASYNC_ACTION("command.executor.asyncAction"),
+    CONFIG_ERROR_INVALID_TIMEZONE("config.error.invalid.timezone"),
 }

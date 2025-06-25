@@ -1,6 +1,7 @@
 package time
 
 import logger.Logger
+import message.MessageUtils
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -9,6 +10,8 @@ import java.time.format.DateTimeFormatter
 class TimeUtils {
     companion object {
         var timeZone = "default"
+
+        var CONFIG_ERROR_INVALID_TIMEZONE = ""
     }
 
     fun parseTimezone(format: String = "dd/MM/yyyy HH:mm:ss"): String {
@@ -25,9 +28,8 @@ class TimeUtils {
             val formatTime = zonedDateTime.format(dateFormat)
 
             return formatTime
-        } catch (e: Exception) {
-            // YVtils.instance.logger.warning(Language().getRawMessage(LangStrings.CONFIG_PARSE_ERROR_TIMEZONE))
-            Logger.warn("Error parsing timezone: ${e.message}") // TODO: Replace with actual warning message
+        } catch (_: Exception) {
+            Logger.warn(MessageUtils.convert(CONFIG_ERROR_INVALID_TIMEZONE))
             return "xx/xx/xxxx xx:xx:xx"
         }
     }
