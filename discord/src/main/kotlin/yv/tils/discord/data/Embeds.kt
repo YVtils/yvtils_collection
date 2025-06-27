@@ -72,4 +72,13 @@ class Embeds {
                 AUTHOR_ICON
             )
     }
+
+    fun actionCancelledEmbed(action: String): EmbedBuilder {
+        return EmbedBuilder()
+            .setTitle("Action Cancelled")
+            .setDescription("The action `$action` has been cancelled.")
+            .setColor(errorColor)
+            .setFooter(FOOTER_TEXT, FOOTER_ICON)
+            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
+    }
 }

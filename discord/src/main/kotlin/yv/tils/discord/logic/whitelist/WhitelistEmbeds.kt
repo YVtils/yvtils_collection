@@ -133,6 +133,29 @@ class WhitelistEmbeds {
             .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
     }
 
+    fun accountChangeEmbed(
+        oldName: String,
+        newName: String,
+    ): EmbedBuilder {
+        val builder = EmbedBuilder()
+
+        val title = LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_TITLE.key)
+        val description = LanguageHandler.getRawMessage(
+            RegisterStrings.LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_DESCRIPTION.key,
+            params = mapOf<String, Any>(
+                "oldName" to oldName,
+                "newName" to newName
+            )
+        )
+
+        return builder
+            .setTitle(title)
+            .setDescription(description)
+            .setColor(infoColor)
+            .setFooter(FOOTER_TEXT, FOOTER_ICON)
+            .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)
+    }
+
     fun forceRemoveEmbed(site: Int, removedEntry: List<WhitelistEntry> = listOf()): EmbedBuilder {
         val builder = EmbedBuilder()
 

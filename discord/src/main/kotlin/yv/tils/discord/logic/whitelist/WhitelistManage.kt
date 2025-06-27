@@ -7,6 +7,7 @@ import coroutine.CoroutineHandler
 import data.Data
 import language.LanguageHandler
 import logger.Logger
+import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
@@ -68,21 +69,10 @@ class WhitelistManage: ListenerAdapter() {
                 }
 
                 try {
-                    linkAccount(name, userID, e.guild.id)
+                    linkAccount(name, userID, e.guild.id, e.author)
                     channel.sendMessageEmbeds(
                         WhitelistEmbeds().accountAddEmbed(name).build()
                     ).complete().delete().queueAfter(5, TimeUnit.SECONDS)
-
-                    Logger.info(
-                        LanguageHandler.getMessage(
-                            RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ADDED.key,
-                            mapOf(
-                                "discordAccount" to DiscordUser.parseIDToName(userID),
-                                "minecraftAccount" to name,
-                                "user" to e.author.effectiveName,
-                            )
-                        )
-                    )
                 } catch (ex: Exception) {
                     when (ex) {
                         is AlreadyWhitelistedException -> {
@@ -122,7 +112,7 @@ class WhitelistManage: ListenerAdapter() {
                         }
                         else -> {
                             channel.sendMessageEmbeds(
-                                WhitelistEmbeds().accountErrorEmbed(e.message ?: "-").build()
+                                WhitelistEmbeds().accountErrorEmbed(ex.message ?: "-").build()
                             ).complete().delete().queueAfter(15, TimeUnit.SECONDS)
 
                             Logger.warn(
@@ -150,11 +140,12 @@ class WhitelistManage: ListenerAdapter() {
      * Unlinks a Minecraft account from a Discord user.
      * @param userID The Discord user ID to unlink the account from.
      * @param guildID Optional Discord guild ID to remove roles from the user.
+     * @param initiator The User who initiated the unlinking action, for logging purposes.
      * @throws InvalidAccountException if the account is not found or cannot be unlinked.
      * @throws Exception for any other errors that occur during the unlinking process.
      * @return The WhitelistEntry that was unlinked, or null if not found.
      */
-    fun unlinkAccount(userID: String, guildID: String? = null): WhitelistEntry {
+    fun unlinkAccount(userID: String, guildID: String? = null, initiator: User? = null): WhitelistEntry {
         val removedEntry: WhitelistEntry
 
         try {
@@ -177,6 +168,17 @@ class WhitelistManage: ListenerAdapter() {
             Logger.error("Failed to remove roles from member with user ID $userID in guild $guildID: ${e.message}. The user was still unlinked, but roles could not be removed.")
         }
 
+        Logger.info(
+            LanguageHandler.getMessage(
+                RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_REMOVED.key,
+                mapOf(
+                    "discordAccount" to DiscordUser.parseIDToName(userID),
+                    "minecraftAccount" to removedEntry.minecraftName,
+                    "user" to (initiator?.effectiveName ?: "Unknown")
+                )
+            )
+        )
+
         return removedEntry
     }
 
@@ -184,11 +186,17 @@ class WhitelistManage: ListenerAdapter() {
      * Links a Minecraft account to a Discord user.
      * @param name The Minecraft username to link.
      * @param userID The Discord user ID to link the account to (default is "~$name").
+     * @param guildID Optional Discord guild ID to add roles to the user.
      * @throws InvalidAccountException if the Minecraft account is invalid.
      * @throws AlreadyWhitelistedException if the account is already whitelisted.
      * @throws Exception for any other errors that occur during the linking process.
      */
-    fun linkAccount(name: String, userID: String = "~$name", guildID: String? = null) {
+    fun linkAccount(
+        name: String,
+        userID: String = "~$name",
+        guildID: String? = null,
+        initiator: User? = null,
+    ): WhitelistEntry {
         val player = Data.instance.server.getOfflinePlayer(name)
 
         if (verifyMinecraftAccount) {
@@ -234,5 +242,18 @@ class WhitelistManage: ListenerAdapter() {
         } catch (e: Exception) {
             Logger.error("Failed to add roles to member with user ID $userID in guild $guildID: ${e.message}. The user was still whitelisted, but roles could not be assigned.")
         }
+
+        Logger.info(
+            LanguageHandler.getMessage(
+                RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ADDED.key,
+                mapOf(
+                    "discordAccount" to DiscordUser.parseIDToName(userID),
+                    "minecraftAccount" to name,
+                    "user" to (initiator?.effectiveName ?: "Unknown")
+                )
+            )
+        )
+
+        return whitelistEntry
     }
 }

@@ -48,22 +48,11 @@ class JDAWhitelist {
                 }
 
                 try {
-                    WhitelistManage().linkAccount(minecraftName, discordUserID, guildID)
+                    WhitelistManage().linkAccount(minecraftName, discordUserID, guildID, e.user)
 
                     e.replyEmbeds(
                         WhitelistEmbeds().accountAddEmbed(minecraftName).build()
                     ).setEphemeral(true).queue()
-
-                    Logger.info(
-                        LanguageHandler.getMessage(
-                            RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ADDED.key,
-                            mapOf(
-                                "discordAccount" to DiscordUser.parseIDToName(discordUserID),
-                                "minecraftAccount" to minecraftName,
-                                "user" to e.user.effectiveName,
-                            )
-                        )
-                    )
                 } catch (ex: Exception) {
                     when (ex) {
                         is AlreadyWhitelistedException -> {
@@ -131,8 +120,15 @@ class JDAWhitelist {
         val minecraftName = e.getOption("minecraft_name")?.asString
         val guildID: String = e.guild?.id ?: return
 
+        val user = e.user
+
+        e.deferReply().queue()
+        val hook = e.hook
+
         CoroutineHandler.launchTask(
             task = {
+                val entries = WhitelistLogic.getEntriesBySite(site)
+
                 if (discordUser != null || minecraftName != null) {
                     var discordEntry: WhitelistEntry? = null
                     var minecraftEntry: WhitelistEntry? = null
@@ -141,8 +137,16 @@ class JDAWhitelist {
                         val entry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
                         if (entry == null) {
                             if (minecraftName == null) {
-                                Logger.dev("No entry found for discord user: $discordUser")
-                                // TODO: Add reply
+                                hook.sendMessageEmbeds(
+                                    WhitelistEmbeds().accountErrorEmbed(
+                                        LanguageHandler.getRawMessage(
+                                            RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_DISCORD.key,
+                                            params = mapOf(
+                                                "discordUser" to discordUser.name
+                                            )
+                                        )
+                                    ).build()
+                                ).queue()
                                 return@launchTask
                             }
                             discordEntry = null
@@ -155,8 +159,16 @@ class JDAWhitelist {
                         val entry = WhitelistLogic.getEntryByMinecraftName(minecraftName)
                         if (entry == null) {
                             if (discordEntry == null) {
-                                Logger.dev("No entry found for minecraft name: $minecraftName")
-                                // TODO: Add reply
+                                hook.sendMessageEmbeds(
+                                    WhitelistEmbeds().accountErrorEmbed(
+                                        LanguageHandler.getRawMessage(
+                                            RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_MINECRAFT.key,
+                                            params = mapOf(
+                                                "minecraftName" to minecraftName
+                                            )
+                                        )
+                                    ).build()
+                                ).queue()
                                 return@launchTask
                             }
                             minecraftEntry = null
@@ -166,26 +178,39 @@ class JDAWhitelist {
                     }
 
                     if (discordEntry != minecraftEntry && discordEntry != null && minecraftEntry != null) {
-                        Logger.dev("Discord entry and Minecraft entry do not match: $discordEntry vs $minecraftEntry")
-                        // TODO: Add reply
+                        hook.sendMessageEmbeds(
+                            WhitelistEmbeds().accountErrorEmbed(
+                                LanguageHandler.getRawMessage(
+                                    RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_ENTRIES_NOT_EQUAL.key,
+                                    params = mapOf(
+                                        "discordEntry" to discordEntry.toString(),
+                                        "minecraftEntry" to minecraftEntry.toString()
+                                    )
+                                )
+                            ).build()
+                        ).queue()
+
                         return@launchTask
                     }
 
                     val discordUserID = discordEntry?.discordUserID ?: minecraftEntry?.discordUserID ?: return@launchTask
 
-                    WhitelistManage().unlinkAccount(discordUserID, guildID)
+                    val oldEntry = WhitelistManage().unlinkAccount(discordUserID, guildID, user)
 
-                    Logger.dev("Removed account: $discordUserID from the whitelist")
-
-                    // TODO: Add reply
+                    val embed = WhitelistEmbeds().forceRemoveEmbed(site, listOf(oldEntry))
+                    hook.sendMessageEmbeds(embed.build())
+                        .setComponents(
+                            ActionRow.of(WhitelistEmbeds().forceRemoveActionRowDropdown(entries).build()),
+                            ActionRow.of(WhitelistEmbeds().forceRemoveActionRowButtons(site))
+                        )
+                        .setEphemeral(true)
+                        .queue()
 
                     return@launchTask
                 }
 
-                val entries = WhitelistLogic.getEntriesBySite(site)
-
                 val embed = WhitelistEmbeds().forceRemoveEmbed(site)
-                e.replyEmbeds(embed.build())
+                hook.sendMessageEmbeds(embed.build())
                     .setComponents(
                         ActionRow.of(WhitelistEmbeds().forceRemoveActionRowDropdown(entries).build()),
                         ActionRow.of(WhitelistEmbeds().forceRemoveActionRowButtons(site))
@@ -201,6 +226,9 @@ class JDAWhitelist {
         val minecraftName = e.getOption("minecraft_name")?.asString
         val discordUser = e.getOption("discord_user")?.asUser
 
+        e.deferReply().queue()
+        val hook = e.hook
+
         CoroutineHandler.launchTask(
             task = {
                 var entry: WhitelistEntry? = null
@@ -215,8 +243,19 @@ class JDAWhitelist {
                     val discordEntry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
 
                     if (discordEntry != minecraftEntry && discordEntry != null && minecraftEntry != null) {
-                        Logger.dev("Discord entry and Minecraft entry do not match: $discordEntry vs $minecraftEntry")
-                        // TODO: Add reply
+                        hook.sendMessageEmbeds(
+                            WhitelistEmbeds().accountErrorEmbed(
+                                LanguageHandler.getRawMessage(
+                                    RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_ENTRIES_NOT_EQUAL.key,
+                                    params = mapOf(
+                                        "discordEntry" to discordEntry.toString(),
+                                        "minecraftEntry" to minecraftEntry.toString()
+                                    )
+                                )
+                            ).build()
+                        ).setEphemeral(true).queue()
+
+
                         return@launchTask
                     }
 
@@ -228,7 +267,7 @@ class JDAWhitelist {
                 }
 
                 if (entry == null) {
-                    e.replyEmbeds(
+                    hook.sendMessageEmbeds(
                         WhitelistEmbeds().invalidAccountEmbed(
                             minecraftName ?: discordUser?.name ?: "Unknown"
                         ).build()
@@ -237,7 +276,7 @@ class JDAWhitelist {
                 }
 
                 val embed = WhitelistEmbeds().checkEmbed(entry)
-                e.replyEmbeds(embed.build())
+                hook.sendMessageEmbeds(embed.build())
                     .setEphemeral(true)
                     .queue()
             },

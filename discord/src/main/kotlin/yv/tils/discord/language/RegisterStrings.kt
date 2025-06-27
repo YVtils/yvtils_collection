@@ -207,6 +207,22 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
+            LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_TITLE,
+            mapOf(
+                FileTypes.EN to "Your account has been successfully changed!",
+                FileTypes.DE to "Dein Account wurde erfolgreich geändert!",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_DESCRIPTION,
+            mapOf(
+                FileTypes.EN to "Old Account: <oldName> • New Account: <newName>",
+                FileTypes.DE to "Alter Account: <oldName> • Neuer Account: <newName>",
+            )
+        )
+
+        registerNewString(
             LangStrings.EMBED_WHITELIST_ERROR_TITLE,
             mapOf(
                 FileTypes.EN to "An error occurred while processing your request",
@@ -271,6 +287,22 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
+            LangStrings.CONSOLE_WHITELIST_ACCOUNT_REMOVED,
+            mapOf(
+                FileTypes.EN to "Discord Account <discordAccount> has been unlinked from Minecraft account <minecraftAccount> and removed from the whitelist by <user>.",
+                FileTypes.DE to "Discord Account <discordAccount> wurde vom Minecraft Account <minecraftAccount> getrennt und von <user> von der Whitelist entfernt.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.CONSOLE_WHITELIST_ACCOUNT_REPLACED,
+            mapOf(
+                FileTypes.EN to "User <user> replaced Minecraft account <oldAccount> with <newAccount> for Discord account <discordAccount>.",
+                FileTypes.DE to "Benutzer <user> hat den Minecraft-Account <oldAccount> durch <newAccount> für den Discord-Account <discordAccount> ersetzt.",
+            )
+        )
+
+        registerNewString(
             LangStrings.CONSOLE_WHITELIST_ACCOUNT_ALREADY_LISTED,
             mapOf(
                 FileTypes.EN to "Discord User <user> tried to link Discord account <discordAccount> with Minecraft account <minecraftAccount>, but it is already whitelisted.",
@@ -291,6 +323,46 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
             mapOf(
                 FileTypes.EN to "An error occurred while processing the whitelist request by <user> for Discord account <discordAccount> and Minecraft account <minecraftAccount>. Error: <error>",
                 FileTypes.DE to "Ein Fehler ist bei der Verarbeitung der Whitelist-Anfrage von <user> für den Discord-Account <discordAccount> und den Minecraft-Account <minecraftAccount> aufgetreten. Fehler: <error>",
+            )
+        )
+
+        registerNewString(
+            LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NO_CACHE,
+            mapOf(
+                FileTypes.EN to "No account found in cache for user <user> during account replacement.",
+                FileTypes.DE to "Es konnte kein Account im Cache für den Benutzer <user> während dem ersetzen des Accounts gefunden werden.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_EXCEPTION,
+            mapOf(
+                FileTypes.EN to "An exception occurred while replacing the account for user <user>: <error>",
+                FileTypes.DE to "Es ist ein Fehler aufgetreten, während der Account für den Benutzer <user> ersetzt wurde: <error>",
+            )
+        )
+
+        registerNewString(
+            LangStrings.ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_DISCORD,
+            mapOf(
+                FileTypes.EN to "No whitelist entry found for Discord user <discordUser>.",
+                FileTypes.DE to "Kein Whitelist-Eintrag für den Discord-Benutzer <discordUser> gefunden.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_MINECRAFT,
+            mapOf(
+                FileTypes.EN to "No whitelist entry found for Minecraft user <minecraftName>.",
+                FileTypes.DE to "Kein Whitelist-Eintrag für den Minecraft-Benutzer <minecraftName> gefunden.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.ERROR_WHITELIST_FORCE_REMOVE_ENTRIES_NOT_EQUAL,
+            mapOf(
+                FileTypes.EN to "Discord entry and Minecraft entry do not match: <discordEntry> vs <minecraftEntry>.",
+                FileTypes.DE to "Discord-Eintrag und Minecraft-Eintrag stimmen nicht überein: <discordEntry> vs <minecraftEntry>.",
             )
         )
     }
@@ -324,6 +396,8 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         EMBED_WHITELIST_ACCOUNT_INVALID_DESCRIPTION("discord.embed.whitelist.account.invalid.description"),
         EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_TITLE("discord.embed.whitelist.account.change.prompt.title"),
         EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_DESCRIPTION("discord.embed.whitelist.account.change.prompt.description"),
+        EMBED_WHITELIST_ACCOUNT_CHANGE_TITLE("discord.embed.whitelist.account.change.title"),
+        EMBED_WHITELIST_ACCOUNT_CHANGE_DESCRIPTION("discord.embed.whitelist.account.change.description"),
         EMBED_WHITELIST_ERROR_TITLE("discord.embed.whitelist.error.title"),
         EMBED_WHITELIST_ERROR_DESCRIPTION("discord.embed.whitelist.error.description"),
         EMBED_WHITELIST_FORCE_REMOVE_TITLE("discord.embed.whitelist.force.remove.title"),
@@ -335,9 +409,17 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
 
 
         CONSOLE_WHITELIST_ACCOUNT_ADDED("discord.console.whitelist.account.added"),
+        CONSOLE_WHITELIST_ACCOUNT_REMOVED("discord.console.whitelist.account.removed"),
+        CONSOLE_WHITELIST_ACCOUNT_REPLACED("discord.console.whitelist.account.replaced"),
         CONSOLE_WHITELIST_ACCOUNT_ALREADY_LISTED("discord.console.whitelist.account.alreadyListed"),
         CONSOLE_WHITELIST_ACCOUNT_INVALID("discord.console.whitelist.account.invalid"),
-        CONSOLE_WHITELIST_ACCOUNT_ERROR("discord.console.whitelist.account.error")
+        CONSOLE_WHITELIST_ACCOUNT_ERROR("discord.console.whitelist.account.error"),
+
+        ERROR_WHITELIST_ACCOUNT_REPLACE_NO_CACHE("discord.error.whitelist.account.replace.noCache"),
+        ERROR_WHITELIST_ACCOUNT_REPLACE_EXCEPTION("discord.error.whitelist.account.replace.exception"),
+        ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_DISCORD("discord.error.whitelist.force.remove.noEntry.discord"),
+        ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_MINECRAFT("discord.error.whitelist.force.remove.noEntry.minecraft"),
+        ERROR_WHITELIST_FORCE_REMOVE_ENTRIES_NOT_EQUAL("discord.error.whitelist.force.remove.entriesNotEqual")
         ;
     }
 }

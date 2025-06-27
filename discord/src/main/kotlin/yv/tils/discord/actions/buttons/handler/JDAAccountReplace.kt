@@ -1,7 +1,11 @@
 package yv.tils.discord.actions.buttons.handler
 
+import language.LanguageHandler
+import logger.Logger
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import yv.tils.discord.logic.whitelist.WhitelistManage
+import yv.tils.discord.data.Embeds
+import yv.tils.discord.language.RegisterStrings
+import yv.tils.discord.logic.whitelist.*
 
 class JDAAccountReplace {
     /**
@@ -9,29 +13,91 @@ class JDAAccountReplace {
      *
      * @param e The ButtonInteractionEvent containing the button interaction event.
      */
+    // TODO: There probably is a bug when replacing the account over forceAdd for another user
     fun executeConfirm(e: ButtonInteractionEvent) {
         val message = e.message
-        val userID = e.user.id
+        val user = e.user
+        val userID = user.id
         val guildID = e.guild?.id
 
         message.delete().queue()
 
+        e.deferReply().queue()
+        val hook = e.hook
+
         val newAccount = WhitelistManage.accountReplaceCache[userID]
         WhitelistManage.accountReplaceCache.remove(userID)
         if (newAccount == null) {
-            e.reply("No account replacement found for your user.").setEphemeral(true).queue() // TODO: error handling...
+            hook.sendMessageEmbeds(
+                WhitelistEmbeds().accountErrorEmbed(
+                    LanguageHandler.getRawMessage(
+                        RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NO_CACHE.key,
+                        params = mapOf<String, Any>(
+                            "user" to user.effectiveName,
+                        )
+                    )
+                ).build()
+            ).queue()
+
+            Logger.warn(
+                LanguageHandler.getMessage(
+                    RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NO_CACHE.key,
+                    params = mapOf<String, Any>(
+                        "user" to user.effectiveName,
+                    )
+                )
+            )
+
             return
         }
+
+        val oldEntry: WhitelistEntry
 
         try {
-            WhitelistManage().unlinkAccount(userID, guildID)
-            WhitelistManage().linkAccount(newAccount, userID, guildID)
+            oldEntry = WhitelistManage().unlinkAccount(userID, guildID, user)
+            WhitelistManage().linkAccount(newAccount, userID, guildID, user)
         } catch (ex: Exception) {
-            e.reply("An error occurred while replacing the account: ${ex.message}").setEphemeral(true).queue() // TODO: error handling...
+            hook.sendMessageEmbeds(
+                WhitelistEmbeds().accountErrorEmbed(
+                    LanguageHandler.getRawMessage(
+                        RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_EXCEPTION.key,
+                        params = mapOf<String, Any>(
+                            "user" to user.effectiveName,
+                            "error" to (ex.message ?: "Unknown error")
+                        )
+                    )
+                ).build()
+            ).queue()
+            Logger.warn(
+                LanguageHandler.getMessage(
+                    RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_EXCEPTION.key,
+                    params = mapOf<String, Any>(
+                        "user" to user.effectiveName,
+                        "error" to (ex.message ?: "Unknown error")
+                    )
+                )
+            )
             return
         }
 
-        e.reply("Account replacement confirmed.").setEphemeral(true).queue() // TODO: success message
+        hook.sendMessageEmbeds(
+            WhitelistEmbeds().accountChangeEmbed(
+                oldEntry.minecraftName,
+                newAccount
+            ).build()
+        )
+
+        Logger.info(
+            LanguageHandler.getMessage(
+                RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_REPLACED.key,
+                params = mapOf<String, Any>(
+                    "oldAccount" to oldEntry.minecraftName,
+                    "newAccount" to newAccount,
+                    "user" to user.effectiveName,
+                    "discordAccount" to user.effectiveName,
+                )
+            )
+        )
     }
 
     /**
@@ -44,9 +110,13 @@ class JDAAccountReplace {
         val userID = e.user.id
 
         message.delete().queue()
+        e.deferReply().queue()
+
+        val hook = e.hook
 
         WhitelistManage.accountReplaceCache.remove(userID)
 
-        e.reply("Account replacement cancelled.").setEphemeral(true).queue() // TODO: success message
+        hook.sendMessageEmbeds(Embeds().actionCancelledEmbed("Account Replacement").build())
+            .queue() // TODO: Add localization support for this message
     }
 }
