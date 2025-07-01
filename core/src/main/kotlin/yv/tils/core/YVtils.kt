@@ -56,7 +56,10 @@ class YVtils : JavaPlugin() {
         Data.pluginShortName = PLUGIN_NAME_SHORT
         Data.pluginURL = "none"
 
-        CommandAPI.onLoad(CommandAPIBukkitConfig(instance).silentLogs(true).verboseOutput(false).setNamespace("yvtils"))
+        CommandAPI.onLoad(
+            CommandAPIBukkitConfig(instance).silentLogs(true).verboseOutput(false).setNamespace("yvtils")
+                .beLenientForMinorVersions(true)
+        )
 
         try {
             modules.forEach { it.onLoad() }

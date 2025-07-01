@@ -10,7 +10,6 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.discord.DiscordYVtils
-import yv.tils.discord.actions.commands.JDACommandsRegister
 
 class YVtils : JavaPlugin() {
     companion object {
@@ -43,7 +42,10 @@ class YVtils : JavaPlugin() {
         Data.pluginShortName = PLUGIN_NAME_SHORT
         Data.pluginURL = "https://modrinth.com/plugin/yvtils_dc"
 
-        CommandAPI.onLoad(CommandAPIBukkitConfig(instance).silentLogs(true).verboseOutput(false).setNamespace("yvtils"))
+        CommandAPI.onLoad(
+            CommandAPIBukkitConfig(instance).silentLogs(true).verboseOutput(false).setNamespace("yvtils")
+                .beLenientForMinorVersions(true)
+        )
 
         try {
             modules.forEach { it.onLoad() }
