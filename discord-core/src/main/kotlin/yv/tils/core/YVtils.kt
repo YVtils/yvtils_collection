@@ -10,6 +10,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.discord.DiscordYVtils
+import yv.tils.migration.MigrationYVtils
 
 class YVtils : JavaPlugin() {
     companion object {
@@ -25,6 +26,7 @@ class YVtils : JavaPlugin() {
     private val modules: List<Data.YVtilsModule> = listOf(
         ConfigYVtils(),
         UtilsYVtils(),
+        MigrationYVtils(), // TODO: Remove with 4.1.0
         DiscordYVtils(),
         CommonYVtils()
     )

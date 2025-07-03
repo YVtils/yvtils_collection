@@ -3,6 +3,7 @@ dependencies {
     implementation(project(":utils"))
     implementation(project(":config"))
     implementation(project(":discord"))
+    implementation(project(":migration"))
 }
 
 val version = "4.0.0"
