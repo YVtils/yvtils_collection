@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.2.0" apply false
     kotlin("plugin.serialization") version "2.2.0" apply false
     id("com.gradleup.shadow") version "9.0.0-beta17" apply false
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17" apply false
+    id("io.papermc.paperweight.userdev") version "2.0.0-SNAPSHOT" apply false
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false
 }
 
