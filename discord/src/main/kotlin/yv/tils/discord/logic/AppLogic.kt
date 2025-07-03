@@ -19,6 +19,7 @@ import yv.tils.discord.logic.sync.serverConsole.SendCMD
 import yv.tils.discord.logic.sync.serverStats.CollectStats
 import yv.tils.discord.logic.whitelist.WhitelistManage
 import java.time.Duration
+import org.apache.logging.log4j.core.Logger as Logger4J
 
 class AppLogic {
     companion object {
@@ -85,7 +86,6 @@ class AppLogic {
 
         builder.addEventListeners(SyncChats())
 
-//        builder.addEventListeners(JDACommandsRegister())
         builder.addEventListeners(JDACommandsListener())
 
         builder.addEventListeners(JDAButtonsListener())
@@ -134,7 +134,6 @@ class AppLogic {
             started = true
             appID = jda.selfUser.id
             launchFeatures()
-            Logger.info(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_START_SUCCESS.key))
         } catch (e: Exception) {
             Logger.error("Failed to start Discord app: ${e.message}")
             started = false
@@ -148,7 +147,7 @@ class AppLogic {
 
         val appender = GetConsole()
         runCatching {
-            val logger = LogManager.getRootLogger() as org.apache.logging.log4j.core.Logger
+            val logger = LogManager.getRootLogger() as Logger4J
             logger.addAppender(appender)
         }
 

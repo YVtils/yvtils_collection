@@ -1,15 +1,12 @@
 package yv.tils.discord
 
 import data.Data
+import language.LanguageHandler
+import logger.Logger
 import yv.tils.discord.actions.commands.JDACommandsRegister
-import yv.tils.discord.configs.ConfigFile
-import yv.tils.discord.configs.SaveFile
-import yv.tils.discord.configs.StatsSyncSaveFile
+import yv.tils.discord.configs.*
 import yv.tils.discord.language.RegisterStrings
-import yv.tils.discord.listener.AsyncChat
-import yv.tils.discord.listener.PlayerAdvancementDone
-import yv.tils.discord.listener.PlayerJoin
-import yv.tils.discord.listener.PlayerQuit
+import yv.tils.discord.listener.*
 import yv.tils.discord.logic.AppLogic
 
 class DiscordYVtils : Data.YVtilsModule {
@@ -39,6 +36,10 @@ class DiscordYVtils : Data.YVtilsModule {
 
     override fun onLateEnablePlugin() {
         JDACommandsRegister().registerCommands()
+
+        if (AppLogic.started) {
+            Logger.info(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_START_SUCCESS.key))
+        }
     }
 
     override fun disablePlugin() {

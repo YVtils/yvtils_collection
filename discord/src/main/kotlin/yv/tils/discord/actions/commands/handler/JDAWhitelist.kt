@@ -28,6 +28,9 @@ class JDAWhitelist {
         val discordUserID = e.getOption("discord_user")?.asUser?.id ?: "~$minecraftName"
         val guildID: String = e.guild?.id ?: return
 
+        e.deferReply(true).queue()
+        val hook = e.hook
+
         CoroutineHandler.launchTask(
             task = {
                 if (WhitelistLogic.containsEntry(discordUserID)) {
@@ -35,7 +38,7 @@ class JDAWhitelist {
 
                     accountReplaceCache[discordUserID] = minecraftName
 
-                    e.replyEmbeds(
+                    hook.sendMessageEmbeds(
                         WhitelistEmbeds().accountChangePromptEmbed(
                             oldName = oldName,
                             newName = minecraftName
@@ -50,13 +53,13 @@ class JDAWhitelist {
                 try {
                     WhitelistManage().linkAccount(minecraftName, discordUserID, guildID, e.user)
 
-                    e.replyEmbeds(
+                    hook.sendMessageEmbeds(
                         WhitelistEmbeds().accountAddEmbed(minecraftName).build()
                     ).setEphemeral(true).queue()
                 } catch (ex: Exception) {
                     when (ex) {
                         is AlreadyWhitelistedException -> {
-                            e.replyEmbeds(
+                            hook.sendMessageEmbeds(
                                 WhitelistEmbeds().accountAlreadyListedEmbed(minecraftName).build()
                             ).setEphemeral(true).queue()
 
@@ -73,7 +76,7 @@ class JDAWhitelist {
                             return@launchTask
                         }
                         is InvalidAccountException -> {
-                            e.replyEmbeds(
+                            hook.sendMessageEmbeds(
                                 WhitelistEmbeds().invalidAccountEmbed(minecraftName).build()
                             ).setEphemeral(true).queue()
 
@@ -90,7 +93,7 @@ class JDAWhitelist {
                             return@launchTask
                         }
                         else -> {
-                            e.replyEmbeds(
+                            hook.sendMessageEmbeds(
                                 WhitelistEmbeds().accountErrorEmbed(ex.message ?: "-").build()
                             ).setEphemeral(true).queue()
 
@@ -122,7 +125,7 @@ class JDAWhitelist {
 
         val user = e.user
 
-        e.deferReply().queue()
+        e.deferReply(true).queue()
         val hook = e.hook
 
         CoroutineHandler.launchTask(
@@ -226,7 +229,7 @@ class JDAWhitelist {
         val minecraftName = e.getOption("minecraft_name")?.asString
         val discordUser = e.getOption("discord_user")?.asUser
 
-        e.deferReply().queue()
+        e.deferReply(true).queue()
         val hook = e.hook
 
         CoroutineHandler.launchTask(

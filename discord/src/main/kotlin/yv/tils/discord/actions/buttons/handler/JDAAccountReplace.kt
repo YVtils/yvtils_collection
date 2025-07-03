@@ -85,7 +85,7 @@ class JDAAccountReplace {
                 oldEntry.minecraftName,
                 newAccount
             ).build()
-        )
+        ).setEphemeral(true).queue()
 
         Logger.info(
             LanguageHandler.getMessage(
@@ -116,7 +116,11 @@ class JDAAccountReplace {
 
         WhitelistManage.accountReplaceCache.remove(userID)
 
-        hook.sendMessageEmbeds(Embeds().actionCancelledEmbed("Account Replacement").build())
-            .queue() // TODO: Add localization support for this message
+        hook.sendMessageEmbeds(
+            Embeds().actionCancelledEmbed(
+                LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE.key)
+            ).build()
+        ).setEphemeral(true)
+            .queue()
     }
 }

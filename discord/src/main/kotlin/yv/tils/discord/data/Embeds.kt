@@ -3,11 +3,13 @@ package yv.tils.discord.data
 import colors.ColorUtils
 import colors.Colors
 import data.Data
+import language.LanguageHandler
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.User
 import player.PlayerUtils
 import server.ServerUtils
 import server.VersionUtils
+import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.WhitelistLogic
 
 class Embeds {
@@ -74,9 +76,17 @@ class Embeds {
     }
 
     fun actionCancelledEmbed(action: String): EmbedBuilder {
-        return EmbedBuilder()
-            .setTitle("Action Cancelled")
-            .setDescription("The action `$action` has been cancelled.")
+        val builder = EmbedBuilder()
+
+        val title = LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_ACTION_CANCELLED_TITLE.key)
+        val description = LanguageHandler.getRawMessage(
+            RegisterStrings.LangStrings.EMBED_ACTION_CANCELLED_DESCRIPTION.key,
+            params = mapOf("action" to action)
+        )
+
+        return builder
+            .setTitle(title)
+            .setDescription(description)
             .setColor(errorColor)
             .setFooter(FOOTER_TEXT, FOOTER_ICON)
             .setAuthor(AUTHOR_NAME, AUTHOR_LINK, AUTHOR_ICON)

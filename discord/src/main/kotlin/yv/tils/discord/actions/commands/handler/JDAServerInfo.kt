@@ -26,11 +26,18 @@ class JDAServerInfo {
     fun executeCommand(e: SlashCommandInteractionEvent) {
         val serverIcon = File("./server-icon.png")
 
+        e.deferReply(true).queue()
+        val hook = e.hook
+
         if (serverIcon.exists()) {
-            e.reply("").setEmbeds(Embeds().serverInfoEmbed(e.user).build()).setEphemeral(true)
-                .addFiles(FileUpload.fromData(serverIcon, "server-icon.png")).queue()
+            hook.sendMessageEmbeds(
+                Embeds().serverInfoEmbed(e.user).build()
+            ).setEphemeral(true)
+                .addFiles(FileUpload.fromData(serverIcon, "server-icon.png"))
+                .queue()
         } else {
-            e.reply("").setEmbeds(Embeds().serverInfoEmbed(e.user).build()).setEphemeral(true).queue()
+            hook.sendMessageEmbeds(Embeds().serverInfoEmbed(e.user).build())
+                .setEphemeral(true).queue()
         }
     }
 

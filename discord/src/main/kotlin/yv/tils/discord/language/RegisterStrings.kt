@@ -279,6 +279,30 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
+            LangStrings.EMBED_ACTION_CANCELLED_TITLE,
+            mapOf(
+                FileTypes.EN to "Action Cancelled",
+                FileTypes.DE to "Aktion Abgebrochen",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_ACTION_CANCELLED_DESCRIPTION,
+            mapOf(
+                FileTypes.EN to "The action <action> has been cancelled.",
+                FileTypes.DE to "Die Aktion <action> wurde abgebrochen.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.EMBED_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE,
+            mapOf(
+                FileTypes.EN to "Account Replacement",
+                FileTypes.DE to "Account Ersetzung",
+            )
+        )
+
+        registerNewString(
             LangStrings.CONSOLE_WHITELIST_ACCOUNT_ADDED,
             mapOf(
                 FileTypes.EN to "Discord Account <discordAccount> has been linked to Minecraft account <minecraftAccount> and added to the whitelist by <user>.",
@@ -407,6 +431,9 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
 
         EMBED_WHITELIST_CHECK_TITLE("discord.embed.whitelist.check.title"),
 
+        EMBED_ACTION_CANCELLED_TITLE("discord.embed.actionCancelled.title"),
+        EMBED_ACTION_CANCELLED_DESCRIPTION("discord.embed.actionCancelled.description"),
+        EMBED_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE("discord.embed.actionCancelled.action.accountReplace"),
 
         CONSOLE_WHITELIST_ACCOUNT_ADDED("discord.console.whitelist.account.added"),
         CONSOLE_WHITELIST_ACCOUNT_REMOVED("discord.console.whitelist.account.removed"),
