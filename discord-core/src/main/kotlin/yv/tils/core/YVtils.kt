@@ -37,15 +37,31 @@ class YVtils : JavaPlugin() {
         Logger.logger = componentLogger
         Logger.debug("$PLUGIN_NAME_FULL v$yvtilsVersion is loading...")
 
-        Data.yvtilsVersion = yvtilsVersion
-        Data.instance = instance
-        Data.key = NamespacedKey(this, "yvtils")
-        Data.pluginName = PLUGIN_NAME
-        Data.pluginShortName = PLUGIN_NAME_SHORT
-        Data.pluginURL = "https://modrinth.com/plugin/yvtils_dc"
+        val core = Data.YVtilsCore(
+            description = "Discord Minecraft Bridge Plugin",
+            url = "https://modrinth.com/plugin/yvtils_dc",
+
+            dependencies = listOf(
+                "discord"
+            ),
+
+            name = PLUGIN_NAME,
+            colorHex = PLUGIN_COLOR,
+            pluginShort = PLUGIN_NAME_SHORT,
+
+            version = yvtilsVersion,
+            instance = instance,
+
+            key = NamespacedKey(this, "yvtils"),
+        )
+
+        Data.initCore(core)
 
         CommandAPI.onLoad(
-            CommandAPIBukkitConfig(instance).silentLogs(true).verboseOutput(false).setNamespace("yvtils")
+            CommandAPIBukkitConfig(instance)
+                .setNamespace("yvtils")
+                .silentLogs(true)
+                .verboseOutput(false)
                 .beLenientForMinorVersions(true)
         )
 
@@ -67,7 +83,9 @@ class YVtils : JavaPlugin() {
             e.printStackTrace()
         }
 
-        onLateEnablePlugin()
+        if (instance.isEnabled) {
+            onLateEnablePlugin()
+        }
     }
 
     fun onLateEnablePlugin() {

@@ -26,7 +26,9 @@ class MessageEmbeds {
             .setAuthor(sender.name, null, ICON_URL.replace("<uuid>", sender.uniqueId.toString()))
             .addField(
                 prettifyAdvancementKey(advancement.key.key),
-                MessageUtils.strip(advancement.display?.description() ?: MessageUtils.convert("No description available.")),
+                MessageUtils.strip(
+                    advancement.display?.description() ?: MessageUtils.convert("No description available.")
+                ), // TODO: Add localization
                 false
             )
             .setColor(Color(0xFEEF89))
@@ -35,8 +37,15 @@ class MessageEmbeds {
     fun embedForJoinLeave(sender: Player, action: String): EmbedBuilder {
         return EmbedBuilder()
             .setAuthor(sender.name, null, ICON_URL.replace("<uuid>", sender.uniqueId.toString()))
-            .setDescription("**${sender.name}** has $action the server.")
+            .setDescription("**${sender.name}** has $action the server.") // TODO: Add localization
             .setColor(if (action == "joined") colorFromHex(Colors.GREEN.color) else colorFromHex(Colors.RED.color))
+    }
+
+    fun embedForDeath(sender: Player, cause: String): EmbedBuilder {
+        return EmbedBuilder()
+            .setAuthor(sender.name, null, ICON_URL.replace("<uuid>", sender.uniqueId.toString()))
+            .setDescription("**${sender.name}** has died due to **$cause**.") // TODO: Add localization
+            .setColor(colorFromHex(Colors.RED.color))
     }
 
     private fun prettifyAdvancementKey(key: String): String {

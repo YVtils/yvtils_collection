@@ -64,7 +64,10 @@ class YVtils : JavaPlugin() {
             Logger.error("Error during YVtils startup: ${e.message}")
             e.printStackTrace()
         }
-        onLateEnablePlugin()
+
+        if (instance.isEnabled) {
+            onLateEnablePlugin()
+        }
     }
 
     fun onLateEnablePlugin() {

@@ -15,6 +15,7 @@ class ServerChatsSyncManager {
         val syncDiscordMessages = ConfigFile.getValueAsBoolean("syncFeature.chatSync.settings.syncDiscordMessages") ?: true
         val syncAdvancements = ConfigFile.getValueAsBoolean("syncFeature.chatSync.settings.syncAdvancements") ?: true
         val syncJoinLeaveMessages = ConfigFile.getValueAsBoolean("syncFeature.chatSync.settings.syncJoinLeaveMessages") ?: true
+        val syncDeaths = ConfigFile.getValueAsBoolean("syncFeature.chatSync.settings.syncDeaths") ?: true
         val ignoreBotMessages = ConfigFile.getValueAsBoolean("general.settings.ignoreBotMessages") ?: true
 
         lateinit var channel: TextChannel
@@ -28,7 +29,7 @@ class ServerChatsSyncManager {
         }
 
         try {
-            channel = AppLogic.jda.getTextChannelById(channelID)
+            channel = AppLogic.getJDA().getTextChannelById(channelID)
                 ?: throw IllegalArgumentException("Channel with ID $channelID not found.")
         } catch (e: Exception) {
             Logger.error("Failed to load channel for chat sync: ${e.message}")

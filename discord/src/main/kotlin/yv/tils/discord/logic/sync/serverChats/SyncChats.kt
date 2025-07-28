@@ -23,7 +23,7 @@ class SyncChats : ListenerAdapter() {
 
         if (!active) return
         if (!syncMinecraftMessages) return
-        if (!e.player.hasPermission(Permissions.SYNC_CHAT.permission)) return
+        if (! e.player.hasPermission(Permissions.SYNC_CHAT.permission.name)) return
 
         sendDiscordMessage(e.player, MessageUtils.stripChatMessage(message))
     }

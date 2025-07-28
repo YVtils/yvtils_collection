@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "2.2.0" apply false
     kotlin("plugin.serialization") version "2.2.0" apply false
-    id("com.gradleup.shadow") version "9.0.0-beta17" apply false
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17" apply false
+    id("com.gradleup.shadow") version "9.0.0-rc2" apply false
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.18" apply false
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false
 }
 
@@ -29,7 +29,7 @@ subprojects {
         plugin("xyz.jpenilla.run-paper")
     }
 
-    val commandAPIVersion = "10.1.1"
+    val commandAPIVersion = "10.1.2"
 
     dependencies {
         // Paper API dependency
@@ -46,7 +46,6 @@ subprojects {
 
     tasks.withType<KotlinCompile> {
         compilerOptions {
-            // The language version defaults to the Kotlin plugin version (2.2).
             jvmTarget.set(JvmTarget.JVM_21)
         }
     }

@@ -16,7 +16,7 @@ class SyncAdvancements {
         if (!active) return
         if (!syncAdvancements) return // Check if advancement sync is enabled
         if (advancement.display == null) return // Skip if no display information is available
-        if (!e.player.hasPermission(Permissions.SYNC_ADVANCEMENTS.permission)) return // Check for permission
+        if (! e.player.hasPermission(Permissions.SYNC_ADVANCEMENTS.permission.name)) return // Check for permission
 
         sendDiscordMessage(e.player, advancement)
     }

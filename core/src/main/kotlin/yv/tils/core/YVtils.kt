@@ -79,7 +79,9 @@ class YVtils : JavaPlugin() {
             e.printStackTrace()
         }
 
-        onLateEnablePlugin()
+        if (instance.isEnabled) {
+            onLateEnablePlugin()
+        }
     }
 
     fun onLateEnablePlugin() {

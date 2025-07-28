@@ -14,21 +14,38 @@ import yv.tils.migration.discord.DiscordMigrationLogic
 @Deprecated("This module will be removed with these releases: yvtils-discord:4.1.0; yvtils-smp:1.3.0; yvtils-multiMine:1.3.0")
 class MigrationYVtils: Data.YVtilsModule {
     companion object {
-        const val MODULE_NAME = "migration"
-        const val MODULE_VERSION = "1.0.0"
+        val MODULE = Data.YVtilsModuleData(
+            name = "migration",
+            version = "1.0.0",
+            description = "Migration module for YVtils",
+            author = "YVtils",
+        )
+
+        lateinit var oldPluginFolder: String
     }
 
-    override fun onLoad() {}
-
-    override fun enablePlugin() {
-        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
-
+    override fun onLoad() {
         // Get which plugin is starting
-        when (Data.pluginShortName) {
-            "dc" -> {
+        when (Data.core.name.lowercase()) {
+            "discord" -> {
+                oldPluginFolder = "plugins/YVtils-DC"
                 DiscordMigrationLogic().startMigration()
             }
+
+            "smp" -> {
+                oldPluginFolder = "plugins/YVtils-SMP"
+                // Add SMP migration logic here if needed
+            }
+
+            "multiMine" -> {
+                oldPluginFolder = "plugins/YVtils-MM"
+                // Add MultiMine migration logic here if needed
+            }
         }
+    }
+
+    override fun enablePlugin() {
+        Data.addModule(MODULE)
     }
 
     override fun onLateEnablePlugin() {

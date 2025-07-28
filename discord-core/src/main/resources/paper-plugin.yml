@@ -2,8 +2,9 @@ name: YVtils-Discord
 version: 4.0.0
 main: yv.tils.core.YVtils
 api-version: '1.21'
-author: WolfiiYV
+author: YVtils
 website: 'https://yvtils.net/yvtils/'
 prefix: YVtils
 contributors:
+  - Lyvric
   - SlWed

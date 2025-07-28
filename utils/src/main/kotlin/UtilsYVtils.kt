@@ -1,17 +1,23 @@
+
 import coroutine.CoroutineHandler
 import data.Data
 import server.VersionUtils
 
 class UtilsYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULE_NAME = "utils"
-        const val MODULE_VERSION = "1.0.0"
+        val MODULE = Data.YVtilsModuleData(
+            "utils",
+            "1.0.0",
+            "Utils module for YVtils",
+            "YVtils",
+            "https://docs.yvtils.net/utils/"
+        )
     }
 
     override fun onLoad() {}
 
     override fun enablePlugin() {
-        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
+        Data.addModule(MODULE)
 
         VersionUtils().loadServerVersion()
     }

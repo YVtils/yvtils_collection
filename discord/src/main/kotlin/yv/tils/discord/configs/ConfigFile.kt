@@ -65,6 +65,7 @@ class ConfigFile {
             content["syncFeature.chatSync.settings.syncDiscordMessages"] = true
             content["syncFeature.chatSync.settings.syncAdvancements"] = true
             content["syncFeature.chatSync.settings.syncJoinLeaveMessages"] = true
+            content["syncFeature.chatSync.settings.syncDeaths"] = true
 
             content["syncFeature.consoleSync.enabled"] = true
             content["syncFeature.consoleSync.channel"] = "CHANNEL ID"

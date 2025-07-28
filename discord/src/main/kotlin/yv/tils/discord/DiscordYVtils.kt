@@ -3,16 +3,23 @@ package yv.tils.discord
 import data.Data
 import language.LanguageHandler
 import logger.Logger
+import yv.tils.common.permissions.PermissionManager
 import yv.tils.discord.actions.commands.JDACommandsRegister
 import yv.tils.discord.configs.*
+import yv.tils.discord.data.PermissionsData
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.listener.*
 import yv.tils.discord.logic.AppLogic
 
 class DiscordYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULE_NAME = "discord"
-        const val MODULE_VERSION = "4.0.0"
+        val MODULE = Data.YVtilsModuleData(
+            "discord",
+            "4.0.0",
+            "Discord integration for YVtils",
+            "YVtils",
+            "",
+        )
 
         var i = 0
     }
@@ -25,9 +32,10 @@ class DiscordYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
+        Data.addModule(MODULE)
 
         registerListeners()
+        registerPermissions()
 
         loadConfigs()
 
@@ -44,6 +52,11 @@ class DiscordYVtils : Data.YVtilsModule {
 
     override fun disablePlugin() {
         AppLogic().stopApp()
+        unregisterModule()
+    }
+
+    fun unregisterModule() {
+        Data.removeModule(MODULE)
     }
 
     private fun registerListeners() {
@@ -54,6 +67,11 @@ class DiscordYVtils : Data.YVtilsModule {
         pm.registerEvents(PlayerAdvancementDone(), plugin)
         pm.registerEvents(PlayerJoin(), plugin)
         pm.registerEvents(PlayerQuit(), plugin)
+        pm.registerEvents(PlayerDeath(), plugin)
+    }
+
+    private fun registerPermissions() {
+        PermissionManager.registerPermissions(PermissionsData().getPermissionList(true))
     }
 
     private fun loadConfigs() {

@@ -13,7 +13,7 @@ class SyncPlayerConnectionChange {
     fun syncJoin(e: PlayerJoinEvent) {
         if (!active) return
         if (!syncJoinLeaveMessages) return
-        if (!e.player.hasPermission(Permissions.SYNC_JOIN.permission)) return
+        if (! e.player.hasPermission(Permissions.SYNC_JOIN.permission.name)) return
 
         sendDiscordMessage(e.player, "joined")
     }
@@ -21,7 +21,7 @@ class SyncPlayerConnectionChange {
     fun syncQuit(e: PlayerQuitEvent) {
         if (!active) return
         if (!syncJoinLeaveMessages) return
-        if (!e.player.hasPermission(Permissions.SYNC_QUIT.permission)) return
+        if (! e.player.hasPermission(Permissions.SYNC_QUIT.permission.name)) return
 
         sendDiscordMessage(e.player, "left")
     }

@@ -1,10 +1,7 @@
 package files
 
 import data.Data
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.*
 import logger.Logger
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -15,8 +12,12 @@ class FileUtils {
         data class JSONFile(val file: File, val content: JsonObject)
         data class YAMLFile(val file: File, val content: YamlConfiguration)
 
-        private fun loadFile(path: String): Any {
-            val file = File(Data.instance.dataFolder, path)
+        private fun loadFile(path: String, overwriteParentDir: Boolean = false): Any {
+            val file = if (overwriteParentDir) {
+                File(path)
+            } else {
+                File(Data.pluginFolder, path)
+            }
 
             if (!file.exists()) throw FileNotFoundException("File not found: $path")
 
@@ -29,30 +30,38 @@ class FileUtils {
             }
         }
 
-        fun loadYAMLFile(path: String): YAMLFile =
-            loadFile(path) as? YAMLFile
+        fun loadYAMLFile(path: String, overwriteParentDir: Boolean = false): YAMLFile =
+            loadFile(path, overwriteParentDir) as? YAMLFile
                 ?: throw Exception("File is not a YAML file!")
 
-        fun loadJSONFile(path: String): JSONFile =
-            loadFile(path) as? JSONFile
+        fun loadJSONFile(path: String, overwriteParentDir: Boolean = false): JSONFile =
+            loadFile(path, overwriteParentDir) as? JSONFile
                 ?: throw Exception("File is not a JSON file!")
 
-        fun loadYAMLFilesFromFolder(folder: String): List<YAMLFile> =
-            loadFilesFromFolder(folder, "yml").mapNotNull { it as? YAMLFile }
+        fun loadYAMLFilesFromFolder(folder: String, overwriteParentDir: Boolean = false): List<YAMLFile> =
+            loadFilesFromFolder(folder, "yml", overwriteParentDir).mapNotNull { it as? YAMLFile }
 
-        fun loadJSONFilesFromFolder(folder: String): List<JSONFile> =
-            loadFilesFromFolder(folder, "json").mapNotNull { it as? JSONFile }
+        fun loadJSONFilesFromFolder(folder: String, overwriteParentDir: Boolean = false): List<JSONFile> =
+            loadFilesFromFolder(folder, "json", overwriteParentDir).mapNotNull { it as? JSONFile }
 
-        private fun loadFilesFromFolder(folder: String, extension: String): List<Any> {
+        private fun loadFilesFromFolder(
+            folder: String,
+            extension: String,
+            overwriteParentDir: Boolean = false,
+        ): List<Any> {
             Logger.debug("Loading files from folder: $folder with extension: $extension")
 
-            val directory = File(Data.instance.dataFolder, folder)
+            val directory = if (overwriteParentDir) {
+                File(folder)
+            } else {
+                File(Data.pluginFolder, folder)
+            }
 
             if (!directory.exists() || !directory.isDirectory) return emptyList()
 
             return directory.listFiles { _, name -> name.endsWith(".$extension", ignoreCase = true) }
                 ?.mapNotNull { file ->
-                    runCatching { loadFile("$folder/${file.name}") }.getOrNull()
+                    runCatching { loadFile("$folder/${file.name}", overwriteParentDir) }.getOrNull()
                 }
                 ?: emptyList()
         }
@@ -60,7 +69,7 @@ class FileUtils {
         fun saveFile(path: String, content: Any) {
             Logger.debug("Saving file: $path")
 
-            val file = File(Data.instance.dataFolder, path)
+            val file = File(Data.pluginFolder, path)
 
             if (!file.exists()) {
                 file.parentFile.mkdirs()
@@ -85,7 +94,7 @@ class FileUtils {
             Logger.debug("Updating file: $path | overwriteExisting: $overwriteExisting")
             Logger.debug("Content: $content", 3)
 
-            val file = File(Data.instance.dataFolder, path)
+            val file = File(Data.pluginFolder, path)
 
             if (!file.exists()) {
                 Logger.debug("File doesn't exist, creating new file: $path")
@@ -208,7 +217,7 @@ class FileUtils {
             Logger.debug("Creating YAML file: $path")
 
             val yaml = makeYAML(content)
-            val file = File(Data.instance.dataFolder, path)
+            val file = File(Data.pluginFolder, path)
 
             Logger.debug("YAML object: $yaml", 3)
 
@@ -233,7 +242,7 @@ class FileUtils {
 
             val jsonString = json.encodeToString(content)
             val jsonObject = json.decodeFromString(JsonObject.serializer(), jsonString)
-            val file = File(Data.instance.dataFolder, path)
+            val file = File(Data.pluginFolder, path)
 
             Logger.debug("JSON object: $jsonObject", 3)
 

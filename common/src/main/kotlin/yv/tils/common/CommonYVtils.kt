@@ -8,22 +8,25 @@ import language.LanguageHandler
 import logger.Logger
 import message.MessageUtils
 import net.kyori.adventure.text.Component
-import org.bukkit.permissions.Permission
 import server.ServerUtils
 import time.TimeUtils
 import yv.tils.common.config.ConfigFile
-import yv.tils.common.data.Permissions
-import yv.tils.common.language.LangStrings
-import yv.tils.common.language.LoadPlayerLanguage
-import yv.tils.common.language.RegisterStrings
+import yv.tils.common.data.PermissionsData
+import yv.tils.common.language.*
 import yv.tils.common.listeners.PlayerJoin
 import yv.tils.common.listeners.PlayerLocaleChange
+import yv.tils.common.permissions.PermissionManager
 import yv.tils.common.updateChecker.PluginVersion
 
 class CommonYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULE_NAME = "common"
-        const val MODULE_VERSION = "1.0.0"
+        val MODULE = Data.YVtilsModuleData(
+            "common",
+            "1.0.0",
+            "Common module for YVtils",
+            "YVtils",
+            "https://docs.yvtils.net/common/"
+        )
     }
 
     override fun onLoad() {
@@ -34,9 +37,9 @@ class CommonYVtils : Data.YVtilsModule {
     override fun enablePlugin() {
         Language().loadLanguageFiles()
 
-        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
+        Data.addModule(MODULE)
 
-        val modules = Data.getModules(sorted = true)
+        val modules = Data.getModulesAsString(sorted = true)
 
         val data = mutableMapOf(
             1 to listOf(LanguageHandler.getMessage("plugin.action.start", params = mapOf("prefix" to Data.prefix))),
@@ -44,6 +47,13 @@ class CommonYVtils : Data.YVtilsModule {
         )
         val log = printLogWithSplits(data)
         log.forEach { Logger.log(Logger.Companion.Level.INFO, it) }
+
+        if (! checkDependencies()) {
+            Data.instance.server.pluginManager.disablePlugin(Data.instance)
+            return
+        } else {
+            Logger.debug("All dependencies are loaded successfully.", 1)
+        }
 
         registerListeners()
         registerCoroutines()
@@ -93,16 +103,21 @@ class CommonYVtils : Data.YVtilsModule {
     }
 
     private fun registerPermissions() {
-        val pm = Data.instance.server.pluginManager
+        PermissionManager.registerPermissions(PermissionsData().getPermissionList(true))
 
-        for (perm in Permissions.entries) {
-            if (pm.getPermission(perm.permission) == null) {
-                pm.addPermission(Permission.loadPermission(perm.permission, mapOf(
-                    "description" to perm.description,
-                    "default" to perm.default
-                )))
-            }
-        }
+        val modules = Data.getModules()
+        val moduleWildcards: Map<String, Boolean> = modules.map { "yvtils.${it.name}.*" }.associateWith { true }
+
+        PermissionManager.registerPermissions(
+            listOf(
+                PermissionManager.YVtilsPermission(
+                    "yvtils.*",
+                    "Allows access to all YVtils features",
+                    false,
+                    moduleWildcards
+                )
+            )
+        )
     }
 
     private fun registerCoroutines() {
@@ -111,6 +126,38 @@ class CommonYVtils : Data.YVtilsModule {
             "yvtils-language-cleanup",
             afterDelay = 5 * 1000 * 60,
         )
+    }
+
+    private fun checkDependencies(): Boolean {
+        try {
+            val core = Data.core
+            val dependencies = core.dependencies
+
+            if (dependencies.isEmpty()) {
+                return false
+            }
+
+            val modules = Data.getModuleNames()
+            for (dependency in dependencies) {
+                if (! modules.contains(dependency)) {
+                    Logger.error("----------")
+                    Logger.error("Missing dependency: $dependency")
+                    Logger.error("The YVtils Core, of the plugin you are using, requires this dependency to function properly.")
+                    Logger.error("Please check if you filled in required values into the config files.")
+                    Logger.error("If you are still having issues, please contact the YVtils support team.")
+                    Logger.error("You can find the support team on our Discord server: https://yvtils.net/yvtils/support")
+                    Logger.error("----------")
+                    Logger.error("The plugin will now disable to prevent further issues.")
+                    return false
+                }
+            }
+
+            Logger.debug("All dependencies are loaded: ${dependencies.joinToString(", ")}")
+            return true
+        } catch (_: Exception) {
+            Logger.error("YVtils core is not initialized. Please ensure the core is loaded before using YVtils features.")
+            return false
+        }
     }
 
     private fun printLogWithSplits(data: MutableMap<Int, List<Component>>): MutableList<Component> {

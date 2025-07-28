@@ -8,14 +8,14 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 
 class MessageUtils {
     companion object {
-        fun convert(text: String): Component {
+        fun convert(text: String?): Component {
             Logger.debug("Converting text to Component: $text")
-            return MiniMessage.miniMessage().deserialize(text)
+            return text?.let { MiniMessage.miniMessage().deserialize(it) } ?: Component.empty()
         }
 
-        fun convert(text: Component): String {
+        fun convert(text: Component?): String {
             Logger.debug("Converting Component to text: $text")
-            return MiniMessage.miniMessage().serialize(text)
+            return text?.let { MiniMessage.miniMessage().serialize(it) } ?: ""
         }
 
         fun convert(textList: List<String>): List<Component> {

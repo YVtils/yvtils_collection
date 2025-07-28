@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import org.apache.logging.log4j.LogManager
+import yv.tils.discord.DiscordYVtils
 import yv.tils.discord.actions.buttons.JDAButtonsListener
 import yv.tils.discord.actions.commands.JDACommandsListener
 import yv.tils.discord.actions.select.JDASelectListener
@@ -29,6 +30,18 @@ class AppLogic {
         var started = false
 
         lateinit var appID: String
+
+        /**
+         * Returns the current instance of the AppLogic.
+         * @return The current instance of AppLogic.
+         * @throws IllegalStateException if the instance is not initialized.
+         */
+        fun getJDA(): JDA {
+            if (! ::jda.isInitialized) {
+                throw IllegalStateException("JDA is not initialized. Please start the application first.") // TODO: Change error message
+            }
+            return jda
+        }
     }
 
     private val appToken = ConfigFile.getValueAsString("appToken")
@@ -44,6 +57,8 @@ class AppLogic {
             intents()
             eventListeners()
             buildJDA()
+        } else {
+            DiscordYVtils().unregisterModule()
         }
     }
 
@@ -96,7 +111,7 @@ class AppLogic {
     }
 
     private fun checkToken(): Boolean {
-        if (appToken == null || appToken.isEmpty() || appToken.isBlank()) {
+        if (appToken == null || appToken.isEmpty() || appToken.isBlank() || appToken.trim().contains(" ")) {
             Logger.error("App token is not set. Please configure it in the config file of the discord module.")
             return false
         }
@@ -137,6 +152,8 @@ class AppLogic {
         } catch (e: Exception) {
             Logger.error("Failed to start Discord app: ${e.message}")
             started = false
+
+            DiscordYVtils().unregisterModule()
         }
     }
 

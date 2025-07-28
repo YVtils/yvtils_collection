@@ -2,9 +2,7 @@ package yv.tils.common.listeners
 
 import data.Data
 import language.LanguageHandler
-import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
+import org.bukkit.event.*
 import org.bukkit.event.player.PlayerJoinEvent
 import yv.tils.common.config.ConfigFile
 import yv.tils.common.data.Permissions
@@ -15,7 +13,7 @@ class PlayerJoin : Listener {
     fun onPlayerJoin(e: PlayerJoinEvent) {
         val player = e.player
 
-        if (!player.hasPermission(Permissions.COMMON_UPDATE_CHECK.permission) && !player.isOp) return
+        if (! player.hasPermission(Permissions.COMMON_UPDATE_CHECK.permission.name) && ! player.isOp) return
         if (ConfigFile.getValueAsBoolean("updateCheck.sendToOps") == true) {
             val messageKey = PluginVersion.moderatorMessageKeyOnJoin?.key ?: return
             val latestVersion = PluginVersion.cloudVersion ?: return

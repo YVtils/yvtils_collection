@@ -5,7 +5,7 @@ import logger.Logger
 import org.apache.logging.log4j.core.LogEvent
 import org.apache.logging.log4j.core.appender.AbstractAppender
 import yv.tils.discord.configs.ConfigFile
-import yv.tils.discord.logic.AppLogic.Companion.jda
+import yv.tils.discord.logic.AppLogic.Companion.getJDA
 import java.text.SimpleDateFormat
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -68,7 +68,7 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
             val formattedContent = "```ansi\n$content```"
             if (formattedContent.length > 2000) return
 
-            val channel = jda.getTextChannelById(channelID) ?: return
+            val channel = getJDA().getTextChannelById(channelID) ?: return
 
             try {
                 if (lastMessageID == null) {

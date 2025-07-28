@@ -1,5 +1,6 @@
 package yv.tils.discord.actions.commands
 
+import logger.Logger
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import yv.tils.discord.actions.commands.handler.JDAServerInfo
 import yv.tils.discord.actions.commands.handler.JDAWhitelist
@@ -11,7 +12,11 @@ class JDACommandsRegister {
         val commandData: MutableList<CommandData> = mutableListOf()
         serverInfoCMD(commandData)
         whitelistCMD(commandData)
-        AppLogic.jda.updateCommands().addCommands(commandData).queue()
+        try {
+            AppLogic.getJDA().updateCommands().addCommands(commandData).queue()
+        } catch (e: IllegalStateException) {
+            Logger.error("Failed to register commands: ${e.message}")
+        }
     }
 
     private fun serverInfoCMD(commandData: MutableList<CommandData>) {
