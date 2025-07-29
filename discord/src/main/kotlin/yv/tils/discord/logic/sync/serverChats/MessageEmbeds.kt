@@ -8,7 +8,7 @@ import org.bukkit.advancement.Advancement
 import org.bukkit.entity.Player
 import java.awt.Color
 
-// TODO: Add other events like death
+// TODO: Add other events
 class MessageEmbeds {
     companion object {
         private const val ICON_URL = "https://cravatar.eu/helmhead/<uuid>/600"

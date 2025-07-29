@@ -13,7 +13,7 @@ class JDAAccountReplace {
      *
      * @param e The ButtonInteractionEvent containing the button interaction event.
      */
-    // TODO: There probably is a bug when replacing the account over forceAdd for another user
+    // TODO FIX: There probably is a bug when replacing the account over forceAdd for another user
     fun executeConfirm(e: ButtonInteractionEvent) {
         val message = e.message
         val user = e.user
