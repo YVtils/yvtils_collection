@@ -1,7 +1,6 @@
 package yv.tils.discord.actions.select.handler
 
 import logger.Logger
-import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import yv.tils.discord.logic.whitelist.*
 
@@ -29,13 +28,11 @@ class JDAAccountRemove {
             }
         }
 
-        val entries = WhitelistLogic.getEntriesBySite(1)
-
-        hook.editOriginalEmbeds(
-            WhitelistEmbeds().forceRemoveEmbed(1, removedEntries).build()
-        ).setComponents(
-            ActionRow.of(WhitelistEmbeds().forceRemoveActionRowDropdown(entries).build()),
-            ActionRow.of(WhitelistEmbeds().forceRemoveActionRowButtons(1))
-        ).queue()
+        hook.editOriginalComponents(
+            WhitelistComponents().forceRemoveContainer(
+                1,
+                removedEntries,
+            )
+        ).useComponentsV2().queue()
     }
 }

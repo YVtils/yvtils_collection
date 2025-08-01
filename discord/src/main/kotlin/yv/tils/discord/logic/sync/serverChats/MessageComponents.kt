@@ -58,9 +58,8 @@ class MessageComponents {
         )
         children.add(
             TextDisplay.of(
-                MessageUtils.strip(
-                advancement.display?.description() ?: MessageUtils.convert("No description available.")
-            ).split("\n").joinToString("\n") { "-# $it" } // TODO: Add localization
+                MessageUtils.strip(advancement.display?.description()).ifBlank { "No description available" }
+                    .split("\n").joinToString("\n") { "-# $it" } // TODO: Add localization
         ))
 
         val container = Container.of(

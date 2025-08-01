@@ -1,8 +1,7 @@
 package yv.tils.discord.actions.buttons.handler
 
-import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import yv.tils.discord.logic.whitelist.WhitelistEmbeds
+import yv.tils.discord.logic.whitelist.WhitelistComponents
 import yv.tils.discord.logic.whitelist.WhitelistLogic
 
 class JDAPageSwitch {
@@ -42,6 +41,7 @@ class JDAPageSwitch {
         switchPage(e, newPage)
     }
 
+    // TODO: Fix, as this probably won't work with switch to containers
     private fun getCurrentPage(e: ButtonInteractionEvent): Int {
         val footerText = e.message.embeds.firstOrNull()?.footer?.text ?: return 1
 
@@ -63,14 +63,11 @@ class JDAPageSwitch {
 
     private fun switchPage(e: ButtonInteractionEvent, page: Int) {
         e.deferEdit().queue()
-        val embed = WhitelistEmbeds().forceRemoveEmbed(page)
-
-        val entries = WhitelistLogic.getEntriesBySite(page)
 
         val hook = e.hook
-        hook.editOriginalEmbeds(embed.build()).setComponents(
-            ActionRow.of(WhitelistEmbeds().forceRemoveActionRowDropdown(entries).build()),
-            ActionRow.of(WhitelistEmbeds().forceRemoveActionRowButtons(page))
-        ).queue()
+
+        hook.editOriginalComponents(
+            WhitelistComponents().forceRemoveContainer(page)
+        ).useComponentsV2().queue()
     }
 }

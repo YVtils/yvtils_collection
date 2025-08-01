@@ -7,7 +7,6 @@ import coroutine.CoroutineHandler
 import data.Data
 import language.LanguageHandler
 import logger.Logger
-import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
@@ -55,14 +54,12 @@ class WhitelistManage: ListenerAdapter() {
 
                     accountReplaceCache[userID] = name
 
-                    channel.sendMessageEmbeds(
-                        WhitelistEmbeds().accountChangePromptEmbed(
+                    channel.sendMessageComponents(
+                        WhitelistComponents().accountChangeContainer(
                             oldName = oldName,
                             newName = name
-                        ).build()
-                    ).addComponents(
-                        ActionRow.of(WhitelistEmbeds().accountChangeActionRow())
-                    ).complete().delete().queueAfter(1, TimeUnit.MINUTES, {
+                        )
+                    ).useComponentsV2().complete().delete().queueAfter(1, TimeUnit.MINUTES, {
                         accountReplaceCache.remove(userID)
                     }, { /* ignore if already deleted */ })
 
@@ -71,15 +68,15 @@ class WhitelistManage: ListenerAdapter() {
 
                 try {
                     linkAccount(name, userID, e.guild.id, e.author)
-                    channel.sendMessageEmbeds(
-                        WhitelistEmbeds().accountAddEmbed(name).build()
-                    ).complete().delete().queueAfter(5, TimeUnit.SECONDS)
+                    channel.sendMessageComponents(
+                        WhitelistComponents().accountAddContainer(name)
+                    ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.SECONDS)
                 } catch (ex: Exception) {
                     when (ex) {
                         is AlreadyWhitelistedException -> {
-                            channel.sendMessageEmbeds(
-                                WhitelistEmbeds().accountAlreadyListedEmbed(name).build()
-                            ).complete().delete().queueAfter(15, TimeUnit.SECONDS)
+                            channel.sendMessageComponents(
+                                WhitelistComponents().accountAlreadyListedContainer(name)
+                            ).useComponentsV2().complete().delete().queueAfter(15, TimeUnit.SECONDS)
 
                             Logger.info(
                                 LanguageHandler.getMessage(
@@ -95,9 +92,9 @@ class WhitelistManage: ListenerAdapter() {
                             return@launchTask
                         }
                         is InvalidAccountException -> {
-                            channel.sendMessageEmbeds(
-                                WhitelistEmbeds().invalidAccountEmbed(name).build()
-                            ).complete().delete().queueAfter(15, TimeUnit.SECONDS)
+                            channel.sendMessageComponents(
+                                WhitelistComponents().invalidAccountContainer(name)
+                            ).useComponentsV2().complete().delete().queueAfter(15, TimeUnit.SECONDS)
 
                             Logger.info(
                                 LanguageHandler.getMessage(
@@ -112,9 +109,9 @@ class WhitelistManage: ListenerAdapter() {
                             return@launchTask
                         }
                         else -> {
-                            channel.sendMessageEmbeds(
-                                WhitelistEmbeds().accountErrorEmbed(ex.message ?: "-").build()
-                            ).complete().delete().queueAfter(15, TimeUnit.SECONDS)
+                            channel.sendMessageComponents(
+                                WhitelistComponents().accountErrorContainer(ex.message ?: "-")
+                            ).useComponentsV2().complete().delete().queueAfter(15, TimeUnit.SECONDS)
 
                             Logger.warn(
                                 LanguageHandler.getMessage(

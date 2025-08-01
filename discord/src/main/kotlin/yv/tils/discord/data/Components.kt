@@ -35,6 +35,14 @@ class Components {
         val successColor = ColorUtils.colorFromHex(Colors.GREEN.color)
         val infoColor = ColorUtils.colorFromHex(Colors.BLUE.color)
         val yvtilsColor = ColorUtils.colorFromHex(Colors.TERTIARY.color)
+
+        fun footerComponent(text: String = ""): TextDisplay {
+            if (text.isEmpty()) {
+                return TextDisplay.of("-# $FOOTER_TEXT")
+            }
+
+            return TextDisplay.of("-# ${FOOTER_TEXT_CUSTOMIZABLE.format(text)}")
+        }
     }
 
     fun serverInfoComponent(user: User): Container {
@@ -119,9 +127,9 @@ class Components {
     }
 
     fun actionCancelledComponent(action: String): Container {
-        val title = LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_ACTION_CANCELLED_TITLE.key)
+        val title = LanguageHandler.getRawMessage(RegisterStrings.LangStrings.COMPONENT_ACTION_CANCELLED_TITLE.key)
         val description = LanguageHandler.getRawMessage(
-            RegisterStrings.LangStrings.EMBED_ACTION_CANCELLED_DESCRIPTION.key,
+            RegisterStrings.LangStrings.COMPONENT_ACTION_CANCELLED_DESCRIPTION.key,
             params = mapOf("action" to action)
         )
 
@@ -131,13 +139,5 @@ class Components {
         children.add(footerComponent())
 
         return Container.of(children).withAccentColor(errorColor)
-    }
-
-    private fun footerComponent(text: String = ""): TextDisplay {
-        if (text.isEmpty()) {
-            return TextDisplay.of("-# $FOOTER_TEXT")
-        }
-
-        return TextDisplay.of("-# ${FOOTER_TEXT_CUSTOMIZABLE.format(text)}")
     }
 }

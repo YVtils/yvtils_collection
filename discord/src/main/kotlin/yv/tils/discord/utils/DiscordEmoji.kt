@@ -8,7 +8,7 @@ import java.net.URI
 import java.util.*
 
 // TODO: Error handling
-// TODO: Add logic for keeping emojis, until app has more than 1800 emojis from this plugin
+// TODO: Add logic for keeping emojis, until app has more than 1800 emojis from this plugin -> For this switch to uuid only as emoji name
 class DiscordEmoji {
     companion object {
         val playerEmojis = mutableMapOf<UUID, Long>()
