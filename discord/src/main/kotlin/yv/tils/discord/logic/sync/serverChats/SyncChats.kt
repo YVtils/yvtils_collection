@@ -30,7 +30,12 @@ class SyncChats : ListenerAdapter() {
 
     private fun sendDiscordMessage(sender: Player, message: String) {
         try {
-            channel.sendMessageEmbeds(MessageEmbeds().embedForChat(sender, message).build()).queue()
+            channel.sendMessageComponents(
+                MessageComponents().componentForChat(
+                    sender,
+                    message
+                )
+            ).useComponentsV2().queue()
         } catch (_: UninitializedPropertyAccessException) {
             Logger.warn("Discord app was not able to establish chat sync bridge between minecraft and discord. Please check your channel configuration.")
             active = false

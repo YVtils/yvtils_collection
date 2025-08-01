@@ -7,11 +7,9 @@ import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import net.dv8tion.jda.api.utils.FileUpload
 import yv.tils.discord.configs.ConfigFile
-import yv.tils.discord.data.Embeds
+import yv.tils.discord.data.Components
 import yv.tils.discord.language.RegisterStrings
-import java.io.File
 
 class JDAServerInfo {
     companion object {
@@ -24,21 +22,12 @@ class JDAServerInfo {
      * @param e The SlashCommandInteractionEvent containing the command event.
      */
     fun executeCommand(e: SlashCommandInteractionEvent) {
-        val serverIcon = File("./server-icon.png")
-
         e.deferReply(true).queue()
         val hook = e.hook
 
-        if (serverIcon.exists()) {
-            hook.sendMessageEmbeds(
-                Embeds().serverInfoEmbed(e.user).build()
-            ).setEphemeral(true)
-                .addFiles(FileUpload.fromData(serverIcon, "server-icon.png"))
-                .queue()
-        } else {
-            hook.sendMessageEmbeds(Embeds().serverInfoEmbed(e.user).build())
-                .setEphemeral(true).queue()
-        }
+        hook.sendMessageComponents(
+            Components().serverInfoComponent(e.user)
+        ).setEphemeral(true).useComponentsV2().queue()
     }
 
     /**

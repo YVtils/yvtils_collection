@@ -23,7 +23,8 @@ class SyncAdvancements {
 
     private fun sendDiscordMessage(sender: Player, advancement: Advancement) {
         try {
-            channel.sendMessageEmbeds(MessageEmbeds().embedForAdvancement(sender, advancement).build()).queue()
+            channel.sendMessageComponents(MessageComponents().componentForAdvancement(sender, advancement))
+                .useComponentsV2().queue()
         } catch (_: UninitializedPropertyAccessException) {
             Logger.warn("Discord app was not able to establish chat sync bridge between minecraft and discord. Please check your channel configuration.")
             active = false

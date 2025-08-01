@@ -46,8 +46,6 @@ class ConfigFile {
             content["botSettings.onlineStatus"] = "online"
             content["botSettings.activity"] = "none"
             content["botSettings.activityMessage"] = "Minecraft"
-            content["embedSettings.author"] = "YVtils SMP"
-            content["embedSettings.authorIconURL"] = "URL"
 
             content["general.settings.ignoreBotMessages"] = true
 

@@ -143,7 +143,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ACCOUNT_ADD_TITLE,
+            LangStrings.COMPONENT_WHITELIST_ACCOUNT_ADD_TITLE,
             mapOf(
                 FileTypes.EN to "The Minecraft account has been successfully added to the whitelist!",
                 FileTypes.DE to "Der Minecraft Account wurde erfolgreich zur Whitelist hinzugefügt!",
@@ -151,7 +151,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ACCOUNT_ADD_DESCRIPTION,
+            LangStrings.COMPONENT_WHITELIST_ACCOUNT_ADD_DESCRIPTION,
             mapOf(
                 FileTypes.EN to "Account: <accountName>",
                 FileTypes.DE to "Account: <accountName>",
@@ -159,7 +159,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ACCOUNT_ALREADY_LISTED_TITLE,
+            LangStrings.COMPONENT_WHITELIST_ACCOUNT_ALREADY_LISTED_TITLE,
             mapOf(
                 FileTypes.EN to "The account is already whitelisted",
                 FileTypes.DE to "Der Account ist bereits auf der Whitelist",
@@ -167,7 +167,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ACCOUNT_ALREADY_LISTED_DESCRIPTION,
+            LangStrings.COMPONENT_WHITELIST_ACCOUNT_ALREADY_LISTED_DESCRIPTION,
             mapOf(
                 FileTypes.EN to "Account: <accountName> • This account is already whitelisted!",
                 FileTypes.DE to "Account: <accountName> • Dieser Account ist bereits auf der Whitelist!",
@@ -175,7 +175,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ACCOUNT_INVALID_TITLE,
+            LangStrings.COMPONENT_WHITELIST_ACCOUNT_INVALID_TITLE,
             mapOf(
                 FileTypes.EN to "The account is invalid or does not exist",
                 FileTypes.DE to "Der Account ist ungültig oder existiert nicht",
@@ -183,7 +183,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ACCOUNT_INVALID_DESCRIPTION,
+            LangStrings.COMPONENT_WHITELIST_ACCOUNT_INVALID_DESCRIPTION,
             mapOf(
                 FileTypes.EN to "Account: <accountName> • The account is invalid or does not exist.",
                 FileTypes.DE to "Account: <accountName> • Der Account ist ungültig oder existiert nicht.",
@@ -191,7 +191,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_TITLE,
+            LangStrings.COMPONENT_WHITELIST_ACCOUNT_CHANGE_PROMPT_TITLE,
             mapOf(
                 FileTypes.EN to "Are you sure you want to change your account?",
                 FileTypes.DE to "Bist du sicher, dass du deinen Account ändern möchtest?",
@@ -199,7 +199,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_DESCRIPTION,
+            LangStrings.COMPONENT_WHITELIST_ACCOUNT_CHANGE_PROMPT_DESCRIPTION,
             mapOf(
                 FileTypes.EN to "You will replace your current whitelisted account (<oldName>) with the new one (<newName>).",
                 FileTypes.DE to "Du wirst deinen aktuellen Whitelist-Account (<oldName>) mit dem neuen Account (<newName>) ersetzen.",
@@ -207,7 +207,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_TITLE,
+            LangStrings.COMPONENT_WHITELIST_ACCOUNT_CHANGE_TITLE,
             mapOf(
                 FileTypes.EN to "Your account has been successfully changed!",
                 FileTypes.DE to "Dein Account wurde erfolgreich geändert!",
@@ -215,7 +215,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ACCOUNT_CHANGE_DESCRIPTION,
+            LangStrings.COMPONENT_WHITELIST_ACCOUNT_CHANGE_DESCRIPTION,
             mapOf(
                 FileTypes.EN to "Old Account: <oldName> • New Account: <newName>",
                 FileTypes.DE to "Alter Account: <oldName> • Neuer Account: <newName>",
@@ -223,7 +223,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ERROR_TITLE,
+            LangStrings.COMPONENT_WHITELIST_ERROR_TITLE,
             mapOf(
                 FileTypes.EN to "An error occurred while processing your request",
                 FileTypes.DE to "Ein Fehler ist bei der Verarbeitung deiner Anfrage aufgetreten",
@@ -231,7 +231,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_ERROR_DESCRIPTION,
+            LangStrings.COMPONENT_WHITELIST_ERROR_DESCRIPTION,
             mapOf(
                 FileTypes.EN to "An error occurred while processing your request. Please try again later. Error: <error>",
                 FileTypes.DE to "Ein Fehler ist bei der Verarbeitung deiner Anfrage aufgetreten. Bitte versuche es später erneut. Fehler: <error>",
@@ -239,7 +239,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_FORCE_REMOVE_TITLE,
+            LangStrings.COMPONENT_WHITELIST_FORCE_REMOVE_TITLE,
             mapOf(
                 FileTypes.EN to "Which whitelist entries do you want to remove?",
                 FileTypes.DE to "Welche Whitelist-Einträge möchtest du entfernen?",
@@ -247,7 +247,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_FORCE_REMOVE_DESCRIPTION,
+            LangStrings.COMPONENT_WHITELIST_FORCE_REMOVE_DESCRIPTION,
             mapOf(
                 FileTypes.EN to "Select the entries you want to remove from the whitelist. You can select multiple entries.",
                 FileTypes.DE to "Wähle die Einträge aus, die du von der Whitelist entfernen möchtest. Du kannst mehrere Einträge auswählen.",
@@ -255,7 +255,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_FORCE_REMOVE_NO_ENTRIES_DESCRIPTION,
+            LangStrings.COMPONENT_WHITELIST_FORCE_REMOVE_NO_ENTRIES_DESCRIPTION,
             mapOf(
                 FileTypes.EN to "No entries found. Please try again later.",
                 FileTypes.DE to "Keine Einträge gefunden. Bitte versuche es später erneut.",
@@ -263,7 +263,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_FORCE_REMOVE_REMOVED_FIELD_NAME,
+            LangStrings.COMPONENT_WHITELIST_FORCE_REMOVE_REMOVED_FIELD_NAME,
             mapOf(
                 FileTypes.EN to "Removed Accounts:",
                 FileTypes.DE to "Entfernte Accounts:",
@@ -271,7 +271,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_WHITELIST_CHECK_TITLE,
+            LangStrings.COMPONENT_WHITELIST_CHECK_TITLE,
             mapOf(
                 FileTypes.EN to "Whitelist Check",
                 FileTypes.DE to "Whitelist Überprüfung",
@@ -279,7 +279,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_ACTION_CANCELLED_TITLE,
+            LangStrings.COMPONENT_ACTION_CANCELLED_TITLE,
             mapOf(
                 FileTypes.EN to "Action Cancelled",
                 FileTypes.DE to "Aktion Abgebrochen",
@@ -287,7 +287,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_ACTION_CANCELLED_DESCRIPTION,
+            LangStrings.COMPONENT_ACTION_CANCELLED_DESCRIPTION,
             mapOf(
                 FileTypes.EN to "The action <action> has been cancelled.",
                 FileTypes.DE to "Die Aktion <action> wurde abgebrochen.",
@@ -295,7 +295,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.EMBED_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE,
+            LangStrings.COMPONENT_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE,
             mapOf(
                 FileTypes.EN to "Account Replacement",
                 FileTypes.DE to "Account Ersetzung",
@@ -412,28 +412,28 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         BOT_STOP_SUCCESS("discord.bot.stop.success"),
         BOT_STOP_NOT_RUNNING("discord.bot.stop.notRunning"),
 
-        EMBED_WHITELIST_ACCOUNT_ADD_TITLE("discord.embed.whitelist.account.add.title"),
-        EMBED_WHITELIST_ACCOUNT_ADD_DESCRIPTION("discord.embed.whitelist.account.add.description"),
-        EMBED_WHITELIST_ACCOUNT_ALREADY_LISTED_TITLE("discord.embed.whitelist.account.alreadyListed.title"),
-        EMBED_WHITELIST_ACCOUNT_ALREADY_LISTED_DESCRIPTION("discord.embed.whitelist.account.alreadyListed.description"),
-        EMBED_WHITELIST_ACCOUNT_INVALID_TITLE("discord.embed.whitelist.account.invalid.title"),
-        EMBED_WHITELIST_ACCOUNT_INVALID_DESCRIPTION("discord.embed.whitelist.account.invalid.description"),
-        EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_TITLE("discord.embed.whitelist.account.change.prompt.title"),
-        EMBED_WHITELIST_ACCOUNT_CHANGE_PROMPT_DESCRIPTION("discord.embed.whitelist.account.change.prompt.description"),
-        EMBED_WHITELIST_ACCOUNT_CHANGE_TITLE("discord.embed.whitelist.account.change.title"),
-        EMBED_WHITELIST_ACCOUNT_CHANGE_DESCRIPTION("discord.embed.whitelist.account.change.description"),
-        EMBED_WHITELIST_ERROR_TITLE("discord.embed.whitelist.error.title"),
-        EMBED_WHITELIST_ERROR_DESCRIPTION("discord.embed.whitelist.error.description"),
-        EMBED_WHITELIST_FORCE_REMOVE_TITLE("discord.embed.whitelist.force.remove.title"),
-        EMBED_WHITELIST_FORCE_REMOVE_DESCRIPTION("discord.embed.whitelist.force.remove.description"),
-        EMBED_WHITELIST_FORCE_REMOVE_NO_ENTRIES_DESCRIPTION("discord.embed.whitelist.force.remove.noEntriesDescription"),
-        EMBED_WHITELIST_FORCE_REMOVE_REMOVED_FIELD_NAME("discord.embed.whitelist.force.remove.removedFieldName"),
+        COMPONENT_WHITELIST_ACCOUNT_ADD_TITLE("discord.component.whitelist.account.add.title"),
+        COMPONENT_WHITELIST_ACCOUNT_ADD_DESCRIPTION("discord.component.whitelist.account.add.description"),
+        COMPONENT_WHITELIST_ACCOUNT_ALREADY_LISTED_TITLE("discord.component.whitelist.account.alreadyListed.title"),
+        COMPONENT_WHITELIST_ACCOUNT_ALREADY_LISTED_DESCRIPTION("discord.component.whitelist.account.alreadyListed.description"),
+        COMPONENT_WHITELIST_ACCOUNT_INVALID_TITLE("discord.component.whitelist.account.invalid.title"),
+        COMPONENT_WHITELIST_ACCOUNT_INVALID_DESCRIPTION("discord.component.whitelist.account.invalid.description"),
+        COMPONENT_WHITELIST_ACCOUNT_CHANGE_PROMPT_TITLE("discord.component.whitelist.account.change.prompt.title"),
+        COMPONENT_WHITELIST_ACCOUNT_CHANGE_PROMPT_DESCRIPTION("discord.component.whitelist.account.change.prompt.description"),
+        COMPONENT_WHITELIST_ACCOUNT_CHANGE_TITLE("discord.component.whitelist.account.change.title"),
+        COMPONENT_WHITELIST_ACCOUNT_CHANGE_DESCRIPTION("discord.component.whitelist.account.change.description"),
+        COMPONENT_WHITELIST_ERROR_TITLE("discord.component.whitelist.error.title"),
+        COMPONENT_WHITELIST_ERROR_DESCRIPTION("discord.component.whitelist.error.description"),
+        COMPONENT_WHITELIST_FORCE_REMOVE_TITLE("discord.component.whitelist.force.remove.title"),
+        COMPONENT_WHITELIST_FORCE_REMOVE_DESCRIPTION("discord.component.whitelist.force.remove.description"),
+        COMPONENT_WHITELIST_FORCE_REMOVE_NO_ENTRIES_DESCRIPTION("discord.component.whitelist.force.remove.noEntriesDescription"),
+        COMPONENT_WHITELIST_FORCE_REMOVE_REMOVED_FIELD_NAME("discord.component.whitelist.force.remove.removedFieldName"),
 
-        EMBED_WHITELIST_CHECK_TITLE("discord.embed.whitelist.check.title"),
+        COMPONENT_WHITELIST_CHECK_TITLE("discord.component.whitelist.check.title"),
 
-        EMBED_ACTION_CANCELLED_TITLE("discord.embed.actionCancelled.title"),
-        EMBED_ACTION_CANCELLED_DESCRIPTION("discord.embed.actionCancelled.description"),
-        EMBED_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE("discord.embed.actionCancelled.action.accountReplace"),
+        COMPONENT_ACTION_CANCELLED_TITLE("discord.component.actionCancelled.title"),
+        COMPONENT_ACTION_CANCELLED_DESCRIPTION("discord.component.actionCancelled.description"),
+        COMPONENT_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE("discord.component.actionCancelled.action.accountReplace"),
 
         CONSOLE_WHITELIST_ACCOUNT_ADDED("discord.console.whitelist.account.added"),
         CONSOLE_WHITELIST_ACCOUNT_REMOVED("discord.console.whitelist.account.removed"),

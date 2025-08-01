@@ -3,7 +3,7 @@ package yv.tils.discord.actions.buttons.handler
 import language.LanguageHandler
 import logger.Logger
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import yv.tils.discord.data.Embeds
+import yv.tils.discord.data.Components
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.*
 
@@ -28,16 +28,16 @@ class JDAAccountReplace {
         val newAccount = WhitelistManage.accountReplaceCache[userID]
         WhitelistManage.accountReplaceCache.remove(userID)
         if (newAccount == null) {
-            hook.sendMessageEmbeds(
-                WhitelistEmbeds().accountErrorEmbed(
+            hook.sendMessageComponents(
+                WhitelistComponents().accountErrorContainer(
                     LanguageHandler.getRawMessage(
                         RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NO_CACHE.key,
                         params = mapOf<String, Any>(
                             "user" to user.effectiveName,
                         )
                     )
-                ).build()
-            ).queue()
+                )
+            ).useComponentsV2().queue()
 
             Logger.warn(
                 LanguageHandler.getMessage(
@@ -57,8 +57,8 @@ class JDAAccountReplace {
             oldEntry = WhitelistManage().unlinkAccount(userID, guildID, user)
             WhitelistManage().linkAccount(newAccount, userID, guildID, user)
         } catch (ex: Exception) {
-            hook.sendMessageEmbeds(
-                WhitelistEmbeds().accountErrorEmbed(
+            hook.sendMessageComponents(
+                WhitelistComponents().accountErrorContainer(
                     LanguageHandler.getRawMessage(
                         RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_EXCEPTION.key,
                         params = mapOf<String, Any>(
@@ -66,8 +66,8 @@ class JDAAccountReplace {
                             "error" to (ex.message ?: "Unknown error")
                         )
                     )
-                ).build()
-            ).queue()
+                )
+            ).useComponentsV2().queue()
             Logger.warn(
                 LanguageHandler.getMessage(
                     RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_EXCEPTION.key,
@@ -80,12 +80,12 @@ class JDAAccountReplace {
             return
         }
 
-        hook.sendMessageEmbeds(
-            WhitelistEmbeds().accountChangeEmbed(
+        hook.sendMessageComponents(
+            WhitelistComponents().accountChangeContainer(
                 oldEntry.minecraftName,
                 newAccount
-            ).build()
-        ).setEphemeral(true).queue()
+            )
+        ).useComponentsV2().setEphemeral(true).queue()
 
         Logger.info(
             LanguageHandler.getMessage(
@@ -110,17 +110,16 @@ class JDAAccountReplace {
         val userID = e.user.id
 
         message.delete().queue()
-        e.deferReply().queue()
+        e.deferReply(true).queue()
 
         val hook = e.hook
 
         WhitelistManage.accountReplaceCache.remove(userID)
 
-        hook.sendMessageEmbeds(
-            Embeds().actionCancelledEmbed(
-                LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE.key)
-            ).build()
-        ).setEphemeral(true)
-            .queue()
+        hook.sendMessageComponents(
+            Components().actionCancelledComponent(
+                LanguageHandler.getRawMessage(RegisterStrings.LangStrings.COMPONENT_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE.key)
+            )
+        ).useComponentsV2().setEphemeral(true).queue()
     }
 }
