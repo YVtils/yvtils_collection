@@ -41,7 +41,7 @@ class Components {
                 return TextDisplay.of("-# $FOOTER_TEXT")
             }
 
-            return TextDisplay.of("-# ${FOOTER_TEXT_CUSTOMIZABLE.format(text)}")
+            return TextDisplay.of("-# ${FOOTER_TEXT_CUSTOMIZABLE.format(text)}").withUniqueId(999)
         }
     }
 
@@ -109,6 +109,7 @@ class Components {
         if (entry != null) {
             children.add(Separator.createDivider(Separator.Spacing.SMALL))
             children.add(
+                // TODO: Switch from thumbnail to emoji
                 Section.of(
                     Thumbnail.fromUrl(playerIconURL),
                     TextDisplay.of("### Linked Minecraft Account"),

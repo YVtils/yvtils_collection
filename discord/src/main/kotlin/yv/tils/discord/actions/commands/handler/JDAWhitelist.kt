@@ -255,6 +255,7 @@ class JDAWhitelist {
                     entry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
                 }
 
+                // TODO: Change container, if entry is null some container should be sent, which says, that the account is not whitelisted instead of an invalid account container
                 if (entry == null) {
                     hook.sendMessageComponents(
                         WhitelistComponents().invalidAccountContainer(

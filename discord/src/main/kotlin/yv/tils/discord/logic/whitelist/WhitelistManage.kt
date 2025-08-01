@@ -55,7 +55,7 @@ class WhitelistManage: ListenerAdapter() {
                     accountReplaceCache[userID] = name
 
                     channel.sendMessageComponents(
-                        WhitelistComponents().accountChangeContainer(
+                        WhitelistComponents().accountChangePromptContainer(
                             oldName = oldName,
                             newName = name
                         )

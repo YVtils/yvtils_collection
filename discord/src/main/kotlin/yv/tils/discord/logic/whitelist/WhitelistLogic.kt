@@ -105,6 +105,10 @@ class WhitelistLogic {
                 if (player != null && player.isWhitelisted) {
                     Data.instance.server.scheduler.runTask(Data.instance, Runnable {
                         player.isWhitelisted = false
+
+                        if (player.isOnline) {
+                            player.player !!.kick()
+                        }
                     })
                 }
 
