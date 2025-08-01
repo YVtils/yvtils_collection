@@ -28,14 +28,14 @@ class MessageUtils {
             return convert(strip(text))
         }
 
-        fun strip(text: String): String {
+        fun strip(text: String?): String {
             Logger.debug("Stripping text: $text")
-            return PlainTextComponentSerializer.plainText().serialize(convert(text))
+            return text?.let { PlainTextComponentSerializer.plainText().serialize(convert(text)) } ?: ""
         }
 
-        fun strip(text: Component): String {
+        fun strip(text: Component?): String {
             Logger.debug("Stripping Component: $text")
-            return PlainTextComponentSerializer.plainText().serialize(text)
+            return text?.let { PlainTextComponentSerializer.plainText().serialize(text) } ?: ""
         }
 
         fun stripChatMessage(text: Component): String {

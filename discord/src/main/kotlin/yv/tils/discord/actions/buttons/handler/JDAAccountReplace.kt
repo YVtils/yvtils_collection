@@ -3,7 +3,7 @@ package yv.tils.discord.actions.buttons.handler
 import language.LanguageHandler
 import logger.Logger
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import yv.tils.discord.data.Embeds
+import yv.tils.discord.data.Components
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.*
 
@@ -110,17 +110,16 @@ class JDAAccountReplace {
         val userID = e.user.id
 
         message.delete().queue()
-        e.deferReply().queue()
+        e.deferReply(true).queue()
 
         val hook = e.hook
 
         WhitelistManage.accountReplaceCache.remove(userID)
 
-        hook.sendMessageEmbeds(
-            Embeds().actionCancelledEmbed(
+        hook.sendMessageComponents(
+            Components().actionCancelledComponent(
                 LanguageHandler.getRawMessage(RegisterStrings.LangStrings.EMBED_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE.key)
-            ).build()
-        ).setEphemeral(true)
-            .queue()
+            )
+        ).useComponentsV2().setEphemeral(true).queue()
     }
 }

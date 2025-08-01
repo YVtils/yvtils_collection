@@ -1,8 +1,8 @@
 package yv.tils.discord.actions.select.handler
 
 import logger.Logger
+import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
-import net.dv8tion.jda.api.interactions.components.ActionRow
 import yv.tils.discord.logic.whitelist.*
 
 class JDAAccountRemove {

@@ -7,6 +7,7 @@ import coroutine.CoroutineHandler
 import data.Data
 import language.LanguageHandler
 import logger.Logger
+import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
@@ -59,8 +60,8 @@ class WhitelistManage: ListenerAdapter() {
                             oldName = oldName,
                             newName = name
                         ).build()
-                    ).addActionRow(
-                        WhitelistEmbeds().accountChangeActionRow()
+                    ).addComponents(
+                        ActionRow.of(WhitelistEmbeds().accountChangeActionRow())
                     ).complete().delete().queueAfter(1, TimeUnit.MINUTES, {
                         accountReplaceCache.remove(userID)
                     }, { /* ignore if already deleted */ })

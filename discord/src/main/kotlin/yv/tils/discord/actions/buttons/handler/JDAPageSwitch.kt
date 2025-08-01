@@ -1,7 +1,7 @@
 package yv.tils.discord.actions.buttons.handler
 
+import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import net.dv8tion.jda.api.interactions.components.ActionRow
 import yv.tils.discord.logic.whitelist.WhitelistEmbeds
 import yv.tils.discord.logic.whitelist.WhitelistLogic
 

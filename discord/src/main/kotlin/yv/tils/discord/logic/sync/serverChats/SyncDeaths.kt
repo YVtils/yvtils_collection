@@ -15,7 +15,7 @@ class SyncDeaths {
         if (! syncDeaths) return // Check if death sync is enabled
         if (! e.player.hasPermission(Permissions.SYNC_DEATHS.permission.name)) return // Check for permission
 
-        val cause = MessageUtils.convert(e.deathMessage()).ifBlank { "Unknown cause" } // TODO: Localization
+        val cause = MessageUtils.strip(e.deathMessage()).ifBlank { "Unknown cause" } // TODO: Localization
 
         Logger.dev("Syncing death message to Discord: ${e.player.name} died due to $cause")
 
@@ -24,7 +24,8 @@ class SyncDeaths {
 
     private fun sendDiscordMessage(sender: Player, cause: String) {
         try {
-            channel.sendMessageEmbeds(MessageEmbeds().embedForDeath(sender, cause).build()).queue()
+            channel.sendMessageComponents(MessageComponents().componentForDeath(sender, cause)).useComponentsV2()
+                .queue()
         } catch (_: UninitializedPropertyAccessException) {
             Logger.warn("Discord app was not able to establish chat sync bridge between minecraft and discord. Please check your channel configuration.")
             active = false

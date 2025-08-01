@@ -4,12 +4,12 @@ import coroutine.CoroutineHandler
 import language.LanguageHandler
 import logger.Logger
 import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.*
-import net.dv8tion.jda.api.interactions.components.ActionRow
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.*
@@ -43,8 +43,8 @@ class JDAWhitelist {
                             oldName = oldName,
                             newName = minecraftName
                         ).build()
-                    ).addActionRow(
-                        WhitelistEmbeds().accountChangeActionRow()
+                    ).setComponents(
+                        ActionRow.of(WhitelistEmbeds().accountChangeActionRow())
                     ).setEphemeral(true).queue()
 
                     return@launchTask

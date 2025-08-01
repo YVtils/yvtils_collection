@@ -2,21 +2,21 @@ package yv.tils.discord.logic.whitelist
 
 import language.LanguageHandler
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.components.buttons.Button
+import net.dv8tion.jda.api.components.selections.SelectOption
+import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.entities.emoji.Emoji
-import net.dv8tion.jda.api.interactions.components.buttons.Button
-import net.dv8tion.jda.api.interactions.components.selections.SelectOption
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
 import server.ServerUtils
-import yv.tils.discord.data.Embeds.Companion.AUTHOR_ICON
-import yv.tils.discord.data.Embeds.Companion.AUTHOR_LINK
-import yv.tils.discord.data.Embeds.Companion.AUTHOR_NAME
-import yv.tils.discord.data.Embeds.Companion.FOOTER_ICON
-import yv.tils.discord.data.Embeds.Companion.FOOTER_TEXT
-import yv.tils.discord.data.Embeds.Companion.FOOTER_TEXT_CUSTOMIZABLE
-import yv.tils.discord.data.Embeds.Companion.errorColor
-import yv.tils.discord.data.Embeds.Companion.infoColor
-import yv.tils.discord.data.Embeds.Companion.successColor
-import yv.tils.discord.data.Embeds.Companion.warningColor
+import yv.tils.discord.data.Components.Companion.AUTHOR_ICON
+import yv.tils.discord.data.Components.Companion.AUTHOR_LINK
+import yv.tils.discord.data.Components.Companion.AUTHOR_NAME
+import yv.tils.discord.data.Components.Companion.FOOTER_ICON
+import yv.tils.discord.data.Components.Companion.FOOTER_TEXT
+import yv.tils.discord.data.Components.Companion.FOOTER_TEXT_CUSTOMIZABLE
+import yv.tils.discord.data.Components.Companion.errorColor
+import yv.tils.discord.data.Components.Companion.infoColor
+import yv.tils.discord.data.Components.Companion.successColor
+import yv.tils.discord.data.Components.Companion.warningColor
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.AppLogic
 

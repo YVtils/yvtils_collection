@@ -28,7 +28,8 @@ class SyncPlayerConnectionChange {
 
     private fun sendDiscordMessage(sender: Player, action: String) {
         try {
-            channel.sendMessageEmbeds(MessageEmbeds().embedForJoinLeave(sender, action).build()).queue()
+            channel.sendMessageComponents(MessageComponents().componentForJoinLeave(sender, action)).useComponentsV2()
+                .queue()
         } catch (_: UninitializedPropertyAccessException) {
             Logger.warn("Discord app was not able to establish chat sync bridge between minecraft and discord. Please check your channel configuration.")
             active = false
