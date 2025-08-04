@@ -1,10 +1,10 @@
 package yv.tils.discord.configs
 
-import files.FileUtils
+import yv.tils.config.files.FileUtils
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import logger.Logger
+import yv.tils.utils.logger.Logger
 
 class StatsSyncSaveFile {
     companion object {

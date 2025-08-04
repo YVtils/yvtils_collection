@@ -1,11 +1,9 @@
 package yv.tils.regions.logic
 
-import language.LanguageHandler
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.regions.data.PlayerManager
-import yv.tils.regions.data.RegionManager
-import yv.tils.regions.data.RegionRoles
+import yv.tils.config.language.LanguageHandler
+import yv.tils.regions.data.*
 import yv.tils.regions.language.LangStrings
 import java.util.*
 

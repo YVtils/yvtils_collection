@@ -1,11 +1,11 @@
 package yv.tils.discord.actions.buttons.handler
 
-import language.LanguageHandler
-import logger.Logger
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
+import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.data.Components
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.*
+import yv.tils.utils.logger.Logger
 
 class JDAAccountReplace {
     /**

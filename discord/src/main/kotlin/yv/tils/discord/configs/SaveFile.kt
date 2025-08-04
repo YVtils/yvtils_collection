@@ -1,11 +1,11 @@
 package yv.tils.discord.configs
 
-import files.FileUtils
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import logger.Logger
+import yv.tils.config.files.FileUtils
 import yv.tils.discord.logic.whitelist.WhitelistEntry
 import yv.tils.discord.logic.whitelist.WhitelistLogic
+import yv.tils.utils.logger.Logger
 
 class SaveFile {
     private val filePath = "/discord/save.json"

@@ -1,8 +1,5 @@
 package yv.tils.discord.data
 
-import colors.ColorUtils
-import colors.Colors
-import language.LanguageHandler
 import net.dv8tion.jda.api.components.container.Container
 import net.dv8tion.jda.api.components.container.ContainerChildComponent
 import net.dv8tion.jda.api.components.section.Section
@@ -11,11 +8,14 @@ import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.components.thumbnail.Thumbnail
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.utils.FileUpload
-import player.PlayerUtils
-import server.ServerUtils
-import server.VersionUtils
+import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.WhitelistLogic
+import yv.tils.utils.colors.ColorUtils
+import yv.tils.utils.colors.Colors
+import yv.tils.utils.player.PlayerUtils
+import yv.tils.utils.server.ServerUtils
+import yv.tils.utils.server.VersionUtils
 import java.io.File
 
 

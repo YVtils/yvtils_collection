@@ -1,8 +1,8 @@
 package yv.tils.discord.actions.select.handler
 
-import logger.Logger
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent
 import yv.tils.discord.logic.whitelist.*
+import yv.tils.utils.logger.Logger
 
 class JDAAccountRemove {
     fun handleForceRemove(e: StringSelectInteractionEvent) {

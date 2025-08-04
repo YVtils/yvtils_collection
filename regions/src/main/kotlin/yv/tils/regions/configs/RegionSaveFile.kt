@@ -1,14 +1,10 @@
 package yv.tils.regions.configs
 
-import coroutine.CoroutineHandler
-import files.FileUtils
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import logger.Logger
-import yv.tils.regions.data.Flag
-import yv.tils.regions.data.FlagManager
-import yv.tils.regions.data.RegionManager
+import kotlinx.serialization.json.*
+import yv.tils.config.files.FileUtils
+import yv.tils.regions.data.*
+import yv.tils.utils.coroutine.CoroutineHandler
+import yv.tils.utils.logger.Logger
 import java.util.*
 
 class RegionSaveFile {
@@ -77,7 +73,7 @@ class RegionSaveFile {
                 )
 
                 val regionUUID = UUID.fromString(id)
-                data.UUID.registerUUID(regionUUID)
+                yv.tils.utils.data.UUID.registerUUID(regionUUID)
 
                 RegionManager.loadRegion(regionUUID, region)
             } catch (e: Exception) {

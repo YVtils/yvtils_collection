@@ -1,17 +1,17 @@
 package yv.tils.discord.logic.sync.serverChats
 
-import message.MessageUtils
 import net.dv8tion.jda.api.components.container.Container
 import net.dv8tion.jda.api.components.container.ContainerChildComponent
 import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import org.bukkit.advancement.Advancement
 import org.bukkit.entity.Player
-import player.PlayerUtils
 import yv.tils.discord.data.Components.Companion.errorColor
 import yv.tils.discord.data.Components.Companion.successColor
 import yv.tils.discord.data.Components.Companion.warningColor
 import yv.tils.discord.data.Components.Companion.yvtilsColor
 import yv.tils.discord.utils.emoji.EmojiUtils
+import yv.tils.utils.message.MessageUtils
+import yv.tils.utils.player.PlayerUtils
 
 // TODO: Add other events
 class MessageComponents {

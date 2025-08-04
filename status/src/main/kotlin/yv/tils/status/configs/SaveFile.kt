@@ -1,11 +1,11 @@
 package yv.tils.status.configs
 
-import coroutine.CoroutineHandler
-import files.FileUtils
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import logger.Logger
+import yv.tils.config.files.FileUtils
+import yv.tils.utils.coroutine.CoroutineHandler
+import yv.tils.utils.logger.Logger
 import java.util.*
 
 class SaveFile {

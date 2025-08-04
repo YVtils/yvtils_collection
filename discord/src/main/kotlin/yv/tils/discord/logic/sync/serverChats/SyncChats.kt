@@ -1,13 +1,13 @@
 package yv.tils.discord.logic.sync.serverChats
 
 import io.papermc.paper.event.player.AsyncChatEvent
-import logger.Logger
-import message.MessageUtils
+import yv.tils.utils.logger.Logger
+import yv.tils.utils.message.MessageUtils
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.bukkit.entity.Player
-import player.PlayerUtils
+import yv.tils.utils.player.PlayerUtils
 import yv.tils.discord.data.Permissions
 import yv.tils.discord.logic.AppLogic
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.active

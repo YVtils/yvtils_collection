@@ -1,13 +1,11 @@
 package yv.tils.essentials.commands.register
 
-import data.Data
 import dev.jorel.commandapi.CommandPermission
-import dev.jorel.commandapi.kotlindsl.anyExecutor
-import dev.jorel.commandapi.kotlindsl.commandTree
-import dev.jorel.commandapi.kotlindsl.playerArgument
-import language.LanguageHandler
+import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
+import yv.tils.config.language.LanguageHandler
 import yv.tils.essentials.commands.handler.PingHandler
+import yv.tils.utils.data.Data
 
 class PingCMD {
     val command = commandTree("ping") {

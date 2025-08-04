@@ -1,8 +1,8 @@
 package yv.tils.server.motd
 
 import com.destroystokyo.paper.event.server.PaperServerListPingEvent
-import player.PlayerUtils
 import yv.tils.server.configs.ConfigFile
+import yv.tils.utils.player.PlayerUtils
 
 class DisplayMOTD {
     fun onServerPing(e: PaperServerListPingEvent) {

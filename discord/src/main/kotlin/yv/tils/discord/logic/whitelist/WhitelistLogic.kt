@@ -1,8 +1,8 @@
 package yv.tils.discord.logic.whitelist
 
-import data.Data
+import yv.tils.utils.data.Data
 import kotlinx.serialization.Serializable
-import logger.Logger
+import yv.tils.utils.logger.Logger
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Role
 import org.bukkit.OfflinePlayer

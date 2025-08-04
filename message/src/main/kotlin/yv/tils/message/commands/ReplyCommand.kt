@@ -1,15 +1,13 @@
 package yv.tils.message.commands
 
-import data.Data
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.executors.CommandArguments
-import dev.jorel.commandapi.kotlindsl.commandTree
-import dev.jorel.commandapi.kotlindsl.greedyStringArgument
-import dev.jorel.commandapi.kotlindsl.playerExecutor
-import language.LanguageHandler
+import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import yv.tils.config.language.LanguageHandler
 import yv.tils.message.logic.MessageHandler
+import yv.tils.utils.data.Data
 
 class ReplyCommand {
     val command = commandTree("reply") {
@@ -18,7 +16,7 @@ class ReplyCommand {
         withUsage("reply <message>")
         withAliases("r")
 
-        greedyStringArgument("message") {
+        greedyStringArgument("yv/tils/message") {
             playerExecutor { sender, args ->
                 reply(sender, args)
             }

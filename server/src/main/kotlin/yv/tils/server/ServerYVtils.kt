@@ -1,16 +1,21 @@
 package yv.tils.server
 
-import data.Data
-import logger.Logger
 import yv.tils.server.configs.ConfigFile
 import yv.tils.server.language.RegisterStrings
 import yv.tils.server.listeners.*
 import yv.tils.server.maintenance.MaintenanceCMD
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 
 class ServerYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULE_NAME = "server"
-        const val MODULE_VERSION = "1.0.0"
+        val MODULE = Data.YVtilsModuleData(
+            "server",
+            "1.0.0",
+            "Server module for YVtils",
+            "YVtils",
+            "https://docs.yvtils.net/server/"
+        )
     }
 
     override fun onLoad() {
@@ -19,7 +24,7 @@ class ServerYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
+        Data.addModule(MODULE)
 
         registerCommands()
         registerListeners()
@@ -60,7 +65,7 @@ class ServerYVtils : Data.YVtilsModule {
     }
 
     private fun loadConfigs() {
-        Logger.debug("Loading configs for $MODULE_NAME v$MODULE_VERSION")
+        Logger.debug("Loading configs for ${MODULE.name} v${MODULE.version}")
 
         ConfigFile().loadConfig()
     }

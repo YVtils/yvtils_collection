@@ -1,11 +1,11 @@
 package yv.tils.regions.logic
 
-import language.LanguageHandler
-import logger.Logger
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import yv.tils.config.language.LanguageHandler
 import yv.tils.regions.data.*
 import yv.tils.regions.language.LangStrings
+import yv.tils.utils.logger.Logger
 import javax.naming.NoPermissionException
 
 class FlagLogic {

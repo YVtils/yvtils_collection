@@ -1,8 +1,8 @@
 package yv.tils.regions.configs
 
-import files.FileUtils
-import logger.Logger
+import yv.tils.config.files.FileUtils
 import yv.tils.regions.data.*
+import yv.tils.utils.logger.Logger
 
 class ConfigFile {
     companion object {

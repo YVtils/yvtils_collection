@@ -1,12 +1,12 @@
 package yv.tils.regions.data
 
 import kotlinx.serialization.Serializable
-import logger.Logger
 import org.bukkit.command.CommandSender
 import yv.tils.regions.configs.ConfigFile
 import yv.tils.regions.configs.RegionSaveFile
 import yv.tils.regions.data.Flag.PLACE
 import yv.tils.regions.data.Flag.PVP
+import yv.tils.utils.logger.Logger
 import java.util.*
 import javax.naming.NoPermissionException
 

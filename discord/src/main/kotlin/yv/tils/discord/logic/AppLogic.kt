@@ -1,12 +1,11 @@
 package yv.tils.discord.logic
 
-import language.LanguageHandler
-import logger.Logger
 import net.dv8tion.jda.api.*
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import org.apache.logging.log4j.LogManager
+import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.DiscordYVtils
 import yv.tils.discord.actions.buttons.JDAButtonsListener
 import yv.tils.discord.actions.commands.JDACommandsListener
@@ -20,6 +19,7 @@ import yv.tils.discord.logic.sync.serverConsole.SendCMD
 import yv.tils.discord.logic.sync.serverStats.CollectStats
 import yv.tils.discord.logic.whitelist.WhitelistManage
 import yv.tils.discord.utils.emoji.DiscordEmoji
+import yv.tils.utils.logger.Logger
 import java.time.Duration
 import org.apache.logging.log4j.core.Logger as Logger4J
 
@@ -39,7 +39,7 @@ class AppLogic {
          */
         fun getJDA(): JDA {
             if (! ::jda.isInitialized) {
-                throw IllegalStateException("JDA is not initialized. Please start the application first.") // TODO: Change error message
+                throw IllegalStateException("JDA is not initialized")
             }
             return jda
         }
@@ -163,7 +163,8 @@ class AppLogic {
             DiscordEmoji().setPersistentEmojis()
             DiscordEmoji().loadPersistentEmojis()
         } catch (e: Exception) {
-            Logger.error("Failed to initialize Discord emojis: ${e.message}") // TODO: Handle error appropriately
+            Logger.error("Failed to initialize Discord emojis: ${e.message}")
+            Logger.debug("Stack trace: ${e.stackTraceToString()}", 2)
         }
 
         ServerChatsSyncManager().loadChannelFromID()

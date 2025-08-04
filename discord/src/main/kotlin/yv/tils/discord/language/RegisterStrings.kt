@@ -1,8 +1,8 @@
 package yv.tils.discord.language
 
-import language.FileTypes
-import language.LanguageProvider
-import language.LanguageProvider.Companion.registerNewString
+import yv.tils.config.language.FileTypes
+import yv.tils.config.language.LanguageProvider
+import yv.tils.config.language.LanguageProvider.Companion.registerNewString
 
 class RegisterStrings : LanguageProvider.RegisterStrings {
     override fun registerStrings() {

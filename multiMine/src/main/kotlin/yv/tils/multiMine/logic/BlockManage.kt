@@ -1,7 +1,5 @@
 package yv.tils.multiMine.logic
 
-import data.Data
-import language.LanguageHandler
 import org.bukkit.Material
 import org.bukkit.block.ShulkerBox
 import org.bukkit.command.CommandSender
@@ -9,9 +7,11 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockStateMeta
 import org.bukkit.inventory.meta.BundleMeta
-import server.VersionUtils
+import yv.tils.config.language.LanguageHandler
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.configs.MultiMineConfig
+import yv.tils.utils.data.Data
+import yv.tils.utils.server.VersionUtils
 
 class BlockManage {
     fun addBlock(sender: CommandSender, block: Any?) {

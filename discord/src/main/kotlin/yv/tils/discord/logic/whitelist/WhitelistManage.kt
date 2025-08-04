@@ -1,12 +1,12 @@
 package yv.tils.discord.logic.whitelist
 
-import apis.MojangAPI
-import apis.MojangAPI.ErrorResponse
-import apis.MojangAPI.SuccessfulResponse
-import coroutine.CoroutineHandler
-import data.Data
-import language.LanguageHandler
-import logger.Logger
+import yv.tils.utils.apis.MojangAPI
+import yv.tils.utils.apis.MojangAPI.ErrorResponse
+import yv.tils.utils.apis.MojangAPI.SuccessfulResponse
+import yv.tils.utils.coroutine.CoroutineHandler
+import yv.tils.utils.data.Data
+import yv.tils.config.language.LanguageHandler
+import yv.tils.utils.logger.Logger
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent

@@ -1,7 +1,8 @@
 package yv.tils.discord.utils.emoji
 
 import org.bukkit.entity.Player
-import player.PlayerUtils
+import yv.tils.utils.logger.Logger
+import yv.tils.utils.player.PlayerUtils
 
 class EmojiUtils {
     companion object {
@@ -35,7 +36,8 @@ class EmojiUtils {
             val emojiId = DiscordEmoji().createSkinEmoji(player)
             addPlayerEmoji(skinHash, emojiId)
         } catch (e: Exception) {
-            e.printStackTrace() // TODO: Handle error appropriately
+            Logger.error("Failed to create player emoji for ${player.name}: ${e.message}")
+            Logger.debug("Stack trace: ${e.stackTraceToString()}", 2)
         }
     }
 
@@ -57,7 +59,8 @@ class EmojiUtils {
                 DiscordEmoji().deleteAppEmoji(getPlayerEmoji(skinHash) ?: return)
                 removePlayerEmoji(skinHash)
             } catch (e: Exception) {
-                e.printStackTrace() // TODO: Handle error appropriately
+                Logger.error("Failed to remove player emoji for ${player.name}: ${e.message}")
+                Logger.debug("Stack trace: ${e.stackTraceToString()}", 2)
             }
         }
     }

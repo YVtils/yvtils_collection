@@ -1,16 +1,19 @@
 package yv.tils.discord.logic.whitelist
 
-import language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.components.buttons.Button
 import net.dv8tion.jda.api.components.container.Container
 import net.dv8tion.jda.api.components.container.ContainerChildComponent
+import net.dv8tion.jda.api.components.section.Section
 import net.dv8tion.jda.api.components.selections.SelectOption
 import net.dv8tion.jda.api.components.selections.StringSelectMenu
 import net.dv8tion.jda.api.components.separator.Separator
 import net.dv8tion.jda.api.components.textdisplay.TextDisplay
+import net.dv8tion.jda.api.components.thumbnail.Thumbnail
 import net.dv8tion.jda.api.entities.emoji.Emoji
-import server.ServerUtils
+import yv.tils.utils.player.PlayerUtils
+import yv.tils.utils.server.ServerUtils
 import yv.tils.discord.data.Components
 import yv.tils.discord.data.Components.Companion.errorColor
 import yv.tils.discord.data.Components.Companion.infoColor
@@ -32,8 +35,20 @@ class WhitelistComponents {
             )
         )
 
-        children.add(TextDisplay.of("## $title"))
-        children.add(TextDisplay.of(description))
+//        children.add(TextDisplay.of("## $title"))
+//        children.add(TextDisplay.of(description))
+
+        val accountUUID = PlayerUtils.nameToUUID(accountName)
+        val skinURL = PlayerUtils.PLAYER_HEAD_API.replace("<uuid>", accountUUID.toString())
+
+        children.add(
+            Section.of(
+                Thumbnail.fromUrl(skinURL),
+                TextDisplay.of("## $title"),
+                TextDisplay.of(description)
+            )
+        )
+
         children.add(Components.footerComponent())
 
         val container = Container.of(

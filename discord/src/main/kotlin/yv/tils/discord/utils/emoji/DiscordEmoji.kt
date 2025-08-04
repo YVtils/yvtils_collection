@@ -4,13 +4,12 @@ import net.dv8tion.jda.api.entities.Icon
 import net.dv8tion.jda.api.entities.emoji.ApplicationEmoji
 import okio.IOException
 import org.bukkit.entity.Player
-import player.PlayerUtils
 import yv.tils.discord.logic.AppLogic
 import yv.tils.discord.utils.emoji.EmojiUtils.Companion.playerEmojis
+import yv.tils.utils.player.PlayerUtils
 import java.io.File
 import java.net.URI
 
-// TODO: Error handling
 class DiscordEmoji {
     companion object {
         var persistentEmojis = true
@@ -35,7 +34,7 @@ class DiscordEmoji {
                 cleanupAppEmojis(90 * 24 * 60 * 60 * 1000L, emojis) // Keep emojis for 90 days if less than 1800 emojis
             }
         } catch (e: Exception) {
-            throw RuntimeException("Failed to set persistent emojis", e)
+            throw RuntimeException("Failed to set persistent emojis: ${e.message}", e)
         }
     }
 
@@ -86,7 +85,11 @@ class DiscordEmoji {
      * @throws RuntimeException if the emoji deletion fails.
      */
     fun deleteAppEmoji(emojiId: Long) {
-        removeAppEmoji(emojiId.toString())
+        try {
+            removeAppEmoji(emojiId.toString())
+        } catch (e: Exception) {
+            throw RuntimeException("Failed to delete emoji with ID: $emojiId", e)
+        }
     }
 
     /**
@@ -110,7 +113,7 @@ class DiscordEmoji {
                     try {
                         removeAppEmoji(emoji.id)
                     } catch (e: Exception) {
-                        throw RuntimeException("Failed to delete emoji with ID: ${emoji.id}", e)
+                        throw RuntimeException("Failed to cleanup emoji with ID: ${emoji.id}", e)
                     }
                 }
             }

@@ -1,9 +1,9 @@
 package yv.tils.status.logic
 
-import data.Data
-import language.LanguageHandler
-import logger.Logger
-import message.MessageUtils
+import yv.tils.utils.data.Data
+import yv.tils.config.language.LanguageHandler
+import yv.tils.utils.logger.Logger
+import yv.tils.utils.message.MessageUtils
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.status.configs.ConfigFile
@@ -61,7 +61,7 @@ class StatusHandler {
                 sender,
                 mapOf(
                     "prefix" to Data.prefix,
-                    "player" to player.name
+                    "yv/tils/player" to player.name
                 )
             ))
         }

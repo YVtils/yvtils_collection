@@ -1,12 +1,12 @@
 package yv.tils.discord.actions.commands.handler
 
-import language.LanguageHandler
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.build.Commands
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
+import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.data.Components
 import yv.tils.discord.language.RegisterStrings

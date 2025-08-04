@@ -1,10 +1,10 @@
 package yv.tils.discord.actions.commands
 
-import logger.Logger
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import yv.tils.discord.actions.commands.handler.JDAServerInfo
 import yv.tils.discord.actions.commands.handler.JDAWhitelist
 import yv.tils.discord.logic.AppLogic
+import yv.tils.utils.logger.Logger
 
 class JDACommandsRegister {
 

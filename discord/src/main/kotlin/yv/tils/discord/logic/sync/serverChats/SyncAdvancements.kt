@@ -1,6 +1,6 @@
 package yv.tils.discord.logic.sync.serverChats
 
-import logger.Logger
+import yv.tils.utils.logger.Logger
 import org.bukkit.advancement.Advancement
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerAdvancementDoneEvent

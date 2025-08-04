@@ -1,9 +1,9 @@
 package yv.tils.common.permissions
 
-import data.Data
-import logger.Logger
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 
 class PermissionManager {
     companion object {

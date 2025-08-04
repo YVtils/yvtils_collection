@@ -1,11 +1,11 @@
 package yv.tils.core
 
-import ConfigYVtils
-import UtilsYVtils
-import data.Data
+import yv.tils.config.ConfigYVtils
+import yv.tils.utils.UtilsYVtils
+import yv.tils.utils.data.Data
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIBukkitConfig
-import logger.Logger
+import yv.tils.utils.logger.Logger
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils

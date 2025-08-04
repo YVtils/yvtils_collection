@@ -1,11 +1,9 @@
 package yv.tils.regions.listeners
 
-import logger.Logger
-import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
+import org.bukkit.event.*
 import yv.tils.regions.listeners.custom.regions.PlayerEntryRegionEvent
 import yv.tils.regions.logic.PlayerChecks
+import yv.tils.utils.logger.Logger
 
 class PlayerEntryRegion : Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)

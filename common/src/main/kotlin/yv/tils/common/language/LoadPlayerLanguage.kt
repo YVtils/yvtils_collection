@@ -1,10 +1,10 @@
 package yv.tils.common.language
 
-import data.Data
-import language.LanguageHandler
-import logger.Logger
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerLocaleChangeEvent
+import yv.tils.config.language.LanguageHandler
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 import java.util.*
 
 class LoadPlayerLanguage {

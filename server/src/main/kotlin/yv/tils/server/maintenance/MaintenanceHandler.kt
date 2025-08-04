@@ -1,13 +1,13 @@
 package yv.tils.server.maintenance
 
-import data.Data
 import dev.jorel.commandapi.executors.CommandArguments
-import language.LanguageBroadcast
-import language.LanguageHandler
 import org.bukkit.command.CommandSender
-import player.PlayerUtils
-import server.ServerUtils
+import yv.tils.config.language.LanguageBroadcast
+import yv.tils.config.language.LanguageHandler
 import yv.tils.server.configs.ConfigFile
+import yv.tils.utils.data.Data
+import yv.tils.utils.player.PlayerUtils
+import yv.tils.utils.server.ServerUtils
 
 class MaintenanceHandler {
     companion object {

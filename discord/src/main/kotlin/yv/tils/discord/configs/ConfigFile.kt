@@ -1,7 +1,7 @@
 package yv.tils.discord.configs
 
-import files.FileUtils
-import logger.Logger
+import yv.tils.config.files.FileUtils
+import yv.tils.utils.logger.Logger
 
 // TODO: Add option to allow multiple whitelist channels
 class ConfigFile {

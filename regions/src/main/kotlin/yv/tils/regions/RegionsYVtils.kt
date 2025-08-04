@@ -1,22 +1,22 @@
 package yv.tils.regions
 
-import data.Data
 import yv.tils.regions.commands.RegionCommand
-import yv.tils.regions.configs.ConfigFile
-import yv.tils.regions.configs.PlayerSaveFile
-import yv.tils.regions.configs.RegionSaveFile
+import yv.tils.regions.configs.*
 import yv.tils.regions.data.FlagManager
 import yv.tils.regions.language.RegisterStrings
-import yv.tils.regions.listeners.BlockFlagTrigger
-import yv.tils.regions.listeners.PlayerEntryRegion
-import yv.tils.regions.listeners.PlayerFlagTrigger
-import yv.tils.regions.listeners.PlayerLeaveRegion
+import yv.tils.regions.listeners.*
 import yv.tils.regions.listeners.cause.*
+import yv.tils.utils.data.Data
 
 class RegionsYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULE_NAME = "regions"
-        const val MODULE_VERSION = "1.0.0-beta.2"
+        val MODULE = Data.YVtilsModuleData(
+            "regions",
+            "1.0.0-beta.2",
+            "Regions module for YVtils",
+            "YVtils",
+            "https://docs.yvtils.net/regions/"
+        )
     }
 
     override fun onLoad() {
@@ -27,7 +27,7 @@ class RegionsYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
+        Data.addModule(MODULE)
 
         unregisterCommands()
 

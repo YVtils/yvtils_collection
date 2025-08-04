@@ -1,7 +1,7 @@
 package yv.tils.common.config
 
-import files.FileUtils
-import logger.Logger
+import yv.tils.config.files.FileUtils
+import yv.tils.utils.logger.Logger
 
 class ConfigFile {
     companion object {
