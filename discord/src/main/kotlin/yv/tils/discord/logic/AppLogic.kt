@@ -19,6 +19,7 @@ import yv.tils.discord.logic.sync.serverConsole.GetConsole
 import yv.tils.discord.logic.sync.serverConsole.SendCMD
 import yv.tils.discord.logic.sync.serverStats.CollectStats
 import yv.tils.discord.logic.whitelist.WhitelistManage
+import yv.tils.discord.utils.emoji.DiscordEmoji
 import java.time.Duration
 import org.apache.logging.log4j.core.Logger as Logger4J
 
@@ -158,6 +159,13 @@ class AppLogic {
     }
 
     private fun launchFeatures() {
+        try {
+            DiscordEmoji().setPersistentEmojis()
+            DiscordEmoji().loadPersistentEmojis()
+        } catch (e: Exception) {
+            Logger.error("Failed to initialize Discord emojis: ${e.message}") // TODO: Handle error appropriately
+        }
+
         ServerChatsSyncManager().loadChannelFromID()
 
         CollectStats().collect()

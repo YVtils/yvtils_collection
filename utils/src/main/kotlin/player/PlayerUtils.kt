@@ -1,6 +1,7 @@
 package player
 
 import data.Data
+import logger.Logger
 import message.MessageUtils
 import net.kyori.adventure.text.Component
 import org.bukkit.OfflinePlayer
@@ -9,6 +10,24 @@ import java.util.*
 
 class PlayerUtils {
     companion object {
+        const val PLAYER_HEAD_API = "https://cravatar.eu/helmhead/<uuid>/600"
+
+        fun getSkinHash(player: Player): String {
+            val skin = player.playerProfile.textures.skin
+
+            if (skin == null) {
+                Logger.dev("Player ${player.name} has no skin.")
+                return "default"
+            }
+
+            val hash = skin.path.split("/").last()
+
+            return hash.ifBlank {
+                Logger.dev("Player ${player.name} has no skin hash.")
+                "default"
+            }
+        }
+
         val onlinePlayersAsCount: Int
             get() {
                 val onlinePlayers = Data.instance.server.onlinePlayers.size

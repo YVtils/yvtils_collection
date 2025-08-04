@@ -6,16 +6,17 @@ import net.dv8tion.jda.api.components.container.ContainerChildComponent
 import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import org.bukkit.advancement.Advancement
 import org.bukkit.entity.Player
+import player.PlayerUtils
 import yv.tils.discord.data.Components.Companion.errorColor
 import yv.tils.discord.data.Components.Companion.successColor
 import yv.tils.discord.data.Components.Companion.warningColor
 import yv.tils.discord.data.Components.Companion.yvtilsColor
-import yv.tils.discord.utils.DiscordEmoji
+import yv.tils.discord.utils.emoji.EmojiUtils
 
 // TODO: Add other events
 class MessageComponents {
     companion object {
-        private const val ICON_URL = "https://cravatar.eu/helmhead/<uuid>/600"
+        private const val ICON_URL = PlayerUtils.PLAYER_HEAD_API
     }
 
     fun componentForChat(sender: Player, message: String): Container {
@@ -84,7 +85,7 @@ class MessageComponents {
     }
 
     private fun authorComponent(sender: Player): ContainerChildComponent {
-        val emojiID = DiscordEmoji.playerEmojis[sender.uniqueId] ?: ""
+        val emojiID = EmojiUtils().getPlayerEmojiId(sender)
         return TextDisplay.of(
             "### <:star:$emojiID> ${sender.name}"
         )

@@ -39,7 +39,7 @@ class DiscordYVtils : Data.YVtilsModule {
 
         loadConfigs()
 
-        AppLogic().startApp()
+        AppLogic().startApp() // TODO: Check if this can be moved to async
     }
 
     override fun onLateEnablePlugin() {

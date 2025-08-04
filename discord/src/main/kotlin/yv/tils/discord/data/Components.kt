@@ -21,7 +21,7 @@ import java.io.File
 
 class Components {
     companion object {
-        const val ICON_URL = "https://cravatar.eu/helmhead/<uuid>/600"
+        private const val ICON_URL = PlayerUtils.PLAYER_HEAD_API
 
         const val AUTHOR_NAME = "YVtils"
         const val AUTHOR_ICON = "https://api.yvtils.net/images/yvtils_logo"
