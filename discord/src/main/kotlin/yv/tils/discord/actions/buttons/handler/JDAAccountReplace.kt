@@ -6,6 +6,7 @@ import yv.tils.discord.data.Components
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.*
 import yv.tils.utils.logger.Logger
+import java.util.concurrent.TimeUnit
 
 class JDAAccountReplace {
     /**
@@ -13,7 +14,6 @@ class JDAAccountReplace {
      *
      * @param e The ButtonInteractionEvent containing the button interaction event.
      */
-    // TODO FIX: There probably is a bug when replacing the account over forceAdd for another user
     fun executeConfirm(e: ButtonInteractionEvent) {
         val message = e.message
         val user = e.user
@@ -22,26 +22,67 @@ class JDAAccountReplace {
 
         message.delete().queue()
 
-        e.deferReply().queue()
+        e.deferReply(true).queue()
         val hook = e.hook
 
-        val newAccount = WhitelistManage.accountReplaceCache[userID]
-        WhitelistManage.accountReplaceCache.remove(userID)
-        if (newAccount == null) {
-            hook.sendMessageComponents(
+        var newAccount: String?
+
+        var targetUserID: String?
+
+        try {
+            val cacheEntry = WhitelistManage.getCacheEntryAsMap(userID, true)
+
+            if (cacheEntry.size == 1) {
+                val entryKey = cacheEntry.keys.first()
+                newAccount = cacheEntry[entryKey]
+
+                targetUserID = entryKey.split("_")[1]
+            } else {
+                throw Exception("Multiple accounts found in cache for user: $userID")
+            }
+
+            Logger.dev("Account replace for $targetUserID with new account: $newAccount by user: ${userID}")
+
+            WhitelistManage.removeFromCache(userID, true)
+        } catch (_: Exception) {
+            e.channel.sendMessageComponents(
                 WhitelistComponents().accountErrorContainer(
                     LanguageHandler.getRawMessage(
-                        RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NO_CACHE.key,
+                        RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NOT_CACHED.key,
                         params = mapOf<String, Any>(
                             "user" to user.effectiveName,
                         )
                     )
                 )
-            ).useComponentsV2().queue()
+            ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
 
             Logger.warn(
                 LanguageHandler.getMessage(
-                    RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NO_CACHE.key,
+                    RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NOT_CACHED.key,
+                    params = mapOf<String, Any>(
+                        "user" to user.effectiveName,
+                    )
+                )
+            )
+
+            return
+        }
+
+        if (newAccount == null) {
+            e.channel.sendMessageComponents(
+                WhitelistComponents().accountErrorContainer(
+                    LanguageHandler.getRawMessage(
+                        RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NOT_CACHED.key,
+                        params = mapOf<String, Any>(
+                            "user" to user.effectiveName,
+                        )
+                    )
+                )
+            ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
+
+            Logger.warn(
+                LanguageHandler.getMessage(
+                    RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NOT_CACHED.key,
                     params = mapOf<String, Any>(
                         "user" to user.effectiveName,
                     )
@@ -54,25 +95,25 @@ class JDAAccountReplace {
         val oldEntry: WhitelistEntry
 
         try {
-            oldEntry = WhitelistManage().unlinkAccount(userID, guildID, user)
-            WhitelistManage().linkAccount(newAccount, userID, guildID, user)
+            oldEntry = WhitelistManage().unlinkAccount(targetUserID, guildID, user)
+            WhitelistManage().linkAccount(newAccount, targetUserID, guildID, user)
         } catch (ex: Exception) {
-            hook.sendMessageComponents(
+            e.channel.sendMessageComponents(
                 WhitelistComponents().accountErrorContainer(
                     LanguageHandler.getRawMessage(
                         RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_EXCEPTION.key,
                         params = mapOf<String, Any>(
-                            "user" to user.effectiveName,
+                            "user" to "<@$targetUserID>",
                             "error" to (ex.message ?: "Unknown error")
                         )
                     )
                 )
-            ).useComponentsV2().queue()
+            ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
             Logger.warn(
                 LanguageHandler.getMessage(
                     RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_EXCEPTION.key,
                     params = mapOf<String, Any>(
-                        "user" to user.effectiveName,
+                        "user" to targetUserID,
                         "error" to (ex.message ?: "Unknown error")
                     )
                 )
@@ -94,7 +135,7 @@ class JDAAccountReplace {
                     "oldAccount" to oldEntry.minecraftName,
                     "newAccount" to newAccount,
                     "user" to user.effectiveName,
-                    "discordAccount" to user.effectiveName,
+                    "discordAccount" to "<@$targetUserID>",
                 )
             )
         )
@@ -114,7 +155,30 @@ class JDAAccountReplace {
 
         val hook = e.hook
 
-        WhitelistManage.accountReplaceCache.remove(userID)
+        try {
+            WhitelistManage.removeFromCache(userID, true)
+        } catch (ex: Exception) {
+            e.channel.sendMessageComponents(
+                WhitelistComponents().accountErrorContainer(
+                    LanguageHandler.getRawMessage(
+                        RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NOT_CACHED.key,
+                        params = mapOf<String, Any>(
+                            "user" to e.user.effectiveName
+                        )
+                    )
+                )
+            ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
+
+            Logger.warn(
+                LanguageHandler.getMessage(
+                    RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NOT_CACHED.key,
+                    params = mapOf<String, Any>(
+                        "user" to e.user.effectiveName
+                    )
+                )
+            )
+            return
+        }
 
         hook.sendMessageComponents(
             Components().actionCancelledComponent(

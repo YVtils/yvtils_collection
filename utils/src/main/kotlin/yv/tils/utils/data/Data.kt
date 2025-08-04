@@ -21,7 +21,7 @@ class Data {
         var pluginFolder = File("plugins/yvtils")
 
         var pluginURL = "https://modrinth.com/organization/yvtils"
-        var pluginName = "null"
+        var pluginName = "YVtils Null"
         var pluginShortName = "null"
         var prefix: String
             set(value) {
@@ -40,12 +40,6 @@ class Data {
             pluginURL = core.url
 
             this.core = core
-        }
-
-        @Deprecated("Use addModule(YVtilsModuleData) instead", ReplaceWith("addModule(YVtilsModuleData)"))
-        @Suppress("Deprecation")
-        fun addModule(module: String) {
-            addModule(YVtilsModuleData(module, "x.x.x"))
         }
 
         private val loadedYVtilsModules = mutableListOf<YVtilsModuleData>()

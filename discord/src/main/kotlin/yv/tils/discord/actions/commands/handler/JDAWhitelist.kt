@@ -12,10 +12,10 @@ import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.*
 import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.AlreadyWhitelistedException
 import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.InvalidAccountException
-import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.accountReplaceCache
 import yv.tils.discord.utils.DiscordUser
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
+import java.util.concurrent.TimeUnit
 
 class JDAWhitelist {
     companion object {
@@ -34,8 +34,32 @@ class JDAWhitelist {
             task = {
                 if (WhitelistLogic.containsEntry(discordUserID)) {
                     val oldName = WhitelistLogic.getEntryByDiscordID(discordUserID)?.minecraftName ?: "Unknown"
+                    val sender = e.user
 
-                    accountReplaceCache[discordUserID] = minecraftName
+                    try {
+                        WhitelistManage.addToCache("${sender.id}_${discordUserID}", minecraftName)
+                    } catch (_: Exception) {
+                        e.channel.sendMessageComponents(
+                            WhitelistComponents().accountErrorContainer(
+                                LanguageHandler.getRawMessage(
+                                    RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_ALREADY_CACHED.key,
+                                    params = mapOf(
+                                        "user" to e.user.effectiveName
+                                    )
+                                )
+                            )
+                        ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
+
+                        Logger.warn(
+                            LanguageHandler.getMessage(
+                                RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_ALREADY_CACHED.key,
+                                mapOf(
+                                    "user" to e.user.effectiveName
+                                )
+                            )
+                        )
+                        return@launchTask
+                    }
 
                     hook.sendMessageComponents(
                         WhitelistComponents().accountChangePromptContainer(
@@ -90,9 +114,9 @@ class JDAWhitelist {
                             return@launchTask
                         }
                         else -> {
-                            hook.sendMessageComponents(
+                            e.channel.sendMessageComponents(
                                 WhitelistComponents().accountErrorContainer(ex.message ?: "-")
-                            ).useComponentsV2().setEphemeral(true).queue()
+                            ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
 
                             Logger.warn(
                                 LanguageHandler.getMessage(
@@ -137,7 +161,7 @@ class JDAWhitelist {
                         val entry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
                         if (entry == null) {
                             if (minecraftName == null) {
-                                hook.sendMessageComponents(
+                                e.channel.sendMessageComponents(
                                     WhitelistComponents().accountErrorContainer(
                                         LanguageHandler.getRawMessage(
                                             RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_DISCORD.key,
@@ -146,7 +170,7 @@ class JDAWhitelist {
                                             )
                                         )
                                     )
-                                ).useComponentsV2().queue()
+                                ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
                                 return@launchTask
                             }
                             discordEntry = null
@@ -159,7 +183,7 @@ class JDAWhitelist {
                         val entry = WhitelistLogic.getEntryByMinecraftName(minecraftName)
                         if (entry == null) {
                             if (discordEntry == null) {
-                                hook.sendMessageComponents(
+                                e.channel.sendMessageComponents(
                                     WhitelistComponents().accountErrorContainer(
                                         LanguageHandler.getRawMessage(
                                             RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_MINECRAFT.key,
@@ -168,7 +192,7 @@ class JDAWhitelist {
                                             )
                                         )
                                     )
-                                ).useComponentsV2().queue()
+                                ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
                                 return@launchTask
                             }
                             minecraftEntry = null
@@ -178,7 +202,7 @@ class JDAWhitelist {
                     }
 
                     if (discordEntry != minecraftEntry && discordEntry != null && minecraftEntry != null) {
-                        hook.sendMessageComponents(
+                        e.channel.sendMessageComponents(
                             WhitelistComponents().accountErrorContainer(
                                 LanguageHandler.getRawMessage(
                                     RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_ENTRIES_NOT_EQUAL.key,
@@ -188,7 +212,7 @@ class JDAWhitelist {
                                     )
                                 )
                             )
-                        ).useComponentsV2().queue()
+                        ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
 
                         return@launchTask
                     }
@@ -232,7 +256,7 @@ class JDAWhitelist {
                     val discordEntry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
 
                     if (discordEntry != minecraftEntry && discordEntry != null && minecraftEntry != null) {
-                        hook.sendMessageComponents(
+                        e.channel.sendMessageComponents(
                             WhitelistComponents().accountErrorContainer(
                                 LanguageHandler.getRawMessage(
                                     RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_ENTRIES_NOT_EQUAL.key,
@@ -242,7 +266,7 @@ class JDAWhitelist {
                                     )
                                 )
                             )
-                        ).useComponentsV2().setEphemeral(true).queue()
+                        ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
 
 
                         return@launchTask

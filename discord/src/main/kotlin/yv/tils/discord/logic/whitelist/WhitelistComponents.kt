@@ -1,6 +1,5 @@
 package yv.tils.discord.logic.whitelist
 
-import yv.tils.config.language.LanguageHandler
 import net.dv8tion.jda.api.components.actionrow.ActionRow
 import net.dv8tion.jda.api.components.buttons.Button
 import net.dv8tion.jda.api.components.container.Container
@@ -12,8 +11,7 @@ import net.dv8tion.jda.api.components.separator.Separator
 import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.components.thumbnail.Thumbnail
 import net.dv8tion.jda.api.entities.emoji.Emoji
-import yv.tils.utils.player.PlayerUtils
-import yv.tils.utils.server.ServerUtils
+import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.data.Components
 import yv.tils.discord.data.Components.Companion.errorColor
 import yv.tils.discord.data.Components.Companion.infoColor
@@ -21,8 +19,9 @@ import yv.tils.discord.data.Components.Companion.successColor
 import yv.tils.discord.data.Components.Companion.warningColor
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.AppLogic
+import yv.tils.utils.player.PlayerUtils
+import yv.tils.utils.server.ServerUtils
 
-// TODO: Implement player head emojis/thumbnails
 class WhitelistComponents {
     fun accountAddContainer(accountName: String): Container {
         val children: MutableList<ContainerChildComponent?> = ArrayList()
@@ -35,11 +34,7 @@ class WhitelistComponents {
             )
         )
 
-//        children.add(TextDisplay.of("## $title"))
-//        children.add(TextDisplay.of(description))
-
-        val accountUUID = PlayerUtils.nameToUUID(accountName)
-        val skinURL = PlayerUtils.PLAYER_HEAD_API.replace("<uuid>", accountUUID.toString())
+        val skinURL = getSkinURL(accountName)
 
         children.add(
             Section.of(
@@ -70,8 +65,16 @@ class WhitelistComponents {
             )
         )
 
-        children.add(TextDisplay.of("## $title"))
-        children.add(TextDisplay.of(description))
+        val skinURL = getSkinURL(accountName)
+
+        children.add(
+            Section.of(
+                Thumbnail.fromUrl(skinURL),
+                TextDisplay.of("## $title"),
+                TextDisplay.of(description)
+            )
+        )
+
         children.add(Components.footerComponent())
 
         val container = Container.of(
@@ -81,7 +84,7 @@ class WhitelistComponents {
         return container
     }
 
-    fun invalidAccountContainer(accName: String): Container {
+    fun invalidAccountContainer(accountName: String): Container {
         val children: MutableList<ContainerChildComponent?> = ArrayList()
 
         val title =
@@ -89,12 +92,20 @@ class WhitelistComponents {
         val description = LanguageHandler.getRawMessage(
             RegisterStrings.LangStrings.COMPONENT_WHITELIST_ACCOUNT_INVALID_DESCRIPTION.key,
             params = mapOf<String, Any>(
-                "accountName" to accName
+                "accountName" to accountName
             )
         )
 
-        children.add(TextDisplay.of("## $title"))
-        children.add(TextDisplay.of(description))
+        val skinURL = getSkinURL(accountName)
+
+        children.add(
+            Section.of(
+                Thumbnail.fromUrl(skinURL),
+                TextDisplay.of("## $title"),
+                TextDisplay.of(description)
+            )
+        )
+
         children.add(Components.footerComponent())
 
         val container = Container.of(
@@ -117,8 +128,16 @@ class WhitelistComponents {
             )
         )
 
-        children.add(TextDisplay.of("## $title"))
-        children.add(TextDisplay.of(description))
+        val skinURL = getSkinURL(newName)
+
+        children.add(
+            Section.of(
+                Thumbnail.fromUrl(skinURL),
+                TextDisplay.of("## $title"),
+                TextDisplay.of(description)
+            )
+        )
+
         children.add(Separator.createDivider(Separator.Spacing.SMALL))
         children.add(
             ActionRow.of(
@@ -171,8 +190,16 @@ class WhitelistComponents {
             )
         )
 
-        children.add(TextDisplay.of("## $title"))
-        children.add(TextDisplay.of(description))
+        val skinURL = getSkinURL(newName)
+
+        children.add(
+            Section.of(
+                Thumbnail.fromUrl(skinURL),
+                TextDisplay.of("## $title"),
+                TextDisplay.of(description)
+            )
+        )
+
         children.add(Components.footerComponent())
 
         val container = Container.of(
@@ -328,9 +355,17 @@ class WhitelistComponents {
         val fieldMinecraftName = entry.minecraftName
         val fieldDiscordUserID = entry.discordUserID
 
-        children.add(TextDisplay.of("## $title"))
-        children.add(TextDisplay.of("Minecraft Name: $fieldMinecraftName"))
-        children.add(TextDisplay.of("Discord User ID: $fieldDiscordUserID"))
+        val skinURL = getSkinURL(fieldMinecraftName)
+
+        children.add(
+            Section.of(
+                Thumbnail.fromUrl(skinURL),
+                TextDisplay.of("## $title"),
+                TextDisplay.of("Minecraft Name: $fieldMinecraftName"),
+                TextDisplay.of("Discord User: <@${fieldDiscordUserID}>")
+            )
+        )
+
         children.add(Components.footerComponent())
 
         val container = Container.of(
@@ -338,6 +373,13 @@ class WhitelistComponents {
         ).withAccentColor(infoColor)
 
         return container
+    }
+
+    private fun getSkinURL(accountName: String): String {
+        val accountUUID = PlayerUtils.nameToUUID(accountName)
+        val skinURL = PlayerUtils.PLAYER_HEAD_API.replace("<uuid>", accountUUID.toString())
+
+        return skinURL
     }
 
 }

@@ -1,36 +1,124 @@
 package yv.tils.discord.logic.whitelist
 
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.entities.channel.ChannelType
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.hooks.ListenerAdapter
+import yv.tils.config.language.LanguageHandler
+import yv.tils.discord.configs.ConfigFile
+import yv.tils.discord.language.RegisterStrings
+import yv.tils.discord.logic.AppLogic
+import yv.tils.discord.utils.DiscordUser
 import yv.tils.utils.apis.MojangAPI
 import yv.tils.utils.apis.MojangAPI.ErrorResponse
 import yv.tils.utils.apis.MojangAPI.SuccessfulResponse
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.data.Data
-import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.logger.Logger
-import net.dv8tion.jda.api.entities.User
-import net.dv8tion.jda.api.entities.channel.ChannelType
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent
-import net.dv8tion.jda.api.hooks.ListenerAdapter
-import yv.tils.discord.configs.ConfigFile
-import yv.tils.discord.language.RegisterStrings
-import yv.tils.discord.logic.AppLogic
-import yv.tils.discord.utils.DiscordUser
 import java.util.concurrent.TimeUnit
 
 class WhitelistManage: ListenerAdapter() {
     companion object {
         val whitelistChannelID = ConfigFile.getValueAsString("whitelistFeature.channel")
         val ignoreBotMessages = ConfigFile.getValueAsBoolean("general.settings.ignoreBotMessages") ?: true
-        val verifyMinecraftAccount = ConfigFile.getValueAsBoolean("whitelistFeature.settings.checkMinecraftAccount") ?: true
+        val verifyMinecraftAccount =
+            ConfigFile.getValueAsBoolean("whitelistFeature.settings.checkMinecraftAccount") ?: true
 
-        class InvalidAccountException : Exception("Invalid Minecraft account")
-        class AlreadyWhitelistedException : Exception("Account is already whitelisted")
+        class InvalidAccountException: Exception("Invalid Minecraft account")
+        class AlreadyWhitelistedException: Exception("Account is already whitelisted")
 
         /**
          * Cache for account replacements.
          * Maps Discord user IDs to new Minecraft usernames.
          */
         val accountReplaceCache = mutableMapOf<String, String>()
+
+        class AlreadyInCacheException: Exception("User is already in the cache")
+        class NoCacheException: Exception("No cache found for the user")
+
+        /**
+         * Adds a user to the account replacement cache.
+         * @param userID The Discord user ID to add.
+         * @param minecraftName The new Minecraft username to associate with the user ID.
+         * @param canStartWith If true, checks if any key in the cache starts with the user ID.
+         *                     If false, checks for an exact match.
+         * @throws AlreadyInCacheException if the user ID is already in the cache.
+         */
+        fun addToCache(userID: String, minecraftName: String, canStartWith: Boolean = true) {
+            if (checkInCache(userID, canStartWith)) {
+                throw AlreadyInCacheException()
+            }
+            accountReplaceCache[userID] = minecraftName
+        }
+
+        /**
+         * Removes a user from the account replacement cache.
+         * @param userID The Discord user ID to remove.
+         * @param canStartWith If true, checks if any key in the cache starts with the user ID.
+         *                     If false, checks for an exact match.
+         * @throws NoCacheException if the user ID is not found in the cache.
+         */
+        fun removeFromCache(userID: String, canStartWith: Boolean = false) {
+            if (! checkInCache(userID, canStartWith)) {
+                throw NoCacheException()
+            }
+            accountReplaceCache.remove(userID)
+        }
+
+        /**
+         * Retrieves the cached Minecraft username for a given Discord user ID.
+         * @param userID The Discord user ID to retrieve the cached Minecraft username for.
+         * @param canStartWith If true, checks if any key in the cache starts with the user ID.
+         *                    If false, checks for an exact match.
+         * @return The cached Minecraft username, or null if not found.
+         * @throws NoCacheException if the user ID is not found in the cache.
+         */
+        fun getCacheEntry(userID: String, canStartWith: Boolean = false): String? {
+            if (! checkInCache(userID, canStartWith)) {
+                throw NoCacheException()
+            }
+
+            return if (canStartWith) {
+                accountReplaceCache.keys.firstOrNull { it.startsWith(userID) }?.let { accountReplaceCache[it] }
+            } else {
+                accountReplaceCache[userID]
+            }
+        }
+
+        /**
+         * Checks if a user is in the account replacement cache.
+         * @param userID The Discord user ID to check.
+         * @param canStartWith If true, checks if any key in the cache starts with the user ID.
+         *                     If false, checks for an exact match.
+         * @return true if the user ID is in the cache, false otherwise.
+         */
+        fun checkInCache(userID: String, canStartWith: Boolean = false): Boolean {
+            return if (canStartWith) {
+                accountReplaceCache.keys.any { it.startsWith(userID) }
+            } else {
+                accountReplaceCache.containsKey(userID)
+            }
+        }
+
+        /**
+         * Retrieves a map of cached Minecraft usernames for a given Discord user ID.
+         * @param userID The Discord user ID to retrieve the cached Minecraft usernames for.
+         * @param canStartWith If true, checks if any key in the cache starts with the user ID.
+         *                     If false, checks for an exact match.
+         * @return A map of cached Minecraft usernames associated with the user ID.
+         * @throws NoCacheException if the user ID is not found in the cache.
+         */
+        fun getCacheEntryAsMap(userID: String, canStartWith: Boolean = false): Map<String, String> {
+            if (! checkInCache(userID, canStartWith)) {
+                throw NoCacheException()
+            }
+
+            return if (canStartWith) {
+                accountReplaceCache.filterKeys { it.startsWith(userID) }
+            } else {
+                accountReplaceCache.filterKeys { it == userID }
+            }
+        }
     }
 
     override fun onMessageReceived(e: MessageReceivedEvent) {
@@ -52,7 +140,31 @@ class WhitelistManage: ListenerAdapter() {
                 if (WhitelistLogic.containsEntry(userID)) {
                     val oldName = WhitelistLogic.getEntryByDiscordID(userID)?.minecraftName ?: "Unknown"
 
-                    accountReplaceCache[userID] = name
+                    try {
+                        addToCache(userID, name)
+                    } catch (_: AlreadyInCacheException) {
+                        channel.sendMessageComponents(
+                            WhitelistComponents().accountErrorContainer(
+                                LanguageHandler.getRawMessage(
+                                    RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_ALREADY_CACHED.key,
+                                    params = mapOf(
+                                        "user" to e.author.effectiveName
+                                    )
+                                )
+                            )
+                        ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.SECONDS)
+
+                        Logger.info(
+                            LanguageHandler.getMessage(
+                                RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_ALREADY_CACHED.key,
+                                mapOf(
+                                    "user" to e.author.effectiveName
+                                )
+                            )
+                        )
+
+                        return@launchTask
+                    }
 
                     channel.sendMessageComponents(
                         WhitelistComponents().accountChangePromptContainer(
@@ -111,7 +223,7 @@ class WhitelistManage: ListenerAdapter() {
                         else -> {
                             channel.sendMessageComponents(
                                 WhitelistComponents().accountErrorContainer(ex.message ?: "-")
-                            ).useComponentsV2().complete().delete().queueAfter(15, TimeUnit.SECONDS)
+                            ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.SECONDS)
 
                             Logger.warn(
                                 LanguageHandler.getMessage(

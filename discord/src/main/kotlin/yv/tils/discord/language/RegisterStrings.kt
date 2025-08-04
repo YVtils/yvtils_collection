@@ -193,24 +193,24 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         registerNewString(
             LangStrings.COMPONENT_WHITELIST_ACCOUNT_CHANGE_PROMPT_TITLE,
             mapOf(
-                FileTypes.EN to "Are you sure you want to change your account?",
-                FileTypes.DE to "Bist du sicher, dass du deinen Account ändern möchtest?",
+                FileTypes.EN to "Are you sure you want to change the account?",
+                FileTypes.DE to "Bist du sicher, dass du den Account ändern möchtest?",
             )
         )
 
         registerNewString(
             LangStrings.COMPONENT_WHITELIST_ACCOUNT_CHANGE_PROMPT_DESCRIPTION,
             mapOf(
-                FileTypes.EN to "You will replace your current whitelisted account (<oldName>) with the new one (<newName>).",
-                FileTypes.DE to "Du wirst deinen aktuellen Whitelist-Account (<oldName>) mit dem neuen Account (<newName>) ersetzen.",
+                FileTypes.EN to "You will replace the current whitelisted account (<oldName>) with the new one (<newName>).",
+                FileTypes.DE to "Du wirst den aktuellen Whitelist-Account (<oldName>) mit dem neuen Account (<newName>) ersetzen.",
             )
         )
 
         registerNewString(
             LangStrings.COMPONENT_WHITELIST_ACCOUNT_CHANGE_TITLE,
             mapOf(
-                FileTypes.EN to "Your account has been successfully changed!",
-                FileTypes.DE to "Dein Account wurde erfolgreich geändert!",
+                FileTypes.EN to "The account has been successfully changed!",
+                FileTypes.DE to "Der Account wurde erfolgreich geändert!",
             )
         )
 
@@ -351,10 +351,18 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
-            LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NO_CACHE,
+            LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_NOT_CACHED,
             mapOf(
                 FileTypes.EN to "No account found in cache for user <user> during account replacement.",
                 FileTypes.DE to "Es konnte kein Account im Cache für den Benutzer <user> während dem ersetzen des Accounts gefunden werden.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_ALREADY_CACHED,
+            mapOf(
+                FileTypes.EN to "There is already an account cached for user <user>. Please finish or cancel the current process before starting a new one.",
+                FileTypes.DE to "Es ist bereits ein Account für den Benutzer <user> im Cache gespeichert. Bitte beende oder breche den aktuellen Prozess ab, bevor du einen neuen startest.",
             )
         )
 
@@ -442,7 +450,9 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         CONSOLE_WHITELIST_ACCOUNT_INVALID("discord.console.whitelist.account.invalid"),
         CONSOLE_WHITELIST_ACCOUNT_ERROR("discord.console.whitelist.account.error"),
 
-        ERROR_WHITELIST_ACCOUNT_REPLACE_NO_CACHE("discord.error.whitelist.account.replace.noCache"),
+        ERROR_WHITELIST_ACCOUNT_REPLACE_NOT_CACHED("discord.error.whitelist.account.replace.notCached"),
+        ERROR_WHITELIST_ACCOUNT_REPLACE_ALREADY_CACHED("discord.error.whitelist.account.replace.alreadyCached"),
+
         ERROR_WHITELIST_ACCOUNT_REPLACE_EXCEPTION("discord.error.whitelist.account.replace.exception"),
         ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_DISCORD("discord.error.whitelist.force.remove.noEntry.discord"),
         ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_MINECRAFT("discord.error.whitelist.force.remove.noEntry.minecraft"),
