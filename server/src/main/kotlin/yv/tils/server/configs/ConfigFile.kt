@@ -17,7 +17,7 @@ class ConfigFile {
         }
     }
 
-    private val filePath = "server/config.yml"
+    private val filePath = "/server/config.yml"
 
     fun loadConfig() {
         val file = FileUtils.loadYAMLFile(filePath)
