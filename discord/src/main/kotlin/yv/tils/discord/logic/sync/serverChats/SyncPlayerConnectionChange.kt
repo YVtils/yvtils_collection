@@ -1,6 +1,5 @@
 package yv.tils.discord.logic.sync.serverChats
 
-import yv.tils.utils.logger.Logger
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -8,6 +7,7 @@ import yv.tils.discord.data.Permissions
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.active
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.channel
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.syncJoinLeaveMessages
+import yv.tils.utils.logger.Logger
 
 class SyncPlayerConnectionChange {
     fun syncJoin(e: PlayerJoinEvent) {
@@ -15,7 +15,7 @@ class SyncPlayerConnectionChange {
         if (!syncJoinLeaveMessages) return
         if (! e.player.hasPermission(Permissions.SYNC_JOIN.permission.name)) return
 
-        sendDiscordMessage(e.player, "joined")
+        sendDiscordMessage(e.player, "join")
     }
 
     fun syncQuit(e: PlayerQuitEvent) {
@@ -23,7 +23,7 @@ class SyncPlayerConnectionChange {
         if (!syncJoinLeaveMessages) return
         if (! e.player.hasPermission(Permissions.SYNC_QUIT.permission.name)) return
 
-        sendDiscordMessage(e.player, "left")
+        sendDiscordMessage(e.player, "leave")
     }
 
     private fun sendDiscordMessage(sender: Player, action: String) {

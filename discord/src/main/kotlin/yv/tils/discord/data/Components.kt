@@ -23,12 +23,10 @@ class Components {
     companion object {
         private const val ICON_URL = PlayerUtils.PLAYER_HEAD_API
 
-        const val AUTHOR_NAME = "YVtils"
-        const val AUTHOR_ICON = "https://api.yvtils.net/images/yvtils_logo"
-        const val AUTHOR_LINK = "https://yvtils.net"
         const val FOOTER_TEXT = "YVtils • https://yvtils.net"
         const val FOOTER_TEXT_CUSTOMIZABLE = "YVtils-SMP • %s • https://yvtils.net"
-        const val FOOTER_ICON = "https://api.yvtils.net/images/yvtils_logo"
+        const val FOOTER_ICON =
+            "https://api.yvtils.net/images/yvtils_logo" // TODO: Implement to upload as emoji to discord app and then use in footer
 
         val errorColor = ColorUtils.colorFromHex(Colors.RED.color)
         val warningColor = ColorUtils.colorFromHex(Colors.YELLOW.color)
@@ -109,7 +107,6 @@ class Components {
         if (entry != null) {
             children.add(Separator.createDivider(Separator.Spacing.SMALL))
             children.add(
-                // TODO: Switch from thumbnail to emoji
                 Section.of(
                     Thumbnail.fromUrl(playerIconURL),
                     TextDisplay.of("### Linked Minecraft Account"),

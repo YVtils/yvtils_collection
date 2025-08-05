@@ -303,6 +303,46 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
 
         registerNewString(
+            LangStrings.COMPONENT_SYNC_JOIN_LEAVE_TEXT,
+            mapOf(
+                FileTypes.EN to "<player> has <action> the server.",
+                FileTypes.DE to "<player> hat den Server <action>.",
+            )
+        )
+
+        registerNewString(
+            LangStrings.COMPONENT_SYNC_JOIN_LEAVE_ACTION_JOIN,
+            mapOf(
+                FileTypes.EN to "joined",
+                FileTypes.DE to "betreten",
+            )
+        )
+
+        registerNewString(
+            LangStrings.COMPONENT_SYNC_JOIN_LEAVE_ACTION_LEAVE,
+            mapOf(
+                FileTypes.EN to "left",
+                FileTypes.DE to "verlassen",
+            )
+        )
+
+        registerNewString(
+            LangStrings.COMPONENT_SYNC_ADVANCEMENT_NO_DESCRIPTION,
+            mapOf(
+                FileTypes.EN to "No description available",
+                FileTypes.DE to "Keine Beschreibung verfügbar",
+            )
+        )
+
+        registerNewString(
+            LangStrings.COMPONENT_SYNC_DEATH_TEXT,
+            mapOf(
+                FileTypes.EN to "<player> has died",
+                FileTypes.DE to "<player> ist gestorben",
+            )
+        )
+
+        registerNewString(
             LangStrings.CONSOLE_WHITELIST_ACCOUNT_ADDED,
             mapOf(
                 FileTypes.EN to "Discord Account <discordAccount> has been linked to Minecraft account <minecraftAccount> and added to the whitelist by <user>.",
@@ -442,6 +482,12 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         COMPONENT_ACTION_CANCELLED_TITLE("discord.component.actionCancelled.title"),
         COMPONENT_ACTION_CANCELLED_DESCRIPTION("discord.component.actionCancelled.description"),
         COMPONENT_ACTION_CANCELLED_ACTION_ACCOUNT_REPLACE("discord.component.actionCancelled.action.accountReplace"),
+
+        COMPONENT_SYNC_JOIN_LEAVE_TEXT("discord.component.sync.joinLeave.text"),
+        COMPONENT_SYNC_JOIN_LEAVE_ACTION_JOIN("discord.component.sync.joinLeave.action.join"),
+        COMPONENT_SYNC_JOIN_LEAVE_ACTION_LEAVE("discord.component.sync.joinLeave.action.leave"),
+        COMPONENT_SYNC_ADVANCEMENT_NO_DESCRIPTION("discord.component.sync.advancement.noDescription"),
+        COMPONENT_SYNC_DEATH_TEXT("discord.component.sync.death.text"),
 
         CONSOLE_WHITELIST_ACCOUNT_ADDED("discord.console.whitelist.account.added"),
         CONSOLE_WHITELIST_ACCOUNT_REMOVED("discord.console.whitelist.account.removed"),
