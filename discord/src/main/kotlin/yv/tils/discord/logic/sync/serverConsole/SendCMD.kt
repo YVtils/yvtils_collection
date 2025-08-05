@@ -1,10 +1,10 @@
 package yv.tils.discord.logic.sync.serverConsole
 
-import colors.Colors
-import coroutine.CoroutineHandler
-import data.Data
-import logger.Logger
-import message.MessageUtils
+import yv.tils.utils.colors.Colors
+import yv.tils.utils.coroutine.CoroutineHandler
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
+import yv.tils.utils.message.MessageUtils
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent

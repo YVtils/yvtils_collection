@@ -1,15 +1,12 @@
 package yv.tils.essentials.commands.register
 
-import data.Data
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
-import dev.jorel.commandapi.kotlindsl.anyExecutor
-import dev.jorel.commandapi.kotlindsl.commandTree
-import dev.jorel.commandapi.kotlindsl.playerArgument
-import dev.jorel.commandapi.kotlindsl.stringArgument
-import language.LanguageHandler
+import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
+import yv.tils.config.language.LanguageHandler
 import yv.tils.essentials.commands.handler.GamemodeHandler
+import yv.tils.utils.data.Data
 
 // TODO: Switch to multiLiteralArgument
 class GamemodeCMD {

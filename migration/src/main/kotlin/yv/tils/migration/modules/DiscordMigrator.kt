@@ -1,8 +1,8 @@
 package yv.tils.migration.modules
 
-import files.FileUtils
-import logger.Logger
+import yv.tils.config.files.FileUtils
 import yv.tils.migration.base.BaseMigrator
+import yv.tils.utils.logger.Logger
 import java.io.File
 
 /**

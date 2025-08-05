@@ -1,6 +1,6 @@
 package yv.tils.migration.modules
 
-import logger.Logger
+import yv.tils.utils.logger.Logger
 import yv.tils.migration.base.BaseMigrator
 
 /**

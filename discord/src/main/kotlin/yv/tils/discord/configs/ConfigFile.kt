@@ -1,7 +1,7 @@
 package yv.tils.discord.configs
 
-import files.FileUtils
-import logger.Logger
+import yv.tils.config.files.FileUtils
+import yv.tils.utils.logger.Logger
 
 // TODO: Add option to allow multiple whitelist channels
 class ConfigFile {
@@ -46,8 +46,6 @@ class ConfigFile {
             content["botSettings.onlineStatus"] = "online"
             content["botSettings.activity"] = "none"
             content["botSettings.activityMessage"] = "Minecraft"
-            content["embedSettings.author"] = "YVtils SMP"
-            content["embedSettings.authorIconURL"] = "URL"
 
             content["general.settings.ignoreBotMessages"] = true
 

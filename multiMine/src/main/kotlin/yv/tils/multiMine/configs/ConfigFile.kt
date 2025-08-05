@@ -1,9 +1,9 @@
 package yv.tils.multiMine.configs
 
-import coroutine.CoroutineHandler
-import files.FileUtils
-import logger.Logger
 import org.bukkit.Material
+import yv.tils.config.files.FileUtils
+import yv.tils.utils.coroutine.CoroutineHandler
+import yv.tils.utils.logger.Logger
 
 class ConfigFile {
     companion object {

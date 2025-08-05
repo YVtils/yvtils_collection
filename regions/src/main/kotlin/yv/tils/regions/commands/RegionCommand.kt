@@ -1,6 +1,5 @@
 package yv.tils.regions.commands
 
-import coroutine.CoroutineHandler
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.LocationType
@@ -10,14 +9,9 @@ import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.common.other.AsyncActionAnnounce
-import yv.tils.regions.data.Flag
-import yv.tils.regions.data.Permissions
-import yv.tils.regions.data.RegionManager
-import yv.tils.regions.data.RegionRoles
-import yv.tils.regions.logic.FlagLogic
-import yv.tils.regions.logic.InformationalLogic
-import yv.tils.regions.logic.MemberLogic
-import yv.tils.regions.logic.RegionLogic
+import yv.tils.regions.data.*
+import yv.tils.regions.logic.*
+import yv.tils.utils.coroutine.CoroutineHandler
 import java.util.concurrent.CompletableFuture
 
 @Suppress("UNCHECKED_CAST")
@@ -158,12 +152,12 @@ class RegionCommand {
                 withPermission(Permissions.REGION_LIST_ROLE.permission)
                 withPermission(CommandPermission.NONE)
 
-                entitySelectorArgumentManyPlayers("player", optional = true) {
+                entitySelectorArgumentManyPlayers("yv/tils/player", optional = true) {
                     withPermission(Permissions.REGION_LIST_OTHER.permission)
                     withPermission(CommandPermission.OP)
 
                     anyExecutor { sender, args ->
-                        val player = args["player"] as Collection<*>?
+                        val player = args["yv/tils/player"] as Collection<*>?
                         val role = args["role"] as String?
 
                         CoroutineHandler.launchTask(
@@ -202,7 +196,7 @@ class RegionCommand {
                         getRegions(sender.sender, RegionRoles.MODERATOR)
                     })
 
-                    asyncOfflinePlayerArgument("player", false) {
+                    asyncOfflinePlayerArgument("yv/tils/player", false) {
                         withPermission(Permissions.REGION_MEMBER_ADD.permission)
                         withPermission(CommandPermission.OP)
 
@@ -214,7 +208,7 @@ class RegionCommand {
 
                             anyExecutor { sender, args ->
                                 val regionName = args["regionName"] as String
-                                val player = args["player"] as CompletableFuture<OfflinePlayer>
+                                val player = args["yv/tils/player"] as CompletableFuture<OfflinePlayer>
                                 val role = args["role"] as String?
 
                                 AsyncActionAnnounce.announceAction(sender)
@@ -260,13 +254,13 @@ class RegionCommand {
                         getRegions(sender.sender, RegionRoles.MODERATOR)
                     })
 
-                    asyncOfflinePlayerArgument("player", false) {
+                    asyncOfflinePlayerArgument("yv/tils/player", false) {
                         withPermission(Permissions.REGION_MEMBER_REMOVE.permission)
                         withPermission(CommandPermission.OP)
 
                         anyExecutor { sender, args ->
                             val regionName = args["regionName"] as String
-                            val player = args["player"] as CompletableFuture<OfflinePlayer>
+                            val player = args["yv/tils/player"] as CompletableFuture<OfflinePlayer>
 
                             AsyncActionAnnounce.announceAction(sender)
 
@@ -310,7 +304,7 @@ class RegionCommand {
                         getRegions(sender.sender, RegionRoles.MODERATOR)
                     })
 
-                    asyncOfflinePlayerArgument("player", false) {
+                    asyncOfflinePlayerArgument("yv/tils/player", false) {
                         withPermission(Permissions.REGION_MEMBER_ROLE.permission)
                         withPermission(CommandPermission.OP)
 
@@ -322,7 +316,7 @@ class RegionCommand {
 
                             anyExecutor { sender, args ->
                                 val regionName = args["regionName"] as String
-                                val player = args["player"] as CompletableFuture<OfflinePlayer>
+                                val player = args["yv/tils/player"] as CompletableFuture<OfflinePlayer>
                                 val role = args["role"] as String?
 
                                 AsyncActionAnnounce.announceAction(sender)

@@ -1,6 +1,8 @@
 package yv.tils.migration
 
-import data.Data
+import yv.tils.config.files.FileUtils
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 
 /**
  * MigrationYVtils is a module for YVtils that handles the migration of data from previous versions.
@@ -35,12 +37,12 @@ class MigrationYVtils: Data.YVtilsModule {
     private fun enableEarlyDebugMode() {
         try {
             // Try to read debug settings directly from config file
-            val configFile = files.FileUtils.loadYAMLFile("/config.yml")
+            val configFile = FileUtils.loadYAMLFile("/config.yml")
             val debugActive = configFile.content.getBoolean("debug.active")
             val debugLevel = configFile.content.getInt("debug.level")
 
             if (debugActive) {
-                logger.Logger.setDebugMode(debugActive, debugLevel)
+                Logger.setDebugMode(debugActive, debugLevel)
             }
         } catch (_: Exception) {
         }

@@ -1,16 +1,16 @@
 package yv.tils.multiMine.logic
 
-import data.Data
-import language.LanguageHandler
-import logger.Logger
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
+import yv.tils.config.language.LanguageHandler
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.configs.MultiMineConfig
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 import java.util.*
 
 // TODO: Add fast Leave decay

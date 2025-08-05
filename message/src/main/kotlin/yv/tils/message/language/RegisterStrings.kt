@@ -1,8 +1,8 @@
 package yv.tils.message.language
 
-import colors.Colors
-import language.BuildLanguage
-import language.FileTypes
+import yv.tils.config.language.BuildLanguage
+import yv.tils.config.language.FileTypes
+import yv.tils.utils.colors.Colors
 
 class RegisterStrings {
     fun registerStrings() {

@@ -1,7 +1,7 @@
 package yv.tils.migration.modules
 
-import logger.Logger
 import yv.tils.migration.base.BaseMigrator
+import yv.tils.utils.logger.Logger
 
 /**
  * MultiMine module configuration migration

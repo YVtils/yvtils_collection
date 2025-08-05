@@ -1,10 +1,10 @@
 package yv.tils.essentials.commands.handler
 
-import data.Data
-import language.LanguageHandler
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
+import yv.tils.config.language.LanguageHandler
+import yv.tils.utils.data.Data
 import java.util.*
 
 class GodHandler {

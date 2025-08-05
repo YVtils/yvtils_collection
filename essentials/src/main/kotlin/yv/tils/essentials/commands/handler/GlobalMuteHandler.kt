@@ -1,12 +1,12 @@
 package yv.tils.essentials.commands.handler
 
-import data.Data
 import dev.jorel.commandapi.executors.CommandArguments
 import io.papermc.paper.event.player.AsyncChatEvent
-import language.LanguageHandler
-import logger.Logger
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
+import yv.tils.config.language.LanguageHandler
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 
 class GlobalMuteHandler {
     companion object {

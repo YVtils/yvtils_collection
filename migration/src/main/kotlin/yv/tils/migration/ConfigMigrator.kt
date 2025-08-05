@@ -1,7 +1,7 @@
 package yv.tils.migration
 
-import logger.Logger
 import yv.tils.migration.modules.DiscordMigrator
+import yv.tils.utils.logger.Logger
 
 /**
  * ConfigMigrator - Universal Config Migration Tool

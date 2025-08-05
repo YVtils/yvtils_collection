@@ -1,9 +1,7 @@
 package yv.tils.regions.data
 
 import kotlinx.serialization.Serializable
-import org.bukkit.Location
-import org.bukkit.OfflinePlayer
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.entity.Player
 import yv.tils.regions.configs.PlayerSaveFile
 import yv.tils.regions.configs.RegionSaveFile
@@ -24,7 +22,7 @@ class RegionManager {
             val x2 = loc2.blockX
             val z2 = loc2.blockZ
 
-            val rUUID = data.UUID.generateUUID()
+            val rUUID = yv.tils.utils.data.UUID.generateUUID()
 
             val defaultGlobalFlags: MutableMap<Flag, Boolean> = mutableMapOf()
             val defaultRoleBasedFlags: MutableMap<Flag, Int> = mutableMapOf()

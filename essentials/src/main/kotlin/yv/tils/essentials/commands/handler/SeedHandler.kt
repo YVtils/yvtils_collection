@@ -1,8 +1,8 @@
 package yv.tils.essentials.commands.handler
 
-import data.Data
-import language.LanguageHandler
-import message.MessageUtils
+import yv.tils.utils.data.Data
+import yv.tils.config.language.LanguageHandler
+import yv.tils.utils.message.MessageUtils
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 

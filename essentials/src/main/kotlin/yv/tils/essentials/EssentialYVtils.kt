@@ -1,17 +1,22 @@
 package yv.tils.essentials
 
-import data.Data
 import dev.jorel.commandapi.CommandAPI
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import yv.tils.essentials.commands.register.*
 import yv.tils.essentials.language.RegisterStrings
 import yv.tils.essentials.listeners.*
+import yv.tils.utils.data.Data
 
 class EssentialYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULE_NAME = "essentials"
-        const val MODULE_VERSION = "1.0.0"
+        val MODULE = Data.YVtilsModuleData(
+            "essentials",
+            "1.0.0",
+            "Essentials module for YVtils",
+            "YVtils",
+            "https://docs.yvtils.net/essentials/"
+        )
     }
 
     override fun onLoad() {
@@ -19,7 +24,7 @@ class EssentialYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
+        Data.addModule(MODULE)
 
         unregisterCommands()
 

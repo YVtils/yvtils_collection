@@ -1,12 +1,12 @@
 package yv.tils.server.motd
 
 import com.destroystokyo.paper.event.server.PaperServerListPingEvent
-import message.MessageUtils
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-import player.PlayerUtils
-import server.VersionUtils
 import yv.tils.server.configs.ConfigFile
+import yv.tils.utils.message.MessageUtils
+import yv.tils.utils.player.PlayerUtils
+import yv.tils.utils.server.VersionUtils
 import java.text.SimpleDateFormat
 import java.util.*
 

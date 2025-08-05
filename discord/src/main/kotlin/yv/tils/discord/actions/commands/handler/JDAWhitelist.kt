@@ -1,22 +1,21 @@
 package yv.tils.discord.actions.commands.handler
 
-import coroutine.CoroutineHandler
-import language.LanguageHandler
-import logger.Logger
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.*
-import net.dv8tion.jda.api.interactions.components.ActionRow
+import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.*
 import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.AlreadyWhitelistedException
 import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.InvalidAccountException
-import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.accountReplaceCache
 import yv.tils.discord.utils.DiscordUser
+import yv.tils.utils.coroutine.CoroutineHandler
+import yv.tils.utils.logger.Logger
+import java.util.concurrent.TimeUnit
 
 class JDAWhitelist {
     companion object {
@@ -35,17 +34,39 @@ class JDAWhitelist {
             task = {
                 if (WhitelistLogic.containsEntry(discordUserID)) {
                     val oldName = WhitelistLogic.getEntryByDiscordID(discordUserID)?.minecraftName ?: "Unknown"
+                    val sender = e.user
 
-                    accountReplaceCache[discordUserID] = minecraftName
+                    try {
+                        WhitelistManage.addToCache("${sender.id}_${discordUserID}", minecraftName)
+                    } catch (_: Exception) {
+                        e.channel.sendMessageComponents(
+                            WhitelistComponents().accountErrorContainer(
+                                LanguageHandler.getRawMessage(
+                                    RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_ALREADY_CACHED.key,
+                                    params = mapOf(
+                                        "user" to e.user.effectiveName
+                                    )
+                                )
+                            )
+                        ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
 
-                    hook.sendMessageEmbeds(
-                        WhitelistEmbeds().accountChangePromptEmbed(
+                        Logger.warn(
+                            LanguageHandler.getMessage(
+                                RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_ALREADY_CACHED.key,
+                                mapOf(
+                                    "user" to e.user.effectiveName
+                                )
+                            )
+                        )
+                        return@launchTask
+                    }
+
+                    hook.sendMessageComponents(
+                        WhitelistComponents().accountChangePromptContainer(
                             oldName = oldName,
                             newName = minecraftName
-                        ).build()
-                    ).addActionRow(
-                        WhitelistEmbeds().accountChangeActionRow()
-                    ).setEphemeral(true).queue()
+                        )
+                    ).useComponentsV2().setEphemeral(true).queue()
 
                     return@launchTask
                 }
@@ -53,15 +74,15 @@ class JDAWhitelist {
                 try {
                     WhitelistManage().linkAccount(minecraftName, discordUserID, guildID, e.user)
 
-                    hook.sendMessageEmbeds(
-                        WhitelistEmbeds().accountAddEmbed(minecraftName).build()
-                    ).setEphemeral(true).queue()
+                    hook.sendMessageComponents(
+                        WhitelistComponents().accountAddContainer(minecraftName)
+                    ).useComponentsV2().setEphemeral(true).queue()
                 } catch (ex: Exception) {
                     when (ex) {
                         is AlreadyWhitelistedException -> {
-                            hook.sendMessageEmbeds(
-                                WhitelistEmbeds().accountAlreadyListedEmbed(minecraftName).build()
-                            ).setEphemeral(true).queue()
+                            hook.sendMessageComponents(
+                                WhitelistComponents().accountAlreadyListedContainer(minecraftName)
+                            ).useComponentsV2().setEphemeral(true).queue()
 
                             Logger.info(
                                 LanguageHandler.getMessage(
@@ -76,9 +97,9 @@ class JDAWhitelist {
                             return@launchTask
                         }
                         is InvalidAccountException -> {
-                            hook.sendMessageEmbeds(
-                                WhitelistEmbeds().invalidAccountEmbed(minecraftName).build()
-                            ).setEphemeral(true).queue()
+                            hook.sendMessageComponents(
+                                WhitelistComponents().invalidAccountContainer(minecraftName)
+                            ).useComponentsV2().setEphemeral(true).queue()
 
                             Logger.info(
                                 LanguageHandler.getMessage(
@@ -93,9 +114,9 @@ class JDAWhitelist {
                             return@launchTask
                         }
                         else -> {
-                            hook.sendMessageEmbeds(
-                                WhitelistEmbeds().accountErrorEmbed(ex.message ?: "-").build()
-                            ).setEphemeral(true).queue()
+                            e.channel.sendMessageComponents(
+                                WhitelistComponents().accountErrorContainer(ex.message ?: "-")
+                            ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
 
                             Logger.warn(
                                 LanguageHandler.getMessage(
@@ -130,7 +151,7 @@ class JDAWhitelist {
 
         CoroutineHandler.launchTask(
             task = {
-                val entries = WhitelistLogic.getEntriesBySite(site)
+                WhitelistLogic.getEntriesBySite(site)
 
                 if (discordUser != null || minecraftName != null) {
                     var discordEntry: WhitelistEntry? = null
@@ -140,16 +161,16 @@ class JDAWhitelist {
                         val entry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
                         if (entry == null) {
                             if (minecraftName == null) {
-                                hook.sendMessageEmbeds(
-                                    WhitelistEmbeds().accountErrorEmbed(
+                                e.channel.sendMessageComponents(
+                                    WhitelistComponents().accountErrorContainer(
                                         LanguageHandler.getRawMessage(
                                             RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_DISCORD.key,
                                             params = mapOf(
                                                 "discordUser" to discordUser.name
                                             )
                                         )
-                                    ).build()
-                                ).queue()
+                                    )
+                                ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
                                 return@launchTask
                             }
                             discordEntry = null
@@ -162,16 +183,16 @@ class JDAWhitelist {
                         val entry = WhitelistLogic.getEntryByMinecraftName(minecraftName)
                         if (entry == null) {
                             if (discordEntry == null) {
-                                hook.sendMessageEmbeds(
-                                    WhitelistEmbeds().accountErrorEmbed(
+                                e.channel.sendMessageComponents(
+                                    WhitelistComponents().accountErrorContainer(
                                         LanguageHandler.getRawMessage(
                                             RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_MINECRAFT.key,
                                             params = mapOf(
                                                 "minecraftName" to minecraftName
                                             )
                                         )
-                                    ).build()
-                                ).queue()
+                                    )
+                                ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
                                 return@launchTask
                             }
                             minecraftEntry = null
@@ -181,8 +202,8 @@ class JDAWhitelist {
                     }
 
                     if (discordEntry != minecraftEntry && discordEntry != null && minecraftEntry != null) {
-                        hook.sendMessageEmbeds(
-                            WhitelistEmbeds().accountErrorEmbed(
+                        e.channel.sendMessageComponents(
+                            WhitelistComponents().accountErrorContainer(
                                 LanguageHandler.getRawMessage(
                                     RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_ENTRIES_NOT_EQUAL.key,
                                     params = mapOf(
@@ -190,36 +211,25 @@ class JDAWhitelist {
                                         "minecraftEntry" to minecraftEntry.toString()
                                     )
                                 )
-                            ).build()
-                        ).queue()
+                            )
+                        ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
 
                         return@launchTask
                     }
 
                     val discordUserID = discordEntry?.discordUserID ?: minecraftEntry?.discordUserID ?: return@launchTask
-
                     val oldEntry = WhitelistManage().unlinkAccount(discordUserID, guildID, user)
 
-                    val embed = WhitelistEmbeds().forceRemoveEmbed(site, listOf(oldEntry))
-                    hook.sendMessageEmbeds(embed.build())
-                        .setComponents(
-                            ActionRow.of(WhitelistEmbeds().forceRemoveActionRowDropdown(entries).build()),
-                            ActionRow.of(WhitelistEmbeds().forceRemoveActionRowButtons(site))
-                        )
-                        .setEphemeral(true)
-                        .queue()
+                    hook.sendMessageComponents(
+                        WhitelistComponents().forceRemoveContainer(site = site, listOf(oldEntry))
+                    ).useComponentsV2().setEphemeral(true).queue()
 
                     return@launchTask
                 }
 
-                val embed = WhitelistEmbeds().forceRemoveEmbed(site)
-                hook.sendMessageEmbeds(embed.build())
-                    .setComponents(
-                        ActionRow.of(WhitelistEmbeds().forceRemoveActionRowDropdown(entries).build()),
-                        ActionRow.of(WhitelistEmbeds().forceRemoveActionRowButtons(site))
-                    )
-                    .setEphemeral(true)
-                    .queue()
+                hook.sendMessageComponents(
+                    WhitelistComponents().forceRemoveContainer(site = site)
+                ).useComponentsV2().setEphemeral(true).queue()
             },
             isOnce = true
         )
@@ -246,8 +256,8 @@ class JDAWhitelist {
                     val discordEntry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
 
                     if (discordEntry != minecraftEntry && discordEntry != null && minecraftEntry != null) {
-                        hook.sendMessageEmbeds(
-                            WhitelistEmbeds().accountErrorEmbed(
+                        e.channel.sendMessageComponents(
+                            WhitelistComponents().accountErrorContainer(
                                 LanguageHandler.getRawMessage(
                                     RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_ENTRIES_NOT_EQUAL.key,
                                     params = mapOf(
@@ -255,8 +265,8 @@ class JDAWhitelist {
                                         "minecraftEntry" to minecraftEntry.toString()
                                     )
                                 )
-                            ).build()
-                        ).setEphemeral(true).queue()
+                            )
+                        ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
 
 
                         return@launchTask
@@ -269,19 +279,19 @@ class JDAWhitelist {
                     entry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
                 }
 
+                // TODO: Change container, if entry is null some container should be sent, which says, that the account is not whitelisted instead of an invalid account container
                 if (entry == null) {
-                    hook.sendMessageEmbeds(
-                        WhitelistEmbeds().invalidAccountEmbed(
+                    hook.sendMessageComponents(
+                        WhitelistComponents().invalidAccountContainer(
                             minecraftName ?: discordUser?.name ?: "Unknown"
-                        ).build()
-                    ).setEphemeral(true).queue()
+                        )
+                    ).useComponentsV2().setEphemeral(true).queue()
                     return@launchTask
                 }
 
-                val embed = WhitelistEmbeds().checkEmbed(entry)
-                hook.sendMessageEmbeds(embed.build())
-                    .setEphemeral(true)
-                    .queue()
+                hook.sendMessageComponents(
+                    WhitelistComponents().checkContainer(entry)
+                ).useComponentsV2().setEphemeral(true).queue()
             },
             isOnce = true
         )

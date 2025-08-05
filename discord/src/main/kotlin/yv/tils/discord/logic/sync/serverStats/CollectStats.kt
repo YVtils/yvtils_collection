@@ -1,12 +1,12 @@
 package yv.tils.discord.logic.sync.serverStats
 
-import coroutine.CoroutineHandler
-import logger.Logger
-import player.PlayerUtils
-import server.ServerUtils
-import server.VersionUtils
-import time.TimeUtils
 import yv.tils.discord.configs.ConfigFile
+import yv.tils.utils.coroutine.CoroutineHandler
+import yv.tils.utils.logger.Logger
+import yv.tils.utils.player.PlayerUtils
+import yv.tils.utils.server.ServerUtils
+import yv.tils.utils.server.VersionUtils
+import yv.tils.utils.time.TimeUtils
 
 class CollectStats {
     companion object {

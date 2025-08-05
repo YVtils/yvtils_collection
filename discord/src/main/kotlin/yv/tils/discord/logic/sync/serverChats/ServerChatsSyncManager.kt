@@ -1,6 +1,6 @@
 package yv.tils.discord.logic.sync.serverChats
 
-import logger.Logger
+import yv.tils.utils.logger.Logger
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import yv.tils.discord.configs.ConfigFile

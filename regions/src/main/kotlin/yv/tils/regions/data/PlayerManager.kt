@@ -2,9 +2,9 @@ package yv.tils.regions.data
 
 import kotlinx.serialization.Serializable
 import org.bukkit.OfflinePlayer
-import player.PlayerUtils
 import yv.tils.regions.configs.PlayerSaveFile
 import yv.tils.regions.data.RegionManager.Companion.regions
+import yv.tils.utils.player.PlayerUtils
 import java.util.*
 
 class PlayerManager {

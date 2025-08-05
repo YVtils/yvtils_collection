@@ -1,17 +1,22 @@
 package yv.tils.message
 
-import data.Data
 import dev.jorel.commandapi.CommandAPI
 import yv.tils.message.commands.MSGCommand
 import yv.tils.message.commands.ReplyCommand
 import yv.tils.message.language.RegisterStrings
 import yv.tils.message.listeners.PlayerQuit
 import yv.tils.message.logic.MessageHandler
+import yv.tils.utils.data.Data
 
 class MessageYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULE_NAME = "message"
-        const val MODULE_VERSION = "1.0.0"
+        val MODULE = Data.YVtilsModuleData(
+            "message",
+            "1.0.0",
+            "Message module for YVtils",
+            "YVtils",
+            "https://docs.yvtils.net/message/"
+        )
     }
 
     override fun onLoad() {
@@ -19,7 +24,7 @@ class MessageYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
+        Data.addModule(MODULE)
 
         unregisterCommands()
 

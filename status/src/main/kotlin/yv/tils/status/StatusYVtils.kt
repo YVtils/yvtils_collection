@@ -1,17 +1,22 @@
 package yv.tils.status
 
-import data.Data
 import yv.tils.status.commands.StatusCommand
 import yv.tils.status.configs.ConfigFile
 import yv.tils.status.configs.SaveFile
 import yv.tils.status.language.RegisterStrings
 import yv.tils.status.listeners.PlayerJoin
 import yv.tils.status.listeners.PlayerQuit
+import yv.tils.utils.data.Data
 
 class StatusYVtils : Data.YVtilsModule {
     companion object {
-        const val MODULE_NAME = "status"
-        const val MODULE_VERSION = "1.0.0"
+        val MODULE = Data.YVtilsModuleData(
+            "status",
+            "1.0.0",
+            "Status module for YVtils",
+            "YVtils",
+            "https://docs.yvtils.net/status/"
+        )
     }
 
     override fun onLoad() {
@@ -21,7 +26,7 @@ class StatusYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule("$MODULE_NAME v$MODULE_VERSION")
+        Data.addModule(MODULE)
 
         registerCommands()
         registerListeners()

@@ -1,15 +1,13 @@
 package yv.tils.regions.logic
 
-import language.LanguageHandler
-import logger.Logger
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
-import player.PlayerUtils
+import yv.tils.config.language.LanguageHandler
 import yv.tils.regions.configs.ConfigFile
-import yv.tils.regions.data.PlayerManager
-import yv.tils.regions.data.RegionManager
-import yv.tils.regions.data.RegionRoles
+import yv.tils.regions.data.*
 import yv.tils.regions.language.LangStrings
+import yv.tils.utils.logger.Logger
+import yv.tils.utils.player.PlayerUtils
 import java.util.*
 
 class MemberLogic {
@@ -25,7 +23,7 @@ class MemberLogic {
                         sender,
                         mapOf<String, Any>(
                             "region" to region,
-                            "player" to (player.name ?: "-"),
+                            "yv/tils/player" to (player.name ?: "-"),
                         )
                     )
                 )
@@ -69,7 +67,7 @@ class MemberLogic {
                         sender,
                         mapOf(
                             "region" to regionData.name,
-                            "player" to (player.name ?: "-"),
+                            "yv/tils/player" to (player.name ?: "-"),
                             "role" to userRole.toString()
                         )
                     )
@@ -81,7 +79,7 @@ class MemberLogic {
                         sender,
                         mapOf(
                             "region" to regionData.name,
-                            "player" to (player.name ?: "-"),
+                            "yv/tils/player" to (player.name ?: "-"),
                         )
                     )
                 )
@@ -98,7 +96,7 @@ class MemberLogic {
                         sender,
                         mapOf(
                             "region" to region,
-                            "player" to (player.name ?: "-"),
+                            "yv/tils/player" to (player.name ?: "-"),
                         )
                     )
                 )
@@ -116,7 +114,7 @@ class MemberLogic {
                         sender,
                         mapOf(
                             "region" to regionData.name,
-                            "player" to (player.name ?: "-")
+                            "yv/tils/player" to (player.name ?: "-")
                         )
                     )
                 )
@@ -127,7 +125,7 @@ class MemberLogic {
                         sender,
                         mapOf(
                             "region" to regionData.name,
-                            "player" to (player.name ?: "-"),
+                            "yv/tils/player" to (player.name ?: "-"),
                         )
                     )
                 )
@@ -145,7 +143,7 @@ class MemberLogic {
                         sender,
                         mapOf(
                             "region" to region,
-                            "player" to (player.name ?: "-"),
+                            "yv/tils/player" to (player.name ?: "-"),
                         )
                     )
                 )
@@ -163,7 +161,7 @@ class MemberLogic {
                         sender,
                         mapOf(
                             "region" to regionData.name,
-                            "player" to (player.name ?: "-"),
+                            "yv/tils/player" to (player.name ?: "-"),
                             "role" to role.toString(),
                         )
                     )
@@ -175,7 +173,7 @@ class MemberLogic {
                         sender,
                         mapOf(
                             "region" to regionData.name,
-                            "player" to (player.name ?: "-"),
+                            "yv/tils/player" to (player.name ?: "-"),
                         )
                     )
                 )

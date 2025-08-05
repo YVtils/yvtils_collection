@@ -1,14 +1,14 @@
 package yv.tils.essentials.commands.handler
 
-import data.Data
-import language.LanguageHandler
-import logger.Logger
 import net.minecraft.world.entity.ai.attributes.Attributes
 import org.bukkit.command.CommandSender
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import yv.tils.config.language.LanguageHandler
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 
 class HealHandler {
     /**

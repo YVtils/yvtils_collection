@@ -1,10 +1,7 @@
 package yv.tils.message.commands
 
 import dev.jorel.commandapi.CommandPermission
-import dev.jorel.commandapi.kotlindsl.anyExecutor
-import dev.jorel.commandapi.kotlindsl.commandTree
-import dev.jorel.commandapi.kotlindsl.greedyStringArgument
-import dev.jorel.commandapi.kotlindsl.playerArgument
+import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
 import yv.tils.message.logic.MessageHandler
 
@@ -13,10 +10,10 @@ class MSGCommand {
         withPermission("yvtils.command.msg")
         withPermission(CommandPermission.NONE)
         withUsage("msg <player> <message>")
-        withAliases("message", "tell", "whisper", "dm", "w")
+        withAliases("yv/tils/message", "tell", "whisper", "dm", "w")
 
-        playerArgument("player") {
-            greedyStringArgument("message") {
+        playerArgument("yv/tils/player") {
+            greedyStringArgument("yv/tils/message") {
                 anyExecutor { sender, args ->
                     val target = args[0] as Player
                     val message = args[1] as String

@@ -1,10 +1,10 @@
 package yv.tils.status.commands
 
-import data.Data
+import yv.tils.utils.data.Data
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
-import language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import org.bukkit.entity.Player
 import yv.tils.status.logic.StatusHandler as handler
 
@@ -43,7 +43,7 @@ class StatusCommand {
         literalArgument("clear", false) {
             withPermission("yvtils.command.status.clear")
             withPermission(CommandPermission.NONE)
-            playerArgument("player", true) {
+            playerArgument("yv/tils/player", true) {
                 withPermission("yvtils.command.status.clear.others")
                 withPermission(CommandPermission.OP)
                 anyExecutor { sender, args ->

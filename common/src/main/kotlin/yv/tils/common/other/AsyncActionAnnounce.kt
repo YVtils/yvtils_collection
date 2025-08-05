@@ -1,8 +1,8 @@
 package yv.tils.common.other
 
-import language.LanguageHandler
 import org.bukkit.command.CommandSender
 import yv.tils.common.language.LangStrings
+import yv.tils.config.language.LanguageHandler
 
 class AsyncActionAnnounce {
     companion object {

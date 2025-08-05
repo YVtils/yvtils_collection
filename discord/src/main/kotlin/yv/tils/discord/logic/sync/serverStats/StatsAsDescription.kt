@@ -1,6 +1,6 @@
 package yv.tils.discord.logic.sync.serverStats
 
-import logger.Logger
+import yv.tils.utils.logger.Logger
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.logic.AppLogic.Companion.jda
 

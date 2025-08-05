@@ -1,11 +1,11 @@
 package yv.tils.discord.logic.sync.serverConsole
 
-import coroutine.CoroutineHandler
-import logger.Logger
 import org.apache.logging.log4j.core.LogEvent
 import org.apache.logging.log4j.core.appender.AbstractAppender
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.logic.AppLogic.Companion.getJDA
+import yv.tils.utils.coroutine.CoroutineHandler
+import yv.tils.utils.logger.Logger
 import java.text.SimpleDateFormat
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean

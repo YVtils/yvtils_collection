@@ -1,12 +1,12 @@
 package yv.tils.essentials.commands.register
 
-import data.Data
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
-import language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import org.bukkit.entity.Player
 import yv.tils.essentials.commands.handler.SpeedHandler
+import yv.tils.utils.data.Data
 
 class SpeedCMD {
     private val speedHandler = SpeedHandler()

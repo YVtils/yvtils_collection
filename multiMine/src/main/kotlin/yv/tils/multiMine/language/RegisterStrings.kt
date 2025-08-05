@@ -1,7 +1,7 @@
 package yv.tils.multiMine.language
 
-import language.BuildLanguage
-import language.FileTypes
+import yv.tils.config.language.BuildLanguage
+import yv.tils.config.language.FileTypes
 
 class RegisterStrings {
     fun registerStrings() {

@@ -1,14 +1,14 @@
 package yv.tils.discord.logic.whitelist
 
-import data.Data
 import kotlinx.serialization.Serializable
-import logger.Logger
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Role
 import org.bukkit.OfflinePlayer
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.configs.SaveFile
 import yv.tils.discord.logic.AppLogic
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 
 class WhitelistLogic {
     companion object {
@@ -105,6 +105,10 @@ class WhitelistLogic {
                 if (player != null && player.isWhitelisted) {
                     Data.instance.server.scheduler.runTask(Data.instance, Runnable {
                         player.isWhitelisted = false
+
+                        if (player.isOnline) {
+                            player.player?.kick()
+                        }
                     })
                 }
 

@@ -1,15 +1,15 @@
 package yv.tils.discord
 
-import data.Data
-import language.LanguageHandler
-import logger.Logger
 import yv.tils.common.permissions.PermissionManager
+import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.actions.commands.JDACommandsRegister
 import yv.tils.discord.configs.*
 import yv.tils.discord.data.PermissionsData
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.listener.*
 import yv.tils.discord.logic.AppLogic
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 
 class DiscordYVtils : Data.YVtilsModule {
     companion object {
