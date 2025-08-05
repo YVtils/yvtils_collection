@@ -3,7 +3,6 @@ package yv.tils.utils.data
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.utils.colors.Colors
-import yv.tils.utils.logger.Logger
 import java.io.File
 
 class Data {
@@ -48,7 +47,6 @@ class Data {
         }
 
         fun removeModule(module: YVtilsModuleData): Boolean {
-            Logger.Companion.dev("Removing module: ${module.name} v${module.version}")
             return loadedYVtilsModules.remove(module)
         }
 

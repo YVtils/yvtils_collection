@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 
 class JDAWhitelist {
     companion object {
-        val cmdPermission = ConfigFile.getValueAsString("command.whitelistCommand.permission") ?: "MANAGE_CHANNEL"
+        val cmdPermission = ConfigFile.getValueAsString("commands.whitelistCommand.permission") ?: "MANAGE_CHANNEL"
     }
 
     private fun handleForceAdd(e: SlashCommandInteractionEvent) {

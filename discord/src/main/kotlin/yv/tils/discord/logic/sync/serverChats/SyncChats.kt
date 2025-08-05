@@ -1,13 +1,10 @@
 package yv.tils.discord.logic.sync.serverChats
 
 import io.papermc.paper.event.player.AsyncChatEvent
-import yv.tils.utils.logger.Logger
-import yv.tils.utils.message.MessageUtils
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.bukkit.entity.Player
-import yv.tils.utils.player.PlayerUtils
 import yv.tils.discord.data.Permissions
 import yv.tils.discord.logic.AppLogic
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.active
@@ -15,6 +12,9 @@ import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.c
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.channelID
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.syncDiscordMessages
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.syncMinecraftMessages
+import yv.tils.utils.logger.Logger
+import yv.tils.utils.message.MessageUtils
+import yv.tils.utils.player.PlayerUtils
 
 
 class SyncChats : ListenerAdapter() {

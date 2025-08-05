@@ -4,7 +4,9 @@ This repository combines all the yvtils minecraft plugins in one place, for easi
 
 ## Plugins included in this collection
 - YVtils-SMP **(IN MIGRATION PROCESS)**
-- YVtils-Discord **(IN MIGRATION PROCESS)**
+- YVtils-Discord ([Modrinth](https://modrinth.com/plugin/yvtils_dc))
+  - [Core](https://github.com/YVtils/yvtils_collection/tree/main/discord-core)
+  - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/discord)
 - YVtils-MultiMine **(IN MIGRATION PROCESS)**
 - YVtils-Regions ([Modrinth](https://modrinth.com/plugin/yvtils_rg))
   - [Core](https://github.com/YVtils/yvtils_collection/tree/main/regions-core)

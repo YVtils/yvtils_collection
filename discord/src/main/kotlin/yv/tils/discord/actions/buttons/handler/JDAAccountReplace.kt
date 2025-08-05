@@ -41,8 +41,6 @@ class JDAAccountReplace {
                 throw Exception("Multiple accounts found in cache for user: $userID")
             }
 
-            Logger.dev("Account replace for $targetUserID with new account: $newAccount by user: ${userID}")
-
             WhitelistManage.removeFromCache(userID, true)
         } catch (_: Exception) {
             e.channel.sendMessageComponents(

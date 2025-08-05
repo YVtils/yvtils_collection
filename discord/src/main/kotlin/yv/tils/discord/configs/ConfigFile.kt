@@ -53,8 +53,8 @@ class ConfigFile {
             content["whitelistFeature.roles"] = "ROLE ID 1, ROLE ID 2, ROLE ID ..."
             content["whitelistFeature.settings.checkMinecraftAccount"] = true
 
-            content["command.serverInfoCommand.permission"] = "PERMISSION"
-            content["command.whitelistCommand.permission"] = "PERMISSION"
+            content["commands.serverInfoCommand.permission"] = "PERMISSION"
+            content["commands.whitelistCommand.permission"] = "PERMISSION"
 
             content["syncFeature.chatSync.enabled"] = true
             content["syncFeature.chatSync.permission"] = "PERMISSION"

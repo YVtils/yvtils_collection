@@ -1,5 +1,5 @@
 name: YVtils-Discord
-version: 4.0.0
+version: 4.0.0-beta.1
 main: yv.tils.core.YVtils
 api-version: '1.21'
 author: YVtils

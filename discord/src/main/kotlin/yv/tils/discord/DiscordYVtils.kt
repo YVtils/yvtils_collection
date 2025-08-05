@@ -15,7 +15,7 @@ class DiscordYVtils : Data.YVtilsModule {
     companion object {
         val MODULE = Data.YVtilsModuleData(
             "discord",
-            "4.0.0",
+            "4.0.0-beta.1",
             "Discord integration for YVtils",
             "YVtils",
             "",

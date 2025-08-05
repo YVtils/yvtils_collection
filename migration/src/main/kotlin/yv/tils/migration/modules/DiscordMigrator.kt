@@ -21,14 +21,11 @@ class DiscordMigrator: BaseMigrator() {
     private val newSavePath = "/discord/save.json"
 
     override fun performMigration(): Boolean {
-        var configMigrated = false
-        var saveMigrated = false
-
         // Migrate config file
-        configMigrated = migrateConfigFile()
+        val configMigrated = migrateConfigFile()
 
         // Migrate save file
-        saveMigrated = migrateSaveFile()
+        val saveMigrated = migrateSaveFile()
 
         // Log results
         Logger.info("Discord migration summary:")
@@ -112,35 +109,26 @@ class DiscordMigrator: BaseMigrator() {
         }
         newRoot["botSettings"] = botSettings
 
-        // 3. Embed settings (preserve existing)
-        val embedSettings = mutableMapOf<String, Any>()
-        val oldEmbedSettings = yaml.getConfigurationSection("embedSettings")
-        if (oldEmbedSettings != null) {
-            embedSettings["author"] = oldEmbedSettings.getString("author") ?: "Server"
-            embedSettings["authorIconURL"] = oldEmbedSettings.getString("authorIconURL") ?: "URL"
-        }
-        newRoot["embedSettings"] = embedSettings
+//        // 3. Embed settings (preserve existing)
+//        val embedSettings = mutableMapOf<String, Any>()
+//        val oldEmbedSettings = yaml.getConfigurationSection("embedSettings")
+//        if (oldEmbedSettings != null) {
+//            embedSettings["author"] = oldEmbedSettings.getString("author") ?: "Server"
+//            embedSettings["authorIconURL"] = oldEmbedSettings.getString("authorIconURL") ?: "URL"
+//        }
+//        newRoot["embedSettings"] = embedSettings
 
         // 4. Commands section (restructured)
         val commands = mutableMapOf<String, Any>()
 
-        // Whitelist feature and command
-        val whitelistFeature = mutableMapOf<String, Any>()
-        val oldWhitelistFeature = yaml.getConfigurationSection("whitelistFeature")
-        if (oldWhitelistFeature != null) {
-            whitelistFeature["role"] =
-                oldWhitelistFeature.getString("role") ?: "ROLE ID 1, ROLE ID 2, ROLE ID ..."
-            whitelistFeature["channel"] = oldWhitelistFeature.getString("channel") ?: "CHANNEL ID"
-        }
-
+        // Whitelist command
         val whitelistCommand = mutableMapOf<String, Any>()
         val oldWhitelistCommand = yaml.getConfigurationSection("whitelistCommand")
         if (oldWhitelistCommand != null) {
             whitelistCommand["permission"] =
                 oldWhitelistCommand.getString("permission") ?: "PERMISSION"
         }
-
-        commands["whitelist"] = mapOf("feature" to whitelistFeature, "command" to whitelistCommand)
+        commands["whitelistCommand"] = whitelistCommand
 
         // Server info command
         val serverInfoCommand = mutableMapOf<String, Any>()
@@ -149,11 +137,21 @@ class DiscordMigrator: BaseMigrator() {
             serverInfoCommand["permission"] =
                 oldServerInfoCommand.getString("permission") ?: "PERMISSION"
         }
-        commands["serverInfo"] = serverInfoCommand
+        commands["serverInfoCommand"] = serverInfoCommand
 
         newRoot["commands"] = commands
 
-        // 5. Sync features (restructured)
+        // 5. Whitelist feature (restructured)
+        val whitelistFeature = mutableMapOf<String, Any>()
+        val oldWhitelistFeature = yaml.getConfigurationSection("whitelistFeature")
+        if (oldWhitelistFeature != null) {
+            whitelistFeature["roles"] =
+                oldWhitelistFeature.getString("role") ?: "ROLE ID 1, ROLE ID 2, ROLE ID ..."
+            whitelistFeature["channel"] = oldWhitelistFeature.getString("channel") ?: "CHANNEL ID"
+        }
+        newRoot["whitelistFeature"] = whitelistFeature
+
+        // 6. Sync features (restructured)
         val syncFeature = mutableMapOf<String, Any>()
 
         // Chat sync
@@ -184,7 +182,7 @@ class DiscordMigrator: BaseMigrator() {
             serverStats["channel"] = oldServerStats.getString("channel") ?: "CHANNEL ID"
 
             // Transform layout structure
-            val layout = mutableMapOf<String, Any>()
+            val design = mutableMapOf<String, Any>()
             val oldLayout = oldServerStats.getConfigurationSection("layout")
             if (oldLayout != null) {
                 // Server status with emoji mapping
@@ -202,23 +200,43 @@ class DiscordMigrator: BaseMigrator() {
                     }
                     serverStatus["emoji"] = emoji
                 }
-                layout["serverStatus"] = serverStatus
+                design["status"] = serverStatus
 
-                // Other layout items
-                layout["serverVersion"] =
-                    oldLayout.getString("serverVersion") ?: "💻 | VERSION <version>"
-                layout["lastPlayerCount"] =
-                    oldLayout.getString("lastPlayerCount") ?: "🎮 | PLAYERS <count>"
-                layout["lastRefreshed"] = oldLayout.getString("lastRefreshed") ?: "⌚ | <time>"
+                // Server version with emoji
+                val version = mutableMapOf<String, Any>()
+                val oldVersion = oldLayout.getString("serverVersion")
+                if (oldVersion != null) {
+                    version["text"] = oldVersion
+                    version["emoji"] = "🛠️"
+                }
+                design["version"] = version
+
+                // Server players with emoji
+                val players = mutableMapOf<String, Any>()
+                val oldPlayers = oldLayout.getString("lastPlayerCount")
+                if (oldPlayers != null) {
+                    players["text"] = oldPlayers.replace("<count>", "<players> / <maxPlayers>")
+                    players["emoji"] = "👥"
+                }
+                design["players"] = players
+
+                // Last refresh time with emoji
+                val lastRefresh = mutableMapOf<String, Any>()
+                val oldLastRefresh = oldLayout.getString("lastRefreshed")
+                if (oldLastRefresh != null) {
+                    lastRefresh["text"] = oldLastRefresh
+                    lastRefresh["emoji"] = "⌚"
+                }
+                design["lastRefresh"] = lastRefresh
             }
-            serverStats["layout"] = layout
+            serverStats["design"] = design
         }
         syncFeature["serverStats"] = serverStats
 
         newRoot["syncFeature"] = syncFeature
 
-        // 6. Log channel (direct copy)
-        newRoot["logChannel"] = yaml.getString("logChannel") ?: "CHANNEL ID"
+//        // 6. Log channel (direct copy)
+//        newRoot["logChannel"] = yaml.getString("logChannel") ?: "CHANNEL ID"
 
         return newRoot
     }

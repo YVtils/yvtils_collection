@@ -13,7 +13,7 @@ import yv.tils.discord.language.RegisterStrings
 
 class JDAServerInfo {
     companion object {
-        val cmdPermission = ConfigFile.getValueAsString("command.serverInfoCommand.permission") ?: "MESSAGE_SEND"
+        val cmdPermission = ConfigFile.getValueAsString("commands.serverInfoCommand.permission") ?: "MESSAGE_SEND"
     }
 
     /**
