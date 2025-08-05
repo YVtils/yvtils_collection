@@ -1,0 +1,112 @@
+package yv.tils.core
+
+import dev.jorel.commandapi.CommandAPI
+import dev.jorel.commandapi.CommandAPIBukkitConfig
+import org.bukkit.NamespacedKey
+import org.bukkit.plugin.java.JavaPlugin
+import yv.tils.common.CommonYVtils
+import yv.tils.config.ConfigYVtils
+import yv.tils.migration.MigrationYVtils
+import yv.tils.multiMine.MultiMineYVtils
+import yv.tils.utils.UtilsYVtils
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
+
+class YVtils: JavaPlugin() {
+    companion object {
+        val yvtilsVersion = YVtils().pluginMeta.version
+        lateinit var instance: YVtils
+
+        const val PLUGIN_NAME_FULL = "YVtils-MultiMine"
+        const val PLUGIN_NAME = "MultiMine"
+        const val PLUGIN_NAME_SHORT = "mm"
+        const val PLUGIN_COLOR = "#66cbe8"
+    }
+
+    private val modules: List<Data.YVtilsModule> = listOf(
+        ConfigYVtils(),
+        UtilsYVtils(),
+        MigrationYVtils(), // TODO: Remove with 2.1.0
+        MultiMineYVtils(),
+        CommonYVtils()
+    )
+
+    override fun onLoad() {
+        instance = this
+
+        Logger.logger = componentLogger
+        Logger.debug("$PLUGIN_NAME_FULL v$yvtilsVersion is loading...")
+
+        val core = Data.YVtilsCore(
+            description = "",
+            url = "https://modrinth.com/plugin/yvtils_mm",
+
+            dependencies = listOf(
+                "multiMine"
+            ),
+
+            name = PLUGIN_NAME,
+            colorHex = PLUGIN_COLOR,
+            pluginShort = PLUGIN_NAME_SHORT,
+
+            version = yvtilsVersion,
+            instance = instance,
+
+            key = NamespacedKey(this, "yvtils"),
+        )
+
+        Data.initCore(core)
+
+        CommandAPI.onLoad(
+            CommandAPIBukkitConfig(instance)
+                .setNamespace("yvtils")
+                .silentLogs(true)
+                .verboseOutput(false)
+                .beLenientForMinorVersions(true)
+        )
+
+        try {
+            modules.forEach { it.onLoad() }
+        } catch (e: Exception) {
+            Logger.error("Error during YVtils loading: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+    override fun onEnable() {
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is starting...")
+
+        try {
+            modules.forEach { it.enablePlugin() }
+        } catch (e: Exception) {
+            Logger.error("Error during YVtils startup: ${e.message}")
+            e.printStackTrace()
+        }
+
+        if (instance.isEnabled) {
+            onLateEnablePlugin()
+        }
+    }
+
+    fun onLateEnablePlugin() {
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is performing late enable...")
+
+        try {
+            modules.forEach { it.onLateEnablePlugin() }
+        } catch (e: Exception) {
+            Logger.error("Error during YVtils late startup: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+    override fun onDisable() {
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is stopping...")
+
+        try {
+            modules.forEach { it.disablePlugin() }
+        } catch (e: Exception) {
+            Logger.error("Error during YVtils shutdown: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+}

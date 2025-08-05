@@ -1,8 +1,10 @@
 package yv.tils.multiMine
 
+import yv.tils.common.permissions.PermissionManager
 import yv.tils.multiMine.commands.MultiMineCommand
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.configs.SaveFile
+import yv.tils.multiMine.data.PermissionsData
 import yv.tils.multiMine.language.RegisterStrings
 import yv.tils.multiMine.listeners.BlockBreak
 import yv.tils.multiMine.listeners.PlayerJoin
@@ -14,7 +16,7 @@ class MultiMineYVtils : Data.YVtilsModule {
     companion object {
         val MODULE = Data.YVtilsModuleData(
             "multiMine",
-            "1.0.0",
+            "2.0.0-beta.1",
             "MultiMine module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/multiMine/"
@@ -67,14 +69,7 @@ class MultiMineYVtils : Data.YVtilsModule {
     }
 
     private fun registerPermissions() {
-        Data.instance.server.pluginManager
-
-//        pm.addPermission(
-//            Permission.loadPermission("yvtils.use.multiMine", mapOf(
-//                "description" to "Use MultiMine",
-//                "default" to PermissionDefault.NOT_OP
-//            ))
-//        )
+        PermissionManager.registerPermissions(PermissionsData().getPermissionList(true))
     }
 
     private fun loadConfigs() {

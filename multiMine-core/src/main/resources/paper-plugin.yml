@@ -1,0 +1,10 @@
+name: YVtils-MultiMine
+version: 2.0.0-beta.1
+main: yv.tils.core.YVtils
+api-version: '1.21'
+author: YVtils
+website: 'https://yvtils.net/yvtils/'
+prefix: YVtils
+contributors:
+  - Lyvric
+  - SlWed

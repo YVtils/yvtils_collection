@@ -5,6 +5,7 @@ import yv.tils.config.files.FileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 
+// TODO: Think about splitting block list and config file into separate files
 class ConfigFile {
     companion object {
         val config: MutableMap<String, Any> = mutableMapOf()
