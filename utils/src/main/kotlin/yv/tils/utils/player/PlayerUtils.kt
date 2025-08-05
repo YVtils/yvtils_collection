@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import yv.tils.utils.data.Data
-import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
 import java.util.*
 
@@ -16,14 +15,12 @@ class PlayerUtils {
             val skin = player.playerProfile.textures.skin
 
             if (skin == null) {
-                Logger.Companion.dev("Player ${player.name} has no skin.")
                 return "default"
             }
 
             val hash = skin.path.split("/").last()
 
             return hash.ifBlank {
-                Logger.Companion.dev("Player ${player.name} has no skin hash.")
                 "default"
             }
         }
