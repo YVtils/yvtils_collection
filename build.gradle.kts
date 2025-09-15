@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.2.0" apply false
+    kotlin("jvm") version "2.2.20" apply false
     kotlin("plugin.serialization") version "2.2.0" apply false
     id("com.gradleup.shadow") version "9.0.0-rc2" apply false
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.18" apply false
