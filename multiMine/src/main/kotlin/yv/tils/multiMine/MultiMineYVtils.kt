@@ -11,6 +11,7 @@ import yv.tils.multiMine.listeners.PlayerJoin
 import yv.tils.multiMine.logic.MultiMineHandler
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.data.Data
+import yv.tils.multiMine.utils.CooldownUtils
 
 class MultiMineYVtils : Data.YVtilsModule {
     companion object {
@@ -62,7 +63,7 @@ class MultiMineYVtils : Data.YVtilsModule {
 
     private fun registerCoroutines() {
         CoroutineHandler.launchTask(
-            suspend { MultiMineHandler().cooldownHandler() },
+            suspend { CooldownUtils().cooldownHandler() },
             "yvtils-multiMine-cooldownHandler",
             1 * 1000L,
         )
