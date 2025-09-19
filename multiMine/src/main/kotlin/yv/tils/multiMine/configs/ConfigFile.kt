@@ -56,6 +56,7 @@ class ConfigFile {
             content["animationTime"] = 3
             content["cooldownTime"] = 3
             content["breakLimit"] = 250
+            content["leaveDecay"] = true
             content["blocks"] = createTemplateBlocks()
         }
 

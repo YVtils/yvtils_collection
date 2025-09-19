@@ -1,28 +1,23 @@
 package yv.tils.multiMine.logic
 
-import org.bukkit.Material
 import org.bukkit.Tag
 import org.bukkit.block.Block
 import yv.tils.multiMine.configs.ConfigFile
-import java.util.UUID
+import yv.tils.multiMine.utils.BlockUtils
 
 // TODO: Add fast Leave decay
 
 class LeaveDecayHandler {
     companion object {
         val decayActive = ConfigFile.config["leaveDecay.active"] as Boolean
-        val decayTime = ConfigFile.config["leaveDecay.time"] as Int
-        val decayInterval = ConfigFile.config["leaveDecay.interval"] as Int
+
+        val leaveBlocks = Tag.LEAVES.values.toMutableList() + Tag.WART_BLOCKS.values.toMutableList()
     }
 
     fun trigger(startBlock: Block) {
         if (!decayActive) return
 
-
-    }
-
-    fun blockIsLeave(block: Block): Boolean {
-        val materials = Tag.LEAVES
-        return materials.isTagged(block.type)
+        val loc = startBlock.location
+        BlockUtils().registerBlocks(loc, leaveBlocks)
     }
 }

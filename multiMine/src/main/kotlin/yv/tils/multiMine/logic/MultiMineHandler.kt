@@ -1,29 +1,17 @@
 package yv.tils.multiMine.logic
 
-import org.bukkit.*
+import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import yv.tils.config.language.LanguageHandler
-import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.configs.MultiMineConfig
-import yv.tils.multiMine.utils.BlockUtils
-import yv.tils.multiMine.utils.CooldownUtils
-import yv.tils.multiMine.utils.ToolUtils
+import yv.tils.multiMine.utils.*
+import yv.tils.multiMine.utils.BlockUtils.Companion.blocks
+import yv.tils.multiMine.utils.BlockUtils.Companion.brokenMap
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
-import java.util.*
-
-// TODO: Try making the break process better for the performance
 
 class MultiMineHandler {
-    companion object {
-        val animationTime = ConfigFile.config["animationTime"] as Int
-        val breakLimit = ConfigFile.config["breakLimit"] as Int
-        val blocks = ConfigFile.blockList
-
-        val brokenMap: MutableMap<UUID, Int> = mutableMapOf()
-    }
-
     fun trigger(e: BlockBreakEvent) {
         val loc = e.block.location
         val player = e.player
