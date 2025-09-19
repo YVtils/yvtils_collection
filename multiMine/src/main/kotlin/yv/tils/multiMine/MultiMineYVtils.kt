@@ -8,10 +8,9 @@ import yv.tils.multiMine.data.PermissionsData
 import yv.tils.multiMine.language.RegisterStrings
 import yv.tils.multiMine.listeners.BlockBreak
 import yv.tils.multiMine.listeners.PlayerJoin
-import yv.tils.multiMine.logic.MultiMineHandler
+import yv.tils.multiMine.utils.CooldownUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.data.Data
-import yv.tils.multiMine.utils.CooldownUtils
 
 class MultiMineYVtils : Data.YVtilsModule {
     companion object {

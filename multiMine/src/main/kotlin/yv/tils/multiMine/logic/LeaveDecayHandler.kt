@@ -1,6 +1,7 @@
 package yv.tils.multiMine.logic
 
 import org.bukkit.Material
+import org.bukkit.Tag
 import org.bukkit.block.Block
 import yv.tils.multiMine.configs.ConfigFile
 import java.util.UUID
@@ -21,16 +22,7 @@ class LeaveDecayHandler {
     }
 
     fun blockIsLeave(block: Block): Boolean {
-        return when (block.type) {
-            Material.OAK_LEAVES,
-            Material.SPRUCE_LEAVES,
-            Material.BIRCH_LEAVES,
-            Material.JUNGLE_LEAVES,
-            Material.ACACIA_LEAVES,
-            Material.DARK_OAK_LEAVES,
-            Material.MANGROVE_LEAVES,
-            Material.CHERRY_LEAVES -> true
-            else -> false
-        }
+        val materials = Tag.LEAVES
+        return materials.isTagged(block.type)
     }
 }

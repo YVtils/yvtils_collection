@@ -1,6 +1,7 @@
 package yv.tils.multiMine.configs
 
 import org.bukkit.Material
+import org.bukkit.Tag
 import yv.tils.config.files.FileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
@@ -62,53 +63,34 @@ class ConfigFile {
         FileUtils.saveFile("/multiMine/config.yml", ymlFile)
     }
 
+    // TODO: Test if list gets updated with version updates
     private fun createTemplateBlocks(): List<String> {
-        val blocks = listOf(
-            Material.OAK_LOG.name,
-            Material.BIRCH_LOG.name,
-            Material.SPRUCE_LOG.name,
-            Material.JUNGLE_LOG.name,
-            Material.ACACIA_LOG.name,
-            Material.DARK_OAK_LOG.name,
-            Material.CHERRY_LOG.name,
-            Material.MANGROVE_LOG.name,
-            "PALE_OAK_WOOD",
-            Material.CRIMSON_STEM.name,
-            Material.WARPED_STEM.name,
-            Material.STRIPPED_OAK_LOG.name,
-            Material.STRIPPED_BIRCH_LOG.name,
-            Material.STRIPPED_SPRUCE_LOG.name,
-            Material.STRIPPED_JUNGLE_LOG.name,
-            Material.STRIPPED_ACACIA_LOG.name,
-            Material.STRIPPED_DARK_OAK_LOG.name,
-            Material.STRIPPED_CHERRY_LOG.name,
-            Material.STRIPPED_MANGROVE_LOG.name,
-            "STRIPPED_PALE_OAK_WOOD",
-            Material.STRIPPED_CRIMSON_STEM.name,
-            Material.STRIPPED_WARPED_STEM.name,
+        val blocks = Tag.LOGS.values.toMutableList()
 
-            Material.COAL_ORE.name,
-            Material.IRON_ORE.name,
-            Material.GOLD_ORE.name,
-            Material.DIAMOND_ORE.name,
-            Material.EMERALD_ORE.name,
-            Material.LAPIS_ORE.name,
-            Material.REDSTONE_ORE.name,
-            Material.COPPER_ORE.name,
-            Material.DEEPSLATE_COAL_ORE.name,
-            Material.DEEPSLATE_IRON_ORE.name,
-            Material.DEEPSLATE_GOLD_ORE.name,
-            Material.DEEPSLATE_DIAMOND_ORE.name,
-            Material.DEEPSLATE_EMERALD_ORE.name,
-            Material.DEEPSLATE_LAPIS_ORE.name,
-            Material.DEEPSLATE_REDSTONE_ORE.name,
-            Material.DEEPSLATE_COPPER_ORE.name,
-            Material.NETHER_QUARTZ_ORE.name,
-            Material.NETHER_GOLD_ORE.name,
-            Material.ANCIENT_DEBRIS.name,
-            Material.GLOWSTONE.name,
+        val ores = listOf(
+            Material.COAL_ORE,
+            Material.IRON_ORE,
+            Material.GOLD_ORE,
+            Material.DIAMOND_ORE,
+            Material.EMERALD_ORE,
+            Material.LAPIS_ORE,
+            Material.REDSTONE_ORE,
+            Material.COPPER_ORE,
+            Material.DEEPSLATE_COAL_ORE,
+            Material.DEEPSLATE_IRON_ORE,
+            Material.DEEPSLATE_GOLD_ORE,
+            Material.DEEPSLATE_DIAMOND_ORE,
+            Material.DEEPSLATE_EMERALD_ORE,
+            Material.DEEPSLATE_LAPIS_ORE,
+            Material.DEEPSLATE_REDSTONE_ORE,
+            Material.DEEPSLATE_COPPER_ORE,
+            Material.NETHER_QUARTZ_ORE,
+            Material.NETHER_GOLD_ORE,
+            Material.ANCIENT_DEBRIS,
+            Material.GLOWSTONE,
         )
+        blocks.addAll(ores)
 
-        return blocks
+        return blocks.map { it.name }
     }
 }

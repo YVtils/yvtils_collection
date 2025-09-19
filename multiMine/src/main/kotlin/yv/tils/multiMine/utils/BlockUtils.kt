@@ -1,6 +1,5 @@
 package yv.tils.multiMine.utils
 
-import coroutine.CoroutineHandler
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -11,6 +10,7 @@ import yv.tils.multiMine.logic.MultiMineHandler.Companion.blocks
 import yv.tils.multiMine.logic.MultiMineHandler.Companion.breakLimit
 import yv.tils.multiMine.logic.MultiMineHandler.Companion.brokenMap
 import yv.tils.multiMine.utils.ToolUtils.Companion.toolBroke
+import yv.tils.utils.coroutine.CoroutineHandler
 
 class BlockUtils {
     /**
@@ -21,7 +21,7 @@ class BlockUtils {
      * @return true if the block was broken
      */
     private fun breakBlock(block: Block, player: Player, item: ItemStack): Boolean {
-        if (checkBlock(block.type, blocks) && checkTool(block, item)) {
+        if (checkBlock(block.type, blocks) && ToolUtils().checkTool(block, item)) {
             if (brokenMap[player.uniqueId]!! != 0) {
                 try {
                     if (toolBroke) return false
