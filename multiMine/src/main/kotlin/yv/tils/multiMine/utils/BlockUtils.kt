@@ -190,30 +190,8 @@ class BlockUtils {
                                         // Continue decay process
                                         registerBlocks(newLoc, customBlockList)
                                     }
-                                }, (animationTime * 0.5).toLong()) // Fast decay for leaves
+                                }, (animationTime * 0.8).toLong()) // Fast decay for leaves
                             }
-                        }
-                        // Handle nether wart blocks (don't have leaf properties but should still decay)
-                        else if (newBlock.type.name.contains("WART_BLOCK") ||
-                            newBlock.type == Material.NETHER_WART_BLOCK ||
-                            newBlock.type == Material.WARPED_WART_BLOCK
-                        ) {
-
-                            // Nether wart blocks should decay fast when not connected to stems
-                            Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-                                if (breakBlock(newBlock, customBlockList)) {
-                                    // Continue decay process
-                                    registerBlocks(newLoc, customBlockList)
-                                }
-                            }, (animationTime * 0.3).toLong()) // Even faster decay for wart blocks
-                        }
-                        // Handle other blocks in the decay list normally
-                        else {
-                            Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-                                if (breakBlock(newBlock, customBlockList)) {
-                                    registerBlocks(newLoc, customBlockList)
-                                }
-                            }, (animationTime * 0.7).toLong()) // Still faster than normal for other decay blocks
                         }
                     }
                 }

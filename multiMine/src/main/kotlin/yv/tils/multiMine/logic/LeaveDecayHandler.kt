@@ -11,7 +11,7 @@ class LeaveDecayHandler {
     companion object {
         val decayActive = ConfigFile.config["leaveDecay.active"] as Boolean
 
-        val leaveBlocks = Tag.LEAVES.values.toMutableList() + Tag.WART_BLOCKS.values.toMutableList()
+        val leaveBlocks = Tag.LEAVES.values.toMutableList()
     }
 
     fun trigger(startBlock: Block) {
