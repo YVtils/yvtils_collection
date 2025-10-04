@@ -2,6 +2,7 @@ package yv.tils.core
 
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIBukkitConfig
+import dev.jorel.commandapi.CommandAPIPaperConfig
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
@@ -58,11 +59,11 @@ class YVtils: JavaPlugin() {
         Data.initCore(core)
 
         CommandAPI.onLoad(
-            CommandAPIBukkitConfig(instance)
+            CommandAPIPaperConfig(instance)
                 .setNamespace("yvtils")
                 .silentLogs(true)
                 .verboseOutput(false)
-                .beLenientForMinorVersions(true)
+                .fallbackToLatestNMS(true)
         )
 
         try {

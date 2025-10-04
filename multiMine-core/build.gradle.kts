@@ -10,7 +10,7 @@ val version = "2.0.0-beta.1"
 
 tasks {
     runServer {
-        minecraftVersion("1.21.5")
+        minecraftVersion("1.21.9")
     }
 
     shadowJar {

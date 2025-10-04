@@ -1,4 +1,4 @@
-val jdaVersion = "6.0.0-rc.2"
+val jdaVersion = "6.0.0"
 
 dependencies {
     implementation(project(":config"))

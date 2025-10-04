@@ -5,8 +5,8 @@ plugins {
     kotlin("jvm") version "2.2.20" apply false
     kotlin("plugin.serialization") version "2.2.20" apply false
     id("com.gradleup.shadow") version "9.1.0" apply false
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.18" apply false
-    id("xyz.jpenilla.run-paper") version "2.3.1" apply false
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19" apply false
+    id("xyz.jpenilla.run-paper") version "3.0.0" apply false
 }
 
 allprojects {
@@ -29,15 +29,15 @@ subprojects {
         plugin("xyz.jpenilla.run-paper")
     }
 
-    val commandAPIVersion = "10.1.2"
+    val commandAPIVersion = "11.0.0"
 
     dependencies {
         // Paper API dependency
         add("paperweightDevelopmentBundle", "io.papermc.paper:dev-bundle:1.21.1-R0.1-SNAPSHOT")
 
         // CommandAPI dependencies
-        add("implementation", "dev.jorel:commandapi-bukkit-shade-mojang-mapped:$commandAPIVersion")
-        add("implementation", "dev.jorel:commandapi-bukkit-kotlin:$commandAPIVersion")
+        add("implementation", "dev.jorel:commandapi-paper-shade:$commandAPIVersion")
+        add("implementation", "dev.jorel:commandapi-kotlin-paper:$commandAPIVersion")
 
         // Other
         add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
@@ -48,5 +48,12 @@ subprojects {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
         }
+    }
+
+    tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
+        javaLauncher.set(project.extensions.getByType<JavaToolchainService>().launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        })
+        jvmArgs("-XX:+AllowEnhancedClassRedefinition")
     }
 }
