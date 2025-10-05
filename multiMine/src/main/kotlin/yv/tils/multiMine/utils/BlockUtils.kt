@@ -176,28 +176,11 @@ class BlockUtils {
 
                                 Logger.debug("Task finished for ${player.name}. Remaining: ${runningProcessesMap[playerId]}")
 
-                                if (runningProcessesMap[playerId]!! <= 0 && !processFinishedMap[playerId]!!) {
-                                    processFinishedMap[playerId] = true
-
-                                    Logger.debug("All processes finished for ${player.name}, triggering leaf decay")
-
-                                    // Reset values
-                                    runningProcessesMap[playerId] = 0
-                                    brokenMap[playerId] = 0
-                                    toolBroke = false
-
-                                    // Trigger leaf decay across the whole affected area (with margin)
-                                    LeaveDecayHandler().triggerArea(
-                                        world = origin.world!!,
-                                        minX = area.minX,
-                                        minY = area.minY,
-                                        minZ = area.minZ,
-                                        maxX = area.maxX,
-                                        maxY = area.maxY,
-                                        maxZ = area.maxZ,
-                                        margin = 6,
-                                    )
-                                }
+                                LeaveDecayHandler().trigger(
+                                    area = area,
+                                    origin = origin,
+                                    player = player
+                                )
                             }
                         }
                     }, animationTime * 1L)
@@ -210,26 +193,11 @@ class BlockUtils {
         // If nothing was scheduled at top-level, finalize immediately if no tasks are running
         if (tasksScheduled == 0 && topLevel) {
             synchronized(runningProcessesMap) {
-                if (runningProcessesMap[playerId]!! <= 0 && !processFinishedMap[playerId]!!) {
-                    processFinishedMap[playerId] = true
-
-                    Logger.debug("No tasks for ${player.name}. Trigger leaf decay now")
-
-                    runningProcessesMap[playerId] = 0
-                    brokenMap[playerId] = 0
-                    toolBroke = false
-
-                    LeaveDecayHandler().triggerArea(
-                        world = origin.world!!,
-                        minX = area.minX,
-                        minY = area.minY,
-                        minZ = area.minZ,
-                        maxX = area.maxX,
-                        maxY = area.maxY,
-                        maxZ = area.maxZ,
-                        margin = 6,
-                    )
-                }
+                LeaveDecayHandler().trigger(
+                    area = area,
+                    origin = origin,
+                    player = player
+                )
             }
         }
     }

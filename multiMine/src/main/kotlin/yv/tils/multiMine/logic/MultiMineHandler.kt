@@ -5,9 +5,11 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import yv.tils.config.language.LanguageHandler
 import yv.tils.multiMine.configs.MultiMineConfig
-import yv.tils.multiMine.utils.*
+import yv.tils.multiMine.utils.BlockUtils
 import yv.tils.multiMine.utils.BlockUtils.Companion.blocks
 import yv.tils.multiMine.utils.BlockUtils.Companion.brokenMap
+import yv.tils.multiMine.utils.CooldownUtils
+import yv.tils.multiMine.utils.ToolUtils
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
 

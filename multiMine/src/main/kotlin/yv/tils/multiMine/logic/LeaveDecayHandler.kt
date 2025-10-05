@@ -1,18 +1,52 @@
 package yv.tils.multiMine.logic
 
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Tag
 import org.bukkit.World
 import org.bukkit.block.data.type.Leaves
+import org.bukkit.entity.Player
 import yv.tils.multiMine.configs.ConfigFile
+import yv.tils.multiMine.utils.BlockUtils
+import yv.tils.multiMine.utils.BlockUtils.Companion.brokenMap
+import yv.tils.multiMine.utils.BlockUtils.Companion.processFinishedMap
+import yv.tils.multiMine.utils.BlockUtils.Companion.runningProcessesMap
+import yv.tils.multiMine.utils.ToolUtils.Companion.toolBroke
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
 import java.util.ArrayDeque
 import java.util.HashMap
 import java.util.HashSet
 import java.util.function.Consumer
+import kotlin.collections.set
 
 class LeaveDecayHandler {
+    fun trigger(area: BlockUtils.BreakAreaBox, origin: Location, player: Player) {
+        val playerId = player.uniqueId
+        if (runningProcessesMap[playerId]!! <= 0 && !processFinishedMap[playerId]!!) {
+            processFinishedMap[playerId] = true
+
+            Logger.debug("All processes finished for ${player.name}, triggering leaf decay")
+
+            // Reset values
+            runningProcessesMap[playerId] = 0
+            brokenMap[playerId] = 0
+            toolBroke = false
+
+            // Trigger leaf decay across the whole affected area (with margin)
+            LeaveDecayHandler().triggerArea(
+                world = origin.world!!,
+                minX = area.minX,
+                minY = area.minY,
+                minZ = area.minZ,
+                maxX = area.maxX,
+                maxY = area.maxY,
+                maxZ = area.maxZ,
+                margin = 6,
+            )
+        }
+    }
+
     fun triggerArea(
         world: World,
         minX: Int,
