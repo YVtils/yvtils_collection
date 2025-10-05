@@ -255,12 +255,19 @@ class BlockUtils {
 
                             // Check if the leaf should decay (not persistent and far from logs)
                             if (!newBlockAsLeave.isPersistent && newBlockAsLeave.distance >= 4) {
-                                Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-                                    if (breakBlock(newBlock, customBlockList)) {
-                                        // Continue decay process
-                                        registerBlocks(newLoc, customBlockList)
-                                    }
-                                }, (animationTime * 0.8).toLong()) // Fast decay for leaves
+                                // TEMP: Make leaf decay delay much bigger to verify delay behavior
+                                val tempDelayTicks = ((animationTime.toDouble() * 5.0).coerceAtLeast(40.0)).toLong()
+                                Logger.dev("Fast leaf-decay TEMP delay: $tempDelayTicks ticks")
+                                Bukkit.getScheduler().runTaskLater(
+                                    Data.instance,
+                                    Runnable {
+                                        if (breakBlock(newBlock, customBlockList)) {
+                                            // Continue decay process
+                                            registerBlocks(newLoc, customBlockList)
+                                        }
+                                    },
+                                    tempDelayTicks
+                                )
                             }
                         }
                     }
