@@ -208,39 +208,6 @@ class BlockUtils {
     }
 
     /**
-     * Registers the leave blocks to be broken without player or item context
-     * @param loc The location of the block to start breaking from
-     * @param customBlockList The list of blocks that can be broken, defaults to the config list
-     */
-    fun registerLeaveBlocks(loc: Location, customBlockList: List<Material> = blocks) {
-        for (x in -1..1) {
-            for (y in -1..1) {
-                for (z in -1..1) {
-                    if (x == 0 && y == 0 && z == 0) continue
-                    val newLoc = Location(loc.world, loc.x + x, loc.y + y, loc.z + z)
-                    val newBlock = newLoc.block
-
-                    if (newBlock.type !in customBlockList) return
-                    if (newBlock.blockData !is Leaves) return
-                    val newBlockAsLeave = newBlock.blockData as Leaves
-
-                    if (!newBlockAsLeave.isPersistent && newBlockAsLeave.distance >= 4) {
-                        Bukkit.getScheduler().runTaskLater(
-                            Data.instance,
-                            Runnable {
-                                if (breakBlock(newBlock, customBlockList)) {
-                                    registerLeaveBlocks(newLoc, customBlockList)
-                                }
-                            },
-                            (animationTime * 0.8).toLong()
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Checks if the block is in the provided list of blocks
      * @param material The material to check
      * @param blocks The list of blocks to check against
