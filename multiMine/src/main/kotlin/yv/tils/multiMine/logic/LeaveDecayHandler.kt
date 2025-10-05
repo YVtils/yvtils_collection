@@ -33,7 +33,6 @@ class LeaveDecayHandler {
             brokenMap[playerId] = 0
             toolBroke = false
 
-            // Trigger leaf decay across the whole affected area (with margin)
             LeaveDecayHandler().triggerArea(
                 world = origin.world!!,
                 minX = area.minX,
@@ -47,6 +46,17 @@ class LeaveDecayHandler {
         }
     }
 
+    /**
+     * Triggers leaf decay in the specified area.
+     * @param world The world where the area is located.
+     * @param minX The minimum X coordinate of the area.
+     * @param minY The minimum Y coordinate of the area.
+     * @param minZ The minimum Z coordinate of the area.
+     * @param maxX The maximum X coordinate of the area.
+     * @param maxY The maximum Y coordinate of the area.
+     * @param maxZ The maximum Z coordinate of the area.
+     * @param margin The margin to expand the area for leaf decay calculation (default is 5).
+     */
     fun triggerArea(
         world: World,
         minX: Int,

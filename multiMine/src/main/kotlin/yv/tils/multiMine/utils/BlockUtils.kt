@@ -164,13 +164,18 @@ class BlockUtils {
                     Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
                         try {
                             if (breakBlock(newBlock, player, item, customBlockList)) {
-                                // Update area with the successfully broken log
                                 area.include(newLoc.blockX, newLoc.blockY, newLoc.blockZ)
-                                // Schedule neighbors recursively (not top-level)
-                                registerBlocks(newLoc, player, item, customBlockList, topLevel = false, root = origin, box = area)
+                                registerBlocks(
+                                    newLoc,
+                                    player,
+                                    item,
+                                    customBlockList,
+                                    topLevel = false,
+                                    root = origin,
+                                    box = area
+                                )
                             }
                         } finally {
-                            // Always decrement when this scheduled task completes
                             synchronized(runningProcessesMap) {
                                 runningProcessesMap[playerId] = runningProcessesMap[playerId]!! - 1
 
@@ -203,12 +208,11 @@ class BlockUtils {
     }
 
     /**
-     * Registers the blocks to be broken without player or item context
-     * Used for recursive breaking without tool damage or limits
+     * Registers the leave blocks to be broken without player or item context
      * @param loc The location of the block to start breaking from
      * @param customBlockList The list of blocks that can be broken, defaults to the config list
      */
-    fun registerBlocks(loc: Location, customBlockList: List<Material> = blocks) {
+    fun registerLeaveBlocks(loc: Location, customBlockList: List<Material> = blocks) {
         for (x in -1..1) {
             for (y in -1..1) {
                 for (z in -1..1) {
@@ -216,26 +220,20 @@ class BlockUtils {
                     val newLoc = Location(loc.world, loc.x + x, loc.y + y, loc.z + z)
                     val newBlock = newLoc.block
 
-                    if (newBlock.type in customBlockList) {
-                        // Handle leaf blocks (have distance and persistence properties)
-                        if (newBlock.blockData is Leaves) {
-                            val newBlockAsLeave = newBlock.blockData as Leaves
+                    if (newBlock.type !in customBlockList) return
+                    if (newBlock.blockData !is Leaves) return
+                    val newBlockAsLeave = newBlock.blockData as Leaves
 
-                            // Check if the leaf should decay (not persistent and far from logs)
-                            if (!newBlockAsLeave.isPersistent && newBlockAsLeave.distance >= 4) {
-                                val tempDelayTicks = ((animationTime.toDouble() * 5.0).coerceAtLeast(40.0)).toLong()
-                                Bukkit.getScheduler().runTaskLater(
-                                    Data.instance,
-                                    Runnable {
-                                        if (breakBlock(newBlock, customBlockList)) {
-                                            // Continue decay process
-                                            registerBlocks(newLoc, customBlockList)
-                                        }
-                                    },
-                                    tempDelayTicks
-                                )
-                            }
-                        }
+                    if (!newBlockAsLeave.isPersistent && newBlockAsLeave.distance >= 4) {
+                        Bukkit.getScheduler().runTaskLater(
+                            Data.instance,
+                            Runnable {
+                                if (breakBlock(newBlock, customBlockList)) {
+                                    registerLeaveBlocks(newLoc, customBlockList)
+                                }
+                            },
+                            (animationTime * 0.8).toLong()
+                        )
                     }
                 }
             }
@@ -243,10 +241,10 @@ class BlockUtils {
     }
 
     /**
-     * Checks if the block is in the list of blocks
+     * Checks if the block is in the provided list of blocks
      * @param material The material to check
      * @param blocks The list of blocks to check against
-     * @return true if the block is in the list
+     * @return true if the block is in the provided list
      */
     fun checkBlock(material: Material, blocks: List<Material>): Boolean {
         return blocks.contains(material)
