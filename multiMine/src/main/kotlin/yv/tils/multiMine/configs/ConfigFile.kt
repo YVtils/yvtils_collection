@@ -57,6 +57,7 @@ class ConfigFile {
             content["cooldownTime"] = 3
             content["breakLimit"] = 250
             content["leaveDecay"] = true
+            content["matchBlockTypeOnly"] = true
             content["blocks"] = createTemplateBlocks()
         }
 
