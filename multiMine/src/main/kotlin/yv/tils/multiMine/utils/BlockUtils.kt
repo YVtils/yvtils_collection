@@ -58,7 +58,7 @@ class BlockUtils {
 
         // Check break limit BEFORE attempting to break
         if (brokenMap[player.uniqueId]!! >= breakLimit) {
-            Logger.dev("Break limit reached for player ${player.name}: ${brokenMap[player.uniqueId]}/$breakLimit")
+            Logger.debug("Break limit reached for ${player.name}: ${brokenMap[player.uniqueId]}/$breakLimit")
             return false
         }
 
@@ -76,7 +76,7 @@ class BlockUtils {
             }
 
             brokenMap[player.uniqueId] = brokenMap[player.uniqueId]!! + 1
-            Logger.dev("Player ${player.name} broke block. Count: ${brokenMap[player.uniqueId]}/$breakLimit")
+            Logger.debug("Block broken by ${player.name}. Count: ${brokenMap[player.uniqueId]}/$breakLimit")
 
             block.breakNaturally(item, true, true)
             return true
@@ -125,7 +125,7 @@ class BlockUtils {
         // Initialize player's counters if not exists
         if (!brokenMap.containsKey(playerId)) {
             brokenMap[playerId] = 0
-            Logger.dev("BREAK_LIMIT: Initialized counter for ${player.name} to 0")
+            Logger.debug("Init counter for ${player.name}")
         }
         if (!runningProcessesMap.containsKey(playerId)) {
             runningProcessesMap[playerId] = 0
@@ -136,11 +136,11 @@ class BlockUtils {
             processFinishedMap[playerId] = false
         }
 
-        Logger.dev("BREAK_LIMIT: Player ${player.name} starting multimine. Current count: ${brokenMap[playerId]}/$breakLimit")
+        Logger.debug("Start multimine for ${player.name}: ${brokenMap[playerId]}/$breakLimit")
 
         // Check break limit BEFORE starting any processes
         if (brokenMap[playerId]!! >= breakLimit) {
-            Logger.dev("BREAK_LIMIT: STOPPING - Break limit already reached for player ${player.name}: ${brokenMap[playerId]}/$breakLimit")
+            Logger.debug("Stop multimine (limit) for ${player.name}: ${brokenMap[playerId]}/$breakLimit")
             return
         }
 
@@ -174,12 +174,12 @@ class BlockUtils {
                             synchronized(runningProcessesMap) {
                                 runningProcessesMap[playerId] = runningProcessesMap[playerId]!! - 1
 
-                                Logger.dev("BREAK_LIMIT: Task finished for ${player.name}. Remaining: ${runningProcessesMap[playerId]}")
+                                Logger.debug("Task finished for ${player.name}. Remaining: ${runningProcessesMap[playerId]}")
 
                                 if (runningProcessesMap[playerId]!! <= 0 && !processFinishedMap[playerId]!!) {
                                     processFinishedMap[playerId] = true
 
-                                    Logger.dev("BREAK_LIMIT: All processes finished for ${player.name}, resetting values and triggering leaf decay")
+                                    Logger.debug("All processes finished for ${player.name}, triggering leaf decay")
 
                                     // Reset values
                                     runningProcessesMap[playerId] = 0
@@ -205,7 +205,7 @@ class BlockUtils {
             }
         }
 
-        Logger.dev("BREAK_LIMIT: Scheduled $tasksScheduled tasks for ${player.name}")
+        Logger.debug("Scheduled $tasksScheduled tasks for ${player.name}")
 
         // If nothing was scheduled at top-level, finalize immediately if no tasks are running
         if (tasksScheduled == 0 && topLevel) {
@@ -213,7 +213,7 @@ class BlockUtils {
                 if (runningProcessesMap[playerId]!! <= 0 && !processFinishedMap[playerId]!!) {
                     processFinishedMap[playerId] = true
 
-                    Logger.dev("BREAK_LIMIT: No tasks scheduled for ${player.name}. Finalizing and triggering leaf decay immediately")
+                    Logger.debug("No tasks for ${player.name}. Trigger leaf decay now")
 
                     runningProcessesMap[playerId] = 0
                     brokenMap[playerId] = 0
@@ -255,9 +255,7 @@ class BlockUtils {
 
                             // Check if the leaf should decay (not persistent and far from logs)
                             if (!newBlockAsLeave.isPersistent && newBlockAsLeave.distance >= 4) {
-                                // TEMP: Make leaf decay delay much bigger to verify delay behavior
                                 val tempDelayTicks = ((animationTime.toDouble() * 5.0).coerceAtLeast(40.0)).toLong()
-                                Logger.dev("Fast leaf-decay TEMP delay: $tempDelayTicks ticks")
                                 Bukkit.getScheduler().runTaskLater(
                                     Data.instance,
                                     Runnable {

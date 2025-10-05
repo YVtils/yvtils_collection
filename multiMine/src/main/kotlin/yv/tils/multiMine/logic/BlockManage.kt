@@ -122,25 +122,6 @@ class BlockManage {
 
     private fun shulkerList(): MutableList<Material> {
         val shulkerList = mutableListOf<Material>()
-//        shulkerList.add(Material.SHULKER_BOX)
-//        shulkerList.add(Material.BLACK_SHULKER_BOX)
-//        shulkerList.add(Material.BLUE_SHULKER_BOX)
-//        shulkerList.add(Material.BROWN_SHULKER_BOX)
-//        shulkerList.add(Material.CYAN_SHULKER_BOX)
-//        shulkerList.add(Material.GRAY_SHULKER_BOX)
-//        shulkerList.add(Material.GREEN_SHULKER_BOX)
-//        shulkerList.add(Material.LIGHT_BLUE_SHULKER_BOX)
-//        shulkerList.add(Material.LIGHT_GRAY_SHULKER_BOX)
-//        shulkerList.add(Material.LIME_SHULKER_BOX)
-//        shulkerList.add(Material.MAGENTA_SHULKER_BOX)
-//        shulkerList.add(Material.ORANGE_SHULKER_BOX)
-//        shulkerList.add(Material.PINK_SHULKER_BOX)
-//        shulkerList.add(Material.PURPLE_SHULKER_BOX)
-//        shulkerList.add(Material.RED_SHULKER_BOX)
-//        shulkerList.add(Material.WHITE_SHULKER_BOX)
-//        shulkerList.add(Material.YELLOW_SHULKER_BOX)
-
-        // TODO: Test this alternative way to get all shulker boxes
         val itemTag = Tag.SHULKER_BOXES
         itemTag.values.forEach {
             if (!shulkerList.contains(it)) {
@@ -156,7 +137,6 @@ class BlockManage {
         bundleList.add(Material.BUNDLE)
 
         if (VersionUtils().isServerVersionAtLeast("1.21.4")) {
-            // TODO: Test if this works
             val ITEMS_BUNDLES: Tag<Material?>? = Bukkit.getTag(REGISTRY_ITEMS, NamespacedKey.minecraft("bundles"), Material::class.java)
             if (ITEMS_BUNDLES != null) {
                 for (item in ITEMS_BUNDLES.values) {
@@ -165,23 +145,6 @@ class BlockManage {
                     }
                 }
             }
-
-//                bundleList.add(Material.valueOf("BLACK_BUNDLE"))
-//                bundleList.add(Material.valueOf("BLUE_BUNDLE"))
-//                bundleList.add(Material.valueOf("BROWN_BUNDLE"))
-//                bundleList.add(Material.valueOf("CYAN_BUNDLE"))
-//                bundleList.add(Material.valueOf("GRAY_BUNDLE"))
-//                bundleList.add(Material.valueOf("GREEN_BUNDLE"))
-//                bundleList.add(Material.valueOf("LIGHT_BLUE_BUNDLE"))
-//                bundleList.add(Material.valueOf("LIGHT_GRAY_BUNDLE"))
-//                bundleList.add(Material.valueOf("LIME_BUNDLE"))
-//                bundleList.add(Material.valueOf("MAGENTA_BUNDLE"))
-//                bundleList.add(Material.valueOf("ORANGE_BUNDLE"))
-//                bundleList.add(Material.valueOf("PINK_BUNDLE"))
-//                bundleList.add(Material.valueOf("PURPLE_BUNDLE"))
-//                bundleList.add(Material.valueOf("RED_BUNDLE"))
-//                bundleList.add(Material.valueOf("WHITE_BUNDLE"))
-//                bundleList.add(Material.valueOf("YELLOW_BUNDLE"))
         }
 
         return bundleList
@@ -209,26 +172,10 @@ class BlockManage {
     }
 
     fun addMultiple(sender: CommandSender) {
-        if (sender !is Player) {
-            sender.sendMessage(LanguageHandler.getMessage(
-                "command.multiMine.multiple.console",
-                sender,
-                mapOf("prefix" to Data.prefix)
-            ))
-            return
-        }
-
-        if (!checkForContainer(sender.inventory.itemInMainHand.type)) {
-            sender.sendMessage(LanguageHandler.getMessage(
-                "command.multiMine.multiple.noContainer",
-                sender,
-                mapOf("prefix" to Data.prefix)
-            ))
-            return
-        }
+        if (!checkMultipleLogic(sender)) return
+        val sender = sender as Player
 
         val blocks = mutableListOf<Material>()
-
         for (block in loadContainerContent(sender.inventory.itemInMainHand)) {
             val b = modifyBlockList("+", block, sender)
             if (!b) {
@@ -246,26 +193,10 @@ class BlockManage {
     }
 
     fun removeMultiple(sender: CommandSender) {
-        if (sender !is Player) {
-            sender.sendMessage(LanguageHandler.getMessage(
-                "command.multiMine.multiple.console",
-                sender,
-                mapOf("prefix" to Data.prefix)
-            ))
-            return
-        }
-
-        if (!checkForContainer(sender.inventory.itemInMainHand.type)) {
-            sender.sendMessage(LanguageHandler.getMessage(
-                "command.multiMine.multiple.noContainer",
-                sender,
-                mapOf("prefix" to Data.prefix)
-            ))
-            return
-        }
+        if (!checkMultipleLogic(sender)) return
+        val sender = sender as Player
 
         val blocks = mutableListOf<Material>()
-
         for (block in loadContainerContent(sender.inventory.itemInMainHand)) {
             val b = modifyBlockList("-", block, sender)
             if (!b) {
@@ -280,6 +211,32 @@ class BlockManage {
             sender,
             mapOf("prefix" to Data.prefix, "blocks" to blocks.joinToString(", ") { it.name })
         ))
+    }
+
+    private fun checkMultipleLogic(sender: CommandSender): Boolean {
+        if (sender !is Player) {
+            sender.sendMessage(
+                LanguageHandler.getMessage(
+                    "command.multiMine.multiple.console",
+                    sender,
+                    mapOf("prefix" to Data.prefix)
+                )
+            )
+            return false
+        }
+
+        if (!checkForContainer(sender.inventory.itemInMainHand.type)) {
+            sender.sendMessage(
+                LanguageHandler.getMessage(
+                    "command.multiMine.multiple.noContainer",
+                    sender,
+                    mapOf("prefix" to Data.prefix)
+                )
+            )
+            return false
+        }
+
+        return true
     }
 
     private fun modifyBlockList(identifier: String, block: Material, sender: CommandSender): Boolean {
