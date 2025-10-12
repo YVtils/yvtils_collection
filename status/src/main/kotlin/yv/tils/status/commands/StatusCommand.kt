@@ -43,7 +43,7 @@ class StatusCommand {
         literalArgument("clear", false) {
             withPermission("yvtils.command.status.clear")
             withPermission(CommandPermission.NONE)
-            playerArgument("yv/tils/player", true) {
+            asyncPlayerProfileArgument("yv/tils/player", true) {
                 withPermission("yvtils.command.status.clear.others")
                 withPermission(CommandPermission.OP)
                 anyExecutor { sender, args ->

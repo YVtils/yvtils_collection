@@ -1,6 +1,8 @@
 package yv.tils.common.config
 
 import yv.tils.config.files.YMLFileUtils
+import yv.tils.config.data.ConfigEntry
+import yv.tils.config.data.EntryType
 import yv.tils.utils.logger.Logger
 
 class ConfigFile {
@@ -38,24 +40,34 @@ class ConfigFile {
     }
 
     fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
+        val entries = mutableListOf<ConfigEntry>()
+
         if (content.isEmpty()) {
-            content["documentation"] = "https://docs.yvtils.net/config.yml"
-
-            content["language"] = "en"
-
-            content["serverIP"] = "smp.net"
-            content["serverPort"] = -1
-
-            content["timezone"] = "default"
-
-            content["updateCheck.enabled"] = true
-            content["updateCheck.sendToOps"] = true
-
-            content["debug.active"] = false
-            content["debug.level"] = 3
+            entries.add(ConfigEntry("documentation", EntryType.STRING, null, "https://docs.yvtils.net/config.yml", "Documentation URL"))
+            entries.add(ConfigEntry("language", EntryType.STRING, null, "en", "Default language"))
+            entries.add(ConfigEntry("serverIP", EntryType.STRING, null, "smp.net", "Server IP"))
+            entries.add(ConfigEntry("serverPort", EntryType.INT, null, -1, "Server port"))
+            entries.add(ConfigEntry("timezone", EntryType.STRING, null, "default", "Timezone"))
+            entries.add(ConfigEntry("updateCheck.enabled", EntryType.BOOLEAN, null, true, "Update check enabled"))
+            entries.add(ConfigEntry("updateCheck.sendToOps", EntryType.BOOLEAN, null, true, "Send updates to ops"))
+            entries.add(ConfigEntry("debug.active", EntryType.BOOLEAN, null, false, "Debug active"))
+            entries.add(ConfigEntry("debug.level", EntryType.INT, null, 3, "Debug level"))
+        } else {
+            for ((k, v) in content) {
+                val type = when (v) {
+                    is Boolean -> EntryType.BOOLEAN
+                    is Int -> EntryType.INT
+                    is Double -> EntryType.DOUBLE
+                    is List<*> -> EntryType.LIST
+                    is Map<*, *> -> EntryType.MAP
+                    is String -> EntryType.STRING
+                    else -> EntryType.UNKNOWN
+                }
+                entries.add(ConfigEntry(k, type, null, v, null))
+            }
         }
 
-    val ymlFile = YMLFileUtils.makeYAMLFile(filePath, content)
-    yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
+        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries(filePath, entries)
+        yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
     }
 }

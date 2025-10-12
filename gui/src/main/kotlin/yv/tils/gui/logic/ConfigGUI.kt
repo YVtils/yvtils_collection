@@ -4,7 +4,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import yv.tils.gui.data.ConfigEntryTypes
+import yv.tils.config.data.ConfigEntry
 import yv.tils.gui.utils.Filler
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.message.MessageUtils
@@ -19,19 +19,7 @@ class ConfigGUI {
         private var multiSite = false
     }
 
-    fun createGUI(player: Player, configName: String, config: MutableMap<String, Any>) {
-        val entries = mutableListOf<ConfigEntry>()
-        for ((key, value) in config) {
-            val type = when (value) {
-                is Int -> ConfigEntryTypes.INT
-                is Double -> ConfigEntryTypes.DOUBLE
-                is Boolean -> ConfigEntryTypes.BOOLEAN
-                is String -> ConfigEntryTypes.STRING
-                else -> ConfigEntryTypes.UNKNOWN
-            }
-            entries.add(ConfigEntry(key, value, type, Material.PAPER))
-        }
-
+    fun createGUI(player: Player, configName: String, config: MutableList<ConfigEntry>) {
         var inv = InventoryHandler().createInventory(
             MessageUtils.replacer(
                 guiTitle,
@@ -40,7 +28,7 @@ class ConfigGUI {
             GUI_SIZE
         )
 
-        inv = fillInventory(inv, entries)
+        inv = fillInventory(inv, config)
         inv = Filler().fillInventory(inv, blockedSlots = keySlots.toMutableList())
 
         if (multiSite) {
@@ -54,28 +42,29 @@ class ConfigGUI {
         inv: Inventory,
         entries: List<ConfigEntry>,
     ): Inventory {
-        for (i in entries.indices) {
-            if (i >= keySlots.size) {
+        var slotIndex = 0
+        for (entry in entries) {
+            if (slotIndex >= keySlots.size) {
                 multiSite = true
                 break
             }
-            val entry = entries[i]
-            inv.setItem(keySlots[i], buildKeyItem(entry))
+            val item = buildKeyItem(entry) ?: continue
+
+            inv.setItem(keySlots[slotIndex], item)
+            slotIndex++
         }
         return inv
     }
+    private fun buildKeyItem(entry: ConfigEntry): ItemStack? {
+        val itemMaterial = entry.invItem ?: entry.dynamicInvItem?.invoke(entry)
+        
+        if (itemMaterial == null) {
+            return null
+        }
 
-    private fun buildKeyItem(entry: ConfigEntry): ItemStack {
-        val item = ItemStack(entry.item)
+        val item = ItemStack(itemMaterial)
         // TODO: Implement logic
         return item
     }
-
-    data class ConfigEntry(
-        val key: String,
-        val value: Any,
-        val type: ConfigEntryTypes,
-        val item: Material,
-    )
 }
 

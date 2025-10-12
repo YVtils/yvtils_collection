@@ -34,5 +34,19 @@ class YMLFileUtils {
 
             return YAMLFile(file, yaml)
         }
+
+        fun makeYAMLFileFromEntries(path: String, entries: List<yv.tils.config.data.ConfigEntry>): YAMLFile {
+            Logger.debug("Creating YAML file from ConfigEntry list: $path")
+
+            val map = mutableMapOf<String, Any>()
+
+            for (entry in entries) {
+                // Prefer explicit value, otherwise defaultValue
+                val value = entry.value ?: entry.defaultValue
+                if (value != null) map[entry.key] = value
+            }
+
+            return makeYAMLFile(path, map)
+        }
     }
 }

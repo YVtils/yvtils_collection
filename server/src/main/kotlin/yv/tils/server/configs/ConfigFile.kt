@@ -1,6 +1,8 @@
 package yv.tils.server.configs
 
 import yv.tils.config.files.YMLFileUtils
+import yv.tils.config.data.ConfigEntry
+import yv.tils.config.data.EntryType
 import yv.tils.utils.logger.Logger
 
 class ConfigFile {
@@ -31,40 +33,44 @@ class ConfigFile {
     }
 
     fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
+        val entries = mutableListOf<ConfigEntry>()
+
         if (content.isEmpty()) {
-            content["documentation"] = "https://docs.yvtils.net/server/config.yml"
-            content["motd.enabled"] = true
-            content["info.maxPlayers"] = 0
-            content["motd.entries.top"] = listOf(
+            entries.add(ConfigEntry("documentation", EntryType.STRING, null, "https://docs.yvtils.net/server/config.yml", "Documentation URL"))
+            entries.add(ConfigEntry("motd.enabled", EntryType.BOOLEAN, null, true, "Enable MOTD"))
+            entries.add(ConfigEntry("info.maxPlayers", EntryType.INT, null, 0, "Max players override"))
+            entries.add(ConfigEntry("motd.entries.top", EntryType.LIST, null, listOf(
                 "Welcome to the server!",
                 "This server is running YVtils v1.0.0",
                 "Server version: <version>",
                 "Online players: <onlinePlayers>",
                 "Max players: <maxPlayers>",
                 "Date: <date>",
-            )
-            content["motd.entries.bottom"] = listOf(
+            ), "Top MOTD entries"))
+            entries.add(ConfigEntry("motd.entries.bottom", EntryType.LIST, null, listOf(
                 "Have fun!",
                 "Enjoy your stay!",
                 "See you next time!",
-            )
-            content["hoverMOTD.enabled"] = true
-            content["hoverMOTD.entries"] = listOf(
-                "a",
-                "b",
-                "c",
-                "d",
-                "e",
-                "f",
-                "g",
-                "h",
-                "i",
-                "j",
-            )
-            content["maintenance.enabled"] = false
+            ), "Bottom MOTD entries"))
+            entries.add(ConfigEntry("hoverMOTD.enabled", EntryType.BOOLEAN, null, true, "Enable hover MOTD"))
+            entries.add(ConfigEntry("hoverMOTD.entries", EntryType.LIST, null, listOf("a","b","c","d","e","f","g","h","i","j"), "Hover entries"))
+            entries.add(ConfigEntry("maintenance.enabled", EntryType.BOOLEAN, null, false, "Maintenance mode"))
+        } else {
+            for ((k, v) in content) {
+                val type = when (v) {
+                    is Boolean -> EntryType.BOOLEAN
+                    is Int -> EntryType.INT
+                    is Double -> EntryType.DOUBLE
+                    is List<*> -> EntryType.LIST
+                    is Map<*, *> -> EntryType.MAP
+                    is String -> EntryType.STRING
+                    else -> EntryType.UNKNOWN
+                }
+                entries.add(ConfigEntry(k, type, null, v, null))
+            }
         }
 
-    val ymlFile = YMLFileUtils.makeYAMLFile(filePath, content)
-    yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
+        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries(filePath, entries)
+        yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
     }
 }

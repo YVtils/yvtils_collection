@@ -2,6 +2,7 @@ package yv.tils.regions.commands
 
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
+import dev.jorel.commandapi.arguments.AsyncPlayerProfileArgument
 import dev.jorel.commandapi.arguments.LocationType
 import dev.jorel.commandapi.kotlindsl.*
 import dev.jorel.commandapi.wrappers.Location2D
@@ -196,7 +197,7 @@ class RegionCommand {
                         getRegions(sender.sender, RegionRoles.MODERATOR)
                     })
 
-                    asyncOfflinePlayerArgument("yv/tils/player", false) {
+                    asyncPlayerProfileArgument("yv/tils/player", false) {
                         withPermission(Permissions.REGION_MEMBER_ADD.permission)
                         withPermission(CommandPermission.OP)
 
@@ -254,7 +255,7 @@ class RegionCommand {
                         getRegions(sender.sender, RegionRoles.MODERATOR)
                     })
 
-                    asyncOfflinePlayerArgument("yv/tils/player", false) {
+                    asyncPlayerProfileArgument("yv/tils/player", false) {
                         withPermission(Permissions.REGION_MEMBER_REMOVE.permission)
                         withPermission(CommandPermission.OP)
 
@@ -304,7 +305,7 @@ class RegionCommand {
                         getRegions(sender.sender, RegionRoles.MODERATOR)
                     })
 
-                    asyncOfflinePlayerArgument("yv/tils/player", false) {
+                    asyncPlayerProfileArgument("yv/tils/player", false) {
                         withPermission(Permissions.REGION_MEMBER_ROLE.permission)
                         withPermission(CommandPermission.OP)
 

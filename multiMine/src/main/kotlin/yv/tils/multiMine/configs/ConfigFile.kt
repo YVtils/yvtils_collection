@@ -13,12 +13,38 @@ class ConfigFile {
     companion object {
         val config: MutableMap<String, Any> = mutableMapOf()
         var blockList: MutableList<Material> = mutableListOf()
+        val configNew: MutableList<ConfigEntry> = mutableListOf()
+        private val configIndex: MutableMap<String, ConfigEntry> = mutableMapOf()
+
+        fun getConfigEntry(key: String): ConfigEntry? = configIndex[key]
+
+        fun get(key: String): Any? {
+            val e = getConfigEntry(key)
+            return e?.value ?: e?.defaultValue ?: config[key]
+        }
+
+        fun getString(key: String): String? = get(key)?.toString()
+        fun getInt(key: String): Int? = (get(key) as? Number)?.toInt()
+        fun getBoolean(key: String): Boolean? = when (val v = get(key)) {
+            is Boolean -> v
+            is String -> v.toBoolean()
+            else -> null
+        }
     }
 
     fun updateBlockList(blocks: MutableList<Material>) {
         blockList = blocks
 
         config["blocks"] = blocks.map { it.name }
+        // keep ConfigEntry list in sync
+        val existing = getConfigEntry("blocks")
+        if (existing != null) {
+            existing.value = blocks.map { it.name }
+        } else {
+            val entry = ConfigEntry("blocks", EntryType.LIST, blocks.map { it.name }, createTemplateBlocks(), "Block list")
+            configNew.add(entry)
+            configIndex[entry.key] = entry
+        }
 
         CoroutineHandler.launchTask(
             suspend { registerStrings(config) },
@@ -29,12 +55,23 @@ class ConfigFile {
 
     fun loadConfig() {
     val file = YMLFileUtils.loadYAMLFile("/multiMine/config.yml")
-
+        // populate legacy config map
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
 
             Logger.debug("Loading config key: $key -> $value")
-            config[key] = value as Any
+            if (value != null) config[key] = value
+        }
+
+        // ensure configNew contains base entries and then load values into them
+        ensureBaseEntries()
+        // load values into entries and populate index
+        for (entry in configNew) {
+            val v = file.content.get(entry.key)
+            if (v != null) entry.value = v
+            configIndex[entry.key] = entry
+            val vv = entry.value ?: entry.defaultValue
+            if (vv != null) config[entry.key] = vv
         }
 
         loadBlockList(file)
@@ -52,82 +89,100 @@ class ConfigFile {
     }
 
     fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
-        if (content.isEmpty()) {
-            content["documentation"] = "https://docs.yvtils.net/multiMine/config.yml"
-            content["defaultState"] = true
-            content["animationTime"] = 3
-            content["cooldownTime"] = 3
-            content["breakLimit"] = 250
-            content["leaveDecay"] = true
-            content["matchBlockTypeOnly"] = true // TODO: Test if this also works in deactivated state
-            content["blocks"] = createTemplateBlocks()
+        // Always start from base default entries
+        ensureBaseEntries()
+
+        // If a map is provided, set entry.value from it
+        if (content.isNotEmpty()) {
+            for (entry in configNew) {
+                if (content.containsKey(entry.key)) entry.value = content[entry.key]
+            }
         }
 
-    val ymlFile = YMLFileUtils.makeYAMLFile("/multiMine/config.yml", content)
-    yv.tils.config.files.FileUtils.saveFile("/multiMine/config.yml", ymlFile)
+        // sync index and legacy map
+        syncEntriesToMap()
+
+        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries("/multiMine/config.yml", configNew)
+        yv.tils.config.files.FileUtils.saveFile("/multiMine/config.yml", ymlFile)
     }
 
-    // TODO: Implement this as new config logic
-    fun registerStrings() {
-        val content = mutableListOf<ConfigEntry>()
+    private fun syncEntriesToMap() {
+        configIndex.clear()
+        for (entry in configNew) {
+            configIndex[entry.key] = entry
+            val vv = entry.value ?: entry.defaultValue
+            if (vv != null) config[entry.key] = vv
+        }
+    }
 
-        content.add(ConfigEntry(
+    private fun ensureBaseEntries() {
+        if (configNew.isNotEmpty()) return
+
+        configNew.add(ConfigEntry(
             "documentation",
             EntryType.STRING,
             null,
             "https://docs.yvtils.net/multiMine/config.yml",
-            "Link to the documentation of the config file"
+            "Documentation URL"
         ))
-        content.add(ConfigEntry(
+        configNew.add(ConfigEntry(
             "defaultState",
             EntryType.BOOLEAN,
             null,
             true,
-            "If MultiMine should be enabled by default for new players"
+            "Default enabled state",
+            dynamicInvItem = { if (it.value as? Boolean == true) Material.LIME_DYE else Material.RED_DYE }
         ))
-        content.add(ConfigEntry(
+        configNew.add(ConfigEntry(
             "animationTime",
             EntryType.INT,
-            mapOf("min" to 1, "max" to 20),
+            null,
             3,
-            "The time in ticks for the breaking animation (1 tick = 1/20 second)"
+            "Animation time in ticks",
+            Material.CLOCK
         ))
-        content.add(ConfigEntry(
+        configNew.add(ConfigEntry(
             "cooldownTime",
             EntryType.INT,
-            mapOf("min" to 0, "max" to 20),
+            null,
             3,
-            "The cooldown time in ticks before the next block can be broken (1 tick = 1/20 second)"
+            "Cooldown time in ticks",
+            Material.SNOWBALL
         ))
-        content.add(ConfigEntry(
+        configNew.add(ConfigEntry(
             "breakLimit",
             EntryType.INT,
-            mapOf("min" to 1, "max" to 10000),
+            null,
             250,
-            "The maximum number of blocks that can be broken in one MultiMine session"
+            "Break limit",
+            Material.DIAMOND_PICKAXE
         ))
-        content.add(ConfigEntry(
+        configNew.add(ConfigEntry(
             "leaveDecay",
             EntryType.BOOLEAN,
             null,
             true,
-            "If the broken blocks should decay over time after the player leaves"
+            "Leave decay",
+            dynamicInvItem = { if (it.value as? Boolean == true) Material.OAK_LEAVES else Material.NETHER_WART_BLOCK }
         ))
-        content.add(ConfigEntry(
+        configNew.add(ConfigEntry(
             "matchBlockTypeOnly",
             EntryType.BOOLEAN,
             null,
             true,
-            "If only blocks of the same type as the initially broken block should be considered for breaking"
+            "Match block type only",
+            dynamicInvItem = { if (it.value as? Boolean == true) Material.HOPPER else Material.RED_DYE }
         ))
-        content.add(ConfigEntry(
+        configNew.add(ConfigEntry(
             "blocks",
             EntryType.LIST,
             null,
             createTemplateBlocks(),
-            "The list of blocks that can be broken with MultiMine"
+            "Block list",
+            Material.BUNDLE
         ))
-
+        // populate index for fast lookups
+        for (entry in configNew) configIndex[entry.key] = entry
     }
 
     // TODO: Test if list gets updated with version updates

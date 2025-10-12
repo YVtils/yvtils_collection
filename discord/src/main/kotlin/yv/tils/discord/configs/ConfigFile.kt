@@ -1,6 +1,8 @@
 package yv.tils.discord.configs
 
 import yv.tils.config.files.YMLFileUtils
+import yv.tils.config.data.ConfigEntry
+import yv.tils.config.data.EntryType
 import yv.tils.utils.logger.Logger
 
 // TODO: Add option to allow multiple whitelist channels
@@ -39,66 +41,64 @@ class ConfigFile {
     }
 
     fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
+        val entries = mutableListOf<ConfigEntry>()
+
         if (content.isEmpty()) {
-            content["documentation"] = "https://docs.yvtils.net/discord/config.yml"
-            content["appToken"] = "YOUR TOKEN HERE"
-            content["mainGuild"] = "GUILD ID"
-            content["botSettings.onlineStatus"] = "online"
-            content["botSettings.activity"] = "none"
-            content["botSettings.activityMessage"] = "Minecraft"
+            entries.add(ConfigEntry("documentation", EntryType.STRING, null, "https://docs.yvtils.net/discord/config.yml", "Documentation URL"))
+            entries.add(ConfigEntry("appToken", EntryType.STRING, null, "YOUR TOKEN HERE", "Discord bot token"))
+            entries.add(ConfigEntry("mainGuild", EntryType.STRING, null, "GUILD ID", "Main guild ID"))
+            entries.add(ConfigEntry("botSettings.onlineStatus", EntryType.STRING, null, "online", "Bot online status"))
+            entries.add(ConfigEntry("botSettings.activity", EntryType.STRING, null, "none", "Bot activity"))
+            entries.add(ConfigEntry("botSettings.activityMessage", EntryType.STRING, null, "Minecraft", "Bot activity message"))
 
-            content["general.settings.ignoreBotMessages"] = true
+            entries.add(ConfigEntry("general.settings.ignoreBotMessages", EntryType.BOOLEAN, null, true, "Ignore bot messages"))
 
-            content["whitelistFeature.channel"] = "CHANNEL ID"
-            content["whitelistFeature.roles"] = "ROLE ID 1, ROLE ID 2, ROLE ID ..."
-            content["whitelistFeature.settings.checkMinecraftAccount"] = true
+            entries.add(ConfigEntry("whitelistFeature.channel", EntryType.STRING, null, "CHANNEL ID", "Whitelist channel"))
+            entries.add(ConfigEntry("whitelistFeature.roles", EntryType.STRING, null, "ROLE ID 1, ROLE ID 2, ROLE ID ...", "Whitelist roles"))
+            entries.add(ConfigEntry("whitelistFeature.settings.checkMinecraftAccount", EntryType.BOOLEAN, null, true, "Check minecraft accounts"))
 
-            content["commands.serverInfoCommand.permission"] = "PERMISSION"
-            content["commands.whitelistCommand.permission"] = "PERMISSION"
+            entries.add(ConfigEntry("commands.serverInfoCommand.permission", EntryType.STRING, null, "PERMISSION", "Server info permission"))
+            entries.add(ConfigEntry("commands.whitelistCommand.permission", EntryType.STRING, null, "PERMISSION", "Whitelist command permission"))
 
-            content["syncFeature.chatSync.enabled"] = true
-            content["syncFeature.chatSync.permission"] = "PERMISSION"
-            content["syncFeature.chatSync.channel"] = "CHANNEL ID"
-            content["syncFeature.chatSync.settings.syncMinecraftMessages"] = true
-            content["syncFeature.chatSync.settings.syncDiscordMessages"] = true
-            content["syncFeature.chatSync.settings.syncAdvancements"] = true
-            content["syncFeature.chatSync.settings.syncJoinLeaveMessages"] = true
-            content["syncFeature.chatSync.settings.syncDeaths"] = true
+            entries.add(ConfigEntry("syncFeature.chatSync.enabled", EntryType.BOOLEAN, null, true, "Chat sync enabled"))
+            entries.add(ConfigEntry("syncFeature.chatSync.permission", EntryType.STRING, null, "PERMISSION", "Chat sync permission"))
+            entries.add(ConfigEntry("syncFeature.chatSync.channel", EntryType.STRING, null, "CHANNEL ID", "Chat sync channel"))
+            entries.add(ConfigEntry("syncFeature.chatSync.settings.syncMinecraftMessages", EntryType.BOOLEAN, null, true, "Sync MC messages"))
+            entries.add(ConfigEntry("syncFeature.chatSync.settings.syncDiscordMessages", EntryType.BOOLEAN, null, true, "Sync Discord messages"))
+            entries.add(ConfigEntry("syncFeature.chatSync.settings.syncAdvancements", EntryType.BOOLEAN, null, true, "Sync advancements"))
+            entries.add(ConfigEntry("syncFeature.chatSync.settings.syncJoinLeaveMessages", EntryType.BOOLEAN, null, true, "Sync join/leave"))
+            entries.add(ConfigEntry("syncFeature.chatSync.settings.syncDeaths", EntryType.BOOLEAN, null, true, "Sync deaths"))
 
-            content["syncFeature.consoleSync.enabled"] = true
-            content["syncFeature.consoleSync.channel"] = "CHANNEL ID"
-            content["syncFeature.consoleSync.settings.ignoreBotMessages"] = true
+            entries.add(ConfigEntry("syncFeature.consoleSync.enabled", EntryType.BOOLEAN, null, true, "Console sync enabled"))
+            entries.add(ConfigEntry("syncFeature.consoleSync.channel", EntryType.STRING, null, "CHANNEL ID", "Console sync channel"))
+            entries.add(ConfigEntry("syncFeature.consoleSync.settings.ignoreBotMessages", EntryType.BOOLEAN, null, true, "Ignore bot messages in console sync"))
 
-            content["syncFeature.serverStats.enabled"] = true
-            content["syncFeature.serverStats.mode"] = "both" // "both", "discord", "minecraft"
-            content["syncFeature.serverStats.channel"] = "CHANNEL ID"
+            entries.add(ConfigEntry("syncFeature.serverStats.enabled", EntryType.BOOLEAN, null, true, "Server stats enabled"))
+            entries.add(ConfigEntry("syncFeature.serverStats.mode", EntryType.STRING, null, "both", "Server stats mode"))
+            entries.add(ConfigEntry("syncFeature.serverStats.channel", EntryType.STRING, null, "CHANNEL ID", "Server stats channel"))
 
-            // Server Status
-            content["syncFeature.serverStats.design.status.text"] = "<emoji> | SERVER <status>"
-            content["syncFeature.serverStats.design.status.emoji.online"] = "💚"
-            content["syncFeature.serverStats.design.status.emoji.offline"] = "❤️"
-            content["syncFeature.serverStats.design.status.emoji.maintenance"] = "💛"
+            entries.add(ConfigEntry("syncFeature.serverStats.design.status.text", EntryType.STRING, null, "<emoji> | SERVER <status>", "Status text"))
+            entries.add(ConfigEntry("syncFeature.serverStats.design.status.emoji.online", EntryType.STRING, null, "💚", "Online emoji"))
+            entries.add(ConfigEntry("syncFeature.serverStats.design.status.emoji.offline", EntryType.STRING, null, "❤️", "Offline emoji"))
+            entries.add(ConfigEntry("syncFeature.serverStats.design.status.emoji.maintenance", EntryType.STRING, null, "💛", "Maintenance emoji"))
 
-            // Server Version
-            content["syncFeature.serverStats.design.version.text"] = "<emoji> | <version>"
-            content["syncFeature.serverStats.design.version.emoji"] = "🛠️"
+            entries.add(ConfigEntry("syncFeature.serverStats.design.version.text", EntryType.STRING, null, "<emoji> | <version>", "Version text"))
+            entries.add(ConfigEntry("syncFeature.serverStats.design.version.emoji", EntryType.STRING, null, "🛠️", "Version emoji"))
 
-            // Server Players
-            content["syncFeature.serverStats.design.players.text"] = "<emoji> | <players> / <maxPlayers> Players"
-            content["syncFeature.serverStats.design.players.emoji"] = "👥"
+            entries.add(ConfigEntry("syncFeature.serverStats.design.players.text", EntryType.STRING, null, "<emoji> | <players> / <maxPlayers> Players", "Players text"))
+            entries.add(ConfigEntry("syncFeature.serverStats.design.players.emoji", EntryType.STRING, null, "👥", "Players emoji"))
 
-            // Last Refresh
-            content["syncFeature.serverStats.design.lastRefresh.text"] = "<emoji> | <time>"
-            content["syncFeature.serverStats.design.lastRefresh.emoji"] = "⌚"
+            entries.add(ConfigEntry("syncFeature.serverStats.design.lastRefresh.text", EntryType.STRING, null, "<emoji> | <time>", "Last refresh text"))
+            entries.add(ConfigEntry("syncFeature.serverStats.design.lastRefresh.emoji", EntryType.STRING, null, "⌚", "Last refresh emoji"))
 
-            content["syncFeature.serverStats.settings.showServerStatus"] = true
-            content["syncFeature.serverStats.settings.showServerVersion"] = true
-            content["syncFeature.serverStats.settings.showServerPlayers"] = true
-            content["syncFeature.serverStats.settings.showLastRefresh"] = true
+            entries.add(ConfigEntry("syncFeature.serverStats.settings.showServerStatus", EntryType.BOOLEAN, null, true, "Show server status"))
+            entries.add(ConfigEntry("syncFeature.serverStats.settings.showServerVersion", EntryType.BOOLEAN, null, true, "Show server version"))
+            entries.add(ConfigEntry("syncFeature.serverStats.settings.showServerPlayers", EntryType.BOOLEAN, null, true, "Show server players"))
+            entries.add(ConfigEntry("syncFeature.serverStats.settings.showLastRefresh", EntryType.BOOLEAN, null, true, "Show last refresh"))
         }
 
-    val ymlFile = YMLFileUtils.makeYAMLFile(filePath, content)
-    yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
+        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries(filePath, entries)
+        yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
     }
 
 }
