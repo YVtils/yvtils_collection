@@ -29,4 +29,19 @@ enum class ConfigEntryTypes(val type: String, val clickActions: List<ClickAction
         "Unknown",
         listOf(),
     );
+
+    companion object {
+        fun fromEntryType(t: yv.tils.config.data.EntryType): ConfigEntryTypes {
+            return when (t) {
+                yv.tils.config.data.EntryType.STRING -> STRING
+                yv.tils.config.data.EntryType.INT -> INT
+                yv.tils.config.data.EntryType.DOUBLE -> DOUBLE
+                yv.tils.config.data.EntryType.BOOLEAN -> BOOLEAN
+                yv.tils.config.data.EntryType.LIST -> LIST
+                yv.tils.config.data.EntryType.MAP -> MAP
+                yv.tils.config.data.EntryType.ANY -> UNKNOWN
+                yv.tils.config.data.EntryType.UNKNOWN -> UNKNOWN
+            }
+        }
+    }
 }

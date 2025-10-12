@@ -4,6 +4,7 @@ dependencies {
     implementation(project(":config"))
     implementation(project(":multiMine"))
     implementation(project(":migration"))
+    implementation(project(":gui"))
 }
 
 val version = "2.0.0-beta.1"

@@ -58,6 +58,7 @@ class MultiMineYVtils : Data.YVtilsModule {
 
         pm.registerEvents(BlockBreak(), plugin)
         pm.registerEvents(PlayerJoin(), plugin)
+
     }
 
     private fun registerCoroutines() {

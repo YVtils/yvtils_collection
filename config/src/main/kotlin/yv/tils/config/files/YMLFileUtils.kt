@@ -13,7 +13,12 @@ class YMLFileUtils {
         data class YAMLFile(val file: File, val content: YamlConfiguration)
 
         fun loadYAMLFile(path: String, overwriteParentDir: Boolean = false): YAMLFile {
-            val file = if (overwriteParentDir) File(path) else File(Data.pluginFolder, path)
+            val file = if (overwriteParentDir) {
+                File(path)
+            } else {
+                val relPath = path.trimStart('/','\\')
+                File(Data.pluginFolder, relPath)
+            }
 
             if (!file.exists()) throw FileNotFoundException("File not found: $path")
 
@@ -28,7 +33,8 @@ class YMLFileUtils {
             Logger.debug("Creating YAML file: $path")
 
             val yaml = makeYAML(content)
-            val file = File(Data.pluginFolder, path)
+            val relPath = path.trimStart('/','\\')
+            val file = File(Data.pluginFolder, relPath)
 
             Logger.debug("YAML object: $yaml", 3)
 

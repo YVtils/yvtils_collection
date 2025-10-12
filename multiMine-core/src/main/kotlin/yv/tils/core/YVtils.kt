@@ -7,6 +7,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.config.ConfigYVtils
+import yv.tils.gui.GUIYVtils
 import yv.tils.migration.MigrationYVtils
 import yv.tils.multiMine.MultiMineYVtils
 import yv.tils.utils.UtilsYVtils
@@ -29,6 +30,7 @@ class YVtils: JavaPlugin() {
         UtilsYVtils(),
         MigrationYVtils(), // TODO: Remove with 2.1.0
         MultiMineYVtils(),
+        GUIYVtils(),
         CommonYVtils()
     )
 

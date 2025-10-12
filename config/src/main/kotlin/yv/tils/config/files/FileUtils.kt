@@ -14,7 +14,9 @@ class FileUtils {
             val file = if (overwriteParentDir) {
                 File(path)
             } else {
-                File(Data.pluginFolder, path)
+                // Normalize path to avoid leading slash creating absolute paths on Windows
+                val relPath = path.trimStart('/','\\')
+                File(Data.pluginFolder, relPath)
             }
 
             if (!file.exists()) throw FileNotFoundException("File not found: $path")
@@ -90,7 +92,9 @@ class FileUtils {
             Logger.debug("Updating file: $path | overwriteExisting: $overwriteExisting")
             Logger.debug("Content: $content", 3)
 
-            val file = File(Data.pluginFolder, path)
+            // Normalize path to avoid leading slash creating absolute paths on Windows
+            val relPath = path.trimStart('/','\\')
+            val file = File(Data.pluginFolder, relPath)
 
             if (!file.exists()) {
                 Logger.debug("File doesn't exist, creating new file: $path")

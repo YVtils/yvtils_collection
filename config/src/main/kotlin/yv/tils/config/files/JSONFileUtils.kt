@@ -14,7 +14,12 @@ class JSONFileUtils {
         data class JSONFile(val file: File, val content: JsonObject)
 
         fun loadJSONFile(path: String, overwriteParentDir: Boolean = false): JSONFile {
-            val file = if (overwriteParentDir) File(path) else File(Data.pluginFolder, path)
+            val file = if (overwriteParentDir) {
+                File(path)
+            } else {
+                val relPath = path.trimStart('/','\\')
+                File(Data.pluginFolder, relPath)
+            }
 
             if (!file.exists()) throw FileNotFoundException("File not found: $path")
 
@@ -93,7 +98,8 @@ class JSONFileUtils {
 
             val jsonString = json.encodeToString(content)
             val jsonObject = json.decodeFromString(JsonObject.serializer(), jsonString)
-            val file = File(Data.pluginFolder, path)
+            val relPath = path.trimStart('/','\\')
+            val file = File(Data.pluginFolder, relPath)
 
             Logger.debug("JSON object: $jsonObject", 3)
 

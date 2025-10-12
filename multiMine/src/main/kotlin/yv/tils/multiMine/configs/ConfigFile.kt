@@ -103,7 +103,8 @@ class ConfigFile {
         syncEntriesToMap()
 
         val ymlFile = YMLFileUtils.makeYAMLFileFromEntries("/multiMine/config.yml", configNew)
-        yv.tils.config.files.FileUtils.saveFile("/multiMine/config.yml", ymlFile)
+        // Use updateFile with overwriteExisting = true so GUI edits overwrite existing keys
+        yv.tils.config.files.FileUtils.updateFile("/multiMine/config.yml", ymlFile, overwriteExisting = true)
     }
 
     private fun syncEntriesToMap() {
