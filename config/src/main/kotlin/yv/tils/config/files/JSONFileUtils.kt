@@ -3,22 +3,24 @@ package yv.tils.config.files
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
-import yv.tils.config.files.FileUtils.Companion.loadFile
 import yv.tils.config.files.FileUtils.Companion.loadFilesFromFolder
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
 import java.io.File
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.plus
+import java.io.FileNotFoundException
 
 class JSONFileUtils {
     companion object {
         data class JSONFile(val file: File, val content: JsonObject)
 
-        fun loadJSONFile(path: String, overwriteParentDir: Boolean = false): JSONFile =
-            loadFile(path, overwriteParentDir) as? JSONFile
-                ?: throw Exception("File is not a JSON file!")
+        fun loadJSONFile(path: String, overwriteParentDir: Boolean = false): JSONFile {
+            val file = if (overwriteParentDir) File(path) else File(Data.pluginFolder, path)
+
+            if (!file.exists()) throw FileNotFoundException("File not found: $path")
+
+            val content = json.decodeFromString(kotlinx.serialization.json.JsonObject.serializer(), file.readText())
+            return JSONFile(file, content)
+        }
 
         fun loadJSONFilesFromFolder(folder: String, overwriteParentDir: Boolean = false): List<JSONFile> =
             loadFilesFromFolder(folder, "json", overwriteParentDir).mapNotNull { it as? JSONFile }
@@ -26,7 +28,7 @@ class JSONFileUtils {
         /**
          * Checks if the JsonObject only contains empty arrays
          */
-        private fun isEmptyArraysOnly(jsonObject: JsonObject): Boolean {
+        fun isEmptyArraysOnly(jsonObject: JsonObject): Boolean {
             if (jsonObject.isEmpty()) return true
 
             return jsonObject.all { (_, value) ->
@@ -41,7 +43,7 @@ class JSONFileUtils {
         /**
          * Recursively merges two JsonObjects, handling arrays by appending items rather than replacing
          */
-        private fun mergeJsonObjectsWithArrayAppend(original: JsonObject, update: JsonObject): JsonObject {
+        fun mergeJsonObjectsWithArrayAppend(original: JsonObject, update: JsonObject): JsonObject {
             val result = original.toMutableMap()
 
             update.forEach { (key, updateValue) ->
@@ -101,7 +103,7 @@ class JSONFileUtils {
         /**
          * Recursively merges two JsonObjects, preserving arrays and nested structures
          */
-        private fun mergeJsonObjects(original: JsonObject, update: JsonObject): JsonObject {
+        fun mergeJsonObjects(original: JsonObject, update: JsonObject): JsonObject {
             val result = original.toMutableMap()
 
             update.forEach { (key, value) ->

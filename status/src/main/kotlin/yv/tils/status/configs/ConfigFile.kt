@@ -1,6 +1,6 @@
 package yv.tils.status.configs
 
-import yv.tils.config.files.FileUtils
+import yv.tils.config.files.YMLFileUtils
 import yv.tils.utils.logger.Logger
 
 class ConfigFile {
@@ -11,7 +11,7 @@ class ConfigFile {
     private val filePath = "/status/config.yml"
 
     fun loadConfig() {
-        val file = FileUtils.loadYAMLFile(filePath)
+    val file = YMLFileUtils.loadYAMLFile(filePath)
 
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
@@ -30,8 +30,8 @@ class ConfigFile {
             content["blacklist"] = blacklist()
         }
 
-        val ymlFile = FileUtils.makeYAMLFile(filePath, content)
-        FileUtils.saveFile(filePath, ymlFile)
+    val ymlFile = YMLFileUtils.makeYAMLFile(filePath, content)
+    yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
     }
 
     private fun defaultStatus(): List<String> {

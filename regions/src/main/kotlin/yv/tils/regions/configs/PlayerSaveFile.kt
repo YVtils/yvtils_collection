@@ -1,7 +1,7 @@
 package yv.tils.regions.configs
 
 import kotlinx.serialization.json.*
-import yv.tils.config.files.FileUtils
+import yv.tils.config.files.JSONFileUtils
 import yv.tils.regions.data.PlayerManager
 import yv.tils.regions.data.RegionRoles
 import yv.tils.utils.coroutine.CoroutineHandler
@@ -12,8 +12,8 @@ class PlayerSaveFile {
     private val filePath = "/regions/player_save.json"
 
     fun loadConfig() {
-        val file = FileUtils.loadJSONFile(filePath)
-        val jsonFile = file.content
+    val file = JSONFileUtils.loadJSONFile(filePath)
+    val jsonFile = file.content
         val saveList = jsonFile["players"]?.jsonArray ?: return
 
         if (saveList.isEmpty()) {
@@ -55,9 +55,9 @@ class PlayerSaveFile {
     }
 
     fun registerStrings(saveList: MutableList<PlayerManager.PlayerRegion> = mutableListOf()) {
-        val saveWrapper = mapOf("players" to saveList)
-        val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
-        FileUtils.updateFile(filePath, jsonFile)
+    val saveWrapper = mapOf("players" to saveList)
+    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
+    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
     }
 
     fun updatePlayerSetting(uuid: UUID, rUUID: UUID, content: PlayerManager.PlayerRegion?) {
@@ -76,8 +76,8 @@ class PlayerSaveFile {
     }
 
     private fun upgradeStrings(saveList: MutableList<PlayerManager.PlayerRegion> = mutableListOf()) {
-        val saveWrapper = mapOf("players" to saveList)
-        val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
-        FileUtils.updateFile(filePath, jsonFile, true)
+    val saveWrapper = mapOf("players" to saveList)
+    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
+    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile, true)
     }
 }

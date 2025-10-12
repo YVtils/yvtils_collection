@@ -3,7 +3,7 @@ package yv.tils.status.configs
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import yv.tils.config.files.FileUtils
+import yv.tils.config.files.JSONFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 import java.util.*
@@ -16,8 +16,8 @@ class SaveFile {
     private val filePath = "/status/save.json"
 
     fun loadConfig() {
-        val file = FileUtils.loadJSONFile(filePath)
-        val jsonFile = file.content
+    val file = JSONFileUtils.loadJSONFile(filePath)
+    val jsonFile = file.content
         val saveList = jsonFile["saves"]?.jsonArray ?: return
 
         if (saveList.isEmpty()) {
@@ -37,8 +37,9 @@ class SaveFile {
 
     fun registerStrings(saveList: MutableList<StatusSave> = mutableListOf()) {
         val saveWrapper = mapOf("saves" to saveList)
-        val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
-        FileUtils.updateFile(filePath, jsonFile)
+    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
+    // Use FileUtils.updateFile for merging/overwriting logic (keeps existing behavior)
+    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
     }
 
     fun updatePlayerSetting(uuid: UUID, content: String) {

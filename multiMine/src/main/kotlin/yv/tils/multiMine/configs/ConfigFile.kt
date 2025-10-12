@@ -4,7 +4,7 @@ import org.bukkit.Material
 import org.bukkit.Tag
 import yv.tils.config.data.ConfigEntry
 import yv.tils.config.data.EntryType
-import yv.tils.config.files.FileUtils
+import yv.tils.config.files.YMLFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 
@@ -28,7 +28,7 @@ class ConfigFile {
     }
 
     fun loadConfig() {
-        val file = FileUtils.loadYAMLFile("/multiMine/config.yml")
+    val file = YMLFileUtils.loadYAMLFile("/multiMine/config.yml")
 
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
@@ -40,7 +40,7 @@ class ConfigFile {
         loadBlockList(file)
     }
 
-    private fun loadBlockList(file: FileUtils.Companion.YAMLFile) {
+    private fun loadBlockList(file: yv.tils.config.files.YMLFileUtils.Companion.YAMLFile) {
         val blocks = file.content.getStringList("blocks")
         blocks.forEach {
             try {
@@ -63,8 +63,8 @@ class ConfigFile {
             content["blocks"] = createTemplateBlocks()
         }
 
-        val ymlFile = FileUtils.makeYAMLFile("/multiMine/config.yml", content)
-        FileUtils.saveFile("/multiMine/config.yml", ymlFile)
+    val ymlFile = YMLFileUtils.makeYAMLFile("/multiMine/config.yml", content)
+    yv.tils.config.files.FileUtils.saveFile("/multiMine/config.yml", ymlFile)
     }
 
     // TODO: Implement this as new config logic

@@ -1,6 +1,6 @@
 package yv.tils.regions.configs
 
-import yv.tils.config.files.FileUtils
+import yv.tils.config.files.YMLFileUtils
 import yv.tils.regions.data.*
 import yv.tils.utils.logger.Logger
 
@@ -117,7 +117,7 @@ class ConfigFile {
     private val filePath = "/regions/config.yml"
 
     fun loadConfig() {
-        val file = FileUtils.loadYAMLFile(filePath)
+    val file = YMLFileUtils.loadYAMLFile(filePath)
 
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
@@ -152,8 +152,8 @@ class ConfigFile {
             Flag.TELEPORT.name to parseIDToName(Flag.TELEPORT.defaultValue as Int),
         )
 
-        val ymlFile = FileUtils.makeYAMLFile(filePath, content)
-        FileUtils.saveFile(filePath, ymlFile)
+    val ymlFile = YMLFileUtils.makeYAMLFile(filePath, content)
+    yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
     }
 
     private fun parseIDToName(id: Int): String {

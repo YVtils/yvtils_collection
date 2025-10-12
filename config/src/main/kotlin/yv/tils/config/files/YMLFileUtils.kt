@@ -1,25 +1,28 @@
 package yv.tils.config.files
 
 import org.bukkit.configuration.file.YamlConfiguration
-import org.codehaus.plexus.util.FileUtils.loadFile
-import yv.tils.config.files.FileUtils.Companion.YAMLFile
-import yv.tils.config.files.FileUtils.Companion.loadFile
 import yv.tils.config.files.FileUtils.Companion.loadFilesFromFolder
 import yv.tils.config.files.FileUtils.Companion.makeYAML
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
 import java.io.File
+import java.io.FileNotFoundException
 
 class YMLFileUtils {
     companion object {
         data class YAMLFile(val file: File, val content: YamlConfiguration)
 
-        fun loadYAMLFile(path: String, overwriteParentDir: Boolean = false): FileUtils.Companion.YAMLFile =
-            loadFile(path, overwriteParentDir) as? FileUtils.Companion.YAMLFile
-                ?: throw Exception("File is not a YAML file!")
+        fun loadYAMLFile(path: String, overwriteParentDir: Boolean = false): YAMLFile {
+            val file = if (overwriteParentDir) File(path) else File(Data.pluginFolder, path)
 
-        fun loadYAMLFilesFromFolder(folder: String, overwriteParentDir: Boolean = false): List<FileUtils.Companion.YAMLFile> =
-            loadFilesFromFolder(folder, "yml", overwriteParentDir).mapNotNull { it as? FileUtils.Companion.YAMLFile }
+            if (!file.exists()) throw FileNotFoundException("File not found: $path")
+
+            val yaml = YamlConfiguration.loadConfiguration(file)
+            return YAMLFile(file, yaml)
+        }
+
+        fun loadYAMLFilesFromFolder(folder: String, overwriteParentDir: Boolean = false): List<YAMLFile> =
+            loadFilesFromFolder(folder, "yml", overwriteParentDir).mapNotNull { it as? YAMLFile }
 
         fun makeYAMLFile(path: String, content: Map<String, Any>): YAMLFile {
             Logger.debug("Creating YAML file: $path")

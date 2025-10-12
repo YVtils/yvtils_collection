@@ -11,7 +11,7 @@ import yv.tils.utils.message.MessageUtils
 
 class ConfigGUI {
     companion object {
-        private const val GUI_SIZE = 4 * 9
+        private const val GUI_SIZE = 3 * 9
         private val guiTitle = "<${Colors.MAIN.color}><configName>"
 
         private val keySlots = listOf(10, 11, 12, 13, 14, 15, 16)

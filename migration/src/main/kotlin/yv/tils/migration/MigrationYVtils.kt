@@ -37,7 +37,7 @@ class MigrationYVtils: Data.YVtilsModule {
     private fun enableEarlyDebugMode() {
         try {
             // Try to read debug settings directly from config file
-            val configFile = FileUtils.loadYAMLFile("/config.yml")
+            val configFile = yv.tils.config.files.YMLFileUtils.loadYAMLFile("/config.yml")
             val debugActive = configFile.content.getBoolean("debug.active")
             val debugLevel = configFile.content.getInt("debug.level")
 

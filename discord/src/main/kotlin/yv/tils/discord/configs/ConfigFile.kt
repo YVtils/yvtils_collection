@@ -1,6 +1,6 @@
 package yv.tils.discord.configs
 
-import yv.tils.config.files.FileUtils
+import yv.tils.config.files.YMLFileUtils
 import yv.tils.utils.logger.Logger
 
 // TODO: Add option to allow multiple whitelist channels
@@ -28,7 +28,7 @@ class ConfigFile {
     private val filePath = "/discord/config.yml"
 
     fun loadConfig() {
-        val file = FileUtils.loadYAMLFile(filePath)
+    val file = YMLFileUtils.loadYAMLFile(filePath)
 
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
@@ -97,8 +97,8 @@ class ConfigFile {
             content["syncFeature.serverStats.settings.showLastRefresh"] = true
         }
 
-        val ymlFile = FileUtils.makeYAMLFile(filePath, content)
-        FileUtils.saveFile(filePath, ymlFile)
+    val ymlFile = YMLFileUtils.makeYAMLFile(filePath, content)
+    yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
     }
 
 }
