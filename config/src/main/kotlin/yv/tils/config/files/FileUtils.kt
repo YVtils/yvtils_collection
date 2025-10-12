@@ -6,13 +6,12 @@ import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
 import java.io.File
 import java.io.FileNotFoundException
+import yv.tils.config.files.YMLFileUtils.Companion.YAMLFile
+import yv.tils.config.files.JSONFileUtils.Companion.JSONFile
 
 class FileUtils {
     companion object {
-        data class JSONFile(val file: File, val content: JsonObject)
-        data class YAMLFile(val file: File, val content: YamlConfiguration)
-
-        private fun loadFile(path: String, overwriteParentDir: Boolean = false): Any {
+        fun loadFile(path: String, overwriteParentDir: Boolean = false): Any {
             val file = if (overwriteParentDir) {
                 File(path)
             } else {
@@ -44,7 +43,7 @@ class FileUtils {
         fun loadJSONFilesFromFolder(folder: String, overwriteParentDir: Boolean = false): List<JSONFile> =
             loadFilesFromFolder(folder, "json", overwriteParentDir).mapNotNull { it as? JSONFile }
 
-        private fun loadFilesFromFolder(
+        fun loadFilesFromFolder(
             folder: String,
             extension: String,
             overwriteParentDir: Boolean = false,

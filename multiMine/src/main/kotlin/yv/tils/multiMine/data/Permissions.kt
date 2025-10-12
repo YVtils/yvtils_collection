@@ -38,11 +38,27 @@ class PermissionsData {
 }
 
 enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
-//    SYNC_CHAT(
-//        PermissionManager.YVtilsPermission(
-//            "${PermissionsData.permissionBase}.sync.chat",
-//            "Sync chat messages between Discord and Minecraft",
-//            default = true
-//        )
-//    ),
+    COMMAND_MULTIMINE_MANAGE(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.multiMine.manage",
+            "Allows the use of the /multiMine manage subcommand",
+            default = false
+        )
+    ),
+
+    COMMAND_MULTIMINE_TOGGLE(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.multiMine.toggle",
+            "Allows the use of the /multiMine toggle subcommand",
+            default = true
+        )
+    ),
+
+    USE_MULTIMINE(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.use.multiMine",
+            "Allows the use of the multiMine feature",
+            default = true
+        )
+    ),
 }

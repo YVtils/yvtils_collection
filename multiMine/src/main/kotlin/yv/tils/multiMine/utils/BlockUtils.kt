@@ -2,7 +2,6 @@ package yv.tils.multiMine.utils
 
 import org.bukkit.*
 import org.bukkit.block.Block
-import org.bukkit.block.data.type.Leaves
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import yv.tils.multiMine.configs.ConfigFile
@@ -16,11 +15,13 @@ class BlockUtils {
     companion object {
         val animationTime = ConfigFile.config["animationTime"] as Int
         val breakLimit = ConfigFile.config["breakLimit"] as Int
+        val matchBlockTypeOnly = ConfigFile.config["matchBlockTypeOnly"] as Boolean
         val blocks = ConfigFile.blockList
 
         val brokenMap: MutableMap<UUID, Int> = mutableMapOf()
         val processFinishedMap: MutableMap<UUID, Boolean> = mutableMapOf()
         val runningProcessesMap: MutableMap<UUID, Int> = mutableMapOf()
+        val playerBlockTypeMap: MutableMap<UUID, Material> = mutableMapOf()
     }
 
     // Tracks the affected log area for a multimine run
@@ -62,7 +63,7 @@ class BlockUtils {
             return false
         }
 
-        if (checkBlock(block.type, blockList) && ToolUtils().checkTool(block, item)) {
+        if (checkBlock(block.type, blockList, player) && ToolUtils().checkTool(block, item)) {
             if (brokenMap[player.uniqueId]!! != 0) {
                 try {
                     if (toolBroke) return false
@@ -79,21 +80,6 @@ class BlockUtils {
             Logger.debug("Block broken by ${player.name}. Count: ${brokenMap[player.uniqueId]}/$breakLimit")
 
             block.breakNaturally(item, true, true)
-            return true
-        }
-        return false
-    }
-
-    /**
-     * Breaks the blocks without player or item context
-     * Used for recursive breaking without tool damage or limits
-     * @param block The block to break
-     * @param blockList The list of blocks that can be broken
-     * @return true if the block was broken
-     */
-    private fun breakBlock(block: Block, blockList: List<Material>): Boolean {
-        if (checkBlock(block.type, blockList)) {
-            block.breakNaturally(true, true)
             return true
         }
         return false
@@ -213,7 +199,21 @@ class BlockUtils {
      * @param blocks The list of blocks to check against
      * @return true if the block is in the provided list
      */
-    fun checkBlock(material: Material, blocks: List<Material>): Boolean {
+    fun checkBlock(material: Material, blocks: List<Material>, player: Player? = null): Boolean {
+        if (player == null) {
+            return blocks.contains(material)
+        }
+
+        if (matchBlockTypeOnly) {
+            val playerId = player.uniqueId
+            if (!playerBlockTypeMap.containsKey(playerId) && blocks.contains(material)) {
+                playerBlockTypeMap[playerId] = material
+                Logger.debug("Set block type for ${player.name} to $material")
+            }
+
+            return material == playerBlockTypeMap[playerId]
+        }
+
         return blocks.contains(material)
     }
 }

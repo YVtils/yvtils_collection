@@ -269,8 +269,4 @@ class BlockManage {
 
         return true
     }
-
-    fun openGUI(sender: Player) {
-
-    }
 }

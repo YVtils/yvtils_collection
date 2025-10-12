@@ -18,7 +18,7 @@ class UtilsYVtils : Data.YVtilsModule {
     override fun onLoad() {}
 
     override fun enablePlugin() {
-        Data.Companion.addModule(MODULE)
+        Data.addModule(MODULE)
 
         VersionUtils().loadServerVersion()
     }
@@ -28,6 +28,6 @@ class UtilsYVtils : Data.YVtilsModule {
     }
 
     override fun disablePlugin() {
-        CoroutineHandler.Companion.cancelAllTasks()
+        CoroutineHandler.cancelAllTasks()
     }
 }

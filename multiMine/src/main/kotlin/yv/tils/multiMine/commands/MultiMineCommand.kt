@@ -5,22 +5,22 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
+import yv.tils.multiMine.data.Permissions
 import yv.tils.multiMine.logic.BlockManage
+import yv.tils.multiMine.logic.ManageGUI
 import yv.tils.multiMine.logic.MultiMineHandler
 import yv.tils.utils.data.Data
 
 class MultiMineCommand {
     val blockManage = BlockManage()
+    val manageGUI = ManageGUI()
 
     val command = commandTree("multiMine") {
-        withPermission("yvtils.command.multiMine")
-        withPermission(CommandPermission.NONE)
         withUsage("multiMine <add/remove/addMultiple/removeMultiple> [block]")
         withAliases("mm")
 
         stringArgument("action") {
-            withPermission("yvtils.command.multiMine.manage")
-            withPermission(CommandPermission.OP)
+            withPermission(Permissions.COMMAND_MULTIMINE_MANAGE.permission.name)
             replaceSuggestions(
                 ArgumentSuggestions.strings(
                     "add",
@@ -52,7 +52,7 @@ class MultiMineCommand {
 
                         "gui" -> {
                             if (sender is Player) {
-                                blockManage.openGUI(sender)
+                                manageGUI.openGUI(sender)
                             } else {
                                 sender.sendMessage(LanguageHandler.getMessage(
                                     "command.executor.notPlayer",
@@ -79,8 +79,7 @@ class MultiMineCommand {
         }
 
         literalArgument("toggle", true) {
-            withPermission("yvtils.command.multiMine.toggle")
-            withPermission(CommandPermission.NONE)
+            withPermission(Permissions.COMMAND_MULTIMINE_TOGGLE.permission.name)
             playerExecutor { sender, _ ->
                 MultiMineHandler().toggle(sender)
             }

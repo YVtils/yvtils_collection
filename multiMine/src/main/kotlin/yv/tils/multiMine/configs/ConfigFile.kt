@@ -2,6 +2,8 @@ package yv.tils.multiMine.configs
 
 import org.bukkit.Material
 import org.bukkit.Tag
+import yv.tils.config.data.ConfigEntry
+import yv.tils.config.data.EntryType
 import yv.tils.config.files.FileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
@@ -57,12 +59,75 @@ class ConfigFile {
             content["cooldownTime"] = 3
             content["breakLimit"] = 250
             content["leaveDecay"] = true
-            content["matchBlockTypeOnly"] = true // TODO: Implement in logic
+            content["matchBlockTypeOnly"] = true // TODO: Test if this also works in deactivated state
             content["blocks"] = createTemplateBlocks()
         }
 
         val ymlFile = FileUtils.makeYAMLFile("/multiMine/config.yml", content)
         FileUtils.saveFile("/multiMine/config.yml", ymlFile)
+    }
+
+    // TODO: Implement this as new config logic
+    fun registerStrings() {
+        val content = mutableListOf<ConfigEntry>()
+
+        content.add(ConfigEntry(
+            "documentation",
+            EntryType.STRING,
+            null,
+            "https://docs.yvtils.net/multiMine/config.yml",
+            "Link to the documentation of the config file"
+        ))
+        content.add(ConfigEntry(
+            "defaultState",
+            EntryType.BOOLEAN,
+            null,
+            true,
+            "If MultiMine should be enabled by default for new players"
+        ))
+        content.add(ConfigEntry(
+            "animationTime",
+            EntryType.INT,
+            mapOf("min" to 1, "max" to 20),
+            3,
+            "The time in ticks for the breaking animation (1 tick = 1/20 second)"
+        ))
+        content.add(ConfigEntry(
+            "cooldownTime",
+            EntryType.INT,
+            mapOf("min" to 0, "max" to 20),
+            3,
+            "The cooldown time in ticks before the next block can be broken (1 tick = 1/20 second)"
+        ))
+        content.add(ConfigEntry(
+            "breakLimit",
+            EntryType.INT,
+            mapOf("min" to 1, "max" to 10000),
+            250,
+            "The maximum number of blocks that can be broken in one MultiMine session"
+        ))
+        content.add(ConfigEntry(
+            "leaveDecay",
+            EntryType.BOOLEAN,
+            null,
+            true,
+            "If the broken blocks should decay over time after the player leaves"
+        ))
+        content.add(ConfigEntry(
+            "matchBlockTypeOnly",
+            EntryType.BOOLEAN,
+            null,
+            true,
+            "If only blocks of the same type as the initially broken block should be considered for breaking"
+        ))
+        content.add(ConfigEntry(
+            "blocks",
+            EntryType.LIST,
+            null,
+            createTemplateBlocks(),
+            "The list of blocks that can be broken with MultiMine"
+        ))
+
     }
 
     // TODO: Test if list gets updated with version updates

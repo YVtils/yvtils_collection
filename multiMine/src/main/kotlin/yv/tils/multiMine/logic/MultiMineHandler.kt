@@ -5,6 +5,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import yv.tils.config.language.LanguageHandler
 import yv.tils.multiMine.configs.MultiMineConfig
+import yv.tils.multiMine.data.Permissions
 import yv.tils.multiMine.utils.BlockUtils
 import yv.tils.multiMine.utils.BlockUtils.Companion.blocks
 import yv.tils.multiMine.utils.BlockUtils.Companion.brokenMap
@@ -21,9 +22,12 @@ class MultiMineHandler {
         val item = player.inventory.itemInMainHand
         val block = e.block
 
-        if (!player.hasPermission("yvtils.use.multiMine")) return
+        if (!player.hasPermission(Permissions.USE_MULTIMINE.permission.name)) return
         if (!MultiMineConfig().getPlayerSetting(uuid)) return
-        if (!BlockUtils().checkBlock(e.block.type, blocks)) return
+
+        cleanup(player)
+
+        if (!BlockUtils().checkBlock(e.block.type, blocks, player)) return
         if (!ToolUtils().checkTool(block, item)) return
         if (CooldownUtils().checkCooldown(e.player.uniqueId)) return
         if (player.isSneaking) return
@@ -33,6 +37,14 @@ class MultiMineHandler {
 
         CooldownUtils().setCooldown(player.uniqueId)
         BlockUtils().registerBlocks(loc, player, item)
+    }
+
+    fun cleanup(player: Player) {
+        val uuid = player.uniqueId
+        brokenMap[uuid] = 0
+        BlockUtils.playerBlockTypeMap.remove(uuid)
+        BlockUtils.runningProcessesMap.remove(uuid)
+        BlockUtils.processFinishedMap.remove(uuid)
     }
 
     fun toggle(sender: Player) {
