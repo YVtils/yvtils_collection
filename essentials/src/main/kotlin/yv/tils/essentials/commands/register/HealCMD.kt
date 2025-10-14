@@ -13,7 +13,7 @@ class HealCMD {
         withPermission(CommandPermission.OP)
         withUsage("heal [player]")
 
-        playerArgument("player", true) {
+        playerProfileArgument("player", true) {
             anyExecutor { sender, args ->
                 if (sender !is Player && args[0] == null) {
                     sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))

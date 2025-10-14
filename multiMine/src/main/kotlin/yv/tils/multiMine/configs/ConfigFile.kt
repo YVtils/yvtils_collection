@@ -131,7 +131,7 @@ class ConfigFile {
             EntryType.BOOLEAN,
             null,
             true,
-            "Default enabled state",
+            "Set the default state of multiMine for new players",
             dynamicInvItem = { if (it.value as? Boolean == true) Material.LIME_DYE else Material.RED_DYE }
         ))
         configNew.add(ConfigEntry(
@@ -139,7 +139,7 @@ class ConfigFile {
             EntryType.INT,
             null,
             3,
-            "Animation time in ticks",
+            "Set the animation time in ticks",
             Material.CLOCK
         ))
         configNew.add(ConfigEntry(
@@ -147,7 +147,7 @@ class ConfigFile {
             EntryType.INT,
             null,
             3,
-            "Cooldown time in ticks",
+            "Set the cooldown time in ticks",
             Material.SNOWBALL
         ))
         configNew.add(ConfigEntry(
@@ -155,7 +155,7 @@ class ConfigFile {
             EntryType.INT,
             null,
             250,
-            "Break limit",
+            "Set the maximum number of blocks that can be broken in one go",
             Material.DIAMOND_PICKAXE
         ))
         configNew.add(ConfigEntry(
@@ -163,7 +163,7 @@ class ConfigFile {
             EntryType.BOOLEAN,
             null,
             true,
-            "Leave decay",
+            "Set whether leaves should decay when trees are cut",
             dynamicInvItem = { if (it.value as? Boolean == true) Material.OAK_LEAVES else Material.NETHER_WART_BLOCK }
         ))
         configNew.add(ConfigEntry(
@@ -171,7 +171,7 @@ class ConfigFile {
             EntryType.BOOLEAN,
             null,
             true,
-            "Match block type only",
+            "Set whether only blocks of the same type should be broken",
             dynamicInvItem = { if (it.value as? Boolean == true) Material.HOPPER else Material.RED_DYE }
         ))
         configNew.add(ConfigEntry(
@@ -179,7 +179,7 @@ class ConfigFile {
             EntryType.LIST,
             null,
             createTemplateBlocks(),
-            "Block list",
+            "Modify the list of blocks that can be broken using multiMine",
             Material.BUNDLE
         ))
         // populate index for fast lookups

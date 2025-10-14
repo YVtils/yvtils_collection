@@ -8,11 +8,13 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.event.EventPriority
 import yv.tils.config.data.EntryType
+import yv.tils.utils.message.MessageUtils
+import java.util.UUID
 
 class GuiEventListener : Listener {
-    private val pendingChat = mutableMapOf<java.util.UUID, Pair<GuiHolder, String>>()
-    private val pendingList = mutableMapOf<java.util.UUID, ListContext>()
-    private val pendingAdd = mutableSetOf<java.util.UUID>()
+    private val pendingChat = mutableMapOf<UUID, Pair<GuiHolder, String>>()
+    private val pendingList = mutableMapOf<UUID, ListContext>()
+    private val pendingAdd = mutableSetOf<UUID>()
 
     @EventHandler
     fun onInventoryClick(e: InventoryClickEvent) {
@@ -69,7 +71,7 @@ class GuiEventListener : Listener {
 
             // handle click types on items
             val clicked = e.inventory.getItem(raw) ?: return
-            val name = yv.tils.utils.message.MessageUtils.strip(clicked.itemMeta?.displayName)
+            val name = MessageUtils.strip(clicked.itemMeta?.displayName())
             when (e.click) {
                 ClickType.LEFT, ClickType.SHIFT_LEFT -> {
                     // toggle (if present remove, else add)
@@ -104,7 +106,7 @@ class GuiEventListener : Listener {
 
         fun reopen() {
             // reopen GUI to refresh
-            ConfigGUI().createGUI(player, holder.configName, holder.entries)
+            ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave)
         }
 
         when (entryType) {

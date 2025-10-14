@@ -27,6 +27,7 @@ class Filler {
         val meta = item.itemMeta
         meta.displayName(MessageUtils.convert(" "))
         meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
+        meta?.isHideTooltip = true
         item.itemMeta = meta
         return item
     }
@@ -36,6 +37,7 @@ class Filler {
         val meta = item.itemMeta
         meta.displayName(MessageUtils.convert(" "))
         meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
+        meta?.isHideTooltip = true
         item.itemMeta = meta
         return item
     }

@@ -3,8 +3,10 @@ package yv.tils.gui.logic
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import yv.tils.config.data.ConfigEntry
+import yv.tils.gui.data.ConfigEntryTypes
 import yv.tils.gui.utils.Filler
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.message.MessageUtils
@@ -68,26 +70,52 @@ class ConfigGUI {
         val item = ItemStack(itemMaterial)
         val meta = item.itemMeta
 
-        // Display name: key in main color
-        meta?.displayName(MessageUtils.convert("<${Colors.MAIN.color}>${entry.key}"))
+        meta.displayName(MessageUtils.convert("<${Colors.MAIN.color}>${entry.key}"))
+        meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES)
 
-        val valueStr = entry.value?.toString() ?: entry.defaultValue?.toString() ?: "<none>"
-        val defaultStr = entry.defaultValue?.toString() ?: "<none>"
+        val valueStr = when (val v = entry.value) {
+            is List<*> -> {
+                val list = v.take(5).joinToString("\n", "\n", "") { "- $it" }
+                if (v.size > 5) "$list\n..." else list
+            }
+            is Map<*, *> -> {
+                val entries = v.entries.take(5).joinToString("\n", "\n", "") { "- ${it.key}=${it.value}" }
+                if (v.entries.size > 5) "$entries\n..." else entries
+            }
+            null -> entry.defaultValue?.toString() ?: "<none>"
+            else -> v.toString()
+        }
+        val defaultStr = when (val v = entry.defaultValue) {
+            is List<*> -> {
+                val list = v.take(5).joinToString("\n", "\n", "") { "- $it" }
+                if (v.size > 5) "$list\n..." else list
+            }
 
-        val actions = yv.tils.gui.data.ConfigEntryTypes.fromEntryType(entry.type).clickActions
+            is Map<*, *> -> {
+                val entries = v.entries.take(5).joinToString("\n", "\n", "") { "- ${it.key}=${it.value}" }
+                if (v.entries.size > 5) "$entries\n..." else entries
+            }
+            null -> "<none>"
+            else -> v.toString()
+        }
+
+        val actions = ConfigEntryTypes.fromEntryType(entry.type).clickActions
         val actionsLines = actions.joinToString("<newline>") { "<gray>${it.name}: <white>${it.description}" }
 
         val loreLines = mutableListOf<String>()
         loreLines.add("<dark_gray>————————")
+        if (!entry.description.isNullOrBlank()) {
+            loreLines.add("<gray>${entry.description}")
+            loreLines.add("<dark_gray>————————")
+        }
         loreLines.add("<white>Value: <green>$valueStr")
         loreLines.add("<white>Default: <yellow>$defaultStr")
-        entry.description?.let { loreLines.add("<gray>$it") }
         loreLines.add("<dark_gray> ")
         loreLines.add("<white>Actions:")
         loreLines.add(actionsLines)
         loreLines.add("<dark_gray>————————")
 
-        meta?.lore(MessageUtils.handleLore(loreLines.joinToString("<newline>")))
+        meta.lore(MessageUtils.handleLore(loreLines.joinToString("<newline>")))
         item.itemMeta = meta
         return item
     }

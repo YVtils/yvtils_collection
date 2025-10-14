@@ -42,7 +42,7 @@ class SpeedCMD {
                     "-10"
                 )
             )
-            playerArgument("player", true) {
+            playerProfileArgument("player", true) {
                 anyExecutor { sender, args ->
                     if (sender !is Player && args[1] == null) {
                         sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
@@ -61,7 +61,7 @@ class SpeedCMD {
         }
 
         literalArgument("reset", false) {
-            playerArgument("player", true) {
+            playerProfileArgument("player", true) {
                 anyExecutor { sender, args ->
                     if (sender !is Player && args[1] == null) {
                         sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))

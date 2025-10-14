@@ -1,11 +1,13 @@
 package yv.tils.gui.logic
 
 import net.kyori.adventure.text.Component
+import net.minecraft.world.level.block.entity.HopperBlockEntity.addItem
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.bukkit.scheduler.BukkitTask
 import yv.tils.gui.utils.Filler
+import yv.tils.gui.utils.HeadUtils
+import yv.tils.gui.utils.Heads
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.message.MessageUtils
 
@@ -22,12 +24,12 @@ class ListGUI {
         val backCallback = context.backCallback
         val contentSize = items.size
         val cols = 9
-    val innerPerRow = 7 // leave borders
-    val rowsNeeded = ((contentSize.toDouble() / innerPerRow).coerceAtLeast(1.0)).toInt()
+        val innerPerRow = 7 // leave borders
+        val rowsNeeded = ((contentSize.toDouble() / innerPerRow).coerceAtLeast(1.0)).toInt()
         val totalRows = (rowsNeeded + 2).coerceAtMost(6) // cap to reasonable size
         val size = totalRows * cols
 
-    val compTitle: Component = MessageUtils.replacer("<${Colors.MAIN.color}>$title", mapOf())
+        val compTitle: Component = MessageUtils.replacer("<${Colors.MAIN.color}>$title", mapOf())
         val holder = context.holder
         val inv = InventoryHandler().createInventory(holder, compTitle, size)
         holder.setInventory(inv)
@@ -61,8 +63,8 @@ class ListGUI {
             val name = pageItems[idx]
             val mat = try {
                 Material.valueOf(name)
-            } catch (ex: Exception) {
-                Material.PAPER
+            } catch (_: Exception) {
+                Material.BARRIER
             }
             val it = ItemStack(mat)
             val meta = it.itemMeta
@@ -71,7 +73,6 @@ class ListGUI {
             val loreLines = listOf(
                 "<dark_gray>————————",
                 "<white>Actions:",
-                "<gray>Left-click: <white>Toggle",
                 "<gray>Right-click: <red>Remove",
                 "<dark_gray>————————"
             )
@@ -81,31 +82,20 @@ class ListGUI {
             idx++
         }
 
-    // fill border (do not overwrite inner slots)
-    Filler().fillInventory(inv, blockedSlots = innerSlots.toMutableList())
+        Filler().fillInventory(inv, blockedSlots = innerSlots.toMutableList())
 
-    // navigation: prev/next if multiple pages
-        if (context.totalPages > 1) {
-            // prev (bottom-left)
-            val prev = ItemStack(Material.ARROW)
-            val pm = prev.itemMeta
-            pm?.displayName(MessageUtils.convert("<yellow>Previous page"))
-            prev.itemMeta = pm
-            inv.setItem(size - 9, prev)
-
-            // next (bottom-right)
-            val next = ItemStack(Material.ARROW)
-            val nm = next.itemMeta
-            nm?.displayName(MessageUtils.convert("<yellow>Next page"))
-            next.itemMeta = nm
-            inv.setItem(size - 1, next)
+        if (context.page > 1) {
+            inv.setItem(size - 9, HeadUtils().createCustomHead(Heads.PREVIOUS_PAGE, "<yellow>Previous page"))
         } else {
-            // show add button on bottom-right
-            val addItem = ItemStack(Material.NAME_TAG)
-            val addMeta = addItem.itemMeta
-            addMeta?.displayName(MessageUtils.convert("<green>Add block"))
-            addItem.itemMeta = addMeta
-            inv.setItem(size - 1, addItem)
+            // On first page, put a quit item in the back slot
+            inv.setItem(size - 9, HeadUtils().createCustomHead(Heads.X_CHARACTER, "<red>Quit"))
+        }
+
+        // bottom-center: always show Add
+        inv.setItem(size - 5, HeadUtils().createCustomHead(Heads.PLUS_CHARACTER, "<green>Add item"))
+
+        if (context.page < context.totalPages) {
+            inv.setItem(size - 1, HeadUtils().createCustomHead(Heads.NEXT_PAGE, "<yellow>Next page"))
         }
 
         player.openInventory(inv)

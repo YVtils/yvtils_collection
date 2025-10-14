@@ -29,7 +29,7 @@ class GamemodeCMD {
                     "3"
                 )
             )
-            playerArgument("player", true) {
+            playerProfileArgument("player", true) {
                 anyExecutor { sender, args ->
 
                     if (sender !is Player && args[1] == null) {

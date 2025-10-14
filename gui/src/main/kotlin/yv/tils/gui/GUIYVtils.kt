@@ -19,19 +19,20 @@ class GUIYVtils : Data.YVtilsModule {
     override fun enablePlugin() {
         Data.addModule(MODULE)
 
-                registerListeners()
+        registerListeners()
 
     }
 
     override fun onLateEnablePlugin() {
 
     }
-    
-    private fun registerListeners() {
-                val plugin = Data.instance
-        val pm = plugin.server.pluginManager
 
-    pm.registerEvents(yv.tils.gui.logic.GuiEventListener(), plugin)
+    private fun registerListeners() {
+        val plugin = Data.instance
+        val pm = plugin.server.pluginManager
+        pm.registerEvents(yv.tils.gui.listeners.InventoryClickListener(), plugin)
+        pm.registerEvents(yv.tils.gui.listeners.InventoryCloseListener(), plugin)
+        pm.registerEvents(yv.tils.gui.listeners.PlayerChatListener(), plugin)
     }
 
     override fun disablePlugin() {
