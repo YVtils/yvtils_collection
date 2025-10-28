@@ -1,6 +1,5 @@
 package yv.tils.multiMine.commands
 
-import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
@@ -79,9 +78,12 @@ class MultiMineCommand {
         }
 
         literalArgument("toggle", true) {
-            withPermission(Permissions.COMMAND_MULTIMINE_TOGGLE.permission.name)
-            playerExecutor { sender, _ ->
-                MultiMineHandler().toggle(sender)
+            withPermission(Permissions.COMMAND_MULTIMINE_TOGGLE_SELF.permission.name)
+            playerProfileArgument("target", true) {
+                withPermission(Permissions.COMMAND_MULTIMINE_TOGGLE_OTHERS.permission.name)
+                anyExecutor { sender, args ->
+                    MultiMineHandler().toggle(sender, args)
+                }
             }
         }
     }

@@ -46,11 +46,19 @@ enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
         )
     ),
 
-    COMMAND_MULTIMINE_TOGGLE(
+    COMMAND_MULTIMINE_TOGGLE_SELF(
         PermissionManager.YVtilsPermission(
-            "${PermissionsData.permissionBase}.command.multiMine.toggle",
+            "${PermissionsData.permissionBase}.command.multiMine.toggle.self",
             "Allows the use of the /multiMine toggle subcommand",
             default = true
+        )
+    ),
+
+    COMMAND_MULTIMINE_TOGGLE_OTHERS(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.multiMine.toggle.others",
+            "Allows toggling multiMine for other players using /multiMine toggle <player>",
+            default = false
         )
     ),
 
@@ -60,5 +68,5 @@ enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
             "Allows the use of the multiMine feature",
             default = true
         )
-    ),
+    ), ;
 }
