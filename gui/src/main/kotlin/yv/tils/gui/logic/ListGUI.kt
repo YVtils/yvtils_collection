@@ -1,7 +1,6 @@
 package yv.tils.gui.logic
 
 import net.kyori.adventure.text.Component
-import net.minecraft.world.level.block.entity.HopperBlockEntity.addItem
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -11,27 +10,19 @@ import yv.tils.gui.utils.Heads
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.message.MessageUtils
 
-class ListGUI {
-    companion object {
-        private val fillerItem = ItemStack(Material.GRAY_STAINED_GLASS_PANE)
-        private val backItem = ItemStack(Material.ARROW)
-    }
-
+object ListGUI {
     fun openList(player: Player, context: ListContext) {
-        // compute rows needed (border + content)
         val items = context.items
         val title = context.entryKey
-        val backCallback = context.backCallback
         val contentSize = items.size
-        val cols = 9
         val innerPerRow = 7 // leave borders
         val rowsNeeded = ((contentSize.toDouble() / innerPerRow).coerceAtLeast(1.0)).toInt()
         val totalRows = (rowsNeeded + 2).coerceAtMost(6) // cap to reasonable size
-        val size = totalRows * cols
+        val size = totalRows * 9
 
         val compTitle: Component = MessageUtils.replacer("<${Colors.MAIN.color}>$title", mapOf())
         val holder = context.holder
-        val inv = InventoryHandler().createInventory(holder, compTitle, size)
+        val inv = InventoryHandler.createInventory(holder, compTitle, size)
         holder.setInventory(inv)
         context.inventory = inv
 
@@ -57,47 +48,48 @@ class ListGUI {
         val pageItems = if (startIndex < endIndex) items.subList(startIndex, endIndex) else emptyList()
 
         // place page items into inner slots left-to-right, top-to-bottom
-        var idx = 0
-        for (slotIndex in innerSlots) {
-            if (idx >= pageItems.size) break
-            val name = pageItems[idx]
-            val mat = try {
-                Material.valueOf(name)
-            } catch (_: Exception) {
-                Material.BARRIER
-            }
-            val it = ItemStack(mat)
-            val meta = it.itemMeta
-            meta?.displayName(MessageUtils.convert("<white>$name"))
-            // add action lore
-            val loreLines = listOf(
-                "<dark_gray>————————",
-                "<white>Actions:",
-                "<gray>Right-click: <red>Remove",
-                "<dark_gray>————————"
-            )
-            meta?.lore(MessageUtils.handleLore(loreLines.joinToString("<newline>")))
-            it.itemMeta = meta
-            inv.setItem(slotIndex, it)
-            idx++
+        pageItems.forEachIndexed { idx, name ->
+            val slotIndex = innerSlots.getOrNull(idx) ?: return@forEachIndexed
+            inv.setItem(slotIndex, createListItem(name))
         }
 
-        Filler().fillInventory(inv, blockedSlots = innerSlots.toMutableList())
+        Filler.fillInventory(inv, blockedSlots = innerSlots)
 
         if (context.page > 1) {
-            inv.setItem(size - 9, HeadUtils().createCustomHead(Heads.PREVIOUS_PAGE, "<yellow>Previous page"))
+            inv.setItem(size - 9, HeadUtils.createCustomHead(Heads.PREVIOUS_PAGE, "<yellow>Previous page"))
         } else {
             // On first page, put a quit item in the back slot
-            inv.setItem(size - 9, HeadUtils().createCustomHead(Heads.X_CHARACTER, "<red>Quit"))
+            inv.setItem(size - 9, HeadUtils.createCustomHead(Heads.X_CHARACTER, "<red>Quit"))
         }
 
         // bottom-center: always show Add
-        inv.setItem(size - 5, HeadUtils().createCustomHead(Heads.PLUS_CHARACTER, "<green>Add item"))
+        inv.setItem(size - 5, HeadUtils.createCustomHead(Heads.PLUS_CHARACTER, "<green>Add item"))
 
         if (context.page < context.totalPages) {
-            inv.setItem(size - 1, HeadUtils().createCustomHead(Heads.NEXT_PAGE, "<yellow>Next page"))
+            inv.setItem(size - 1, HeadUtils.createCustomHead(Heads.NEXT_PAGE, "<yellow>Next page"))
         }
 
         player.openInventory(inv)
+    }
+
+    private fun createListItem(name: String): ItemStack {
+        val mat = try {
+            Material.valueOf(name)
+        } catch (_: Exception) {
+            Material.BARRIER
+        }
+        val item = ItemStack(mat)
+        val meta = item.itemMeta
+        meta.displayName(MessageUtils.convert("<white>$name"))
+        
+        val loreLines = listOf(
+            "<dark_gray>————————",
+            "<white>Actions:",
+            "<gray>Right-click: <red>Remove",
+            "<dark_gray>————————"
+        )
+        meta.lore(MessageUtils.handleLore(loreLines.joinToString("<newline>")))
+        item.itemMeta = meta
+        return item
     }
 }

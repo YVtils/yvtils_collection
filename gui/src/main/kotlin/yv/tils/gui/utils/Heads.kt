@@ -72,7 +72,7 @@ enum class Heads(val desc: String, val texture: String) {
     ),
 }
 
-class HeadUtils {
+object HeadUtils {
     fun createCustomHead(headTexture: Heads, itemName: String): ItemStack {
         val item = ItemStack(Material.PLAYER_HEAD)
         val meta = item.itemMeta as SkullMeta
@@ -80,16 +80,11 @@ class HeadUtils {
 
         playerProfile.setProperties(
             Collections.singletonList(
-                ProfileProperty(
-                    "textures",
-                    headTexture.texture,
-                    ""
-                )
+                ProfileProperty("textures", headTexture.texture, "")
             )
         )
 
         meta.playerProfile = playerProfile
-
         meta.displayName(MessageUtils.convert(itemName))
         meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
         item.itemMeta = meta

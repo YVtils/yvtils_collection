@@ -7,7 +7,7 @@ import yv.tils.utils.logger.Logger
 
 class ManageGUI {
     fun openGUI(sender: Player) {
-        ConfigGUI().createGUI(
+        ConfigGUI.createGUI(
             sender,
             "MultiMine Config",
             ConfigFile.configNew,

@@ -41,18 +41,11 @@ class SaveFile {
     }
 
     fun updatePlayerSetting(uuid: UUID, state: Boolean) {
-        Logger.dev("Updating player setting for uuid $uuid")
-        Logger.dev("Saves before update: $saves")
-
         if (saves.containsKey(uuid)) {
-            Logger.dev("Player save found, updating toggled state to $state")
             saves[uuid]?.toggled = state
         } else {
-            Logger.dev("Player save not found, creating new save with toggled state $state")
             saves[uuid] = MultiMineSave(uuid.toString(), state)
         }
-
-        Logger.dev("Saves after update: $saves")
 
         CoroutineHandler.launchTask(
             suspend { registerStrings(saves.values.toMutableList()) },

@@ -16,19 +16,14 @@ class GUIYVtils : Data.YVtilsModule {
         )
     }
 
-    override fun onLoad() {
-    }
+    override fun onLoad() {}
 
     override fun enablePlugin() {
         Data.addModule(MODULE)
-
         registerListeners()
-
     }
 
-    override fun onLateEnablePlugin() {
-
-    }
+    override fun onLateEnablePlugin() {}
 
     private fun registerListeners() {
         val plugin = Data.instance
@@ -38,7 +33,5 @@ class GUIYVtils : Data.YVtilsModule {
         pm.registerEvents(AsyncChat(), plugin)
     }
 
-    override fun disablePlugin() {
-
-    }
+    override fun disablePlugin() {}
 }

@@ -7,7 +7,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import yv.tils.config.data.ConfigEntry
 import yv.tils.config.data.EntryType
+import yv.tils.config.language.LanguageHandler
 import yv.tils.gui.logic.ConfigGUI
 import yv.tils.gui.logic.GuiHolder
 import yv.tils.gui.logic.ListContext
@@ -15,14 +17,14 @@ import yv.tils.gui.logic.ListGUI
 import yv.tils.utils.data.Data
 import yv.tils.utils.message.MessageUtils
 
-private val ENTRY_SLOTS = listOf(10, 11, 12, 13, 14, 15, 16)
-
 class InventoryClickListener : Listener {
+    companion object {
+        private val ENTRY_SLOTS = listOf(10, 11, 12, 13, 14, 15, 16)
+    }
+
     @EventHandler
     fun onEvent(e: InventoryClickEvent) {
-        val holder = e.inventory.holder
-        if (holder !is GuiHolder) return
-
+        val holder = e.inventory.holder as? GuiHolder ?: return
         e.isCancelled = true
 
         val player = e.whoClicked as Player
@@ -31,11 +33,18 @@ class InventoryClickListener : Listener {
         // Handle pending list UI first
         val listContext = GuiListenerState.pendingList[uuid]
         if (listContext != null && listContext.inventory != null && e.inventory == listContext.inventory) {
-            if (handleListClick(e, player, uuid, listContext)) return
+            handleListClick(e, player, uuid, listContext)
             return
         }
 
-        // handle navigation (previous/next) for paginated config GUIs
+        // Handle navigation (previous/next) for paginated config GUIs
+        if (handleNavigation(e, player, holder)) return
+
+        // Handle entry clicks
+        handleEntryClick(e, player, holder)
+    }
+
+    private fun handleNavigation(e: InventoryClickEvent, player: Player, holder: GuiHolder): Boolean {
         val invSize = e.inventory.size
         val navLeft = invSize - 9
         val navRight = invSize - 1
@@ -46,76 +55,57 @@ class InventoryClickListener : Listener {
             navLeft -> {
                 if (totalPages > 1 && holder.page > 1) {
                     holder.page--
-                    ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
-                    return
+                    reopenConfigGUI(player, holder)
+                    return true
                 }
-                // else: do nothing (no previous page)
             }
             navRight -> {
                 if (totalPages > 1 && holder.page < totalPages) {
                     holder.page++
-                    ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
-                    return
+                    reopenConfigGUI(player, holder)
+                    return true
                 }
-                // else: no next page
             }
         }
+        return false
+    }
 
-        // Map raw slot to configured entries (paged)
+    private fun handleEntryClick(e: InventoryClickEvent, player: Player, holder: GuiHolder) {
         val index = ENTRY_SLOTS.indexOf(e.rawSlot).takeIf { it >= 0 } ?: return
+        val perPage = ENTRY_SLOTS.size
         val globalIndex = (holder.page - 1) * perPage + index
-        val entries = holder.entries
-        if (globalIndex >= entries.size) return
+        if (globalIndex >= holder.entries.size) return
 
-        val entry = entries[globalIndex]
-
-        fun reopen() {
-            ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
-        }
+        val entry = holder.entries[globalIndex]
 
         when (entry.type) {
             EntryType.BOOLEAN -> if (e.click == ClickType.LEFT) {
-                val cur = entry.value as? Boolean ?: (entry.defaultValue as? Boolean ?: false)
-                entry.value = !cur
-                holder.entries[holder.entries.indexOf(entry)] = entry
+                val current = entry.value as? Boolean ?: (entry.defaultValue as? Boolean ?: false)
+                entry.value = !current
                 holder.dirty = true
-                reopen()
+                reopenConfigGUI(player, holder)
             }
 
             EntryType.INT, EntryType.DOUBLE -> {
-                val isShift = e.click == ClickType.SHIFT_LEFT || e.click == ClickType.SHIFT_RIGHT
-                val delta = if (isShift) 10 else 1
+                val delta = if (e.click == ClickType.SHIFT_LEFT || e.click == ClickType.SHIFT_RIGHT) 10 else 1
                 when (e.click) {
                     ClickType.LEFT, ClickType.SHIFT_LEFT -> {
-                        if (entry.type == EntryType.INT) {
-                            val cur = (entry.value as? Number)?.toInt() ?: (entry.defaultValue as? Number)?.toInt() ?: 0
-                            entry.value = cur + delta
-                        } else {
-                            val cur = (entry.value as? Number)?.toDouble() ?: (entry.defaultValue as? Number)?.toDouble() ?: 0.0
-                            entry.value = cur + delta
-                        }
+                        modifyNumericValue(entry, delta)
                         holder.dirty = true
-                        reopen()
+                        reopenConfigGUI(player, holder)
                     }
                     ClickType.RIGHT, ClickType.SHIFT_RIGHT -> {
-                        if (entry.type == EntryType.INT) {
-                            val cur = (entry.value as? Number)?.toInt() ?: (entry.defaultValue as? Number)?.toInt() ?: 0
-                            entry.value = cur - delta
-                        } else {
-                            val cur = (entry.value as? Number)?.toDouble() ?: (entry.defaultValue as? Number)?.toDouble() ?: 0.0
-                            entry.value = cur - delta
-                        }
+                        modifyNumericValue(entry, -delta)
                         holder.dirty = true
-                        reopen()
+                        reopenConfigGUI(player, holder)
                     }
                     else -> {}
                 }
             }
 
             EntryType.STRING -> if (e.click == ClickType.LEFT) {
-                player.sendMessage("Please type the new value for ${entry.key} in chat. Type cancel to abort.")  // TODO: localize
+                player.sendMessage(LanguageHandler.getMessage("action.gui.enterValue.prompt", player,mapOf("key" to entry.key)))
                 GuiListenerState.pendingChat[player.uniqueId] = holder to entry.key
-                reopen()
             }
 
             EntryType.LIST, EntryType.MAP -> {
@@ -123,41 +113,65 @@ class InventoryClickListener : Listener {
                     ?: (entry.defaultValue as? List<*>)?.filterIsInstance<String>()?.toMutableList()
                     ?: mutableListOf()
 
-                val back = {
+                val backCallback = {
                     val targetEntry = holder.entries.find { it.key == entry.key }
                     if (targetEntry != null) {
                         targetEntry.value = list.toList()
-                        holder.entries[holder.entries.indexOf(targetEntry)] = targetEntry
                         holder.dirty = true
                     }
                     Bukkit.getScheduler().runTask(Data.instance, Runnable {
-                        ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
+                        ConfigGUI.createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
                     })
                 }
 
-                GuiListenerState.pendingList[player.uniqueId] = ListContext(holder, entry.key, list, back)
-                ListGUI().openList(player, GuiListenerState.pendingList[player.uniqueId]!!)
+                GuiListenerState.pendingList[player.uniqueId] = ListContext(holder, entry.key, list, backCallback)
+                ListGUI.openList(player, GuiListenerState.pendingList[player.uniqueId]!!)
             }
 
-            else -> player.sendMessage("Value: ${entry.value ?: entry.defaultValue}")
+            else -> player.sendMessage(LanguageHandler.getMessage("action.gui.valueInfo", player,mapOf("value" to (entry.value ?: entry.defaultValue).toString())))
         }
     }
 
-    private fun handleListClick(e: InventoryClickEvent, player: Player, uuid: java.util.UUID, listContext: ListContext): Boolean {
+    private fun modifyNumericValue(entry: ConfigEntry, delta: Int) {
+        when (entry.type) {
+            EntryType.INT -> {
+                val current = (entry.value as? Number)?.toInt()
+                    ?: (entry.defaultValue as? Number)?.toInt() ?: 0
+                entry.value = current + delta
+            }
+            EntryType.DOUBLE -> {
+                val current = (entry.value as? Number)?.toDouble()
+                    ?: (entry.defaultValue as? Number)?.toDouble() ?: 0.0
+                entry.value = current + delta.toDouble()
+            }
+            else -> {}
+        }
+    }
+
+    private fun reopenConfigGUI(player: Player, holder: GuiHolder) {
+        ConfigGUI.createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
+    }
+
+    private fun handleListClick(
+        e: InventoryClickEvent,
+        player: Player,
+        uuid: java.util.UUID,
+        listContext: ListContext
+    ) {
         val raw = e.rawSlot
         val inv = e.inventory
         val invSize = inv.size
         val clicked = try {
-             inv.getItem(raw)
+            inv.getItem(raw)
         } catch (_: ArrayIndexOutOfBoundsException) {
-            return false
+            return
         }
 
-        // filler/gray pane acts as a 'back' button
+        // Filler/gray pane acts as a 'back' button
         if (clicked?.type == Material.GRAY_STAINED_GLASS_PANE) {
             GuiListenerState.pendingList.remove(uuid)
             listContext.backCallback.invoke()
-            return true
+            return
         }
 
         val navLeft = invSize - 9
@@ -168,68 +182,67 @@ class InventoryClickListener : Listener {
             navLeft -> {
                 if (listContext.totalPages > 1 && listContext.page > 1) {
                     listContext.page--
-                    ListGUI().openList(player, listContext)
-                    return true
+                    ListGUI.openList(player, listContext)
+                } else {
+                    GuiListenerState.pendingList.remove(uuid)
+                    listContext.backCallback.invoke()
                 }
-                GuiListenerState.pendingList.remove(uuid)
-                listContext.backCallback.invoke()
-                return true
+                return
             }
             addSlot -> {
-                try { player.closeInventory() } catch (_: Exception) {}
-                val prompt = "<green>Type block Material name to add (e.g. <white>OAK_LOG<green>)\n<yellow>Type <red>cancel<yellow> to abort." // TODO: localize
-                player.sendMessage(MessageUtils.replacer(prompt, mapOf()))
-                GuiListenerState.pendingAdd[uuid] = listContext
-                return true
+                promptAddItem(player, uuid, listContext)
+                return
             }
             navRight -> {
-                if (listContext.totalPages > 1) {
-                    if (listContext.page < listContext.totalPages) listContext.page++
-                    ListGUI().openList(player, listContext)
-                    return true
+                if (listContext.totalPages > 1 && listContext.page < listContext.totalPages) {
+                    listContext.page++
+                    ListGUI.openList(player, listContext)
                 }
+                return
             }
         }
 
-        // check display name-based controls (previous/next/quit/add)
+        // Check display name-based controls
         val clickedName = clicked?.itemMeta?.displayName()?.let { MessageUtils.strip(it) } ?: ""
         if (clickedName.isNotBlank()) {
-            val lower = clickedName.lowercase()
             when {
-                "previous" in lower || "back" in lower -> {
+                "previous" in clickedName.lowercase() || "back" in clickedName.lowercase() -> {
                     if (listContext.page > 1) listContext.page--
-                    ListGUI().openList(player, listContext)
-                    return true
+                    ListGUI.openList(player, listContext)
+                    return
                 }
-                "next" in lower -> {
+                "next" in clickedName.lowercase() -> {
                     if (listContext.page < listContext.totalPages) listContext.page++
-                    ListGUI().openList(player, listContext)
-                    return true
+                    ListGUI.openList(player, listContext)
+                    return
                 }
-                "quit" in lower || "close" in lower -> {
+                "quit" in clickedName.lowercase() || "close" in clickedName.lowercase() -> {
                     try { player.closeInventory() } catch (_: Exception) {}
                     GuiListenerState.pendingList.remove(uuid)
                     listContext.backCallback.invoke()
-                    return true
+                    return
                 }
-                "add" in lower || "plus" in lower -> {
-                    try { player.closeInventory() } catch (_: Exception) {}
-                    val prompt = "<green>Type block Material name to add (e.g. <white>OAK_LOG<green>)\n<yellow>Type <red>cancel<yellow> to abort."  // TODO: localize
-                    player.sendMessage(MessageUtils.replacer(prompt, mapOf()))
-                    GuiListenerState.pendingAdd[uuid] = listContext
-                    return true
+                "add" in clickedName.lowercase() || "plus" in clickedName.lowercase() -> {
+                    promptAddItem(player, uuid, listContext)
+                    return
                 }
             }
         }
 
-        // treat item clicks (right removes)
-        if (clicked == null) return false
-        val name = MessageUtils.strip(clicked.itemMeta?.displayName())
-        when (e.click) {
-            ClickType.RIGHT, ClickType.SHIFT_RIGHT -> listContext.items.remove(name)
-            else -> {}
+        // Handle item clicks (right removes)
+        if (clicked != null) {
+            val name = MessageUtils.strip(clicked.itemMeta?.displayName())
+            when (e.click) {
+                ClickType.RIGHT, ClickType.SHIFT_RIGHT -> listContext.items.remove(name)
+                else -> {}
+            }
+            ListGUI.openList(player, listContext)
         }
-        ListGUI().openList(player, listContext)
-        return true
+    }
+
+    private fun promptAddItem(player: Player, uuid: java.util.UUID, listContext: ListContext) {
+        try { player.closeInventory() } catch (_: Exception) {}
+        player.sendMessage(LanguageHandler.getMessage("action.gui.enterValue.promptList", player,mapOf()))
+        GuiListenerState.pendingAdd[uuid] = listContext
     }
 }

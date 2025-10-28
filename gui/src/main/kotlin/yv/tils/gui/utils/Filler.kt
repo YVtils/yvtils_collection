@@ -6,15 +6,15 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import yv.tils.utils.message.MessageUtils
 
-class Filler {
+object Filler {
     fun fillInventory(
         inv: Inventory,
-        blockedSlots: MutableList<Int> = mutableListOf(),
-        onlySlots: MutableList<Int> = mutableListOf()
+        blockedSlots: List<Int> = emptyList(),
+        onlySlots: List<Int> = emptyList()
     ): Inventory {
         for (i in 0 until inv.size) {
-            if (onlySlots.isNotEmpty() && !onlySlots.contains(i)) continue
-            if (blockedSlots.contains(i)) continue
+            if (onlySlots.isNotEmpty() && i !in onlySlots) continue
+            if (i in blockedSlots) continue
             if (inv.getItem(i) == null) {
                 inv.setItem(i, mainFillerItem())
             }
@@ -22,22 +22,16 @@ class Filler {
         return inv
     }
 
-    fun mainFillerItem(): ItemStack {
-        val item = ItemStack(Material.GRAY_STAINED_GLASS_PANE)
-        val meta = item.itemMeta
-        meta.displayName(MessageUtils.convert(" "))
-        meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
-        meta?.isHideTooltip = true
-        item.itemMeta = meta
-        return item
-    }
+    fun mainFillerItem(): ItemStack = createFillerItem(Material.GRAY_STAINED_GLASS_PANE)
 
-    fun secondaryFillerItem(): ItemStack {
-        val item = ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+    fun secondaryFillerItem(): ItemStack = createFillerItem(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+
+    private fun createFillerItem(material: Material): ItemStack {
+        val item = ItemStack(material)
         val meta = item.itemMeta
         meta.displayName(MessageUtils.convert(" "))
         meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
-        meta?.isHideTooltip = true
+        meta.isHideTooltip = true
         item.itemMeta = meta
         return item
     }
