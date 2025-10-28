@@ -89,22 +89,30 @@ class ConfigFile {
     }
 
     fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
+        Logger.debug("ConfigFile.registerStrings called with ${content.size} entries", 2)
+        
         // Always start from base default entries
         ensureBaseEntries()
 
         // If a map is provided, set entry.value from it
         if (content.isNotEmpty()) {
             for (entry in configNew) {
-                if (content.containsKey(entry.key)) entry.value = content[entry.key]
+                if (content.containsKey(entry.key)) {
+                    Logger.debug("Updating entry ${entry.key} from ${entry.value} to ${content[entry.key]}", 3)
+                    entry.value = content[entry.key]
+                }
             }
         }
 
         // sync index and legacy map
         syncEntriesToMap()
 
+        Logger.debug("ConfigFile.registerStrings: about to create YAML file with ${configNew.size} entries", 2)
         val ymlFile = YMLFileUtils.makeYAMLFileFromEntries("/multiMine/config.yml", configNew)
+        Logger.debug("ConfigFile.registerStrings: about to update file on disk", 2)
         // Use updateFile with overwriteExisting = true so GUI edits overwrite existing keys
         yv.tils.config.files.FileUtils.updateFile("/multiMine/config.yml", ymlFile, overwriteExisting = true)
+        Logger.debug("ConfigFile.registerStrings: file update complete", 2)
     }
 
     private fun syncEntriesToMap() {
@@ -182,6 +190,20 @@ class ConfigFile {
             "Modify the list of blocks that can be broken using multiMine",
             Material.BUNDLE
         ))
+
+        // TEST ENTRY
+
+        configNew.add(
+            ConfigEntry(
+                "testEntry",
+                EntryType.STRING,
+                null,
+                "This is a test entry",
+                "A test entry to demonstrate functionality",
+                Material.PAPER
+            )
+        )
+
         // populate index for fast lookups
         for (entry in configNew) configIndex[entry.key] = entry
     }

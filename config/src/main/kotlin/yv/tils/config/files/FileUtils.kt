@@ -108,15 +108,20 @@ class FileUtils {
                     val newContent = (content as? YAMLFile)?.content
                         ?: throw IllegalArgumentException("Content must be YAMLFile for .yml files")
 
+                    Logger.debug("FileUtils.updateFile: updating YAML with ${newContent.getKeys(false).size} top-level keys", 2)
+                    Logger.debug("FileUtils.updateFile: overwriteExisting = $overwriteExisting", 2)
+                    
                     // Merge new content with existing, with optional overwrite
                     newContent.getKeys(true).forEach { key ->
                         if (overwriteExisting || !existingYaml.content.contains(key)) {
-                            existingYaml.content[key] = newContent[key]
+                            val value = newContent[key]
+                            Logger.debug("FileUtils.updateFile: setting key '$key' = $value", 3)
+                            existingYaml.content[key] = value
                         }
                     }
 
                     existingYaml.content.save(file)
-                    Logger.debug("YAML file updated: $path")
+                    Logger.debug("YAML file saved to: ${file.absolutePath}", 2)
                 }
 
                 path.endsWith(".json", ignoreCase = true) -> {

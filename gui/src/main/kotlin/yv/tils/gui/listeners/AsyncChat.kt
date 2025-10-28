@@ -11,9 +11,9 @@ import yv.tils.gui.logic.ListGUI
 import yv.tils.utils.data.Data
 import yv.tils.utils.message.MessageUtils
 
-class PlayerChatListener : Listener {
+class AsyncChat : Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun onPlayerChat(e: AsyncChatEvent) {
+    fun onEvent(e: AsyncChatEvent) {
         val uuid = e.player.uniqueId
         // If user is in "add block" flow, handle that first
         val addCtx = GuiListenerState.pendingAdd.remove(uuid)
@@ -24,6 +24,8 @@ class PlayerChatListener : Listener {
                 e.isCancelled = true
                 Bukkit.getScheduler().runTask(Data.instance, Runnable {
                     ListGUI().openList(e.player, addCtx)
+                    // Re-register the context so clicks work
+                    GuiListenerState.pendingList[uuid] = addCtx
                 })
                 return
             }
@@ -34,6 +36,8 @@ class PlayerChatListener : Listener {
                 addCtx.items.add(m.name)
                 Bukkit.getScheduler().runTask(Data.instance, Runnable {
                     ListGUI().openList(e.player, addCtx)
+                    // Re-register the context so clicks work after adding
+                    GuiListenerState.pendingList[uuid] = addCtx
                 })
                 e.player.sendMessage("Added $name to list.")  // TODO: localize
                 // TODO: Test if sprites are a good idea for implementing 1.21.9+
@@ -61,7 +65,7 @@ class PlayerChatListener : Listener {
 
         e.isCancelled = true
         Bukkit.getScheduler().runTask(Data.instance, Runnable {
-            ConfigGUI().createGUI(e.player, holder.configName, holder.entries, holder.onSave)
+                ConfigGUI().createGUI(e.player, holder.configName, holder.entries, holder.onSave, holder)
         })
     }
 }

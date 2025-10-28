@@ -19,7 +19,7 @@ private val ENTRY_SLOTS = listOf(10, 11, 12, 13, 14, 15, 16)
 
 class InventoryClickListener : Listener {
     @EventHandler
-    fun onInventoryClick(e: InventoryClickEvent) {
+    fun onEvent(e: InventoryClickEvent) {
         val holder = e.inventory.holder
         if (holder !is GuiHolder) return
 
@@ -35,15 +35,42 @@ class InventoryClickListener : Listener {
             return
         }
 
-        // Map raw slot to configured entries
-        val index = ENTRY_SLOTS.indexOf(e.rawSlot).takeIf { it >= 0 } ?: return
-        val entries = holder.entries
-        if (index >= entries.size) return
+        // handle navigation (previous/next) for paginated config GUIs
+        val invSize = e.inventory.size
+        val navLeft = invSize - 9
+        val navRight = invSize - 1
+        val perPage = ENTRY_SLOTS.size
+        val totalPages = ((holder.entries.size + perPage - 1) / perPage).coerceAtLeast(1)
 
-        val entry = entries[index]
+        when (e.rawSlot) {
+            navLeft -> {
+                if (totalPages > 1 && holder.page > 1) {
+                    holder.page--
+                    ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
+                    return
+                }
+                // else: do nothing (no previous page)
+            }
+            navRight -> {
+                if (totalPages > 1 && holder.page < totalPages) {
+                    holder.page++
+                    ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
+                    return
+                }
+                // else: no next page
+            }
+        }
+
+        // Map raw slot to configured entries (paged)
+        val index = ENTRY_SLOTS.indexOf(e.rawSlot).takeIf { it >= 0 } ?: return
+        val globalIndex = (holder.page - 1) * perPage + index
+        val entries = holder.entries
+        if (globalIndex >= entries.size) return
+
+        val entry = entries[globalIndex]
 
         fun reopen() {
-            ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave)
+            ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
         }
 
         when (entry.type) {
@@ -104,7 +131,7 @@ class InventoryClickListener : Listener {
                         holder.dirty = true
                     }
                     Bukkit.getScheduler().runTask(Data.instance, Runnable {
-                        ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave)
+                        ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
                     })
                 }
 
@@ -120,7 +147,11 @@ class InventoryClickListener : Listener {
         val raw = e.rawSlot
         val inv = e.inventory
         val invSize = inv.size
-        val clicked = inv.getItem(raw)
+        val clicked = try {
+             inv.getItem(raw)
+        } catch (_: ArrayIndexOutOfBoundsException) {
+            return false
+        }
 
         // filler/gray pane acts as a 'back' button
         if (clicked?.type == Material.GRAY_STAINED_GLASS_PANE) {

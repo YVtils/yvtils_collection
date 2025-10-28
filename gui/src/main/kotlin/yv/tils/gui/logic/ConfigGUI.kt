@@ -8,6 +8,8 @@ import org.bukkit.inventory.ItemStack
 import yv.tils.config.data.ConfigEntry
 import yv.tils.gui.data.ConfigEntryTypes
 import yv.tils.gui.utils.Filler
+import yv.tils.gui.utils.HeadUtils
+import yv.tils.gui.utils.Heads
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.message.MessageUtils
 
@@ -17,27 +19,43 @@ class ConfigGUI {
         private val guiTitle = "<${Colors.MAIN.color}><configName>"
 
         private val keySlots = listOf(10, 11, 12, 13, 14, 15, 16)
-
-        private var multiSite = false
-
         fun slotToIndex(slot: Int): Int? {
             val idx = keySlots.indexOf(slot)
             return if (idx >= 0) idx else null
         }
     }
 
-    fun createGUI(player: Player, configName: String, config: MutableList<ConfigEntry>, saver: ((MutableList<ConfigEntry>) -> Unit)? = null) {
+    fun createGUI(player: Player, configName: String, config: MutableList<ConfigEntry>, saver: ((MutableList<ConfigEntry>) -> Unit)? = null, reuseHolder: GuiHolder? = null) {
         val title = MessageUtils.replacer(guiTitle, mapOf("configName" to configName))
-    // hide documentation entry from the UI (it's metadata), prevents off-by-one mapping
-    val displayEntries = config.filter { it.key != "documentation" }.toMutableList()
-    val holder = GuiHolder(configName, displayEntries, saver)
-    var inv = InventoryHandler().createInventory(holder, title, GUI_SIZE)
+        // hide documentation entry from the UI (it's metadata), prevents off-by-one mapping
+        val displayEntries = config.filter { it.key != "documentation" }.toMutableList()
+        val holder = if (reuseHolder != null && reuseHolder.configName == configName) {
+            // reuse existing holder state (page, etc.) and refresh entries
+            reuseHolder.entries.clear()
+            reuseHolder.entries.addAll(displayEntries)
+            // onSave is assumed to be the same; if caller passed a different saver, it's ignored for reuse
+            reuseHolder
+        } else {
+            GuiHolder(configName, displayEntries, saver)
+        }
+        // ensure holder.page is within bounds
+        val perPage = keySlots.size
+        val totalPages = ((displayEntries.size + perPage - 1) / perPage).coerceAtLeast(1)
+        if (holder.page > totalPages) holder.page = totalPages
 
-    inv = fillInventory(inv, displayEntries)
+        var inv = InventoryHandler().createInventory(holder, title, GUI_SIZE)
+
+        inv = fillInventory(inv, displayEntries, holder.page)
         inv = Filler().fillInventory(inv, blockedSlots = keySlots.toMutableList())
 
-        if (multiSite) {
-            // TODO: Implement multi-site logic
+        // pagination controls: only when there are multiple pages
+        if (totalPages > 1) {
+            if (holder.page > 1) {
+                inv.setItem(GUI_SIZE - 9, HeadUtils().createCustomHead(Heads.PREVIOUS_PAGE, "<yellow>Previous page"))
+            }
+            if (holder.page < totalPages) {
+                inv.setItem(GUI_SIZE - 1, HeadUtils().createCustomHead(Heads.NEXT_PAGE, "<yellow>Next page"))
+            }
         }
 
         player.openInventory(inv)
@@ -46,15 +64,16 @@ class ConfigGUI {
     private fun fillInventory(
         inv: Inventory,
         entries: List<ConfigEntry>,
+        page: Int = 1,
     ): Inventory {
-        var slotIndex = 0
-        for (entry in entries) {
-            if (slotIndex >= keySlots.size) {
-                multiSite = true
-                break
-            }
-            val item = buildKeyItem(entry) ?: continue
+        val perPage = keySlots.size
+        val startIndex = ((page - 1) * perPage).coerceAtLeast(0)
+        val endIndex = (startIndex + perPage).coerceAtMost(entries.size)
+        val pageSlice = if (startIndex < endIndex) entries.subList(startIndex, endIndex) else emptyList()
 
+        var slotIndex = 0
+        for (entry in pageSlice) {
+            val item = buildKeyItem(entry) ?: continue
             inv.setItem(keySlots[slotIndex], item)
             slotIndex++
         }

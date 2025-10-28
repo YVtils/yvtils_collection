@@ -3,6 +3,7 @@ package yv.tils.multiMine.configs
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import yv.tils.config.files.FileUtils
 import yv.tils.config.files.JSONFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
@@ -35,16 +36,23 @@ class SaveFile {
 
     fun registerStrings(saveList: MutableList<MultiMineSave> = mutableListOf()) {
         val saveWrapper = mapOf("saves" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile("/multiMine/save.json", saveWrapper)
-    yv.tils.config.files.FileUtils.updateFile("/multiMine/save.json", jsonFile)
+        val jsonFile = JSONFileUtils.makeJSONFile("/multiMine/save.json", saveWrapper)
+        FileUtils.updateFile("/multiMine/save.json", jsonFile, true)
     }
 
     fun updatePlayerSetting(uuid: UUID, state: Boolean) {
+        Logger.dev("Updating player setting for uuid $uuid")
+        Logger.dev("Saves before update: $saves")
+
         if (saves.containsKey(uuid)) {
+            Logger.dev("Player save found, updating toggled state to $state")
             saves[uuid]?.toggled = state
         } else {
+            Logger.dev("Player save not found, creating new save with toggled state $state")
             saves[uuid] = MultiMineSave(uuid.toString(), state)
         }
+
+        Logger.dev("Saves after update: $saves")
 
         CoroutineHandler.launchTask(
             suspend { registerStrings(saves.values.toMutableList()) },

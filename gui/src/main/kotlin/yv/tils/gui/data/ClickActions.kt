@@ -22,7 +22,7 @@ data class ClickActions(val name: String, val description: String, val click: Cl
             entry.value = !cur
             // refresh GUI
             val player = event.whoClicked as? org.bukkit.entity.Player ?: return@ClickActions
-            yv.tils.gui.logic.ConfigGUI().createGUI(player, holder.configName, holder.entries)
+            yv.tils.gui.logic.ConfigGUI().createGUI(player, holder.configName, holder.entries, null, holder)
         }
 
         val INCREMENT_VALUE = ClickActions("INCREMENT_VALUE", "Increment a value", ClickType.LEFT) { event ->
@@ -41,7 +41,7 @@ data class ClickActions(val name: String, val description: String, val click: Cl
                 }
                 else -> return@ClickActions
             }
-            yv.tils.gui.logic.ConfigGUI().createGUI(player, holder.configName, holder.entries)
+            yv.tils.gui.logic.ConfigGUI().createGUI(player, holder.configName, holder.entries, null, holder)
         }
 
         val INCREMENT_VALUE_SHIFT = ClickActions("INCREMENT_VALUE_SHIFT", "Increment a value by 10 times the normal amount", ClickType.SHIFT_LEFT) { event ->
@@ -60,7 +60,7 @@ data class ClickActions(val name: String, val description: String, val click: Cl
                 }
                 else -> return@ClickActions
             }
-            yv.tils.gui.logic.ConfigGUI().createGUI(player, holder.configName, holder.entries)
+            yv.tils.gui.logic.ConfigGUI().createGUI(player, holder.configName, holder.entries, null, holder)
         }
 
         val DECREMENT_VALUE = ClickActions("DECREMENT_VALUE", "Decrement a value", ClickType.RIGHT) { event ->
@@ -79,7 +79,7 @@ data class ClickActions(val name: String, val description: String, val click: Cl
                 }
                 else -> return@ClickActions
             }
-            yv.tils.gui.logic.ConfigGUI().createGUI(player, holder.configName, holder.entries)
+            yv.tils.gui.logic.ConfigGUI().createGUI(player, holder.configName, holder.entries, null, holder)
         }
 
         val DECREMENT_VALUE_SHIFT = ClickActions("DECREMENT_VALUE_SHIFT", "Decrement a value by 10 times the normal amount", ClickType.SHIFT_RIGHT) { event ->
@@ -98,7 +98,7 @@ data class ClickActions(val name: String, val description: String, val click: Cl
                 }
                 else -> return@ClickActions
             }
-            yv.tils.gui.logic.ConfigGUI().createGUI(player, holder.configName, holder.entries)
+            yv.tils.gui.logic.ConfigGUI().createGUI(player, holder.configName, holder.entries, null, holder)
         }
 
         val MODIFY_TEXT = ClickActions("MODIFY_TEXT", "Modify text value", ClickType.LEFT) { event ->

@@ -9,42 +9,42 @@ import yv.tils.utils.logger.Logger
 class MessageUtils {
     companion object {
         fun convert(text: String?): Component {
-            Logger.Companion.debug("Converting text to Component: $text")
+            Logger.debug("Converting text to Component: $text")
             return text?.let { MiniMessage.miniMessage().deserialize(it) } ?: Component.empty()
         }
 
         fun convert(text: Component?): String {
-            Logger.Companion.debug("Converting Component to text: $text")
+            Logger.debug("Converting Component to text: $text")
             return text?.let { MiniMessage.miniMessage().serialize(it) } ?: ""
         }
 
         fun convert(textList: List<String>): List<Component> {
-            Logger.Companion.debug("Converting list of text to Component: $textList")
+            Logger.debug("Converting list of text to Component: $textList")
             return textList.map { convert(it) }
         }
 
         fun convertChatMessage(text: Component): Component {
-            Logger.Companion.debug("Converting chat message to Component: $text")
+            Logger.debug("Converting chat message to Component: $text")
             return convert(strip(text))
         }
 
         fun strip(text: String?): String {
-            Logger.Companion.debug("Stripping text: $text")
+            Logger.debug("Stripping text: $text")
             return text?.let { PlainTextComponentSerializer.plainText().serialize(convert(text)) } ?: ""
         }
 
         fun strip(text: Component?): String {
-            Logger.Companion.debug("Stripping Component: $text")
+            Logger.debug("Stripping Component: $text")
             return text?.let { PlainTextComponentSerializer.plainText().serialize(text) } ?: ""
         }
 
         fun stripChatMessage(text: Component): String {
-            Logger.Companion.debug("Stripping chat message: $text")
+            Logger.debug("Stripping chat message: $text")
             return strip(strip(text))
         }
 
         fun handleLore(text: String): List<Component> {
-            Logger.Companion.debug("Handling lore: $text")
+            Logger.debug("Handling lore: $text")
             val lore = mutableListOf<Component>()
             val mm = MiniMessage.miniMessage()
 
@@ -84,35 +84,35 @@ class MessageUtils {
         }
 
         fun handleLore(text: Component): List<Component> {
-            Logger.Companion.debug("Handling component lore: $text")
+            Logger.debug("Handling component lore: $text")
             return handleLore(convert(text))
         }
 
         fun joinedConvert(vararg text: String): Component {
-            Logger.Companion.debug("Joining and converting text: ${text.joinToString(";")}")
+            Logger.debug("Joining and converting text: ${text.joinToString(";")}")
             val joinedText = text.joinToString("")
             return convert(joinedText)
         }
 
         fun replacer(inPut: Component, replace: Map<String, Any>): Component {
-            Logger.Companion.debug("InPut: $inPut")
-            Logger.Companion.debug("Replace: $replace")
+            Logger.debug("InPut: $inPut")
+            Logger.debug("Replace: $replace")
 
             val text = convert(inPut)
             val outPut = replacerLogic(text, replace)
 
-            Logger.Companion.debug("Output: $outPut")
+            Logger.debug("Output: $outPut")
 
             return outPut
         }
 
         fun replacer(inPut: String, replace: Map<String, Any>): Component {
-            Logger.Companion.debug("InPut: $inPut")
-            Logger.Companion.debug("Replace: $replace")
+            Logger.debug("InPut: $inPut")
+            Logger.debug("Replace: $replace")
 
             val outPut = replacerLogic(inPut, replace)
 
-            Logger.Companion.debug("Output: $outPut")
+            Logger.debug("Output: $outPut")
 
             return outPut
         }
@@ -125,7 +125,7 @@ class MessageUtils {
                 text = text.replace(oldString, replace[i].toString())
             }
 
-            text = text.replace("<prefix>", Data.Companion.prefix)
+            text = text.replace("<prefix>", Data.prefix)
 
             if (text.startsWith(" ")) {
                 text = text.replaceFirst(" ", "")

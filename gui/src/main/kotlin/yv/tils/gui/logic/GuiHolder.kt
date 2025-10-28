@@ -17,4 +17,6 @@ class GuiHolder(
 
     override fun getInventory(): Inventory = invInternal!!
     var dirty: Boolean = false
+    // current page for paginated views (1-based)
+    var page: Int = 1
 }

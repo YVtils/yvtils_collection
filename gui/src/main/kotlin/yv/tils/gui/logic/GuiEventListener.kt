@@ -105,8 +105,8 @@ class GuiEventListener : Listener {
         val entryType = entry.type
 
         fun reopen() {
-            // reopen GUI to refresh
-            ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave)
+            // reopen GUI to refresh - reuse holder so page is preserved
+            ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
         }
 
         when (entryType) {
@@ -181,7 +181,7 @@ class GuiEventListener : Listener {
                         holder.dirty = true
                     }
                     org.bukkit.Bukkit.getScheduler().runTask(yv.tils.utils.data.Data.instance, Runnable {
-                        ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave)
+                        ConfigGUI().createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
                     })
                 }
 
@@ -269,8 +269,8 @@ class GuiEventListener : Listener {
         // cancel original chat event so it doesn't appear globally
         e.isCancelled = true
         // reopen GUI sync on main thread
-        org.bukkit.Bukkit.getScheduler().runTask(yv.tils.utils.data.Data.instance, Runnable {
-            ConfigGUI().createGUI(e.player, holder.configName, holder.entries, holder.onSave)
+            org.bukkit.Bukkit.getScheduler().runTask(yv.tils.utils.data.Data.instance, Runnable {
+            ConfigGUI().createGUI(e.player, holder.configName, holder.entries, holder.onSave, holder)
         })
     }
 }

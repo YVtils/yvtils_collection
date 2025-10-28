@@ -1,5 +1,8 @@
 package yv.tils.gui
 
+import yv.tils.gui.listeners.AsyncChat
+import yv.tils.gui.listeners.InventoryClickListener
+import yv.tils.gui.listeners.InventoryClose
 import yv.tils.utils.data.Data
 
 class GUIYVtils : Data.YVtilsModule {
@@ -30,9 +33,9 @@ class GUIYVtils : Data.YVtilsModule {
     private fun registerListeners() {
         val plugin = Data.instance
         val pm = plugin.server.pluginManager
-        pm.registerEvents(yv.tils.gui.listeners.InventoryClickListener(), plugin)
-        pm.registerEvents(yv.tils.gui.listeners.InventoryCloseListener(), plugin)
-        pm.registerEvents(yv.tils.gui.listeners.PlayerChatListener(), plugin)
+        pm.registerEvents(InventoryClickListener(), plugin)
+        pm.registerEvents(InventoryClose(), plugin)
+        pm.registerEvents(AsyncChat(), plugin)
     }
 
     override fun disablePlugin() {
