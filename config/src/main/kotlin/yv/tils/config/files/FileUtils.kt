@@ -83,7 +83,7 @@ class FileUtils {
 
             when (content) {
                 is YAMLFile -> content.content.save(file)
-                is JSONFile -> file.writeText(yv.tils.config.files.JSONFileUtils.json.encodeToString(content.content))
+                is JSONFile -> file.writeText(JSONFileUtils.json.encodeToString(content.content))
                 else -> throw Exception("This file extension is not supported by this function!")
             }
         }
@@ -133,27 +133,27 @@ class FileUtils {
                     val newContent = when (content) {
                         is JSONFile -> content.content
                         else -> {
-                            val jsonString = yv.tils.config.files.JSONFileUtils.json.encodeToString(content)
-                            yv.tils.config.files.JSONFileUtils.json.decodeFromString(kotlinx.serialization.json.JsonObject.serializer(), jsonString)
+                            val jsonString = JSONFileUtils.json.encodeToString(content)
+                            JSONFileUtils.json.decodeFromString(kotlinx.serialization.json.JsonObject.serializer(), jsonString)
                         }
                     }
 
                     // Skip updating if new content contains empty arrays and we're not forcing overwrite
-                    if (!overwriteExisting && yv.tils.config.files.JSONFileUtils.isEmptyArraysOnly(newContent)) {
+                    if (!overwriteExisting && JSONFileUtils.isEmptyArraysOnly(newContent)) {
                         Logger.debug("Skipping update with empty arrays: $path")
                         return
                     }
 
                     // For complete replacement, just use the new content directly
                     if (overwriteExisting) {
-                        file.writeText(yv.tils.config.files.JSONFileUtils.json.encodeToString(newContent))
+                        file.writeText(JSONFileUtils.json.encodeToString(newContent))
                         Logger.debug("JSON file completely replaced: $path")
                         return
                     }
 
                     // Otherwise, do a smart merge of the objects
-                    val mergedJson = yv.tils.config.files.JSONFileUtils.mergeJsonObjectsWithArrayAppend(existingJson.content, newContent)
-                    file.writeText(yv.tils.config.files.JSONFileUtils.json.encodeToString(mergedJson))
+                    val mergedJson = JSONFileUtils.mergeJsonObjectsWithArrayAppend(existingJson.content, newContent)
+                    file.writeText(JSONFileUtils.json.encodeToString(mergedJson))
                     Logger.debug("JSON file updated with merged content: $path")
                 }
 

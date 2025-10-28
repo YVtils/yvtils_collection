@@ -10,19 +10,27 @@ import yv.tils.gui.logic.ConfigGUI
 import yv.tils.gui.logic.GuiHolder
 
 data class ClickActions(
-    val name: String,
-    val description: String,
+    val nameKey: String,
+    val descriptionKey: String,
     val click: ClickType,
     val action: (InventoryClickEvent) -> Unit
 ) {
+    fun getName(): String {
+        return LanguageHandler.getCleanMessage(nameKey)
+    }
+
+    fun getDescription(): String {
+        return LanguageHandler.getCleanMessage(descriptionKey)
+    }
+
     companion object {
-        val OPEN_SETTING = ClickActions("OPEN_SETTING", "Open settings menu", ClickType.RIGHT) { event ->
+        val OPEN_SETTING = ClickActions("action.gui.click.name.openSetting", "action.gui.click.openSetting", ClickType.RIGHT) { event ->
             getEventContext(event)?.let { (player, entry) ->
                 player.sendMessage(LanguageHandler.getMessage("action.gui.settingInfo", player,mapOf("key" to entry.key, "value" to (entry.value ?: entry.defaultValue).toString())))
             }
         }
 
-        val TOGGLE_OPTION = ClickActions("TOGGLE_OPTION", "Toggle an option", ClickType.LEFT) { event ->
+        val TOGGLE_OPTION = ClickActions("action.gui.click.name.toggleOption", "action.gui.click.toggleOption", ClickType.LEFT) { event ->
             getEventContext(event)?.let { (player, entry, holder) ->
                 if (entry.type != EntryType.BOOLEAN) return@ClickActions
                 val current = entry.value as? Boolean ?: (entry.defaultValue as? Boolean ?: false)
@@ -31,23 +39,23 @@ data class ClickActions(
             }
         }
 
-        val INCREMENT_VALUE = ClickActions("INCREMENT_VALUE", "Increment a value", ClickType.LEFT) { event ->
+        val INCREMENT_VALUE = ClickActions("action.gui.click.name.incrementValue", "action.gui.click.incrementValue", ClickType.LEFT) { event ->
             modifyNumericValue(event, 1)
         }
 
-        val INCREMENT_VALUE_SHIFT = ClickActions("INCREMENT_VALUE_SHIFT", "Increment a value by 10", ClickType.SHIFT_LEFT) { event ->
+        val INCREMENT_VALUE_SHIFT = ClickActions("action.gui.click.name.incrementValueShift", "action.gui.click.incrementValueShift", ClickType.SHIFT_LEFT) { event ->
             modifyNumericValue(event, 10)
         }
 
-        val DECREMENT_VALUE = ClickActions("DECREMENT_VALUE", "Decrement a value", ClickType.RIGHT) { event ->
+        val DECREMENT_VALUE = ClickActions("action.gui.click.name.decrementValue", "action.gui.click.decrementValue", ClickType.RIGHT) { event ->
             modifyNumericValue(event, -1)
         }
 
-        val DECREMENT_VALUE_SHIFT = ClickActions("DECREMENT_VALUE_SHIFT", "Decrement a value by 10", ClickType.SHIFT_RIGHT) { event ->
+        val DECREMENT_VALUE_SHIFT = ClickActions("action.gui.click.name.decrementValueShift", "action.gui.click.decrementValueShift", ClickType.SHIFT_RIGHT) { event ->
             modifyNumericValue(event, -10)
         }
 
-        val MODIFY_TEXT = ClickActions("MODIFY_TEXT", "Modify text value", ClickType.LEFT) { event ->
+        val MODIFY_TEXT = ClickActions("action.gui.click.name.modifyText", "action.gui.click.modifyText", ClickType.LEFT) { event ->
             getEventContext(event)?.let { (player, entry) ->
                 player.sendMessage(LanguageHandler.getMessage("action.gui.enterValue.prompt", player, mapOf("key" to entry.key)))
             }

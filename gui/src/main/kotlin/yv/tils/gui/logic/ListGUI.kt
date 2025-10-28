@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import yv.tils.config.language.LanguageHandler
 import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.HeadUtils
 import yv.tils.gui.utils.Heads
@@ -50,29 +51,29 @@ object ListGUI {
         // place page items into inner slots left-to-right, top-to-bottom
         pageItems.forEachIndexed { idx, name ->
             val slotIndex = innerSlots.getOrNull(idx) ?: return@forEachIndexed
-            inv.setItem(slotIndex, createListItem(name))
+            inv.setItem(slotIndex, createListItem(name, player))
         }
 
         Filler.fillInventory(inv, blockedSlots = innerSlots)
 
         if (context.page > 1) {
-            inv.setItem(size - 9, HeadUtils.createCustomHead(Heads.PREVIOUS_PAGE, "<yellow>Previous page"))
+            inv.setItem(size - 9, HeadUtils.createCustomHead(Heads.PREVIOUS_PAGE, player, "action.gui.nav.previousPage"))
         } else {
             // On first page, put a quit item in the back slot
-            inv.setItem(size - 9, HeadUtils.createCustomHead(Heads.X_CHARACTER, "<red>Quit"))
+            inv.setItem(size - 9, HeadUtils.createCustomHead(Heads.X_CHARACTER, player, "action.gui.nav.quit"))
         }
 
         // bottom-center: always show Add
-        inv.setItem(size - 5, HeadUtils.createCustomHead(Heads.PLUS_CHARACTER, "<green>Add item"))
+        inv.setItem(size - 5, HeadUtils.createCustomHead(Heads.PLUS_CHARACTER, player, "action.gui.nav.addItem"))
 
         if (context.page < context.totalPages) {
-            inv.setItem(size - 1, HeadUtils.createCustomHead(Heads.NEXT_PAGE, "<yellow>Next page"))
+            inv.setItem(size - 1, HeadUtils.createCustomHead(Heads.NEXT_PAGE, player, "action.gui.nav.nextPage"))
         }
 
         player.openInventory(inv)
     }
 
-    private fun createListItem(name: String): ItemStack {
+    private fun createListItem(name: String, player: Player): ItemStack {
         val mat = try {
             Material.valueOf(name)
         } catch (_: Exception) {
@@ -82,10 +83,13 @@ object ListGUI {
         val meta = item.itemMeta
         meta.displayName(MessageUtils.convert("<white>$name"))
         
+        val actionsLabel = LanguageHandler.getRawMessage("action.gui.list.actions", player.uniqueId)
+        val removeAction = LanguageHandler.getRawMessage("action.gui.list.remove", player.uniqueId)
+        
         val loreLines = listOf(
             "<dark_gray>————————",
-            "<white>Actions:",
-            "<gray>Right-click: <red>Remove",
+            "<white>$actionsLabel:",
+            "<white>$removeAction",
             "<dark_gray>————————"
         )
         meta.lore(MessageUtils.handleLore(loreLines.joinToString("<newline>")))

@@ -1,5 +1,6 @@
 package yv.tils.gui
 
+import yv.tils.gui.language.RegisterStrings
 import yv.tils.gui.listeners.AsyncChat
 import yv.tils.gui.listeners.InventoryClickListener
 import yv.tils.gui.listeners.InventoryClose
@@ -16,7 +17,9 @@ class GUIYVtils : Data.YVtilsModule {
         )
     }
 
-    override fun onLoad() {}
+    override fun onLoad() {
+        RegisterStrings.registerStrings()
+    }
 
     override fun enablePlugin() {
         Data.addModule(MODULE)

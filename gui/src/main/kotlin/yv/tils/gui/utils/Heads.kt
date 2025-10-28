@@ -3,9 +3,11 @@ package yv.tils.gui.utils
 import com.destroystokyo.paper.profile.ProfileProperty
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
+import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.message.MessageUtils
 import java.util.*
 
@@ -86,6 +88,26 @@ object HeadUtils {
 
         meta.playerProfile = playerProfile
         meta.displayName(MessageUtils.convert(itemName))
+        meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
+        item.itemMeta = meta
+
+        return item
+    }
+
+    fun createCustomHead(headTexture: Heads, player: Player, languageKey: String): ItemStack {
+        val item = ItemStack(Material.PLAYER_HEAD)
+        val meta = item.itemMeta as SkullMeta
+        val playerProfile = Bukkit.createProfile(UUID.randomUUID())
+
+        playerProfile.setProperties(
+            Collections.singletonList(
+                ProfileProperty("textures", headTexture.texture, "")
+            )
+        )
+
+        meta.playerProfile = playerProfile
+        val localizedName = LanguageHandler.getMessage(languageKey, player)
+        meta.displayName(localizedName)
         meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
         item.itemMeta = meta
 

@@ -77,7 +77,7 @@ class ConfigFile {
         loadBlockList(file)
     }
 
-    private fun loadBlockList(file: yv.tils.config.files.YMLFileUtils.Companion.YAMLFile) {
+    private fun loadBlockList(file: YMLFileUtils.Companion.YAMLFile) {
         val blocks = file.content.getStringList("blocks")
         blocks.forEach {
             try {
@@ -190,19 +190,6 @@ class ConfigFile {
             "Modify the list of blocks that can be broken using multiMine",
             Material.BUNDLE
         ))
-
-        // TEST ENTRY
-
-        configNew.add(
-            ConfigEntry(
-                "testEntry",
-                EntryType.STRING,
-                null,
-                "This is a test entry",
-                "A test entry to demonstrate functionality",
-                Material.PAPER
-            )
-        )
 
         // populate index for fast lookups
         for (entry in configNew) configIndex[entry.key] = entry

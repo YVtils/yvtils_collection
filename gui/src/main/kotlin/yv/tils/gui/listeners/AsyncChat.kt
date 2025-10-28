@@ -63,6 +63,11 @@ class AsyncChat : Listener {
         if (message.equals("cancel", ignoreCase = true)) {
             e.player.sendMessage(LanguageHandler.getMessage("action.gui.cancelled", e.player))
             e.isCancelled = true
+            Logger.debug("Player ${e.player.name} cancelled text edit", 2)
+            // Reopen the GUI when cancelled
+            Bukkit.getScheduler().runTask(Data.instance, Runnable {
+                ConfigGUI.createGUI(e.player, holder.configName, holder.entries, holder.onSave, holder)
+            })
             return
         }
 

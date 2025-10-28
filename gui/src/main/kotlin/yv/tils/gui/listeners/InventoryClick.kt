@@ -104,8 +104,15 @@ class InventoryClickListener : Listener {
             }
 
             EntryType.STRING -> if (e.click == ClickType.LEFT) {
-                player.sendMessage(LanguageHandler.getMessage("action.gui.enterValue.prompt", player,mapOf("key" to entry.key)))
                 GuiListenerState.pendingChat[player.uniqueId] = holder to entry.key
+                try { player.closeInventory() } catch (_: Exception) {}
+                player.sendMessage(
+                    LanguageHandler.getMessage(
+                        "action.gui.enterValue.prompt",
+                        player,
+                        mapOf("key" to entry.key)
+                    )
+                )
             }
 
             EntryType.LIST, EntryType.MAP -> {
