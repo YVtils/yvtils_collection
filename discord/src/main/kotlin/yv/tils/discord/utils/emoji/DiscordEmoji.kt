@@ -100,7 +100,10 @@ class DiscordEmoji {
      */
     fun cleanupAppEmojis(maxAge: Long = 7 * 24 * 60 * 60 * 1000L, emojis: List<ApplicationEmoji> = emptyList()) {
         if (emojis.isEmpty()) {
-            val retrievedEmojis = AppLogic.Companion.jda.retrieveApplicationEmojis().complete()
+            val retrievedEmojis = AppLogic.jda.retrieveApplicationEmojis().complete()
+
+            if (retrievedEmojis.isEmpty()) return
+
             cleanupAppEmojis(maxAge, retrievedEmojis)
             return
         }

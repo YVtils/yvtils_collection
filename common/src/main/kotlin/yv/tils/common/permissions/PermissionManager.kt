@@ -18,27 +18,31 @@ class PermissionManager {
         }
 
         private fun registerPermission(perms: List<YVtilsPermission>) {
-            val pluginManager = Data.instance.server.pluginManager
-            val created = mutableMapOf<String, Permission>()
+            try {
+                val pluginManager = Data.instance.server.pluginManager
+                val created = mutableMapOf<String, Permission>()
 
-            perms.forEach { p ->
-                val perm = Permission(
-                    p.name,
-                    p.description,
-                    if (p.default) PermissionDefault.TRUE else PermissionDefault.FALSE
-                )
-                created[p.name] = perm
-            }
-
-            perms.forEach { p ->
-                val perm = created[p.name] !!
-                if (p.children.isNotEmpty()) {
-                    perm.children.putAll(p.children)
-                    perm.recalculatePermissibles()
+                perms.forEach { p ->
+                    val perm = Permission(
+                        p.name,
+                        p.description,
+                        if (p.default) PermissionDefault.TRUE else PermissionDefault.FALSE
+                    )
+                    created[p.name] = perm
                 }
-            }
 
-            created.values.forEach { pluginManager.addPermission(it) }
+                perms.forEach { p ->
+                    val perm = created[p.name]!!
+                    if (p.children.isNotEmpty()) {
+                        perm.children.putAll(p.children)
+                        perm.recalculatePermissibles()
+                    }
+                }
+
+                created.values.forEach { pluginManager.addPermission(it) }
+            } catch (e: Exception) {
+                Logger.error("An error occurred while registering permissions: ${e.message}")
+            }
         }
     }
 

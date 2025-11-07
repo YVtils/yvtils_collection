@@ -24,7 +24,7 @@ class Components {
         private const val ICON_URL = PlayerUtils.PLAYER_HEAD_API
 
         const val FOOTER_TEXT = "YVtils • https://yvtils.net"
-        const val FOOTER_TEXT_CUSTOMIZABLE = "YVtils-SMP • %s • https://yvtils.net"
+        const val FOOTER_TEXT_CUSTOMIZABLE = "YVtils • %s • https://yvtils.net"
         const val FOOTER_ICON =
             "https://api.yvtils.net/images/yvtils_logo" // TODO: Implement to upload as emoji to discord app and then use in footer
 

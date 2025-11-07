@@ -6,7 +6,7 @@ dependencies {
     implementation(project(":migration"))
 }
 
-val version = "4.0.0-beta.1"
+val version = "4.0.0-beta.2"
 
 tasks {
     runServer {

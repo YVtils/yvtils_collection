@@ -1,16 +1,16 @@
 package yv.tils.core
 
-import yv.tils.config.ConfigYVtils
-import yv.tils.utils.UtilsYVtils
-import yv.tils.utils.data.Data
 import dev.jorel.commandapi.CommandAPI
-import dev.jorel.commandapi.CommandAPIBukkitConfig
-import yv.tils.utils.logger.Logger
+import dev.jorel.commandapi.CommandAPIPaperConfig
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
+import yv.tils.config.ConfigYVtils
 import yv.tils.discord.DiscordYVtils
 import yv.tils.migration.MigrationYVtils
+import yv.tils.utils.UtilsYVtils
+import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 
 class YVtils : JavaPlugin() {
     companion object {
@@ -58,11 +58,11 @@ class YVtils : JavaPlugin() {
         Data.initCore(core)
 
         CommandAPI.onLoad(
-            CommandAPIBukkitConfig(instance)
+            CommandAPIPaperConfig(instance)
                 .setNamespace("yvtils")
                 .silentLogs(true)
                 .verboseOutput(false)
-                .beLenientForMinorVersions(true)
+                .fallbackToLatestNMS(true)
         )
 
         try {
