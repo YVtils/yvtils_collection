@@ -18,11 +18,11 @@ dependencies {
     implementation(project(":migration"))
 }
 
-val version = "4.0.0-beta.2"
+val version = "4.0.0-beta.3"
 
 tasks {
     runServer {
-        minecraftVersion("1.21.5")
+        minecraftVersion("1.21.10")
     }
 
     shadowJar {
