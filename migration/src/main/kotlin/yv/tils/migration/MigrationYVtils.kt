@@ -1,3 +1,15 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.migration
 
 import yv.tils.config.files.FileUtils
@@ -37,7 +49,7 @@ class MigrationYVtils: Data.YVtilsModule {
     private fun enableEarlyDebugMode() {
         try {
             // Try to read debug settings directly from config file
-            val configFile = FileUtils.loadYAMLFile("/config.yml")
+            val configFile = yv.tils.config.files.YMLFileUtils.loadYAMLFile("/config.yml")
             val debugActive = configFile.content.getBoolean("debug.active")
             val debugLevel = configFile.content.getInt("debug.level")
 
