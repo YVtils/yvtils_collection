@@ -163,15 +163,33 @@ class BlockUtils {
                         try {
                             if (breakBlock(newBlock, player, item, customBlockList)) {
                                 area.include(newLoc.blockX, newLoc.blockY, newLoc.blockZ)
-                                registerBlocks(
-                                    newLoc,
-                                    player,
-                                    item,
-                                    customBlockList,
-                                    topLevel = false,
-                                    root = origin,
-                                    box = area
-                                )
+                                try {
+                                    registerBlocks(
+                                        newLoc,
+                                        player,
+                                        item,
+                                        customBlockList,
+                                        topLevel = false,
+                                        root = origin,
+                                        box = area
+                                    )
+                                } catch (e: NullPointerException) {
+                                    Logger.warn("Error during recursive block registration: ${e.message}")
+                                    Logger.debug("Error: ${e.stackTraceToString()}", 2)
+
+                                    // TODO: Look into this error
+                                    // [17:06:53 WARN]: [YVtils] Task #798115 for YVtils-MultiMine v2.0.0-beta.1 generated an exception
+                                    //java.lang.NullPointerException: null
+                                    //        at YVtils-MM_v2.0.0-beta.1.jar/yv.tils.multiMine.utils.BlockUtils.registerBlocks$lambda$1(BlockUtils.kt:166) ~[YVtils-MM_v2.0.0-beta.1.jar:?]
+                                    //        at org.bukkit.craftbukkit.scheduler.CraftTask.run(CraftTask.java:78) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                    //        at org.bukkit.craftbukkit.scheduler.CraftScheduler.mainThreadHeartbeat(CraftScheduler.java:474) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                    //        at net.minecraft.server.MinecraftServer.tickChildren(MinecraftServer.java:1771) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                    //        at net.minecraft.server.MinecraftServer.tickServer(MinecraftServer.java:1645) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                    //        at net.minecraft.server.dedicated.DedicatedServer.tickServer(DedicatedServer.java:467) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                    //        at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1365) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                    //        at net.minecraft.server.MinecraftServer.lambda$spin$2(MinecraftServer.java:388) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                    //        at java.base/java.lang.Thread.run(Thread.java:1583) ~[?:?]
+                                }
                             }
                         } finally {
                             synchronized(runningProcessesMap) {

@@ -19,7 +19,7 @@ dependencies {
     implementation(project(":gui"))
 }
 
-val version = "2.0.0-beta.1"
+val version = "2.0.0-beta.3"
 
 tasks {
     runServer {

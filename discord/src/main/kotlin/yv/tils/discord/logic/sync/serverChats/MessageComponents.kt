@@ -121,9 +121,15 @@ class MessageComponents {
 
     private fun authorComponent(sender: Player): ContainerChildComponent {
         val emojiID = EmojiUtils().getPlayerEmojiId(sender)
-        return TextDisplay.of(
-            "### <:star:$emojiID> ${sender.name}"
-        )
+        return if (emojiID != null) {
+            TextDisplay.of(
+                "### <:star:$emojiID> ${sender.name}"
+            )
+        } else {
+            TextDisplay.of(
+                "### :star: ${sender.name}"
+            )
+        }
     }
 
     private fun prettifyAdvancementKey(key: String): String {

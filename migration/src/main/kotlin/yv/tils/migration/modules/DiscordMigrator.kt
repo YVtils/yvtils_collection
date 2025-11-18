@@ -102,7 +102,7 @@ class DiscordMigrator: BaseMigrator() {
     }
 
     /** Transforms Discord config structure from old to new format */
-    private fun transformConfigStructure(oldYaml: yv.tils.config.files.YMLFileUtils.Companion.YAMLFile): Map<String, Any> {
+    private fun transformConfigStructure(oldYaml: YMLFileUtils.Companion.YAMLFile): Map<String, Any> {
         val newRoot = mutableMapOf<String, Any>()
         val yaml = oldYaml.content
 
@@ -256,7 +256,7 @@ class DiscordMigrator: BaseMigrator() {
 
     /** Transforms Discord save structure from YAML to JSON format */
     private fun transformSaveStructure(
-        oldYaml: yv.tils.config.files.YMLFileUtils.Companion.YAMLFile,
+        oldYaml: YMLFileUtils.Companion.YAMLFile,
     ): List<Map<String, String>> {
         val entries = mutableListOf<Map<String, String>>()
         val yaml = oldYaml.content

@@ -142,7 +142,7 @@ class DiscordEmoji {
      * @throws RuntimeException if the emoji creation fails.
      */
     fun createAppEmoji(name: String, icon: Icon): Long {
-        val emoji = AppLogic.Companion.jda.createApplicationEmoji(
+        val emoji = AppLogic.jda.createApplicationEmoji(
             name,
             icon,
         ).complete()

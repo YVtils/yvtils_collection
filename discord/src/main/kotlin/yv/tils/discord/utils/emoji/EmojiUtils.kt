@@ -13,6 +13,7 @@
 package yv.tils.discord.utils.emoji
 
 import org.bukkit.entity.Player
+import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.player.PlayerUtils
 
@@ -44,13 +45,21 @@ class EmojiUtils {
             return
         }
 
-        try {
-            val emojiId = DiscordEmoji().createSkinEmoji(player)
-            addPlayerEmoji(skinHash, emojiId)
-        } catch (e: Exception) {
-            Logger.error("Failed to create player emoji for ${player.name}: ${e.message}")
-            Logger.debug("Stack trace: ${e.stackTraceToString()}", 2)
-        }
+        CoroutineHandler.launchTask(
+            {
+                Logger.dev("Creating player emoji for ${player.name}")
+
+                try {
+                    val emojiId = DiscordEmoji().createSkinEmoji(player)
+                    addPlayerEmoji(skinHash, emojiId)
+                } catch (e: Exception) {
+                    Logger.error("Failed to create player emoji for ${player.name}: ${e.message}")
+                    Logger.debug("Stack trace: ${e.stackTraceToString()}", 2)
+                }
+            },
+            taskName = "createPlayerEmoji",
+            isOnce = true
+        )
     }
 
     /**
