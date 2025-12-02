@@ -20,9 +20,16 @@ import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.logic.LeaveDecayHandler
 import yv.tils.multiMine.utils.ToolUtils.Companion.toolBroke
 import yv.tils.utils.data.Data
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.decrementAndFetch
+import kotlin.concurrent.atomics.incrementAndFetch
 
+@OptIn(ExperimentalAtomicApi::class)
 class BlockUtils {
     companion object {
         val animationTime = ConfigFile.config["animationTime"] as Int
@@ -30,9 +37,10 @@ class BlockUtils {
         val matchBlockTypeOnly = ConfigFile.config["matchBlockTypeOnly"] as Boolean
         val blocks = ConfigFile.blockList
 
-        val brokenMap: MutableMap<UUID, Int> = mutableMapOf()
+        val runningProcessesMap: ConcurrentHashMap<UUID, AtomicInt> = ConcurrentHashMap()
+        val brokenMap: ConcurrentHashMap<UUID, AtomicInt> = ConcurrentHashMap()
+
         val processFinishedMap: MutableMap<UUID, Boolean> = mutableMapOf()
-        val runningProcessesMap: MutableMap<UUID, Int> = mutableMapOf()
         val playerBlockTypeMap: MutableMap<UUID, Material> = mutableMapOf()
     }
 
@@ -66,17 +74,17 @@ class BlockUtils {
     private fun breakBlock(block: Block, player: Player, item: ItemStack, blockList: List<Material>): Boolean {
         // Initialize player's broken count if not exists
         if (!brokenMap.containsKey(player.uniqueId)) {
-            brokenMap[player.uniqueId] = 0
+            brokenMap[player.uniqueId] = AtomicInt(0)
         }
 
         // Check break limit BEFORE attempting to break
-        if (brokenMap[player.uniqueId]!! >= breakLimit) {
-            Logger.debug("Break limit reached for ${player.name}: ${brokenMap[player.uniqueId]}/$breakLimit")
+        if (brokenMap[player.uniqueId]!!.load() >= breakLimit) {
+            Logger.debug("Break limit reached for ${player.name}: ${brokenMap[player.uniqueId]}/$breakLimit",DEBUGLEVEL.DETAILED)
             return false
         }
 
         if (checkBlock(block.type, blockList, player) && ToolUtils().checkTool(block, item)) {
-            if (brokenMap[player.uniqueId]!! != 0) {
+            if (brokenMap[player.uniqueId]!!.load() != 0) {
                 try {
                     if (toolBroke) return false
 
@@ -88,8 +96,8 @@ class BlockUtils {
                 }
             }
 
-            brokenMap[player.uniqueId] = brokenMap[player.uniqueId]!! + 1
-            Logger.debug("Block broken by ${player.name}. Count: ${brokenMap[player.uniqueId]}/$breakLimit")
+            brokenMap[player.uniqueId]?.incrementAndFetch()
+            Logger.debug("Block broken by ${player.name}. Count: ${brokenMap[player.uniqueId]}/$breakLimit",DEBUGLEVEL.DETAILED)
 
             block.breakNaturally(item, true, true)
             return true
@@ -122,11 +130,11 @@ class BlockUtils {
 
         // Initialize player's counters if not exists
         if (!brokenMap.containsKey(playerId)) {
-            brokenMap[playerId] = 0
+            brokenMap[playerId] = AtomicInt(0)
             Logger.debug("Init counter for ${player.name}")
         }
         if (!runningProcessesMap.containsKey(playerId)) {
-            runningProcessesMap[playerId] = 0
+            runningProcessesMap[playerId] = AtomicInt(0)
         }
         if (topLevel) {
             processFinishedMap[playerId] = false
@@ -137,9 +145,11 @@ class BlockUtils {
         Logger.debug("Start multimine for ${player.name}: ${brokenMap[playerId]}/$breakLimit")
 
         // Check break limit BEFORE starting any processes
-        if (brokenMap[playerId]!! >= breakLimit) {
-            Logger.debug("Stop multimine (limit) for ${player.name}: ${brokenMap[playerId]}/$breakLimit")
-            return
+        brokenMap[playerId]?.let {
+            if (it.load() >= breakLimit) {
+                Logger.debug("Break limit reached for ${player.name} before scheduling tasks: ${brokenMap[playerId]}/$breakLimit")
+                return
+            }
         }
 
         var tasksScheduled = 0
@@ -155,7 +165,9 @@ class BlockUtils {
                     if (!ToolUtils().checkTool(newBlock, item)) continue
 
                     synchronized(runningProcessesMap) {
-                        runningProcessesMap[playerId] = runningProcessesMap[playerId]!! + 1
+                        runningProcessesMap[playerId]?.incrementAndFetch() ?: run {
+                            runningProcessesMap[playerId] = AtomicInt(1)
+                        }
                     }
                     tasksScheduled++
 
@@ -177,7 +189,7 @@ class BlockUtils {
                                     Logger.warn("Error during recursive block registration: ${e.message}")
                                     Logger.debug("Error: ${e.stackTraceToString()}", 2)
 
-                                    // TODO: Look into this error
+                                    // TODO: Look into this error -> Maybe this is fixed now?
                                     // [17:06:53 WARN]: [YVtils] Task #798115 for YVtils-MultiMine v2.0.0-beta.1 generated an exception
                                     //java.lang.NullPointerException: null
                                     //        at YVtils-MM_v2.0.0-beta.1.jar/yv.tils.multiMine.utils.BlockUtils.registerBlocks$lambda$1(BlockUtils.kt:166) ~[YVtils-MM_v2.0.0-beta.1.jar:?]
@@ -192,16 +204,33 @@ class BlockUtils {
                                 }
                             }
                         } finally {
-                            synchronized(runningProcessesMap) {
-                                runningProcessesMap[playerId] = runningProcessesMap[playerId]!! - 1
+                            try {
+                                synchronized(runningProcessesMap) {
+                                    runningProcessesMap[playerId]?.decrementAndFetch()
 
-                                Logger.debug("Task finished for ${player.name}. Remaining: ${runningProcessesMap[playerId]}")
+                                    Logger.debug("Task finished for ${player.name}. Remaining: ${runningProcessesMap[playerId]}")
 
-                                LeaveDecayHandler().trigger(
-                                    area = area,
-                                    origin = origin,
-                                    player = player
-                                )
+                                    LeaveDecayHandler().trigger(
+                                        area = area,
+                                        origin = origin,
+                                        player = player
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                Logger.warn("Error during task finalization: ${e.message}")
+                                Logger.debug("Error: ${e.stackTraceToString()}", 2)
+                                // TODO: Look into this error -> Maybe this is fixed now?
+                                // [17:00:07] [Server thread/WARN]: [YVtils] Task #525404 for YVtils-MultiMine v2.0.0-beta.3 generated an exception
+                                //java.lang.NullPointerException: null
+                                //	at YVtils-MM_v2.0.0-beta.3.jar/yv.tils.multiMine.utils.BlockUtils.registerBlocks$lambda$1(BlockUtils.kt:196) ~[YVtils-MM_v2.0.0-beta.3.jar:?]
+                                //	at org.bukkit.craftbukkit.scheduler.CraftTask.run(CraftTask.java:78) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                //	at org.bukkit.craftbukkit.scheduler.CraftScheduler.mainThreadHeartbeat(CraftScheduler.java:474) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                //	at net.minecraft.server.MinecraftServer.tickChildren(MinecraftServer.java:1771) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                //	at net.minecraft.server.MinecraftServer.tickServer(MinecraftServer.java:1645) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                //	at net.minecraft.server.dedicated.DedicatedServer.tickServer(DedicatedServer.java:467) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                //	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1365) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                //	at net.minecraft.server.MinecraftServer.lambda$spin$2(MinecraftServer.java:388) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
+                                //	at java.base/java.lang.Thread.run(Thread.java:1583) ~[?:?]
                             }
                         }
                     }, animationTime * 1L)

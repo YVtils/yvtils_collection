@@ -20,16 +20,16 @@ import org.bukkit.block.data.type.Leaves
 import org.bukkit.entity.Player
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.utils.BlockUtils
-import yv.tils.multiMine.utils.BlockUtils.Companion.brokenMap
 import yv.tils.multiMine.utils.BlockUtils.Companion.processFinishedMap
-import yv.tils.multiMine.utils.BlockUtils.Companion.runningProcessesMap
 import yv.tils.multiMine.utils.ToolUtils.Companion.toolBroke
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
-import java.util.ArrayDeque
-import java.util.HashSet
+import java.util.*
 import java.util.function.Consumer
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
+@OptIn(ExperimentalAtomicApi::class)
 class LeaveDecayHandler {
     companion object {
         private const val DECAY_DISTANCE_THRESHOLD_EXCLUSIVE = 6
@@ -37,27 +37,35 @@ class LeaveDecayHandler {
 
     fun trigger(area: BlockUtils.BreakAreaBox, origin: Location, player: Player) {
         val playerId = player.uniqueId
-        if (runningProcessesMap[playerId]!! <= 0 && !processFinishedMap[playerId]!!) {
-            processFinishedMap[playerId] = true
 
-            Logger.debug("All processes finished for ${player.name}, triggering leaf decay")
-
-            // Reset values
-            runningProcessesMap[playerId] = 0
-            brokenMap[playerId] = 0
-            toolBroke = false
-
-            LeaveDecayHandler().triggerArea(
-                world = origin.world!!,
-                minX = area.minX,
-                minY = area.minY,
-                minZ = area.minZ,
-                maxX = area.maxX,
-                maxY = area.maxY,
-                maxZ = area.maxZ,
-                margin = 6,
-            )
+        if (BlockUtils.runningProcessesMap[playerId] == null || BlockUtils.runningProcessesMap[playerId]!!.load() > 0) {
+            Logger.debug("Processes still running for ${player.name}, not triggering leaf decay yet")
+            return
         }
+
+        if (processFinishedMap[playerId]!!) {
+            Logger.debug("Leaf decay already triggered for ${player.name}, skipping")
+            return
+        }
+        processFinishedMap[playerId] = true
+
+        Logger.debug("All processes finished for ${player.name}, triggering leaf decay")
+
+        // Reset values
+        BlockUtils.runningProcessesMap[playerId] = AtomicInt(0)
+        BlockUtils.brokenMap[playerId]?.store(0)
+        toolBroke = false
+
+        LeaveDecayHandler().triggerArea(
+            world = origin.world!!,
+            minX = area.minX,
+            minY = area.minY,
+            minZ = area.minZ,
+            maxX = area.maxX,
+            maxY = area.maxY,
+            maxZ = area.maxZ,
+            margin = 6,
+        )
     }
 
     /**

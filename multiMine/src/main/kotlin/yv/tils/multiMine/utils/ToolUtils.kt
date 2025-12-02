@@ -18,6 +18,7 @@ import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
+import yv.tils.multiMine.configs.ConfigFile
 
 class ToolUtils {
     companion object {
@@ -35,6 +36,13 @@ class ToolUtils {
         val damageable: Damageable = tool.itemMeta as Damageable
 
         if (damageable.damage + damage >= tool.type.maxDurability) {
+            if (ConfigFile.getBoolean("canToolsBreak") == false) {
+                val restDurability = tool.type.maxDurability - damageable.damage - 1
+                tool.damage(restDurability, player)
+                toolBroke = true
+                return true
+            }
+
             toolBroke = true
             player.inventory.removeItem(tool)
             player.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 1f)

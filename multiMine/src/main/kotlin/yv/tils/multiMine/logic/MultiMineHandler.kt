@@ -13,7 +13,6 @@
 package yv.tils.multiMine.logic
 
 import com.destroystokyo.paper.profile.PlayerProfile
-import dev.jorel.commandapi.arguments.CommandArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
@@ -25,12 +24,13 @@ import yv.tils.multiMine.configs.MultiMineConfig
 import yv.tils.multiMine.data.Permissions
 import yv.tils.multiMine.utils.BlockUtils
 import yv.tils.multiMine.utils.BlockUtils.Companion.blocks
-import yv.tils.multiMine.utils.BlockUtils.Companion.brokenMap
 import yv.tils.multiMine.utils.CooldownUtils
 import yv.tils.multiMine.utils.ToolUtils
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
+@OptIn(ExperimentalAtomicApi::class)
 class MultiMineHandler {
     fun trigger(e: BlockBreakEvent) {
         val loc = e.block.location
@@ -50,7 +50,7 @@ class MultiMineHandler {
         if (player.isSneaking) return
         if (player.gameMode != GameMode.SURVIVAL) return
 
-        brokenMap[player.uniqueId] = 0
+        BlockUtils.brokenMap[player.uniqueId]?.store(0)
 
         CooldownUtils().setCooldown(player.uniqueId)
         BlockUtils().registerBlocks(loc, player, item)
@@ -58,7 +58,7 @@ class MultiMineHandler {
 
     fun cleanup(player: Player) {
         val uuid = player.uniqueId
-        brokenMap[uuid] = 0
+        BlockUtils.brokenMap.remove(uuid)
         BlockUtils.playerBlockTypeMap.remove(uuid)
         BlockUtils.runningProcessesMap.remove(uuid)
         BlockUtils.processFinishedMap.remove(uuid)
