@@ -21,7 +21,7 @@ class MultiMineConfig {
      * @param uuid the player uuid
      */
     fun addPlayer(uuid: UUID) {
-        if (!SaveFile.saves.containsKey(uuid)) return
+        if (SaveFile.saves.containsKey(uuid)) return
 
         updatePlayerSetting(uuid, ConfigFile.config["defaultState"] as Boolean)
     }
