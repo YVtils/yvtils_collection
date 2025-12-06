@@ -1,6 +1,20 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.config.language
 
 import yv.tils.config.files.FileUtils
+import yv.tils.config.files.YMLFileUtils
+import yv.tils.config.files.YMLFileUtils.Companion.makeYAMLFile
 import yv.tils.utils.logger.Logger
 import java.util.*
 
@@ -37,12 +51,12 @@ class BuildLanguage {
                     } else if (currentLanguage != lang) {
                         Logger.debug("Saving language file for ${currentLanguage!!.name}")
 
-                        val ymlConfig = FileUtils.Companion.makeYAMLFile(
+                        val ymlConfig = YMLFileUtils.makeYAMLFile(
                             "/languages/${currentLanguage !!.name.lowercase(Locale.getDefault())}.yml",
                             languageMap
                         )
 
-                        FileUtils.Companion.saveFile(
+                        FileUtils.saveFile(
                             "/languages/${currentLanguage !!.name.lowercase(Locale.getDefault())}.yml",
                             ymlConfig
                         )
@@ -57,12 +71,12 @@ class BuildLanguage {
 
             if (currentLanguage != null) {
                 Logger.debug("Saving last language file for ${currentLanguage!!.name}")
-                val ymlConfig = FileUtils.Companion.makeYAMLFile(
-                    "/languages/${currentLanguage !!.name.lowercase(Locale.getDefault())}.yml",
+                val ymlConfig = YMLFileUtils.makeYAMLFile(
+                    "/languages/${currentLanguage.name.lowercase(Locale.getDefault())}.yml",
                     languageMap
                 )
                 FileUtils.Companion.saveFile(
-                    "/languages/${currentLanguage !!.name.lowercase(Locale.getDefault())}.yml",
+                    "/languages/${currentLanguage.name.lowercase(Locale.getDefault())}.yml",
                     ymlConfig
                 )
             }

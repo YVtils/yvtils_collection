@@ -1,3 +1,15 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.discord.data
 
 import net.dv8tion.jda.api.components.container.Container
@@ -24,7 +36,7 @@ class Components {
         private const val ICON_URL = PlayerUtils.PLAYER_HEAD_API
 
         const val FOOTER_TEXT = "YVtils • https://yvtils.net"
-        const val FOOTER_TEXT_CUSTOMIZABLE = "YVtils-SMP • %s • https://yvtils.net"
+        const val FOOTER_TEXT_CUSTOMIZABLE = "YVtils • %s • https://yvtils.net"
         const val FOOTER_ICON =
             "https://api.yvtils.net/images/yvtils_logo" // TODO: Implement to upload as emoji to discord app and then use in footer
 

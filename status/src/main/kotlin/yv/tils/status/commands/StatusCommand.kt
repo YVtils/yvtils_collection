@@ -1,3 +1,15 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.status.commands
 
 import yv.tils.utils.data.Data
@@ -43,7 +55,7 @@ class StatusCommand {
         literalArgument("clear", false) {
             withPermission("yvtils.command.status.clear")
             withPermission(CommandPermission.NONE)
-            playerArgument("yv/tils/player", true) {
+            asyncPlayerProfileArgument("yv/tils/player", true) {
                 withPermission("yvtils.command.status.clear.others")
                 withPermission(CommandPermission.OP)
                 anyExecutor { sender, args ->

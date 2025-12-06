@@ -1,3 +1,15 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.utils.logger
 
 import net.kyori.adventure.text.Component
@@ -19,15 +31,33 @@ class Logger {
             logger?.info("[DEV] $message")
         }
 
+        @Deprecated("Use debug(message: String, level: Int) instead", ReplaceWith("debug(message, level)"))
         fun debug(message: String, level: Int = -1) {
             if (debugMode && (level == -1 || level <= debugLevel)) {
                 logger?.info("[$level] $message")
             }
         }
 
+        @Deprecated("Use debug(message: String, level: Int) instead", ReplaceWith("debug(\"\", level, message)"))
         fun debug(message: Component, level: Int = -1) {
             if (debugMode && (level == -1 || level <= debugLevel)) {
                 logger?.info(MiniMessage.miniMessage().deserialize("[$level]").append(message))
+            }
+        }
+
+        fun debug(message: String, level: DEBUGLEVEL, cMessage: Component? = null) {
+            val levelInt = level.level
+
+            if (message != "") {
+                if (debugMode && (levelInt == -1 || levelInt <= debugLevel)) {
+                    logger?.info("[$level] $message")
+                }
+            }
+
+            if (cMessage != null) {
+                if (debugMode && (levelInt == -1 || levelInt <= debugLevel)) {
+                    logger?.info(MiniMessage.miniMessage().deserialize("[$level]").append(cMessage))
+                }
             }
         }
 
@@ -55,15 +85,7 @@ class Logger {
             logger?.error(message)
         }
 
-        fun log(level: Level, message: String) {
-            when (level) {
-                Level.INFO -> info(message)
-                Level.WARN -> warn(message)
-                Level.ERROR -> error(message)
-                Level.DEBUG -> debug(message)
-            }
-        }
-
+        @Deprecated("Use own log function with Level enum")
         fun log(level: Level, message: Component) {
             when (level) {
                 Level.INFO -> info(message)
@@ -80,4 +102,13 @@ class Logger {
             DEBUG
         }
     }
+}
+
+enum class DEBUGLEVEL(val level: Int) {
+    NONE(0),
+    BASIC(1),
+    DETAILED(2),
+    VERBOSE(3),
+    EXTRA(4),
+    SPAM(5);
 }

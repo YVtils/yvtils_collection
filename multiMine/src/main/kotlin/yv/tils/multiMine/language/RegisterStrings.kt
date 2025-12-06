@@ -1,3 +1,15 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.multiMine.language
 
 import yv.tils.config.language.BuildLanguage
@@ -6,7 +18,7 @@ import yv.tils.config.language.FileTypes
 class RegisterStrings {
     fun registerStrings() {
         registerNewString(
-            "command.multiMine.activate",
+            "command.multiMine.activate.self",
             mapOf(
                 FileTypes.EN to "<prefix> <white>MultiMine has been <yellow>activated<white>!",
                 FileTypes.DE to "<prefix> <white>MultiMine wurde <yellow>aktiviert<white>!",
@@ -14,10 +26,26 @@ class RegisterStrings {
         )
 
         registerNewString(
-            "command.multiMine.deactivate",
+            "command.multiMine.deactivate.self",
             mapOf(
                 FileTypes.EN to "<prefix> <white>MultiMine has been <yellow>deactivated<white>!",
                 FileTypes.DE to "<prefix> <white>MultiMine wurde <yellow>deaktiviert<white>!",
+            )
+        )
+
+        registerNewString(
+            "command.multiMine.activate.other",
+            mapOf(
+                FileTypes.EN to "<prefix> <white>MultiMine has been <yellow>activated<white> for player <yellow><player><white>!",
+                FileTypes.DE to "<prefix> <white>MultiMine wurde für Spieler <yellow><player><white> <yellow>aktiviert<white>!",
+            )
+        )
+
+        registerNewString(
+            "command.multiMine.deactivate.other",
+            mapOf(
+                FileTypes.EN to "<prefix> <white>MultiMine has been <yellow>deactivated<white> for player <yellow><player><white>!",
+                FileTypes.DE to "<prefix> <white>MultiMine wurde für Spieler <yellow><player><white> <yellow>deaktiviert<white>!",
             )
         )
 

@@ -1,6 +1,19 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.migration.modules
 
-import yv.tils.config.files.FileUtils
+import yv.tils.config.files.YMLFileUtils
+import yv.tils.config.files.JSONFileUtils
 import yv.tils.migration.base.BaseMigrator
 import yv.tils.utils.logger.Logger
 import java.io.File
@@ -48,14 +61,14 @@ class DiscordMigrator: BaseMigrator() {
         createBackup(oldFile, "backup_config.yml")
 
         // Load old config using FileUtils
-        val oldYaml = FileUtils.loadYAMLFile(oldConfigPath, true)
+    val oldYaml = YMLFileUtils.loadYAMLFile(oldConfigPath, true)
 
         // Transform structure to new format
         val newStructure = transformConfigStructure(oldYaml)
 
         // Save new config
-        val newYamlFile = FileUtils.makeYAMLFile(newConfigPath, newStructure)
-        FileUtils.saveFile(newConfigPath, newYamlFile)
+    val newYamlFile = YMLFileUtils.makeYAMLFile(newConfigPath, newStructure)
+    yv.tils.config.files.FileUtils.saveFile(newConfigPath, newYamlFile)
 
         Logger.info("Discord config migrated successfully")
         return true
@@ -74,22 +87,22 @@ class DiscordMigrator: BaseMigrator() {
         createBackup(oldFile, "backup_save.yml")
 
         // Load old save
-        val oldYaml = FileUtils.loadYAMLFile(oldSavePath, true)
+    val oldYaml = YMLFileUtils.loadYAMLFile(oldSavePath, true)
 
         // Transform to new structure
         val saveEntries = transformSaveStructure(oldYaml)
         val saveWrapper = mapOf("saves" to saveEntries)
 
         // Save as JSON
-        val jsonFile = FileUtils.makeJSONFile(newSavePath, saveWrapper)
-        FileUtils.saveFile(newSavePath, jsonFile)
+    val jsonFile = JSONFileUtils.makeJSONFile(newSavePath, saveWrapper)
+    yv.tils.config.files.FileUtils.saveFile(newSavePath, jsonFile)
 
         Logger.info("Discord save migrated successfully (${saveEntries.size} entries)")
         return true
     }
 
     /** Transforms Discord config structure from old to new format */
-    private fun transformConfigStructure(oldYaml: FileUtils.Companion.YAMLFile): Map<String, Any> {
+    private fun transformConfigStructure(oldYaml: YMLFileUtils.Companion.YAMLFile): Map<String, Any> {
         val newRoot = mutableMapOf<String, Any>()
         val yaml = oldYaml.content
 
@@ -243,7 +256,7 @@ class DiscordMigrator: BaseMigrator() {
 
     /** Transforms Discord save structure from YAML to JSON format */
     private fun transformSaveStructure(
-        oldYaml: FileUtils.Companion.YAMLFile,
+        oldYaml: YMLFileUtils.Companion.YAMLFile,
     ): List<Map<String, String>> {
         val entries = mutableListOf<Map<String, String>>()
         val yaml = oldYaml.content

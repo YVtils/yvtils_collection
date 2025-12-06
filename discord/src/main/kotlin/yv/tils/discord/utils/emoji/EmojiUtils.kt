@@ -1,6 +1,19 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.discord.utils.emoji
 
 import org.bukkit.entity.Player
+import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.player.PlayerUtils
 
@@ -32,13 +45,21 @@ class EmojiUtils {
             return
         }
 
-        try {
-            val emojiId = DiscordEmoji().createSkinEmoji(player)
-            addPlayerEmoji(skinHash, emojiId)
-        } catch (e: Exception) {
-            Logger.error("Failed to create player emoji for ${player.name}: ${e.message}")
-            Logger.debug("Stack trace: ${e.stackTraceToString()}", 2)
-        }
+        CoroutineHandler.launchTask(
+            {
+                Logger.dev("Creating player emoji for ${player.name}")
+
+                try {
+                    val emojiId = DiscordEmoji().createSkinEmoji(player)
+                    addPlayerEmoji(skinHash, emojiId)
+                } catch (e: Exception) {
+                    Logger.error("Failed to create player emoji for ${player.name}: ${e.message}")
+                    Logger.debug("Stack trace: ${e.stackTraceToString()}", 2)
+                }
+            },
+            taskName = "createPlayerEmoji",
+            isOnce = true
+        )
     }
 
     /**
