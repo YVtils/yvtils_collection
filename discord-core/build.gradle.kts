@@ -33,7 +33,7 @@ tasks {
         archiveFileName.set("YVtils-DC_v${version}.jar")
 
         manifest {
-            attributes["Main-Class"] = "yv.tils.discord.YVtils"
+            attributes["Main-Class"] = "yv.tils.core.YVtils"
         }
     }
 }
