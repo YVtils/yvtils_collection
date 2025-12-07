@@ -10,9 +10,7 @@
  * the YVtils Brand Protection Clause.
  */
 
-dependencies {
-    implementation(project(":utils"))
-    implementation(project(":config"))
-    implementation(project(":common"))
-    implementation(project(":gui"))
+package yv.tils.moderation.configs
+
+class ModerationConfig {
 }
