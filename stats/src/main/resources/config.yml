@@ -1,0 +1,89 @@
+# ==============================================================================
+# YVtils Stats Module Configuration
+# ==============================================================================
+# Documentation: https://docs.yvtils.net/stats/config.yml
+#
+# This module collects anonymous usage statistics to help improve YVtils.
+# All data collection is opt-in and respects your privacy.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# OPT-IN SETTING
+# ------------------------------------------------------------------------------
+# Whether you have opted in to anonymous stats collection.
+#
+# Values:
+#   true  - Stats collection is enabled
+#   false - Stats collection is disabled
+#   (not set) - You will be prompted to choose when an admin joins
+#
+# You can change this at any time. Setting to false will stop all data
+# collection immediately.
+# ------------------------------------------------------------------------------
+# opt_in: false
+
+# ------------------------------------------------------------------------------
+# METADATA SETTINGS
+# ------------------------------------------------------------------------------
+# These settings control what metadata is included in stats exports.
+# ------------------------------------------------------------------------------
+metadata:
+  # Enable/disable region tracking based on server IP.
+  #
+  # PRIVACY NOTE: When enabled, region information may be derived from your
+  # server's IP address. This is disabled by default for privacy.
+  #
+  # Default: false
+  region: false
+
+  # Optional human-readable name for the server.
+  #
+  # This name is included in stats exports to help you identify your server
+  # if you run multiple servers. Leave empty for anonymous identification.
+  #
+  # Example: "Survival Server" or "Creative Hub"
+  # Default: "" (empty)
+  server_name: ""
+
+  # Whether to include current player count in exported stats.
+  #
+  # When enabled, a gauge metric "player_count" is tracked and updated
+  # periodically (every minute).
+  #
+  # Default: true
+  collect_player_count: true
+
+# ------------------------------------------------------------------------------
+# AUTO-SAVE SETTINGS
+# ------------------------------------------------------------------------------
+# Stats are saved to disk periodically to survive server restarts.
+# ------------------------------------------------------------------------------
+
+# How often to auto-save stats to disk (in seconds).
+#
+# Set to 0 to disable auto-save (stats will only be saved on server shutdown).
+#
+# Default: 300 (5 minutes)
+auto_save_interval_seconds: 300
+
+# ------------------------------------------------------------------------------
+# SAFETY LIMITS
+# ------------------------------------------------------------------------------
+# These limits prevent resource exhaustion from runaway stat registrations.
+# ------------------------------------------------------------------------------
+
+# Maximum size for list-type stats.
+#
+# If a list exceeds this size, new items will be rejected with a warning.
+# This prevents memory issues from unbounded list growth.
+#
+# Default: 1000
+max_list_size: 1000
+
+# Maximum number of stats that can be registered.
+#
+# If this limit is reached, new stat registrations will be rejected.
+# This prevents high cardinality issues.
+#
+# Default: 10000
+max_stats_count: 10000

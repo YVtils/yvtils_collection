@@ -1,7 +1,19 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.regions.configs
 
 import kotlinx.serialization.json.*
-import yv.tils.config.files.FileUtils
+import yv.tils.config.files.JSONFileUtils
 import yv.tils.regions.data.*
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
@@ -11,8 +23,8 @@ class RegionSaveFile {
     private val filePath = "/regions/region_save.json"
 
     fun loadConfig() {
-        val file = FileUtils.loadJSONFile(filePath)
-        val jsonFile = file.content
+    val file = JSONFileUtils.loadJSONFile(filePath)
+    val jsonFile = file.content
         val saveList = jsonFile["regions"]?.jsonArray ?: return
 
         if (saveList.isEmpty()) {
@@ -84,8 +96,8 @@ class RegionSaveFile {
 
     fun registerStrings(saveList: MutableList<RegionManager.RegionData> = mutableListOf()) {
         val saveWrapper = mapOf("regions" to saveList)
-        val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
-        FileUtils.updateFile(filePath, jsonFile)
+    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
+    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
     }
 
     fun updateRegionSetting(uuid: UUID, content: RegionManager.RegionData?) {
@@ -102,7 +114,7 @@ class RegionSaveFile {
 
     private fun upgradeStrings(saveList: MutableList<RegionManager.RegionData> = mutableListOf()) {
         val saveWrapper = mapOf("regions" to saveList)
-        val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
-        FileUtils.updateFile(filePath, jsonFile, true)
+    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
+    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile, true)
     }
 }

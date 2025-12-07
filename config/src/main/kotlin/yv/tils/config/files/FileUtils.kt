@@ -1,22 +1,34 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.config.files
 
-import kotlinx.serialization.json.*
 import org.bukkit.configuration.file.YamlConfiguration
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
 import java.io.File
 import java.io.FileNotFoundException
+import yv.tils.config.files.YMLFileUtils.Companion.YAMLFile
+import yv.tils.config.files.JSONFileUtils.Companion.JSONFile
 
 class FileUtils {
     companion object {
-        data class JSONFile(val file: File, val content: JsonObject)
-        data class YAMLFile(val file: File, val content: YamlConfiguration)
-
-        private fun loadFile(path: String, overwriteParentDir: Boolean = false): Any {
+        fun loadFile(path: String, overwriteParentDir: Boolean = false): Any {
             val file = if (overwriteParentDir) {
                 File(path)
             } else {
-                File(Data.pluginFolder, path)
+                // Normalize path to avoid leading slash creating absolute paths on Windows
+                val relPath = path.trimStart('/','\\')
+                File(Data.pluginFolder, relPath)
             }
 
             if (!file.exists()) throw FileNotFoundException("File not found: $path")
@@ -24,27 +36,25 @@ class FileUtils {
             Logger.debug("Loading file: $path")
 
             return when (file.extension.lowercase()) {
-                "yml" -> YAMLFile(file, YamlConfiguration.loadConfiguration(file))
-                "json" -> JSONFile(file, Json.decodeFromString(file.readText()))
+                "yml" -> YMLFileUtils.loadYAMLFile(path, overwriteParentDir)
+                "json" -> JSONFileUtils.loadJSONFile(path, overwriteParentDir)
                 else -> throw Exception("This file extension is not supported by this function!")
             }
         }
 
         fun loadYAMLFile(path: String, overwriteParentDir: Boolean = false): YAMLFile =
-            loadFile(path, overwriteParentDir) as? YAMLFile
-                ?: throw Exception("File is not a YAML file!")
+            YMLFileUtils.loadYAMLFile(path, overwriteParentDir)
 
         fun loadJSONFile(path: String, overwriteParentDir: Boolean = false): JSONFile =
-            loadFile(path, overwriteParentDir) as? JSONFile
-                ?: throw Exception("File is not a JSON file!")
+            JSONFileUtils.loadJSONFile(path, overwriteParentDir)
 
         fun loadYAMLFilesFromFolder(folder: String, overwriteParentDir: Boolean = false): List<YAMLFile> =
-            loadFilesFromFolder(folder, "yml", overwriteParentDir).mapNotNull { it as? YAMLFile }
+            YMLFileUtils.loadYAMLFilesFromFolder(folder, overwriteParentDir)
 
         fun loadJSONFilesFromFolder(folder: String, overwriteParentDir: Boolean = false): List<JSONFile> =
-            loadFilesFromFolder(folder, "json", overwriteParentDir).mapNotNull { it as? JSONFile }
+            JSONFileUtils.loadJSONFilesFromFolder(folder, overwriteParentDir)
 
-        private fun loadFilesFromFolder(
+        fun loadFilesFromFolder(
             folder: String,
             extension: String,
             overwriteParentDir: Boolean = false,
@@ -85,7 +95,7 @@ class FileUtils {
 
             when (content) {
                 is YAMLFile -> content.content.save(file)
-                is JSONFile -> file.writeText(Json.encodeToString(content.content))
+                is JSONFile -> file.writeText(JSONFileUtils.json.encodeToString(content.content))
                 else -> throw Exception("This file extension is not supported by this function!")
             }
         }
@@ -94,7 +104,9 @@ class FileUtils {
             Logger.debug("Updating file: $path | overwriteExisting: $overwriteExisting")
             Logger.debug("Content: $content", 3)
 
-            val file = File(Data.pluginFolder, path)
+            // Normalize path to avoid leading slash creating absolute paths on Windows
+            val relPath = path.trimStart('/','\\')
+            val file = File(Data.pluginFolder, relPath)
 
             if (!file.exists()) {
                 Logger.debug("File doesn't exist, creating new file: $path")
@@ -108,15 +120,20 @@ class FileUtils {
                     val newContent = (content as? YAMLFile)?.content
                         ?: throw IllegalArgumentException("Content must be YAMLFile for .yml files")
 
+                    Logger.debug("FileUtils.updateFile: updating YAML with ${newContent.getKeys(false).size} top-level keys", 2)
+                    Logger.debug("FileUtils.updateFile: overwriteExisting = $overwriteExisting", 2)
+                    
                     // Merge new content with existing, with optional overwrite
                     newContent.getKeys(true).forEach { key ->
                         if (overwriteExisting || !existingYaml.content.contains(key)) {
-                            existingYaml.content[key] = newContent[key]
+                            val value = newContent[key]
+                            Logger.debug("FileUtils.updateFile: setting key '$key' = $value", 3)
+                            existingYaml.content[key] = value
                         }
                     }
 
                     existingYaml.content.save(file)
-                    Logger.debug("YAML file updated: $path")
+                    Logger.debug("YAML file saved to: ${file.absolutePath}", 2)
                 }
 
                 path.endsWith(".json", ignoreCase = true) -> {
@@ -128,80 +145,32 @@ class FileUtils {
                     val newContent = when (content) {
                         is JSONFile -> content.content
                         else -> {
-                            val jsonString = json.encodeToString(content)
-                            json.decodeFromString(JsonObject.serializer(), jsonString)
+                            val jsonString = JSONFileUtils.json.encodeToString(content)
+                            JSONFileUtils.json.decodeFromString(kotlinx.serialization.json.JsonObject.serializer(), jsonString)
                         }
                     }
 
                     // Skip updating if new content contains empty arrays and we're not forcing overwrite
-                    if (!overwriteExisting && isEmptyArraysOnly(newContent)) {
+                    if (!overwriteExisting && JSONFileUtils.isEmptyArraysOnly(newContent)) {
                         Logger.debug("Skipping update with empty arrays: $path")
                         return
                     }
 
                     // For complete replacement, just use the new content directly
                     if (overwriteExisting) {
-                        file.writeText(Json.encodeToString(newContent))
+                        file.writeText(JSONFileUtils.json.encodeToString(newContent))
                         Logger.debug("JSON file completely replaced: $path")
                         return
                     }
 
                     // Otherwise, do a smart merge of the objects
-                    val mergedJson = mergeJsonObjectsWithArrayAppend(existingJson.content, newContent)
-                    file.writeText(Json.encodeToString(mergedJson))
+                    val mergedJson = JSONFileUtils.mergeJsonObjectsWithArrayAppend(existingJson.content, newContent)
+                    file.writeText(JSONFileUtils.json.encodeToString(mergedJson))
                     Logger.debug("JSON file updated with merged content: $path")
                 }
 
                 else -> throw IllegalArgumentException("Unsupported file extension: ${file.extension}")
             }
-        }
-
-        /**
-         * Checks if the JsonObject only contains empty arrays
-         */
-        private fun isEmptyArraysOnly(jsonObject: JsonObject): Boolean {
-            if (jsonObject.isEmpty()) return true
-
-            return jsonObject.all { (_, value) ->
-                when (value) {
-                    is JsonArray -> value.isEmpty()
-                    is JsonObject -> isEmptyArraysOnly(value)
-                    else -> false
-                }
-            }
-        }
-
-        /**
-         * Recursively merges two JsonObjects, handling arrays by appending items rather than replacing
-         */
-        private fun mergeJsonObjectsWithArrayAppend(original: JsonObject, update: JsonObject): JsonObject {
-            val result = original.toMutableMap()
-
-            update.forEach { (key, updateValue) ->
-                if (key in result) {
-                    val originalValue = result[key]
-                    when {
-                        originalValue is JsonObject && updateValue is JsonObject -> {
-                            // Recursively merge nested objects
-                            result[key] = mergeJsonObjectsWithArrayAppend(originalValue, updateValue)
-                        }
-                        originalValue is JsonArray && updateValue is JsonArray -> {
-                            // For arrays, append new items rather than replacing
-                            val combinedArray = JsonArray(originalValue + updateValue)
-                            result[key] = combinedArray
-                        }
-                        else -> {
-                            // For other types, replace with new value
-                            result[key] = updateValue
-                        }
-                    }
-                } else {
-                    // Add new key-value pair
-                    result[key] = updateValue
-                }
-            }
-
-            return JsonObject(result)
         }
 
         fun makeYAML(content: Map<String, Any>): YamlConfiguration {
@@ -211,67 +180,6 @@ class FileUtils {
             content.forEach { (key, value) -> yaml[key] = value }
 
             return yaml
-        }
-
-        fun makeYAMLFile(path: String, content: Map<String, Any>): YAMLFile {
-            Logger.debug("Creating YAML file: $path")
-
-            val yaml = makeYAML(content)
-            val file = File(Data.pluginFolder, path)
-
-            Logger.debug("YAML object: $yaml", 3)
-
-            return YAMLFile(file, yaml)
-        }
-
-        val json = Json {
-            prettyPrint = true
-            ignoreUnknownKeys = true
-            encodeDefaults = true
-        }
-
-        inline fun <reified T> makeJSON(content: T): JsonObject {
-            Logger.debug("Creating JSON object...")
-
-            val jsonString = json.encodeToString(content)
-            return json.decodeFromString(JsonObject.serializer(), jsonString)
-        }
-
-        inline fun <reified T> makeJSONFile(path: String, content: T): JSONFile {
-            Logger.debug("Creating JSON file: $path")
-
-            val jsonString = json.encodeToString(content)
-            val jsonObject = json.decodeFromString(JsonObject.serializer(), jsonString)
-            val file = File(Data.pluginFolder, path)
-
-            Logger.debug("JSON object: $jsonObject", 3)
-
-            return JSONFile(file, jsonObject)
-        }
-
-        /**
-         * Recursively merges two JsonObjects, preserving arrays and nested structures
-         */
-        private fun mergeJsonObjects(original: JsonObject, update: JsonObject): JsonObject {
-            val result = original.toMutableMap()
-
-            update.forEach { (key, value) ->
-                if (key in result) {
-                    val originalValue = result[key]
-                    if (originalValue is JsonObject && value is JsonObject) {
-                        // Recursively merge nested objects
-                        result[key] = mergeJsonObjects(originalValue, value)
-                    } else {
-                        // For arrays or other types, replace with new value
-                        result[key] = value
-                    }
-                } else {
-                    // Add new key-value pair
-                    result[key] = value
-                }
-            }
-
-            return JsonObject(result)
         }
     }
 }

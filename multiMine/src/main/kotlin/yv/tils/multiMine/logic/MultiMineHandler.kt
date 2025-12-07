@@ -1,32 +1,37 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.multiMine.logic
 
-import org.bukkit.*
-import org.bukkit.block.Block
+import com.destroystokyo.paper.profile.PlayerProfile
+import dev.jorel.commandapi.executors.CommandArguments
+import org.bukkit.GameMode
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.Damageable
+import yv.tils.common.language.LangStrings
 import yv.tils.config.language.LanguageHandler
-import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.configs.MultiMineConfig
+import yv.tils.multiMine.data.Permissions
+import yv.tils.multiMine.utils.BlockUtils
+import yv.tils.multiMine.utils.BlockUtils.Companion.blocks
+import yv.tils.multiMine.utils.CooldownUtils
+import yv.tils.multiMine.utils.ToolUtils
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
-import java.util.*
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
-// TODO: Add fast Leave decay
-// TODO: Try making the break process better for the performance
-
+@OptIn(ExperimentalAtomicApi::class)
 class MultiMineHandler {
-    companion object {
-        val animationTime = ConfigFile.config["animationTime"] as Int
-        val cooldownTime = ConfigFile.config["cooldownTime"] as Int
-        val breakLimit = ConfigFile.config["breakLimit"] as Int
-        val blocks = ConfigFile.blockList
-
-        val cooldownMap: MutableMap<UUID, Int> = mutableMapOf()
-        val brokenMap: MutableMap<UUID, Int> = mutableMapOf()
-    }
-
     fun trigger(e: BlockBreakEvent) {
         val loc = e.block.location
         val player = e.player
@@ -34,145 +39,88 @@ class MultiMineHandler {
         val item = player.inventory.itemInMainHand
         val block = e.block
 
-        if (!player.hasPermission("yvtils.use.multiMine")) return
+        if (!player.hasPermission(Permissions.USE_MULTIMINE.permission.name)) return
         if (!MultiMineConfig().getPlayerSetting(uuid)) return
-        if (!checkBlock(e.block.type, blocks)) return
-        if (!checkTool(block, item)) return
-        if (checkCooldown(e.player.uniqueId)) return
+
+        cleanup(player)
+
+        if (!BlockUtils().checkBlock(e.block.type, blocks, player)) return
+        if (!ToolUtils().checkTool(block, item)) return
+        if (CooldownUtils().checkCooldown(e.player.uniqueId)) return
         if (player.isSneaking) return
         if (player.gameMode != GameMode.SURVIVAL) return
 
-        brokenMap[player.uniqueId] = 0
+        BlockUtils.brokenMap[player.uniqueId]?.store(0)
 
-        setCooldown(player.uniqueId)
-        registerBlocks(loc, player, item)
+        CooldownUtils().setCooldown(player.uniqueId)
+        BlockUtils().registerBlocks(loc, player, item)
     }
 
-    private var itemBroke = false
-
-    private fun registerBlocks(loc: Location, player: Player, item: ItemStack) {
-        if (brokenMap[player.uniqueId]!! >= breakLimit) {
-            return
-        }
-
-        for (x in -1..1) {
-            for (y in -1..1) {
-                for (z in -1..1) {
-                    if (x == 0 && y == 0 && z == 0) continue
-                    val newLoc = Location(loc.world, loc.x + x, loc.y + y, loc.z + z)
-                    val newBlock = newLoc.block
-
-                    Bukkit.getScheduler().runTaskLater(Data.instance, Runnable { // TODO: Test if switchable to coroutine
-                        if (!breakBlock(newBlock, player, item)) {
-                            return@Runnable
-                        } else {
-                            registerBlocks(newLoc, player, item)
-                        }
-                    }, animationTime * 1L)
-                }
-            }
-        }
+    fun cleanup(player: Player) {
+        val uuid = player.uniqueId
+        BlockUtils.brokenMap.remove(uuid)
+        BlockUtils.playerBlockTypeMap.remove(uuid)
+        BlockUtils.runningProcessesMap.remove(uuid)
+        BlockUtils.processFinishedMap.remove(uuid)
     }
 
-    /**
-     * Breaks the blocks
-     * @param block The block to break
-     * @param player The player who is breaking the block
-     * @param item The item the player is using to break the block
-     * @return true if the block was broken
-     */
-    private fun breakBlock(block: Block, player: Player, item: ItemStack): Boolean {
-        if (checkBlock(block.type, blocks) && checkTool(block, item)) {
-            if (brokenMap[player.uniqueId]!! != 0) {
-                try {
-                    if (itemBroke) return false
+    fun toggle(sender: CommandSender, args: CommandArguments) {
+        if (args["target"] == null) {
+            if (sender is Player) {
+                val uuid = sender.uniqueId
+                val value = MultiMineConfig().getPlayerSetting(uuid)
+                Logger.debug("Toggling multiMine for player $uuid: \nOld value: $value \nNew value: ${!value}")
+                MultiMineConfig().updatePlayerSetting(uuid, !value)
 
-                    if (damageItem(player, 1, item)) {
-                        return false
-                    }
-                } catch (_: NullPointerException) {
-                    return false
-                }
-            }
+                val langMessageState = if (!value) "command.multiMine.activate" else "command.multiMine.deactivate"
 
-            brokenMap[player.uniqueId] = brokenMap[player.uniqueId]!! + 1
-
-            block.breakNaturally(item, true, true)
-            return true
-        }
-        return false
-    }
-
-    /**
-     * Damages the item
-     * @param player The player who is breaking the block
-     * @param damage The amount of damage to deal to the item
-     * @param item The item to damage
-     * @return true if the item broke
-     */
-    private fun damageItem(player: Player, damage: Int, item: ItemStack): Boolean {
-        val damageable: Damageable = item.itemMeta as Damageable
-
-        if (damageable.damage + damage >= item.type.maxDurability) {
-            itemBroke = true
-            player.inventory.removeItem(item)
-            player.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 1f)
-            return true
-        } else {
-            item.damage(damage, player)
-            return false
-        }
-    }
-
-    private fun setCooldown(player: UUID) {
-        cooldownMap[player] = cooldownTime
-    }
-
-    private fun checkCooldown(player: UUID): Boolean {
-        return cooldownMap[player] != null && cooldownMap[player] != 0
-    }
-
-    private fun checkBlock(material: Material, blocks: List<Material>): Boolean {
-        return blocks.contains(material)
-    }
-
-    private fun checkTool(block: Block, tool: ItemStack): Boolean {
-        if (tool.type == Material.AIR) return false
-        if (tool.type.maxDurability.toInt() == 0) return false
-
-        return block.getDrops(tool).isNotEmpty()
-    }
-
-    fun toggle(sender: Player) {
-        val uuid = sender.uniqueId
-        val value = MultiMineConfig().getPlayerSetting(uuid)
-
-        Logger.debug("Toggling multiMine for player $uuid: \nOld value: $value \nNew value: ${!value}")
-
-        MultiMineConfig().updatePlayerSetting(uuid, !value)
-
-        sender.sendMessage(
-            if (!value) {
-                LanguageHandler.getMessage(
-                    "command.multiMine.activate",
-                    sender,
-                    mapOf("prefix" to Data.prefix)
+                sender.sendMessage(
+                    LanguageHandler.getMessage(
+                        "$langMessageState.self",
+                        sender,
+                        mapOf("prefix" to Data.prefix)
+                    )
                 )
             } else {
-                LanguageHandler.getMessage(
-                    "command.multiMine.deactivate",
-                    sender,
-                    mapOf("prefix" to Data.prefix)
+                sender.sendMessage(
+                    LanguageHandler.getMessage(
+                        LangStrings.COMMAND_MISSING_PLAYER.key,
+                    )
                 )
             }
-        )
-    }
+        } else {
+            @Suppress("UNCHECKED_CAST")
+            val targets = args["target"] as List<PlayerProfile>
 
-    fun cooldownHandler() {
-        Logger.debug("Handling multiMine cooldowns...")
-        for (entry in cooldownMap) {
-            if (entry.value == 0) continue
-            cooldownMap[entry.key] = entry.value - 1
+            for (target in targets) {
+                val uuid = target.id ?: continue  // TODO: Think about implementing a message for this case
+                val value = MultiMineConfig().getPlayerSetting(uuid)
+
+                Logger.debug("Toggling multiMine for player $uuid by ${sender.name}: \nOld value: $value \nNew value: ${!value}")
+
+                MultiMineConfig().updatePlayerSetting(uuid, !value)
+
+                val langMessageState = if (!value) "command.multiMine.activate" else "command.multiMine.deactivate"
+
+                // Check if target is online to send them a message
+                val onlinePlayer = Data.instance.server.getPlayer(uuid)
+                onlinePlayer?.sendMessage(
+                    LanguageHandler.getMessage(
+                        "$langMessageState.self",
+                        sender
+                    )
+                )
+
+                sender.sendMessage(
+                    LanguageHandler.getMessage(
+                        "$langMessageState.other",
+                        sender,
+                        mapOf(
+                            "player" to (target.name ?: "Unknown")
+                        )
+                    )
+                )
+            }
         }
     }
 }

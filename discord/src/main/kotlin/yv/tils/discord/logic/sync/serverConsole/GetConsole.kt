@@ -1,3 +1,15 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.discord.logic.sync.serverConsole
 
 import org.apache.logging.log4j.core.LogEvent
@@ -34,6 +46,11 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
 
     private fun processMessageQueue() {
         if (!isProcessing.compareAndSet(false, true)) return
+
+        if (messageQueue.isEmpty()) {
+            isProcessing.set(false)
+            return
+        }
 
         try {
             while (messageQueue.isNotEmpty()) {
@@ -72,12 +89,6 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
 
             try {
                 if (lastMessageID == null) {
-                    // Clean up old messages if needed
-                    while (messageIDs.size >= 10) {
-                        val oldestMessageID = messageIDs.removeFirst()
-                        channel.deleteMessageById(oldestMessageID).queue()
-                    }
-
                     // Create new message
                     val message = channel.sendMessage(formattedContent).complete()
                     lastMessageID = message.id
@@ -86,7 +97,7 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
                     // Try to edit existing message
                     channel.editMessageById(lastMessageID!!, formattedContent).complete()
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // If edit fails, create new message
                 val message = channel.sendMessage(formattedContent).complete()
                 lastMessageID = message.id
@@ -109,14 +120,16 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
 
     private fun formatLogMessage(event: LogEvent): String {
         val timestamp = SimpleDateFormat("HH:mm:ss").format(event.timeMillis)
+        val name = event.loggerName
         val level = event.level.toString()
         val color = when(event.level.toString()) {
             "ERROR" -> "\u001B[31m" // Red
             "WARN" -> "\u001B[33m"  // Yellow
-            "INFO" -> "\u001B[32m"  // Green
+            "INFO" -> "\u001B[37m"  // White
+            "DEBUG" -> "\u001B[34m" // Blue
             else -> "\u001B[37m"    // White
         }
-        return "$color[$timestamp $level] ${event.message.formattedMessage}\u001B[0m\n"
+        return "$color[$timestamp $level] [$name] ${event.message.formattedMessage}\u001B[0m\n"
     }
 
     fun syncTask() {

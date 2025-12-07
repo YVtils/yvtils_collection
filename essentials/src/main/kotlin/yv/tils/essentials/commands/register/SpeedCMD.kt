@@ -1,3 +1,15 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.essentials.commands.register
 
 import dev.jorel.commandapi.CommandPermission
@@ -42,7 +54,7 @@ class SpeedCMD {
                     "-10"
                 )
             )
-            playerArgument("player", true) {
+            playerProfileArgument("player", true) {
                 anyExecutor { sender, args ->
                     if (sender !is Player && args[1] == null) {
                         sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
@@ -61,7 +73,7 @@ class SpeedCMD {
         }
 
         literalArgument("reset", false) {
-            playerArgument("player", true) {
+            playerProfileArgument("player", true) {
                 anyExecutor { sender, args ->
                     if (sender !is Player && args[1] == null) {
                         sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))

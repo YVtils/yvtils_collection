@@ -1,6 +1,18 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.discord.configs
 
-import yv.tils.config.files.FileUtils
+import yv.tils.config.files.JSONFileUtils
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -14,8 +26,8 @@ class StatsSyncSaveFile {
     private val filePath = "/discord/statsSync.json"
 
     fun loadConfig() {
-        val file = FileUtils.loadJSONFile(filePath)
-        val jsonFile = file.content
+    val file = JSONFileUtils.loadJSONFile(filePath)
+    val jsonFile = file.content
         val saveList = jsonFile["saves"]?.jsonArray ?: return
 
         if (saveList.isEmpty()) {
@@ -43,9 +55,9 @@ class StatsSyncSaveFile {
     }
 
     fun registerStrings(saveList: MutableList<StatsSyncSave> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-        val jsonFile = FileUtils.makeJSONFile(filePath, saveWrapper)
-        FileUtils.updateFile(filePath, jsonFile)
+    val saveWrapper = mapOf("saves" to saveList)
+    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
+    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
     }
 
     @Serializable

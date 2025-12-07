@@ -1,3 +1,15 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.discord.logic.sync.serverChats
 
 import net.dv8tion.jda.api.components.container.Container
@@ -109,9 +121,15 @@ class MessageComponents {
 
     private fun authorComponent(sender: Player): ContainerChildComponent {
         val emojiID = EmojiUtils().getPlayerEmojiId(sender)
-        return TextDisplay.of(
-            "### <:star:$emojiID> ${sender.name}"
-        )
+        return if (emojiID != null) {
+            TextDisplay.of(
+                "### <:star:$emojiID> ${sender.name}"
+            )
+        } else {
+            TextDisplay.of(
+                "### :star: ${sender.name}"
+            )
+        }
     }
 
     private fun prettifyAdvancementKey(key: String): String {

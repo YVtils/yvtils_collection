@@ -1,6 +1,19 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.config.language
 
 import yv.tils.config.files.FileUtils
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 import java.util.*
 
@@ -24,7 +37,7 @@ class Language {
         Logger.debug("Loading language files...")
         BuildLanguage.buildFiles()
 
-        FileUtils.Companion.loadYAMLFilesFromFolder("/languages").forEach { file ->
+        FileUtils.loadYAMLFilesFromFolder("/languages").forEach { file ->
             Logger.debug("Loading language file: ${file.file.nameWithoutExtension}")
 
             val tempLangStrings = langStrings
@@ -41,7 +54,7 @@ class Language {
 
             // Process only deepest keys
             deepestKeys.forEach { key ->
-                Logger.debug("Processing key: $key")
+                Logger.debug("Processing key: $key", DEBUGLEVEL.SPAM)
                 val string = tempLangStrings[key]
 
                 if (string == null) {

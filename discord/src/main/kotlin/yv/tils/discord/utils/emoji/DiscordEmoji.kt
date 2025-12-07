@@ -1,3 +1,15 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.discord.utils.emoji
 
 import net.dv8tion.jda.api.entities.Icon
@@ -100,7 +112,10 @@ class DiscordEmoji {
      */
     fun cleanupAppEmojis(maxAge: Long = 7 * 24 * 60 * 60 * 1000L, emojis: List<ApplicationEmoji> = emptyList()) {
         if (emojis.isEmpty()) {
-            val retrievedEmojis = AppLogic.Companion.jda.retrieveApplicationEmojis().complete()
+            val retrievedEmojis = AppLogic.jda.retrieveApplicationEmojis().complete()
+
+            if (retrievedEmojis.isEmpty()) return
+
             cleanupAppEmojis(maxAge, retrievedEmojis)
             return
         }
@@ -127,7 +142,7 @@ class DiscordEmoji {
      * @throws RuntimeException if the emoji creation fails.
      */
     fun createAppEmoji(name: String, icon: Icon): Long {
-        val emoji = AppLogic.Companion.jda.createApplicationEmoji(
+        val emoji = AppLogic.jda.createApplicationEmoji(
             name,
             icon,
         ).complete()

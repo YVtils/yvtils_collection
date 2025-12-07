@@ -1,3 +1,15 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2025 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.discord.logic.sync.serverChats
 
 import yv.tils.utils.logger.Logger
@@ -28,6 +40,9 @@ class SyncAdvancements {
         } catch (_: UninitializedPropertyAccessException) {
             Logger.warn("Discord app was not able to establish chat sync bridge between minecraft and discord. Please check your channel configuration.")
             active = false
+        } catch (e: Exception) {
+            Logger.warn("An error occurred while sending a synced chat message to Discord")
+            Logger.debug("Error details: ${e.message}")
         }
     }
 }
