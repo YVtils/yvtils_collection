@@ -12,12 +12,14 @@
 
 package yv.tils.moderation
 
-import yv.tils.common.listeners.PlayerJoin
 import yv.tils.common.permissions.PermissionManager
+import yv.tils.moderation.commands.*
 import yv.tils.moderation.configs.ConfigFile
-import yv.tils.moderation.configs.SaveFile
+import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.data.PermissionsData
 import yv.tils.moderation.language.RegisterStrings
+import yv.tils.moderation.listeners.AsyncChat
+import yv.tils.moderation.utils.TargetUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.data.Data
 
@@ -25,7 +27,7 @@ class ModerationYVtils : Data.YVtilsModule {
     companion object {
         val MODULE = Data.YVtilsModuleData(
             "moderation",
-            "2.0.0-beta.1",
+            "1.0.0-beta.1",
             "Moderation module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/moderation/"
@@ -35,7 +37,7 @@ class ModerationYVtils : Data.YVtilsModule {
     override fun onLoad() {
         RegisterStrings().registerStrings()
         ConfigFile().registerStrings()
-        SaveFile().registerStrings()
+        MuteSaveFile().registerStrings()
     }
 
     override fun enablePlugin() {
@@ -58,17 +60,32 @@ class ModerationYVtils : Data.YVtilsModule {
     }
 
     private fun registerCommands() {
+        BanCommand()
+        TempBanCommand()
+        UnbanCommand()
 
+        MuteCommand()
+        TempMuteCommand()
+        UnmuteCommand()
+
+        KickCommand()
+
+        WarnCommand()
     }
 
     private fun registerListeners() {
         val plugin = Data.instance
         val pm = plugin.server.pluginManager
 
+        pm.registerEvents(AsyncChat(), plugin)
     }
 
     private fun registerCoroutines() {
-
+        CoroutineHandler.launchTask(
+            suspend { TargetUtils().cleanupMutedPlayers() },
+            "yvtils-moderation-mutedPlayersHandler",
+            300 * 1000L,
+        )
     }
 
     private fun registerPermissions() {
@@ -77,6 +94,6 @@ class ModerationYVtils : Data.YVtilsModule {
 
     private fun loadConfigs() {
         ConfigFile().loadConfig()
-        SaveFile().loadConfig()
+        MuteSaveFile().loadConfig()
     }
 }

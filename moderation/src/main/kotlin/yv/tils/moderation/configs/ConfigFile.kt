@@ -12,12 +12,9 @@
 
 package yv.tils.moderation.configs
 
-import org.bukkit.Material
-import org.bukkit.Tag
 import yv.tils.config.data.ConfigEntry
 import yv.tils.config.data.EntryType
 import yv.tils.config.files.YMLFileUtils
-import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 

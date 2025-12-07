@@ -49,5 +49,75 @@ class PermissionsData {
 }
 
 enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
+    COMMAND_MODERATION_BAN(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.ban",
+            "Allows the use of the /ban command",
+            default = false
+        )
+    ),
 
+    COMMAND_MODERATION_TEMPBAN(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.tempban",
+            "Allows the use of the /tempban command",
+            default = false
+        )
+    ),
+
+    COMMAND_MODERATION_UNBAN(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.unban",
+            "Allows the use of the /unban command",
+            default = false
+        )
+    ),
+
+    COMMAND_MODERATION_MUTE(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.mute",
+            "Allows the use of the /mute command",
+            default = false
+        )
+    ),
+
+    COMMAND_MODERATION_TEMPMUTE(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.tempmute",
+            "Allows the use of the /tempmute command",
+            default = false
+        )
+    ),
+
+    COMMAND_MODERATION_UNMUTE(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.unmute",
+            "Allows the use of the /unmute command",
+            default = false
+        )
+    ),
+
+    COMMAND_MODERATION_KICK(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.kick",
+            "Allows the use of the /kick command",
+            default = false
+        )
+    ),
+
+    COMMAND_MODERATION_WARN(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.warn",
+            "Allows the use of the /warn command",
+            default = false
+        )
+    ),
+
+    MODERATION_BROADCAST(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.broadcast",
+            "Allows to receive broadcasts of moderation actions",
+            default = false
+        )
+    )
 }
