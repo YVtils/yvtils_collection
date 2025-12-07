@@ -14,13 +14,13 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":utils"))
     implementation(project(":config"))
-    implementation(project(":multiMine"))
+    implementation(project(":moderation"))
     implementation(project(":migration"))
     implementation(project(":gui"))
     implementation(project(":stats"))
 }
 
-val version = "2.0.0-beta.6"
+val version = "0.0.1-dev"
 
 tasks {
     runServer {
@@ -28,10 +28,10 @@ tasks {
     }
 
     shadowJar {
-        archiveBaseName.set("YVtils-MM")
+        archiveBaseName.set("TEST-YVTILS-CORE")
         archiveVersion.set(version)
         archiveClassifier.set("")
-        archiveFileName.set("YVtils-MM_v${version}.jar")
+        archiveFileName.set("TEST-YVTILS-CORE_v$version.jar")
 
         manifest {
             attributes["Main-Class"] = "yv.tils.core.YVtils"

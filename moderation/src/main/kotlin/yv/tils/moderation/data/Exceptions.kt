@@ -10,9 +10,10 @@
  * the YVtils Brand Protection Clause.
  */
 
-dependencies {
-    implementation(project(":utils"))
-    implementation(project(":config"))
-    implementation(project(":common"))
-    implementation(project(":gui"))
+package yv.tils.moderation.data
+
+class Exceptions {
+    companion object {
+        val TargetToOfflinePlayerParseException = Exception("There occurred an error while trying to parse the target to an offline player.")
+    }
 }

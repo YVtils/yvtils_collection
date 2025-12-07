@@ -146,7 +146,7 @@ class CommonYVtils : Data.YVtilsModule {
             val dependencies = core.dependencies
 
             if (dependencies.isEmpty()) {
-                return false
+                return true
             }
 
             val modules = Data.getModuleNames()

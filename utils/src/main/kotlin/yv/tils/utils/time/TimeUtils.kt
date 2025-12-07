@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 
 class TimeUtils {
     companion object {
@@ -41,8 +42,31 @@ class TimeUtils {
 
             return formatTime
         } catch (_: Exception) {
-            Logger.Companion.warn(MessageUtils.Companion.convert(CONFIG_ERROR_INVALID_TIMEZONE))
+            Logger.warn(MessageUtils.convert(CONFIG_ERROR_INVALID_TIMEZONE))
             return "xx/xx/xxxx xx:xx:xx"
         }
+    }
+
+    /**
+     * Parse time from string to calendar
+     * @param duration [Int] of time duration
+     * @param unit [String] of time unit
+     * @return [Calendar]
+     * @throws [IllegalArgumentException]
+     */
+    fun parseTime(duration: Int, unit: String): Calendar {
+        val time: Calendar = Calendar.getInstance()
+        when (unit) {
+            "s" -> time.add(Calendar.SECOND, duration)
+            "m" -> time.add(Calendar.MINUTE, duration)
+            "h" -> time.add(Calendar.HOUR, duration)
+            "d" -> time.add(Calendar.DAY_OF_MONTH, duration)
+            "w" -> time.add(Calendar.WEEK_OF_YEAR, duration)
+            else -> {
+                throw IllegalArgumentException("unit $unit is not supported")
+            }
+        }
+
+        return time
     }
 }

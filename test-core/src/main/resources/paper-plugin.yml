@@ -1,0 +1,10 @@
+name: TEST-YVTILS-CORE
+version: 0.0.1-dev
+main: yv.tils.core.YVtils
+api-version: '1.21'
+author: YVtils
+website: 'https://yvtils.net/yvtils/'
+prefix: YVtils
+contributors:
+  - Lyvric
+  - SlWed
