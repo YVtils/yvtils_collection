@@ -14,7 +14,7 @@ package yv.tils.config.language
 
 import yv.tils.config.files.FileUtils
 import yv.tils.config.files.YMLFileUtils
-import yv.tils.config.files.YMLFileUtils.Companion.makeYAMLFile
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 import java.util.*
 
@@ -25,7 +25,7 @@ class BuildLanguage {
         fun registerString(registeredString: RegisteredString) {
             registeredStrings.add(registeredString)
 
-            Logger.debug("Registered string: ${registeredString.key} -> ${registeredString.value} in ${registeredString.file.name}")
+            Logger.debug("Registered string: ${registeredString.key} -> ${registeredString.value} in ${registeredString.file.name}",DEBUGLEVEL.SPAM)
 
             Logger.debug("Registered strings: ${registeredStrings.size}")
         }
@@ -40,7 +40,7 @@ class BuildLanguage {
             groupedStrings.forEach { (fileType, strings) ->
                 Logger.debug("Processing file type: ${fileType.name}")
                 strings.forEach { registeredString ->
-                    Logger.debug("Registering string: ${registeredString.key} -> ${registeredString.value} in ${fileType.name}")
+                    Logger.debug("Registering string: ${registeredString.key} -> ${registeredString.value} in ${fileType.name}",DEBUGLEVEL.SPAM)
                     val lang = registeredString.file
                     val key = registeredString.key
                     val value = registeredString.value
@@ -70,12 +70,12 @@ class BuildLanguage {
             }
 
             if (currentLanguage != null) {
-                Logger.debug("Saving last language file for ${currentLanguage!!.name}")
+                Logger.debug("Saving last language file for ${currentLanguage.name}")
                 val ymlConfig = YMLFileUtils.makeYAMLFile(
                     "/languages/${currentLanguage.name.lowercase(Locale.getDefault())}.yml",
                     languageMap
                 )
-                FileUtils.Companion.saveFile(
+                FileUtils.saveFile(
                     "/languages/${currentLanguage.name.lowercase(Locale.getDefault())}.yml",
                     ymlConfig
                 )

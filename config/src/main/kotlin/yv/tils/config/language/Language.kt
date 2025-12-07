@@ -13,6 +13,7 @@
 package yv.tils.config.language
 
 import yv.tils.config.files.FileUtils
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 import java.util.*
 
@@ -36,7 +37,7 @@ class Language {
         Logger.debug("Loading language files...")
         BuildLanguage.buildFiles()
 
-        FileUtils.Companion.loadYAMLFilesFromFolder("/languages").forEach { file ->
+        FileUtils.loadYAMLFilesFromFolder("/languages").forEach { file ->
             Logger.debug("Loading language file: ${file.file.nameWithoutExtension}")
 
             val tempLangStrings = langStrings
@@ -53,7 +54,7 @@ class Language {
 
             // Process only deepest keys
             deepestKeys.forEach { key ->
-                Logger.debug("Processing key: $key")
+                Logger.debug("Processing key: $key", DEBUGLEVEL.SPAM)
                 val string = tempLangStrings[key]
 
                 if (string == null) {

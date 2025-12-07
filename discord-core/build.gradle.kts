@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":config"))
     implementation(project(":discord"))
     implementation(project(":migration"))
+    implementation(project(":stats"))
 }
 
 val version = "4.0.0-beta.4"

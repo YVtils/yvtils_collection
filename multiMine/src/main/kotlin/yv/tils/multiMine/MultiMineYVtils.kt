@@ -28,7 +28,7 @@ class MultiMineYVtils : Data.YVtilsModule {
     companion object {
         val MODULE = Data.YVtilsModuleData(
             "multiMine",
-            "2.0.0-beta.5",
+            "2.0.0-beta.6",
             "MultiMine module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/multiMine/"

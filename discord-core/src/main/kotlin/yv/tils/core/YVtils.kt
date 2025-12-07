@@ -20,6 +20,7 @@ import yv.tils.common.CommonYVtils
 import yv.tils.config.ConfigYVtils
 import yv.tils.discord.DiscordYVtils
 import yv.tils.migration.MigrationYVtils
+import yv.tils.stats.StatsYVtils
 import yv.tils.utils.UtilsYVtils
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
@@ -40,6 +41,7 @@ class YVtils : JavaPlugin() {
         UtilsYVtils(),
         MigrationYVtils(), // TODO: Remove with 4.1.0
         DiscordYVtils(),
+        StatsYVtils(),
         CommonYVtils()
     )
 

@@ -13,7 +13,6 @@
 package yv.tils.core
 
 import dev.jorel.commandapi.CommandAPI
-import dev.jorel.commandapi.CommandAPIBukkitConfig
 import dev.jorel.commandapi.CommandAPIPaperConfig
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
@@ -22,6 +21,7 @@ import yv.tils.config.ConfigYVtils
 import yv.tils.gui.GUIYVtils
 import yv.tils.migration.MigrationYVtils
 import yv.tils.multiMine.MultiMineYVtils
+import yv.tils.stats.StatsYVtils
 import yv.tils.utils.UtilsYVtils
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
@@ -43,6 +43,7 @@ class YVtils: JavaPlugin() {
         MigrationYVtils(), // TODO: Remove with 2.1.0
         MultiMineYVtils(),
         GUIYVtils(),
+        StatsYVtils(),
         CommonYVtils()
     )
 

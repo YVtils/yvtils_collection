@@ -17,9 +17,10 @@ dependencies {
     implementation(project(":multiMine"))
     implementation(project(":migration"))
     implementation(project(":gui"))
+    implementation(project(":stats"))
 }
 
-val version = "2.0.0-beta.5"
+val version = "2.0.0-beta.6"
 
 tasks {
     runServer {
