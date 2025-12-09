@@ -10,7 +10,7 @@
  * the YVtils Brand Protection Clause.
  */
 
-val jdaVersion = "6.1.2"
+val jdaVersion = "6.1.3"
 
 dependencies {
     implementation(project(":config"))
