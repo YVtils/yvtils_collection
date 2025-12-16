@@ -41,7 +41,7 @@ subprojects {
         plugin("xyz.jpenilla.run-paper")
     }
 
-    val commandAPIVersion = "11.0.0"
+    val commandAPIVersion = "11.1.0"
 
     dependencies {
         // Paper API dependency
