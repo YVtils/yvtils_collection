@@ -16,6 +16,8 @@ import com.destroystokyo.paper.profile.PlayerProfile
 import io.papermc.paper.ban.BanListType
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
+import yv.tils.config.language.LanguageHandler
+import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
@@ -55,15 +57,12 @@ class UnbanLogic {
 
         try {
             val offlinePlayer = TargetUtils.parseTargetToOfflinePlayer(target) ?: run {
-                // TODO: Add some type of error message
-                Logger.dev("Failed to parse offline player ${target.name}")
+                PlayerUtils.logicError(sender, Exceptions.PlayerProfileToOfflinePlayerParseException)
                 return
             }
 
             if (!TargetUtils.isTargetBanned(offlinePlayer)) {
-                // TODO: target is not banned
-                //  Return and throw error to player
-                Logger.dev("Target ${target.name} is not banned")
+                sender.sendMessage(LanguageHandler.getMessage("command.moderation.player.not.banned", sender))
                 return
             }
 
@@ -73,8 +72,7 @@ class UnbanLogic {
 
                 Bukkit.getBanList(BanListType.PROFILE).addBan(target, reason, date, sender.name)
             } catch (e: IllegalArgumentException) {
-                // TODO: Add error handling
-                Logger.dev("Failed to unban player ${target.name}: ${e.message}")
+                PlayerUtils.logicError(sender, Exceptions.PlayerProfileToOfflinePlayerParseException, e)
                 return
             }
 
@@ -83,11 +81,10 @@ class UnbanLogic {
                 reason,
                 sender,
                 silent,
-                ModerationAction.UNBAN
+                action = ModerationAction.UNBAN
             )
         } catch (e: Exception) {
-            // TODO: Add error handling
-            Logger.dev("Failed to unban player ${target.name}: ${e.message}")
+            PlayerUtils.logicError(sender, Exceptions.ModerationActionException, e)
         }
     }
 }

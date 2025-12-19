@@ -15,6 +15,7 @@ package yv.tils.moderation.listeners
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.TargetUtils
 import yv.tils.utils.logger.Logger
 
@@ -28,8 +29,7 @@ class AsyncChat : Listener {
         e.isCancelled = true
 
         val muteData = TargetUtils.getMuteData(player) ?: run {
-            // TODO: Add some type of error message
-            Logger.dev("Failed to get mute")
+            Logger.warn(Exceptions.MuteDataNotFoundException.message!!)
             return
         }
 

@@ -15,6 +15,7 @@ package yv.tils.moderation.commands
 import com.destroystokyo.paper.profile.PlayerProfile
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
+import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.TempBanLogic
 
@@ -33,7 +34,7 @@ class TempBanCommand {
                             val target = args["target"] as List<PlayerProfile>
                             val duration = args["duration"] as Int
                             val unit = args["unit"] as String
-                            val reason = (args["reason"] ?: "No reason provided") as String // TODO: Localize
+                            val reason = (args["reason"] ?: LanguageHandler.getMessage("moderation.placeholder.reason.none")) as String
 
                             TempBanLogic().triggerTempBan(target, reason, duration, unit, sender)
                         }

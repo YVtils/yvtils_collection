@@ -17,6 +17,8 @@ import dev.jorel.commandapi.commandsenders.BukkitPlayer
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
+import org.jline.utils.Log
+import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.configs.saveFile.MuteSave
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.data.Exceptions.Companion.TargetToOfflinePlayerParseException
@@ -92,10 +94,24 @@ class TargetUtils {
             expiresDate.toString()
         }
 
-        val message = "You are muted for the following reason: $reason. Your mute expires on: $expires." // TODO: Localize this message
-        player.sendMessage(message)
+        player.sendMessage(LanguageHandler.getMessage(
+            "moderation.target.muted.chat.player",
+            player.uniqueId,
+            mapOf(
+                "reason" to reason,
+                "duration" to expires
+            )
+        ))
 
-        // TODO: Add console logging for muted message sent
+        Logger.info(
+            LanguageHandler.getMessage(
+                "moderation.target.muted.chat.console",
+                player.uniqueId,
+                mapOf(
+                    "reason" to reason,
+                    "duration" to expires
+                )
+            ))
     }
 
     fun cleanupMutedPlayers() {

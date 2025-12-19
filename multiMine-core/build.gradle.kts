@@ -20,7 +20,7 @@ dependencies {
     implementation(project(":stats"))
 }
 
-val version = "2.0.0-beta.6"
+val version = "2.0.0-beta.7"
 
 tasks {
     runServer {

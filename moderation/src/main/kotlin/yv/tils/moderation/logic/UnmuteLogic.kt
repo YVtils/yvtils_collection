@@ -13,15 +13,14 @@
 package yv.tils.moderation.logic
 
 import com.destroystokyo.paper.profile.PlayerProfile
-import io.papermc.paper.ban.BanListType
-import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
+import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
+import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
 import yv.tils.utils.logger.Logger
-import java.util.Date
 
 class UnmuteLogic {
     /**
@@ -56,23 +55,19 @@ class UnmuteLogic {
 
         try {
             val offlinePlayer = TargetUtils.parseTargetToOfflinePlayer(target) ?: run {
-                // TODO: Add some type of error message
-                Logger.dev("Failed to parse offline player ${target.name}")
+                PlayerUtils.logicError(sender, Exceptions.PlayerProfileToOfflinePlayerParseException)
                 return
             }
 
             if (!TargetUtils.isTargetMuted(offlinePlayer)) {
-                // TODO: target is not muted
-                //  Return and throw error to player
-                Logger.dev("Target ${target.name} is not muted")
+                sender.sendMessage(LanguageHandler.getMessage("command.moderation.player.not.muted", sender))
                 return
             }
 
             try {
                 MuteSaveFile().unmutePlayer(offlinePlayer.uniqueId)
             } catch (e: IllegalArgumentException) {
-                // TODO: Add error handling
-                Logger.dev("Failed to unmute player ${target.name}: ${e.message}")
+                PlayerUtils.logicError(sender, Exceptions.ModerationActionException, e)
                 return
             }
 
@@ -81,11 +76,10 @@ class UnmuteLogic {
                 reason,
                 sender,
                 silent,
-                ModerationAction.UNMUTE
+                action = ModerationAction.UNMUTE
             )
         } catch (e: Exception) {
-            // TODO: Add error handling
-            Logger.dev("Failed to unmute player ${target.name}: ${e.message}")
+            PlayerUtils.logicError(sender, Exceptions.ModerationActionException, e)
         }
     }
 }

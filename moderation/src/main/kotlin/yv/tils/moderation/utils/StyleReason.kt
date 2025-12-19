@@ -16,6 +16,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import yv.tils.config.language.LanguageHandler
 
 class StyleReason {
     companion object {
@@ -34,11 +35,11 @@ class StyleReason {
             val contentWidth = innerWidth.coerceAtLeast(MIN_WIDTH).coerceAtLeast(title.length)
             val normalized = reason.replace("\r", "")
             val wrappedLines = when {
-                normalized.isBlank() -> listOf("No reason provided.")
+                normalized.isBlank() -> listOf(LanguageHandler.getRawMessage("moderation.placeholder.reason.none"))
                 else -> normalized
                     .split('\n')
                     .flatMap { wrapLine(it, contentWidth) }
-                    .ifEmpty { listOf("No reason provided.") }
+                    .ifEmpty { listOf(LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) }
             }
 
             val horizontalBorder = "+${"-".repeat(contentWidth + 2)}+"

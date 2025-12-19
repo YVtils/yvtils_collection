@@ -17,6 +17,7 @@ import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.greedyStringArgument
 import dev.jorel.commandapi.kotlindsl.playerProfileArgument
+import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.WarnLogic
 
@@ -29,7 +30,7 @@ class WarnCommand {
             greedyStringArgument("reason", true) {
                 anyExecutor { sender, args ->
                     val target = args["target"] as List<PlayerProfile>
-                    val reason = (args["reason"] ?: "No reason provided") as String // TODO: Localize
+                    val reason = (args["reason"] ?: LanguageHandler.getMessage("moderation.placeholder.reason.none")) as String
 
                     WarnLogic().triggerWarn(target, reason, sender)
                 }

@@ -13,14 +13,16 @@
 package yv.tils.moderation.logic
 
 import com.destroystokyo.paper.profile.PlayerProfile
-import dev.jorel.commandapi.CommandAPILogger.silent
 import org.bukkit.command.CommandSender
 import org.bukkit.event.player.PlayerKickEvent
-import org.jline.utils.Log
+import sun.jvm.hotspot.HelloWorld.e
+import yv.tils.config.language.LanguageHandler
+import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.StyleReason
 import yv.tils.moderation.utils.TargetUtils
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 
 class KickLogic {
@@ -53,22 +55,18 @@ class KickLogic {
 
         try {
             val offlinePlayer = TargetUtils.parseTargetToOfflinePlayer(target) ?: run {
-                // TODO: Add some type of error message
-                //  Only if not silent
-                Logger.dev("Failed to parse offline player ${target.name}")
+                PlayerUtils.logicError(sender, Exceptions.PlayerProfileToOfflinePlayerParseException)
                 return
             }
 
             if (!TargetUtils.isTargetOnline(offlinePlayer)) {
-                // TODO: target is not online
-                Logger.dev("Failed to parse offline player ${offlinePlayer.name}")
+                sender.sendMessage(LanguageHandler.getMessage("command.moderation.player.not.online", sender))
                 return
             }
 
             val player = offlinePlayer.player ?: run {
-                // TODO: Add some type of error message
-                // This should never occur as an error
-                Logger.dev("Offline player's player is null for ${offlinePlayer.name}")
+                PlayerUtils.logicError(sender, Exceptions.ModerationActionException)
+                Logger.debug("KickLogic.kickLogic: offlinePlayer.player is null despite being online", DEBUGLEVEL.BASIC)
                 return
             }
 
@@ -80,11 +78,10 @@ class KickLogic {
                 reason,
                 sender,
                 silent,
-                ModerationAction.KICK
+                action = ModerationAction.KICK
             )
         } catch (e: Exception) {
-            // TODO: Add error handling
-            Logger.dev("Failed to kick player ${target.name}: ${e.message}")
+            PlayerUtils.logicError(sender, Exceptions.ModerationActionException, e)
         }
     }
 }

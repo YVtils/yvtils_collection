@@ -16,9 +16,9 @@ import com.destroystokyo.paper.profile.PlayerProfile
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.moderation.configs.saveFile.ModAction
-import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.configs.saveFile.WarnSaveFile
 import yv.tils.moderation.configs.saveFile.Warning
+import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
@@ -58,8 +58,7 @@ class WarnLogic {
 
         try {
             val offlinePlayer = TargetUtils.parseTargetToOfflinePlayer(target) ?: run {
-                // TODO: Add some type of error message
-                Logger.dev("Offline player is null!")
+                PlayerUtils.logicError(sender, Exceptions.PlayerProfileToOfflinePlayerParseException)
                 return
             }
 
@@ -88,11 +87,10 @@ class WarnLogic {
                 reason,
                 sender,
                 silent,
-                ModerationAction.WARN
+                action = ModerationAction.WARN
             )
         } catch (e: Exception) {
-            // TODO: Add error handling
-            Logger.dev("An error occurred while trying to warn the player: ${e.message}")
+            PlayerUtils.logicError(sender, Exceptions.ModerationActionException, e)
         }
     }
 }

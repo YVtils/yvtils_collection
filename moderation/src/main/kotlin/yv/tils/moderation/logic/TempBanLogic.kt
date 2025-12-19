@@ -16,12 +16,13 @@ import com.destroystokyo.paper.profile.PlayerProfile
 import io.papermc.paper.ban.BanListType
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
+import yv.tils.config.language.LanguageHandler
+import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.time.TimeUtils
-import java.util.Date
 
 class TempBanLogic {
     /**
@@ -63,31 +64,26 @@ class TempBanLogic {
 
         try {
             val offlinePlayer = TargetUtils.parseTargetToOfflinePlayer(target) ?: run {
-                // TODO: Add some type of error message
-                Logger.dev("Target is null")
+                PlayerUtils.logicError(sender, Exceptions.PlayerProfileToOfflinePlayerParseException)
                 return
             }
 
             if (TargetUtils.isTargetBanned(offlinePlayer)) {
-                // TODO: target is already banned
-                //  Either add logic to update ban or return and throw error to player
-                Logger.dev("Target ${target.name} is already banned")
+                sender.sendMessage(LanguageHandler.getMessage("command.moderation.player.already.banned", sender))
                 return
             }
 
             val parsedTime = try {
                 TimeUtils().parseTime(duration, unit)
             } catch (e: IllegalArgumentException) {
-                // TODO: Add error handling
-                Logger.dev("Failed to parse time for tempban: ${e.message}")
+                PlayerUtils.logicError(sender, Exceptions.TimeUnitParseException, e)
                 return
             }
 
             try {
                 Bukkit.getBanList(BanListType.PROFILE).addBan(target, reason, parsedTime.time, sender.name)
             } catch (e: IllegalArgumentException) {
-                // TODO: Add error handling
-                Logger.dev("Failed to ban player ${target.name}: ${e.message}")
+                PlayerUtils.logicError(sender, Exceptions.PlayerProfileToOfflinePlayerParseException, e)
                 return
             }
 
@@ -103,11 +99,11 @@ class TempBanLogic {
                 reason,
                 sender,
                 silent,
-                ModerationAction.TEMPBAN
+                duration = duration,
+                action = ModerationAction.TEMPBAN
             )
         } catch (e: Exception) {
-            // TODO: Add error handling
-            Logger.dev("Failed to tempban player ${target.name}: ${e.message}")
+            PlayerUtils.logicError(sender, Exceptions.ModerationActionException, e)
         }
     }
 }

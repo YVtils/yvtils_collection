@@ -15,14 +15,14 @@ package yv.tils.moderation.logic
 import com.destroystokyo.paper.profile.PlayerProfile
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.configs.saveFile.ModAction
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
+import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
-import yv.tils.utils.logger.Logger
 import yv.tils.utils.time.TimeUtils
-import kotlin.time.Duration
 
 class TempMuteLogic {
     /**
@@ -63,15 +63,12 @@ class TempMuteLogic {
 
         try {
             val offlinePlayer = TargetUtils.parseTargetToOfflinePlayer(target) ?: run {
-                // TODO: Add some type of error message
-                Logger.dev("Offline player is null!")
+                PlayerUtils.logicError(sender, Exceptions.PlayerProfileToOfflinePlayerParseException)
                 return
             }
 
             if (TargetUtils.isTargetMuted(offlinePlayer)) {
-                // TODO: target is already muted
-                //  Either add logic to update mute or return and throw error to player
-                Logger.dev("Target is muted!")
+                sender.sendMessage(LanguageHandler.getMessage("command.moderation.player.already.muted", sender))
                 return
             }
 
@@ -90,8 +87,7 @@ class TempMuteLogic {
             val parsedTime = try {
                 TimeUtils().parseTime(duration, unit)
             } catch (e: IllegalArgumentException) {
-                // TODO: Add error handling
-                Logger.dev("Failed to parse time for tempmute: ${e.message}")
+                PlayerUtils.logicError(sender, Exceptions.TimeUnitParseException, e)
                 return
             }
 
@@ -102,11 +98,11 @@ class TempMuteLogic {
                 reason,
                 sender,
                 silent,
-                ModerationAction.TEMPMUTE
+                duration,
+                action = ModerationAction.TEMPMUTE
             )
         } catch (e: Exception) {
-            // TODO: Add error handling
-            Logger.dev("An error occurred while trying to mute the player: ${e.message}")
+            PlayerUtils.logicError(sender, Exceptions.ModerationActionException, e)
         }
     }
 }

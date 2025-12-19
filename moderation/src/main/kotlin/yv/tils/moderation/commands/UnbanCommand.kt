@@ -16,6 +16,7 @@ import com.destroystokyo.paper.profile.PlayerProfile
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.OfflinePlayer
+import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.UnbanLogic
 import yv.tils.utils.data.Data
@@ -29,6 +30,7 @@ class UnbanCommand {
         playerProfileArgument("target") {
             replaceSuggestions(ArgumentSuggestions.strings { _ ->
                 // TODO: Look into possibilities to optimize this
+                //  Look into Asynchronous suggestions (https://docs.commandapi.dev/create-commands/arguments/suggestions/async-suggestions#asynchronous-suggestions)
                 val bannedPlayers: MutableSet<OfflinePlayer> = Data.instance.server.bannedPlayers
                 val bannedPlayersNames: MutableList<String> = mutableListOf()
 
@@ -46,7 +48,7 @@ class UnbanCommand {
             greedyStringArgument("reason", true) {
                 anyExecutor { sender, args ->
                     val target = args["target"] as List<PlayerProfile>
-                    val reason = (args["reason"] ?: "No reason provided") as String // TODO: Localize
+                    val reason = (args["reason"] ?: LanguageHandler.getMessage("moderation.placeholder.reason.none")) as String
 
                     UnbanLogic().triggerUnban(target, reason, sender)
                 }

@@ -43,7 +43,7 @@ class YVtils: JavaPlugin() {
         MigrationYVtils(), // TODO: Remove with 2.1.0
         MultiMineYVtils(),
         GUIYVtils(),
-        StatsYVtils(),
+        //StatsYVtils(),
         CommonYVtils()
     )
 

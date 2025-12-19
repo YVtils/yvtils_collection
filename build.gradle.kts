@@ -14,8 +14,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.2.21" apply false
-    kotlin("plugin.serialization") version "2.2.21" apply false
+    kotlin("jvm") version "2.3.0" apply false
+    kotlin("plugin.serialization") version "2.3.0" apply false
     id("com.gradleup.shadow") version "9.3.0" apply false
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19" apply false
     id("xyz.jpenilla.run-paper") version "3.0.2" apply false
@@ -41,7 +41,7 @@ subprojects {
         plugin("xyz.jpenilla.run-paper")
     }
 
-    val commandAPIVersion = "11.0.0"
+    val commandAPIVersion = "11.1.0"
 
     dependencies {
         // Paper API dependency

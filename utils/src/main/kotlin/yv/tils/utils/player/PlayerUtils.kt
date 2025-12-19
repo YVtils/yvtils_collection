@@ -39,7 +39,7 @@ class PlayerUtils {
 
         val onlinePlayersAsCount: Int
             get() {
-                val onlinePlayers = Data.Companion.instance.server.onlinePlayers.size
+                val onlinePlayers = Data.instance.server.onlinePlayers.size
 
                 // TODO: Add vanish logic
 
@@ -50,7 +50,7 @@ class PlayerUtils {
             get() {
                 val players = mutableListOf<String>()
 
-                for (player in Data.Companion.instance.server.onlinePlayers) {
+                for (player in Data.instance.server.onlinePlayers) {
                     // TODO: Add vanish logic
 
                     players.add(player.name)
@@ -66,7 +66,7 @@ class PlayerUtils {
 
         val maxOnlinePlayers: Int
             get() {
-                return Data.Companion.instance.server.maxPlayers
+                return Data.instance.server.maxPlayers
             }
 
         /**
@@ -79,7 +79,7 @@ class PlayerUtils {
         fun onlinePlayersAsPlayers(permission: String = "", needPerm: Boolean = true): List<Player> {
             val players = mutableListOf<Player>()
 
-            for (player in Data.Companion.instance.server.onlinePlayers) {
+            for (player in Data.instance.server.onlinePlayers) {
                 if (permission.isNotEmpty()) {
                     if (needPerm && player.hasPermission(permission)) {
                         players.add(player)
@@ -100,7 +100,7 @@ class PlayerUtils {
          * @param needPerm If true, only players with the permission will receive the message. If false, only players without the permission will receive the message.
          */
         fun broadcast(message: String, permission: String = "", needPerm: Boolean = true) {
-            broadcast(MessageUtils.Companion.convert(message), permission, needPerm)
+            broadcast(MessageUtils.convert(message), permission, needPerm)
         }
 
         /**
@@ -121,7 +121,7 @@ class PlayerUtils {
          * @return OfflinePlayer object.
          */
         fun uuidToPlayer(uuid: UUID): OfflinePlayer {
-            return Data.Companion.instance.server.getOfflinePlayer(uuid)
+            return Data.instance.server.getOfflinePlayer(uuid)
         }
 
         /**
@@ -139,7 +139,7 @@ class PlayerUtils {
          * @return OfflinePlayer object.
          */
         fun nameToPlayer(name: String): OfflinePlayer {
-            return Data.Companion.instance.server.getOfflinePlayer(name)
+            return Data.instance.server.getOfflinePlayer(name)
         }
 
         /**
