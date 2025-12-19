@@ -114,6 +114,14 @@ class RegisterStrings {
         )
 
         registerNewString(
+            LangStrings.COMMAND_SUGGESTION_ASYNC_ACTION,
+            mapOf(
+                FileTypes.EN to "<prefix> <yellow>Suggestions are being processed in the background. Please be patient...",
+                FileTypes.DE to "<prefix> <yellow>Vorschläge werden im Hintergrund verarbeitet. Bitte etwas Geduld...",
+            )
+        )
+
+        registerNewString(
             LangStrings.CONFIG_ERROR_INVALID_TIMEZONE,
             mapOf(
                 FileTypes.EN to "<prefix> <red>Invalid timezone specified in the config file! Please check your settings.",
@@ -146,5 +154,6 @@ enum class LangStrings(val key: String) {
     COMMAND_EXECUTOR_MISSING_PERMISSION("command.executor.missingPermission"),
     COMMAND_USAGE("command.usage"),
     COMMAND_EXECUTOR_ASYNC_ACTION("command.executor.asyncAction"),
+    COMMAND_SUGGESTION_ASYNC_ACTION("command.suggestion.asyncAction"),
     CONFIG_ERROR_INVALID_TIMEZONE("config.error.invalid.timezone"),
 }

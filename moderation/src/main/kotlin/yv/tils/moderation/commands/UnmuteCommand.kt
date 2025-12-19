@@ -14,11 +14,15 @@ package yv.tils.moderation.commands
 
 import com.destroystokyo.paper.profile.PlayerProfile
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
-import dev.jorel.commandapi.kotlindsl.*
+import dev.jorel.commandapi.kotlindsl.anyExecutor
+import dev.jorel.commandapi.kotlindsl.commandTree
+import dev.jorel.commandapi.kotlindsl.greedyStringArgument
+import dev.jorel.commandapi.kotlindsl.playerProfileArgument
 import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.UnbanLogic
+import java.util.concurrent.CompletableFuture
 
 class UnmuteCommand {
     val command = commandTree("unmute") {
@@ -26,7 +30,14 @@ class UnmuteCommand {
         withUsage("unmute <player> [reason]")
 
         playerProfileArgument("target") {
-            replaceSuggestions(ArgumentSuggestions.strings { _ -> MuteSaveFile().getAllMutes()})
+            replaceSuggestions(ArgumentSuggestions.stringsAsync { info ->
+                CompletableFuture.supplyAsync {
+                    info.sender.sendMessage(LanguageHandler.getMessage(yv.tils.common.language.LangStrings.COMMAND_SUGGESTION_ASYNC_ACTION.key))
+
+                    MuteSaveFile().getAllMutes()
+                }
+            })
+
             greedyStringArgument("reason", true) {
                 anyExecutor { sender, args ->
                     val target = args["target"] as List<PlayerProfile>
