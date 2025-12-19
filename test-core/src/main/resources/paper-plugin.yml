@@ -1,5 +1,5 @@
-name: YVtils-MultiMine
-version: 2.0.0-beta.7
+name: TEST-YVTILS-CORE
+version: 0.0.1-dev
 main: yv.tils.core.YVtils
 api-version: '1.21'
 author: YVtils

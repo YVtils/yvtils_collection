@@ -18,32 +18,28 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.config.ConfigYVtils
-import yv.tils.gui.GUIYVtils
-import yv.tils.migration.MigrationYVtils
-import yv.tils.multiMine.MultiMineYVtils
-import yv.tils.stats.StatsYVtils
+import yv.tils.moderation.ModerationYVtils
 import yv.tils.utils.UtilsYVtils
 import yv.tils.utils.data.Data
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 
+@Suppress("UnstableApiUsage")
 class YVtils: JavaPlugin() {
     companion object {
         val yvtilsVersion = YVtils().pluginMeta.version
         lateinit var instance: YVtils
 
-        const val PLUGIN_NAME_FULL = "YVtils-MultiMine"
-        const val PLUGIN_NAME = "MultiMine"
-        const val PLUGIN_NAME_SHORT = "mm"
+        const val PLUGIN_NAME_FULL = "TEST-YVTILS-CORE"
+        const val PLUGIN_NAME = "TEST-YVTILS-CORE"
+        const val PLUGIN_NAME_SHORT = "test"
         const val PLUGIN_COLOR = "#66cbe8"
     }
 
     private val modules: List<Data.YVtilsModule> = listOf(
         ConfigYVtils(),
         UtilsYVtils(),
-        MigrationYVtils(), // TODO: Remove with 2.1.0
-        MultiMineYVtils(),
-        GUIYVtils(),
-        //StatsYVtils(),
+        ModerationYVtils(),
         CommonYVtils()
     )
 
@@ -51,14 +47,14 @@ class YVtils: JavaPlugin() {
         instance = this
 
         Logger.logger = componentLogger
-        Logger.debug("$PLUGIN_NAME_FULL v$yvtilsVersion is loading...")
+        Logger.debug("$PLUGIN_NAME_FULL v$yvtilsVersion is loading...", DEBUGLEVEL.BASIC)
 
         val core = Data.YVtilsCore(
             description = "",
-            url = "https://modrinth.com/plugin/yvtils_mm",
+            url = "",
 
             dependencies = listOf(
-                "multiMine"
+                "common"
             ),
 
             name = PLUGIN_NAME,
@@ -90,7 +86,7 @@ class YVtils: JavaPlugin() {
     }
 
     override fun onEnable() {
-        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is starting...")
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is starting...", DEBUGLEVEL.BASIC)
 
         try {
             modules.forEach { it.enablePlugin() }
@@ -105,7 +101,13 @@ class YVtils: JavaPlugin() {
     }
 
     fun onLateEnablePlugin() {
-        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is performing late enable...")
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is performing late enable...", DEBUGLEVEL.BASIC)
+
+        Logger.error("------------------------------------------------")
+        Logger.error("IF YOU SEE THIS MESSAGE, YOU SOMEHOW GOT ACCESS TO A TEST BUILD OF THE TEST CORE PLUGIN.")
+        Logger.error("THIS BUILD IS NOT INTENDED FOR PUBLIC USAGE AND MAY MISS FUNCTIONALITY OR CAUSE ISSUES.")
+        Logger.error("PLEASE DOWNLOAD THE OFFICIAL BUILD FROM THE MODRINTH PAGE.")
+        Logger.error("------------------------------------------------")
 
         try {
             modules.forEach { it.onLateEnablePlugin() }
@@ -116,7 +118,7 @@ class YVtils: JavaPlugin() {
     }
 
     override fun onDisable() {
-        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is stopping...")
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is stopping...", DEBUGLEVEL.BASIC)
 
         try {
             modules.forEach { it.disablePlugin() }

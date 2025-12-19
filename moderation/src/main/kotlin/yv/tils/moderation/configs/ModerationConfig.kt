@@ -10,12 +10,7 @@
  * the YVtils Brand Protection Clause.
  */
 
-val jdaVersion = "6.2.0"
+package yv.tils.moderation.configs
 
-dependencies {
-    implementation(project(":config"))
-    implementation(project(":utils"))
-    implementation(project(":common"))
-
-    implementation("net.dv8tion:JDA:${jdaVersion}")
+class ModerationConfig {
 }

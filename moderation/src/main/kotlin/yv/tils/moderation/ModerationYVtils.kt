@@ -10,65 +10,67 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.discord
+package yv.tils.moderation
 
 import yv.tils.common.permissions.PermissionManager
-import yv.tils.config.language.LanguageHandler
-import yv.tils.discord.actions.commands.JDACommandsRegister
-import yv.tils.discord.configs.*
-import yv.tils.discord.data.PermissionsData
-import yv.tils.discord.language.RegisterStrings
-import yv.tils.discord.listener.*
-import yv.tils.discord.logic.AppLogic
+import yv.tils.moderation.commands.*
+import yv.tils.moderation.configs.ConfigFile
+import yv.tils.moderation.configs.saveFile.MuteSaveFile
+import yv.tils.moderation.data.PermissionsData
+import yv.tils.moderation.language.RegisterStrings
+import yv.tils.moderation.listeners.AsyncChat
+import yv.tils.moderation.utils.TargetUtils
+import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.data.Data
-import yv.tils.utils.logger.Logger
 
-class DiscordYVtils : Data.YVtilsModule {
+class ModerationYVtils : Data.YVtilsModule {
     companion object {
         val MODULE = Data.YVtilsModuleData(
-            "discord",
-            "4.0.0-beta.5",
-            "Discord integration for YVtils",
+            "moderation",
+            "1.0.0-beta.1",
+            "Moderation module for YVtils",
             "YVtils",
-            "",
+            "https://docs.yvtils.net/moderation/"
         )
-
-        var i = 0
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
         ConfigFile().registerStrings()
-        SaveFile().registerStrings()
-        StatsSyncSaveFile().registerStrings()
+        MuteSaveFile().registerStrings()
     }
 
     override fun enablePlugin() {
         Data.addModule(MODULE)
 
+        registerCommands()
         registerListeners()
+        registerCoroutines()
         registerPermissions()
 
         loadConfigs()
-
-        AppLogic().startApp()
     }
 
     override fun onLateEnablePlugin() {
-        JDACommandsRegister().registerCommands()
 
-        if (AppLogic.started) {
-            Logger.info(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_START_SUCCESS.key))
-        }
     }
 
     override fun disablePlugin() {
-        AppLogic().stopApp()
-        unregisterModule()
+
     }
 
-    fun unregisterModule() {
-        Data.removeModule(MODULE)
+    private fun registerCommands() {
+        BanCommand()
+        TempBanCommand()
+        UnbanCommand()
+
+        MuteCommand()
+        TempMuteCommand()
+        UnmuteCommand()
+
+        KickCommand()
+
+        WarnCommand()
     }
 
     private fun registerListeners() {
@@ -76,10 +78,14 @@ class DiscordYVtils : Data.YVtilsModule {
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(AsyncChat(), plugin)
-        pm.registerEvents(PlayerAdvancementDone(), plugin)
-        pm.registerEvents(PlayerJoin(), plugin)
-        pm.registerEvents(PlayerQuit(), plugin)
-        pm.registerEvents(PlayerDeath(), plugin)
+    }
+
+    private fun registerCoroutines() {
+        CoroutineHandler.launchTask(
+            suspend { TargetUtils().cleanupMutedPlayers() },
+            "yvtils-moderation-mutedPlayersHandler",
+            300 * 1000L,
+        )
     }
 
     private fun registerPermissions() {
@@ -88,7 +94,6 @@ class DiscordYVtils : Data.YVtilsModule {
 
     private fun loadConfigs() {
         ConfigFile().loadConfig()
-        SaveFile().loadConfig()
-        StatsSyncSaveFile().loadConfig()
+        MuteSaveFile().loadConfig()
     }
 }

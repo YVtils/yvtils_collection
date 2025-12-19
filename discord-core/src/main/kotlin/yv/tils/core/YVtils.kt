@@ -41,7 +41,7 @@ class YVtils : JavaPlugin() {
         UtilsYVtils(),
         MigrationYVtils(), // TODO: Remove with 4.1.0
         DiscordYVtils(),
-        StatsYVtils(),
+        //StatsYVtils(),
         CommonYVtils()
     )
 
