@@ -18,6 +18,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.config.ConfigYVtils
+import yv.tils.gui.GUIYVtils
 import yv.tils.moderation.ModerationYVtils
 import yv.tils.utils.UtilsYVtils
 import yv.tils.utils.data.Data
@@ -40,6 +41,7 @@ class YVtils: JavaPlugin() {
         ConfigYVtils(),
         UtilsYVtils(),
         ModerationYVtils(),
+        GUIYVtils(),
         CommonYVtils()
     )
 

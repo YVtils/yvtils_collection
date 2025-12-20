@@ -15,11 +15,32 @@ package yv.tils.gui.logic
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.InventoryHolder
+import yv.tils.gui.core.GuiGenericHolder
 
 object InventoryHandler {
+    /**
+     * Creates an inventory with a GuiHolder (legacy config system).
+     */
     fun createInventory(holder: GuiHolder, name: Component, size: Int): Inventory {
         val inv = Bukkit.createInventory(holder, size, name)
         holder.setInventory(inv)
         return inv
+    }
+
+    /**
+     * Creates an inventory with a GuiGenericHolder (new generic system).
+     */
+    fun createInventory(holder: GuiGenericHolder, name: Component, size: Int): Inventory {
+        val inv = Bukkit.createInventory(holder, size, name)
+        holder.setInventory(inv)
+        return inv
+    }
+
+    /**
+     * Creates an inventory with any InventoryHolder (generic fallback).
+     */
+    fun createInventory(holder: InventoryHolder, name: Component, size: Int): Inventory {
+        return Bukkit.createInventory(holder, size, name)
     }
 }

@@ -71,6 +71,8 @@ class ModerationYVtils : Data.YVtilsModule {
         KickCommand()
 
         WarnCommand()
+
+        ModGUICommand()
     }
 
     private fun registerListeners() {

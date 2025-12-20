@@ -52,12 +52,32 @@ class MojangAPI {
         }
     }
 
+    fun getSkinTexture(uuid: UUID? = null, name: String? = null): MojangResponse {
+        if (uuid == null && name == null) {
+            throw IllegalArgumentException("Either uuid or name must be provided")
+        }
+        if (name != null) {
+            val playerUUID = nameToUUID(name)
+            try {
+                return getSkinTexture(playerUUID)
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+        try {
+            val url = "https://sessionserver.mojang.com/session/minecraft/profile/${uuid.toString().replace("-", "")}"
+            return sendRequest(url)
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
     fun nameToUUID(playerName: String): UUID {
-        return Data.Companion.instance.server.getOfflinePlayer(playerName).uniqueId
+        return Data.instance.server.getOfflinePlayer(playerName).uniqueId
     }
 
     fun nameToOfflinePlayer(playerName: String): OfflinePlayer {
-        return Data.Companion.instance.server.getOfflinePlayer(playerName)
+        return Data.instance.server.getOfflinePlayer(playerName)
     }
 
     private fun sendRequest(url: String): MojangResponse {
@@ -65,8 +85,7 @@ class MojangAPI {
             val connection = URI(url).toURL().openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
 
-            val responseCode = connection.responseCode
-            when (responseCode) {
+            when (val responseCode = connection.responseCode) {
                 HttpURLConnection.HTTP_OK -> {
                     val reader = BufferedReader(InputStreamReader(connection.inputStream))
                     val response = StringBuilder()
@@ -76,6 +95,7 @@ class MojangAPI {
                     }
                     reader.close()
                     val json = Json { ignoreUnknownKeys = true }
+                    Logger.dev("Mojang API Response: $response")
                     return json.decodeFromString<SuccessfulResponse>(response.toString())
                 }
                 HttpURLConnection.HTTP_NOT_FOUND -> {
@@ -90,19 +110,32 @@ class MojangAPI {
                     return json.decodeFromString<ErrorResponse>(response.toString())
                 }
                 else -> {
-                    Logger.Companion.error("Unexpected response code: $responseCode")
+                    Logger.error("Unexpected response code: $responseCode")
                     return ErrorResponse(url, "Unexpected response code: $responseCode")
                 }
             }
         } catch (e: Exception) {
-            Logger.Companion.error("Failed to connect to Mojang API: ${e.message}")
+            Logger.error("Failed to connect to Mojang API: ${e.message}")
             return ErrorResponse(url, e.message ?: "Unknown error")
         }
     }
 
     sealed class MojangResponse
-    @Serializable
-    data class SuccessfulResponse(val id: String, val name: String) : MojangResponse()
+//    @Serializable
+//    data class SuccessfulResponse(val id: String, val name: String) : MojangResponse()
     @Serializable
     data class ErrorResponse(val path: String, val error: String, val errorMessage: String? = null) : MojangResponse()
+    @Serializable
+    data class SuccessfulResponse(
+        val id: String,
+        val name: String,
+        val properties: List<Property>
+    ) : MojangResponse() {
+        @Serializable
+        data class Property(
+            val name: String,
+            val value: String,
+            val signature: String? = null
+        )
+    }
 }

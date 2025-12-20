@@ -113,6 +113,14 @@ enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
         )
     ),
 
+    COMMAND_MODERATION_MODGUI(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.modgui",
+            "Allows the use of the /modgui command",
+            default = false
+        )
+    ),
+
     MODERATION_BROADCAST(
         PermissionManager.YVtilsPermission(
             "${PermissionsData.permissionBase}.broadcast",

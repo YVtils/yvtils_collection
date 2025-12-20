@@ -58,7 +58,7 @@ object StatsPusher {
 
     // Hardcoded configuration - not user-configurable
     private const val API_ENDPOINT = "https://api.yvtils.net/stats"
-    private const val PUSH_INTERVAL_SECONDS = 600 // 10 minutes
+    private const val PUSH_INTERVAL_SECONDS = 3600 // 1 hour
     private const val HTTP_TIMEOUT_SECONDS = 30
     private const val MAX_CONSECUTIVE_FAILURES = 5
 
@@ -322,7 +322,7 @@ object StatsPusher {
     private fun buildPayload(): PushPayload {
         val serverVersion = try {
             Bukkit.getVersion()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             "Unknown"
         }
 
@@ -332,24 +332,24 @@ object StatsPusher {
             } else {
                 null
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             null
         }
 
         val pluginVersion = try {
             Data.yvtilsVersion
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             "Unknown"
         }
 
         val region = try {
             val regionEnabled = ConfigFile.getBoolean("metadata.region") == true
             if (regionEnabled) {
-                ConfigFile.getString("metadata.region_value")
+                ConfigFile.getString("metadata.region_value") ?: null
             } else {
                 null
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             null
         }
 
@@ -435,7 +435,7 @@ object StatsPusher {
                 return try {
                     val response = json.decodeFromString<PushResponse>(responseBody)
                     PushResult.Success(response)
-                } catch (_: Exception) {
+                } catch (e: Exception) {
                     // If we can't parse the response but got a 2xx, consider it a success
                     PushResult.Success(PushResponse(success = true, message = "OK"))
                 }
@@ -443,13 +443,13 @@ object StatsPusher {
                 // Read error response
                 val errorBody = try {
                     connection.errorStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() } ?: "No error body"
-                } catch (_: Exception) {
+                } catch (e: Exception) {
                     "Could not read error body"
                 }
                 
                 return PushResult.Error("HTTP $responseCode: $errorBody", responseCode)
             }
-        } catch (_: java.net.SocketTimeoutException) {
+        } catch (e: java.net.SocketTimeoutException) {
             return PushResult.Error("Connection timed out")
         } catch (e: java.net.UnknownHostException) {
             return PushResult.Error("Could not resolve host: ${e.message}")

@@ -12,6 +12,7 @@
 
 package yv.tils.gui
 
+import yv.tils.gui.core.GuiManager
 import yv.tils.gui.language.RegisterStrings
 import yv.tils.gui.listeners.AsyncChat
 import yv.tils.gui.listeners.InventoryClickListener
@@ -48,5 +49,8 @@ class GUIYVtils : Data.YVtilsModule {
         pm.registerEvents(AsyncChat(), plugin)
     }
 
-    override fun disablePlugin() {}
+    override fun disablePlugin() {
+        // Clean up all active GUIs
+        GuiManager.clearAll()
+    }
 }
