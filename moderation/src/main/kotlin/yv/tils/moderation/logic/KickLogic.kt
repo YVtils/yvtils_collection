@@ -19,10 +19,10 @@ import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
-import yv.tils.moderation.utils.StyleReason
 import yv.tils.moderation.utils.TargetUtils
 import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.message.MessageUtils
 
 class KickLogic {
     /**
@@ -59,6 +59,8 @@ class KickLogic {
             }
 
             if (!TargetUtils.isTargetOnline(offlinePlayer)) {
+                if (silent) return
+
                 sender.sendMessage(LanguageHandler.getMessage("command.moderation.player.not.online", sender))
                 return
             }
@@ -69,8 +71,15 @@ class KickLogic {
                 return
             }
 
-            val styledReason = StyleReason.styleReason(reason)
-            player.kick(styledReason, PlayerKickEvent.Cause.KICK_COMMAND)
+            val styledReason = MessageUtils.convert(
+                """
+                    ${LanguageHandler.getRawMessage("moderation.target.disconnected", player)}
+                    
+                    <white>$reason
+                """.trimIndent()
+            )
+
+            player.kick(styledReason, PlayerKickEvent.Cause.PLUGIN)
 
             PlayerUtils.broadcastAction(
                 target,

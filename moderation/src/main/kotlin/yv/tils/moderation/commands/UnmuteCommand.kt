@@ -41,7 +41,7 @@ class UnmuteCommand {
             greedyStringArgument("reason", true) {
                 anyExecutor { sender, args ->
                     val target = args["target"] as List<PlayerProfile>
-                    val reason = (args["reason"] ?: LanguageHandler.getMessage("moderation.placeholder.reason.none")) as String
+                    val reason = (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
 
                     UnbanLogic().triggerUnban(target, reason, sender)
                 }

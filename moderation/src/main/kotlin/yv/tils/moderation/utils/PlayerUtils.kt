@@ -28,7 +28,7 @@ class PlayerUtils {
             reason: String,
             sender: CommandSender,
             silent: Boolean,
-            duration: Int? = null,
+            duration: String? = null,
             action: ModerationAction = ModerationAction.OTHER,
             offlineTarget: OfflinePlayer? = null,
         ) {
@@ -42,7 +42,8 @@ class PlayerUtils {
 
             // Send message to all players with specific permission
             LanguageBroadcast.broadcast(
-                langKey, Permissions.MODERATION_BROADCAST.permission.name,
+                langKey,
+                Permissions.MODERATION_BROADCAST.permission.name,
                 mapOf(
                     "target" to target.name!!,
                     "sender" to sender.name,
@@ -53,9 +54,12 @@ class PlayerUtils {
             )
 
             // Send message to console
-            Logger.info(LanguageHandler.getMessage(
-                langKey.replace("broadcast", "target"),
+            Logger.info(LanguageHandler.getCleanMessage(
+                langKey,
+                null,
                 mapOf(
+                    "target" to target.name!!,
+                    "sender" to sender.name,
                     "reason" to reason,
                     "duration" to (duration ?: LanguageHandler.getMessage("moderation.placeholder.duration.none")),
                     "action" to LanguageHandler.getRawMessage(action.langString)
@@ -63,34 +67,33 @@ class PlayerUtils {
             ))
 
             // Send message to target if online
-            if (offlineTarget != null) {
-                if (offlineTarget.isOnline) {
-                    offlineTarget.player?.sendMessage(
-                        LanguageHandler.getMessage(
-                            langKey,
-                            mapOf(
-                                "target" to target.name!!,
-                                "sender" to sender.name,
-                                "reason" to reason,
-                                "duration" to (duration
-                                    ?: LanguageHandler.getMessage("moderation.placeholder.duration.none")),
-                                "action" to LanguageHandler.getRawMessage(action.langString)
-                            )
-                        )
+            if (offlineTarget == null) return
+            if (!offlineTarget.isOnline) return
+            offlineTarget.player?.sendMessage(
+                LanguageHandler.getMessage(
+                    langKey.replace("broadcast", "target"),
+                    offlineTarget.uniqueId,
+                    mapOf(
+                        "target" to target.name!!,
+                        "sender" to sender.name,
+                        "reason" to reason,
+                        "duration" to (duration
+                            ?: LanguageHandler.getMessage("moderation.placeholder.duration.none")),
+                        "action" to LanguageHandler.getRawMessage(action.langString)
                     )
-                }
-            }
+                )
+            )
         }
 
         // TODO: Test this method
         fun logicError(sender: CommandSender, errorKey: Exception, extraInformation: Exception? = null) {
             val senderIsConsole = sender !is Player
             if (senderIsConsole) {
-                Logger.error(errorKey.message!! + (if (extraInformation != null) "\n\n | $extraInformation" else ""))
+                Logger.error(errorKey.message!! + (if (extraInformation != null) "\n${extraInformation.message}" else ""))
             }
             if (!senderIsConsole) {
-                sender.sendMessage(errorKey.message!! + (if (extraInformation != null) "\n\n | $extraInformation" else ""))
-                Logger.error(errorKey.message!! + (if (extraInformation != null) "\n\n | $extraInformation" else ""))
+                sender.sendMessage(errorKey.message!! + (if (extraInformation != null) "\n${extraInformation.message}" else ""))
+                Logger.error(errorKey.message!! + (if (extraInformation != null) "\n${extraInformation.message}" else ""))
             }
         }
     }

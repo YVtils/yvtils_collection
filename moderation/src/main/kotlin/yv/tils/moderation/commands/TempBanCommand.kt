@@ -18,6 +18,7 @@ import dev.jorel.commandapi.kotlindsl.*
 import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.TempBanLogic
+import yv.tils.utils.logger.Logger
 
 class TempBanCommand {
     val command = commandTree("tempban") {
@@ -34,7 +35,7 @@ class TempBanCommand {
                             val target = args["target"] as List<PlayerProfile>
                             val duration = args["duration"] as Int
                             val unit = args["unit"] as String
-                            val reason = (args["reason"] ?: LanguageHandler.getMessage("moderation.placeholder.reason.none")) as String
+                            val reason = (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
 
                             TempBanLogic().triggerTempBan(target, reason, duration, unit, sender)
                         }

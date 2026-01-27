@@ -98,7 +98,7 @@ class TempMuteLogic {
                 reason,
                 sender,
                 silent,
-                duration,
+                duration = "$duration $unit",
                 action = ModerationAction.TEMPMUTE
             )
         } catch (e: Exception) {

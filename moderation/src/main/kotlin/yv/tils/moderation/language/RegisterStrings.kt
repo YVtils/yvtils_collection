@@ -22,32 +22,32 @@ class RegisterStrings {
         registerNewString(
             "command.moderation.broadcast.message.permanent",
             mapOf(
-                FileTypes.EN to "<prefix> <${Colors.TERTIARY}><target> <white>has been <action> for <${Colors.TERTIARY}><reason><white> by <${Colors.TERTIARY}><sender><white>.",
-                FileTypes.DE to "<prefix> <${Colors.TERTIARY}><target> <white>wurde von <${Colors.TERTIARY}><sender><white> wegen <${Colors.TERTIARY}><reason><white> <action>.",
+                FileTypes.EN to "<prefix> <${Colors.TERTIARY.color}><target> <white>has been <action><white> for <${Colors.TERTIARY.color}><reason><white> by <${Colors.TERTIARY.color}><sender><white>.",
+                FileTypes.DE to "<prefix> <${Colors.TERTIARY.color}><target> <white>wurde von <${Colors.TERTIARY.color}><sender><white> wegen <${Colors.TERTIARY.color}><reason><white> <action><white>.",
             )
         )
 
         registerNewString(
             "command.moderation.broadcast.message.temporary",
             mapOf(
-                FileTypes.EN to "<prefix> <${Colors.TERTIARY}><target> <white>has been <action> for <${Colors.TERTIARY}><reason><white> for <${Colors.TERTIARY}><duration><white> by <${Colors.TERTIARY}><sender><white>.",
-                FileTypes.DE to "<prefix> <${Colors.TERTIARY}><target> <white>wurde von <${Colors.TERTIARY}><sender><white> wegen <${Colors.TERTIARY}><reason><white> für <${Colors.TERTIARY}><duration><white> <action>.",
+                FileTypes.EN to "<prefix> <${Colors.TERTIARY.color}><target> <white>has been <action><white> for <${Colors.TERTIARY.color}><reason><white> for <${Colors.TERTIARY.color}><duration><white> by <${Colors.TERTIARY.color}><sender><white>.",
+                FileTypes.DE to "<prefix> <${Colors.TERTIARY.color}><target> <white>wurde von <${Colors.TERTIARY.color}><sender><white> wegen <${Colors.TERTIARY.color}><reason><white> für <${Colors.TERTIARY.color}><duration><white> <action><white>.",
             )
         )
 
         registerNewString(
             "command.moderation.target.message.permanent",
             mapOf(
-                FileTypes.EN to "<prefix> <white>You have been <action> for <${Colors.TERTIARY}><reason><white>.",
-                FileTypes.DE to "<prefix> <white>Du wurdest wegen <${Colors.TERTIARY}><reason><white> <action>.",
+                FileTypes.EN to "<prefix> <white>You have been <action><white> for <${Colors.TERTIARY.color}><reason><white>.",
+                FileTypes.DE to "<prefix> <white>Du wurdest wegen <${Colors.TERTIARY.color}><reason><white> <action><white>.",
             )
         )
 
         registerNewString(
             "command.moderation.target.message.temporary",
             mapOf(
-                FileTypes.EN to "<prefix> <white>You have been <action> for <${Colors.TERTIARY}><reason><white> for <${Colors.TERTIARY}><duration><white>.",
-                FileTypes.DE to "<prefix> <white>Du wurdest wegen <${Colors.TERTIARY}><reason><white> für <${Colors.TERTIARY}><duration><white> <action>.",
+                FileTypes.EN to "<prefix> <white>You have been <action> for <${Colors.TERTIARY.color}><reason><white> for <${Colors.TERTIARY.color}><duration><white>.",
+                FileTypes.DE to "<prefix> <white>Du wurdest wegen <${Colors.TERTIARY.color}><reason><white> für <${Colors.TERTIARY.color}><duration><white> <action>.",
             )
         )
 
@@ -180,6 +180,14 @@ class RegisterStrings {
         )
 
         registerNewString(
+            "moderation.placeholder.duration.expires",
+            mapOf(
+                FileTypes.EN to "Expires in <yellow><duration><white>",
+                FileTypes.DE to "Läuft ab in <yellow><duration><white>",
+            )
+        )
+
+        registerNewString(
             "moderation.target.muted.chat.player",
             mapOf(
                 FileTypes.EN to "<prefix> <gray>You are muted! Reason: <dark_gray><reason><gray>, Duration: <dark_gray><duration>",
@@ -192,6 +200,14 @@ class RegisterStrings {
             mapOf(
                 FileTypes.EN to "<prefix> <gray><player> tried to chat while muted. Message: <dark_gray><message><gray>; Reason: <dark_gray><reason><gray>; Duration: <dark_gray><duration>",
                 FileTypes.DE to "<prefix> <gray><player> hat versucht zu schreiben, während er gemutet ist. Nachricht: <dark_gray><message><gray>; Grund: <dark_gray><reason><gray>; Dauer: <dark_gray><duration>",
+            )
+        )
+
+        registerNewString(
+            "moderation.target.disconnected",
+            mapOf(
+                FileTypes.EN to "<red>You have been disconnected from the server",
+                FileTypes.DE to "<red>Du wurdest vom Server getrennt",
             )
         )
     }

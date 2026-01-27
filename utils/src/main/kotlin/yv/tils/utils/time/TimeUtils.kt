@@ -69,4 +69,28 @@ class TimeUtils {
 
         return time
     }
+
+    /**
+     * Format duration from milliseconds to human-readable string
+     * @param durationMillis [Long] duration in milliseconds
+     * @return [String] formatted duration
+     */
+    fun formatDuration(durationMillis: Long): String {
+        val seconds = (durationMillis / 1000) % 60
+        val minutes = (durationMillis / (1000 * 60) % 60)
+        val hours = (durationMillis / (1000 * 60 * 60) % 24)
+        val days = (durationMillis / (1000 * 60 * 60 * 24))
+
+        val parts = mutableListOf<String>()
+        if (days > 0) parts.add("$days d")
+        if (hours > 0) parts.add("$hours h")
+        if (minutes > 0) parts.add("$minutes m")
+        if (seconds > 0) parts.add("$seconds s")
+
+        return if (parts.isEmpty()) {
+            "0 s"
+        } else {
+            parts.joinToString(" ")
+        }
+    }
 }

@@ -89,7 +89,12 @@ class TempBanLogic {
 
             KickLogic().triggerKick(
                 listOf(target),
-                reason,
+                "$reason<newline>" +
+                        LanguageHandler.getRawMessage(
+                            "moderation.placeholder.duration.expires",
+                            sender,
+                            mapOf("duration" to TimeUtils().formatDuration(parsedTime.timeInMillis))
+                        ),
                 sender,
                 true
             )
@@ -99,7 +104,7 @@ class TempBanLogic {
                 reason,
                 sender,
                 silent,
-                duration = duration,
+                duration = "$duration $unit",
                 action = ModerationAction.TEMPBAN
             )
         } catch (e: Exception) {
