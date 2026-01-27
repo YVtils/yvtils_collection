@@ -72,7 +72,7 @@ class ModerationYVtils : Data.YVtilsModule {
 
         WarnCommand()
 
-        ModGUICommand()
+        //ModGUICommand()
     }
 
     private fun registerListeners() {
