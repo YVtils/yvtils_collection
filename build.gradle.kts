@@ -16,7 +16,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "2.3.0" apply false
     kotlin("plugin.serialization") version "2.3.0" apply false
-    id("com.gradleup.shadow") version "9.3.0" apply false
+    id("com.gradleup.shadow") version "9.3.1" apply false
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19" apply false
     id("xyz.jpenilla.run-paper") version "3.0.2" apply false
 }
@@ -53,7 +53,7 @@ subprojects {
 
         // Other
         add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-        add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+        add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     }
 
     tasks.withType<KotlinCompile> {
