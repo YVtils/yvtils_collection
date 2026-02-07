@@ -88,23 +88,6 @@ class Logger {
         fun error(message: String, throwable: Throwable) {
             logger?.error(message, throwable)
         }
-
-        @Deprecated("Use own log function with Level enum")
-        fun log(level: Level, message: Component) {
-            when (level) {
-                Level.INFO -> info(message)
-                Level.WARN -> warn(message)
-                Level.ERROR -> error(message)
-                Level.DEBUG -> debug(message)
-            }
-        }
-
-        enum class Level {
-            INFO,
-            WARN,
-            ERROR,
-            DEBUG
-        }
     }
 }
 

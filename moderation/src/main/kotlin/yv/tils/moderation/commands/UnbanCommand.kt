@@ -18,12 +18,10 @@ import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.asyncPlayerProfileArgument
 import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.greedyStringArgument
-import dev.jorel.commandapi.kotlindsl.playerProfileArgument
 import org.bukkit.OfflinePlayer
 import yv.tils.common.other.AsyncActionAnnounce
 import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
-import yv.tils.moderation.logic.BanLogic
 import yv.tils.moderation.logic.UnbanLogic
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
@@ -58,6 +56,7 @@ class UnbanCommand {
 
             greedyStringArgument("reason", true) {
                 anyExecutor { sender, args ->
+                    @Suppress("UNCHECKED_CAST")
                     val target = args["target"] as CompletableFuture<List<PlayerProfile>>
                     val reason = (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
 

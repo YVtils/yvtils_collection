@@ -12,18 +12,11 @@
 
 package yv.tils.moderation.commands
 
-import com.destroystokyo.paper.profile.PlayerProfile
 import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.asyncPlayerProfileArgument
 import dev.jorel.commandapi.kotlindsl.commandTree
-import dev.jorel.commandapi.kotlindsl.playerProfileArgument
-import yv.tils.common.other.AsyncActionAnnounce
-import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.gui.PlayerGUI
-import yv.tils.moderation.logic.BanLogic
-import yv.tils.utils.logger.Logger
-import java.util.concurrent.CompletableFuture
 
 class ModGUICommand {
     val command = commandTree("modgui") {

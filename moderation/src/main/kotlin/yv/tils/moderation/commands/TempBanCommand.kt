@@ -18,7 +18,6 @@ import dev.jorel.commandapi.kotlindsl.*
 import yv.tils.common.other.AsyncActionAnnounce
 import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
-import yv.tils.moderation.logic.BanLogic
 import yv.tils.moderation.logic.TempBanLogic
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.CompletableFuture
@@ -35,6 +34,7 @@ class TempBanCommand {
 
                     greedyStringArgument("reason", true) {
                         anyExecutor { sender, args ->
+                            @Suppress("UNCHECKED_CAST")
                             val target = args["target"] as CompletableFuture<List<PlayerProfile>>
                             val duration = args["duration"] as Int
                             val unit = args["unit"] as String

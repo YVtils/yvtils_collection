@@ -21,7 +21,6 @@ import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
-import yv.tils.utils.logger.Logger
 import yv.tils.utils.time.TimeUtils
 
 class TempBanLogic {

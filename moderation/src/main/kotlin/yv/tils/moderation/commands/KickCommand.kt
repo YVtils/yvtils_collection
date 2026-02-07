@@ -32,6 +32,7 @@ class KickCommand {
         asyncPlayerProfileArgument("target") {
             greedyStringArgument("reason", true) {
                 anyExecutor { sender, args ->
+                    @Suppress("UNCHECKED_CAST")
                     val target = args["target"] as CompletableFuture<List<PlayerProfile>>
                     val reason = (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
 

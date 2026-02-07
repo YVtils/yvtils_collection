@@ -13,12 +13,14 @@
 package yv.tils.moderation.commands
 
 import com.destroystokyo.paper.profile.PlayerProfile
-import dev.jorel.commandapi.kotlindsl.*
+import dev.jorel.commandapi.kotlindsl.anyExecutor
+import dev.jorel.commandapi.kotlindsl.asyncPlayerProfileArgument
+import dev.jorel.commandapi.kotlindsl.commandTree
+import dev.jorel.commandapi.kotlindsl.greedyStringArgument
 import yv.tils.common.other.AsyncActionAnnounce
 import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.BanLogic
-import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.CompletableFuture
 
@@ -30,6 +32,7 @@ class BanCommand {
         asyncPlayerProfileArgument("target") {
             greedyStringArgument("reason", true) {
                 anyExecutor { sender, args ->
+                    @Suppress("UNCHECKED_CAST")
                     val target = args["target"] as CompletableFuture<List<PlayerProfile>>
                     val reason = (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
 

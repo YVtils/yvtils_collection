@@ -58,7 +58,7 @@ class CommonYVtils : Data.YVtilsModule {
             2 to listOf(MessageUtils.convert(modules)),
         )
         val log = printLogWithSplits(data)
-        log.forEach { Logger.log(Logger.Companion.Level.INFO, it) }
+        log.forEach { Logger.info(it) }
 
         if (! checkDependencies()) {
             Data.instance.server.pluginManager.disablePlugin(Data.instance)
@@ -86,7 +86,7 @@ class CommonYVtils : Data.YVtilsModule {
         )
 
         val log = printLogWithSplits(data)
-        log.forEach { Logger.log(Logger.Companion.Level.INFO, it) }
+        log.forEach { Logger.info(it) }
     }
 
     private fun loadConfigs() {
