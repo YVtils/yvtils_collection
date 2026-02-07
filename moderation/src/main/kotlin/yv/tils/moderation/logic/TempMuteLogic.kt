@@ -102,7 +102,8 @@ class TempMuteLogic {
                 sender,
                 silent,
                 duration = "$duration $unit",
-                action = ModerationAction.TEMPMUTE
+                action = ModerationAction.TEMPMUTE,
+                offlineTarget = offlinePlayer
             )
         } catch (e: Exception) {
             PlayerUtils.logicError(sender, Exceptions.ModerationActionException, e)

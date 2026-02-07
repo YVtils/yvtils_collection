@@ -13,7 +13,6 @@
 package yv.tils.config.language
 
 import yv.tils.utils.data.Data
-import yv.tils.utils.logger.Logger
 
 class LanguageBroadcast {
     companion object {
@@ -29,9 +28,7 @@ class LanguageBroadcast {
 
         fun broadcast(key: String, permission: String, params: Map<String, Any> = emptyMap()) {
             for (p in Data.instance.server.onlinePlayers) {
-                Logger.dev("Checking player ${p.name} for permission $permission")
                 if (p.hasPermission(permission)) {
-                    Logger.dev("Player ${p.name} has permission $permission, sending message")
                     p.sendMessage(
                         LanguageHandler.getMessage(
                             key,
@@ -39,8 +36,6 @@ class LanguageBroadcast {
                             params
                         )
                     )
-                } else {
-                    Logger.dev("Player ${p.name} does not have permission $permission, skipping")
                 }
             }
         }

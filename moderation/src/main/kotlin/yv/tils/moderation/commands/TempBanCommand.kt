@@ -38,12 +38,14 @@ class TempBanCommand {
                             val unit = args["unit"] as String
                             val reason = (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
 
-                            AsyncActionAnnounce.announceAction(sender)
+                            val announceTask = AsyncActionAnnounce.announceAction(sender)
 
                             target.thenAccept { offlinePlayers ->
+                                announceTask.cancel()
                                 TempBanLogic().triggerTempBan(offlinePlayers, reason, duration, unit, sender)
                             }.exceptionally { throwable ->
-                                AsyncActionAnnounce.announceError(sender)
+                                announceTask.cancel()
+                                AsyncActionAnnounce.announcePlayerError(sender)
                                 Logger.error("Failed to fetch player profiles for the command")
                                 Logger.debug("Error details", throwable, DEBUGLEVEL.DETAILED)
                                 null

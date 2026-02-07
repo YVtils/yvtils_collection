@@ -95,7 +95,6 @@ class MojangAPI {
                     }
                     reader.close()
                     val json = Json { ignoreUnknownKeys = true }
-                    Logger.dev("Mojang API Response: $response")
                     return json.decodeFromString<SuccessfulResponse>(response.toString())
                 }
                 HttpURLConnection.HTTP_NOT_FOUND -> {

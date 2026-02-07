@@ -14,7 +14,6 @@ package yv.tils.moderation.language
 
 import yv.tils.config.language.BuildLanguage
 import yv.tils.config.language.FileTypes
-import yv.tils.config.language.LanguageProvider.Companion.registerNewString
 import yv.tils.utils.colors.Colors
 
 class RegisterStrings {
@@ -46,7 +45,7 @@ class RegisterStrings {
         registerNewString(
             "command.moderation.target.message.temporary",
             mapOf(
-                FileTypes.EN to "<prefix> <white>You have been <action> for <${Colors.TERTIARY.color}><reason><white> for <${Colors.TERTIARY.color}><duration><white>.",
+                FileTypes.EN to "<prefix> <white>You have been <action><white> for <${Colors.TERTIARY.color}><reason><white> for <${Colors.TERTIARY.color}><duration><white>.",
                 FileTypes.DE to "<prefix> <white>Du wurdest wegen <${Colors.TERTIARY.color}><reason><white> für <${Colors.TERTIARY.color}><duration><white> <action>.",
             )
         )

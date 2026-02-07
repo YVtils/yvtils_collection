@@ -13,18 +13,18 @@
 package yv.tils.moderation.utils
 
 import com.destroystokyo.paper.profile.PlayerProfile
-import dev.jorel.commandapi.commandsenders.BukkitPlayer
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
-import org.jline.utils.Log
 import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.configs.saveFile.MuteSave
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.data.Exceptions.Companion.TargetToOfflinePlayerParseException
 import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
-import java.util.Date
+import yv.tils.utils.message.MessageUtils
+import yv.tils.utils.time.TimeUtils
 
 class TargetUtils {
     companion object {
@@ -84,15 +84,15 @@ class TargetUtils {
         }
     }
 
-    fun sendMutedMessage(player: Player, muteData: MuteSave) {
+    fun sendMutedMessage(player: Player, muteData: MuteSave, message: Component) {
         val reason = muteData.reason
         val expires = if (muteData.expires == "null") {
             "Never"
         } else {
             val expiresLong = muteData.expires.toLong()
-            val expiresDate = Date(expiresLong)
-            expiresDate.toString()
+            TimeUtils().formatDuration(expiresLong-System.currentTimeMillis())
         }
+        val sMessage = MessageUtils.stripChatMessage(message)
 
         player.sendMessage(LanguageHandler.getMessage(
             "moderation.target.muted.chat.player",
@@ -109,7 +109,9 @@ class TargetUtils {
                 player.uniqueId,
                 mapOf(
                     "reason" to reason,
-                    "duration" to expires
+                    "duration" to expires,
+                    "player" to player.name,
+                    "message" to sMessage
                 )
             ))
     }

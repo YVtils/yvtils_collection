@@ -23,6 +23,7 @@ class AsyncChat : Listener {
     @EventHandler
     fun onEvent(e: AsyncChatEvent) {
         val player = e.player
+        val message = e.message()
 
         if (!TargetUtils.isTargetMuted(player)) return
 
@@ -33,6 +34,6 @@ class AsyncChat : Listener {
             return
         }
 
-        TargetUtils().sendMutedMessage(player, muteData)
+        TargetUtils().sendMutedMessage(player, muteData, message)
     }
 }

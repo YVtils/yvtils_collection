@@ -37,7 +37,7 @@ class UnbanCommand {
         asyncPlayerProfileArgument("target") {
             replaceSuggestions(ArgumentSuggestions.stringsAsync { info ->
                 CompletableFuture.supplyAsync {
-                    info.sender.sendMessage(LanguageHandler.getMessage(yv.tils.common.language.LangStrings.COMMAND_SUGGESTION_ASYNC_ACTION.key))
+                    val announceTask = AsyncActionAnnounce.announceSuggestion(info.sender)
 
                     val bannedPlayers: MutableSet<OfflinePlayer> = Data.instance.server.bannedPlayers
                     val bannedPlayersNames: MutableList<String> = mutableListOf()
@@ -50,6 +50,7 @@ class UnbanCommand {
                         bannedPlayersNames.add(player.name!!)
                     }
 
+                    announceTask.cancel()
                     val suggestions = bannedPlayersNames.toTypedArray()
                     suggestions
                 }
@@ -61,12 +62,14 @@ class UnbanCommand {
                     val target = args["target"] as CompletableFuture<List<PlayerProfile>>
                     val reason = (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
 
-                    AsyncActionAnnounce.announceAction(sender)
+                    val announceTask = AsyncActionAnnounce.announceAction(sender)
 
                     target.thenAccept { offlinePlayers ->
+                        announceTask.cancel()
                         UnbanLogic().triggerUnban(offlinePlayers, reason, sender)
                     }.exceptionally { throwable ->
-                        AsyncActionAnnounce.announceError(sender)
+                        announceTask.cancel()
+                        AsyncActionAnnounce.announcePlayerError(sender)
                         Logger.error("Failed to fetch player profiles for the command")
                         Logger.debug("Error details", throwable, DEBUGLEVEL.DETAILED)
                         null

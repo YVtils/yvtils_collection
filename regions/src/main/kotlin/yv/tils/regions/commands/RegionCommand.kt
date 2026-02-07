@@ -14,7 +14,6 @@ package yv.tils.regions.commands
 
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
-import dev.jorel.commandapi.arguments.AsyncPlayerProfileArgument
 import dev.jorel.commandapi.arguments.LocationType
 import dev.jorel.commandapi.kotlindsl.*
 import dev.jorel.commandapi.wrappers.Location2D
@@ -23,7 +22,10 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.common.other.AsyncActionAnnounce
 import yv.tils.regions.data.*
-import yv.tils.regions.logic.*
+import yv.tils.regions.logic.FlagLogic
+import yv.tils.regions.logic.InformationalLogic
+import yv.tils.regions.logic.MemberLogic
+import yv.tils.regions.logic.RegionLogic
 import yv.tils.utils.coroutine.CoroutineHandler
 import java.util.concurrent.CompletableFuture
 
@@ -224,9 +226,10 @@ class RegionCommand {
                                 val player = args["yv/tils/player"] as CompletableFuture<OfflinePlayer>
                                 val role = args["role"] as String?
 
-                                AsyncActionAnnounce.announceAction(sender)
+                                val announceTask = AsyncActionAnnounce.announceAction(sender)
 
                                 player.thenAccept { offlinePlayer ->
+                                    announceTask.cancel()
                                     CoroutineHandler.launchTask(
                                         suspend {
                                             MemberLogic.addPlayerToRegion(
@@ -240,6 +243,7 @@ class RegionCommand {
                                         isOnce = true,
                                     )
                                 }.exceptionally { throwable ->
+                                    announceTask.cancel()
                                     val cause = throwable.cause
                                     val rootCause = if (cause is RuntimeException) cause.cause else cause
 
@@ -275,9 +279,10 @@ class RegionCommand {
                             val regionName = args["regionName"] as String
                             val player = args["yv/tils/player"] as CompletableFuture<OfflinePlayer>
 
-                            AsyncActionAnnounce.announceAction(sender)
+                            val announceTask = AsyncActionAnnounce.announceAction(sender)
 
                             player.thenAccept { offlinePlayer ->
+                                announceTask.cancel()
                                 CoroutineHandler.launchTask(
                                     suspend {
                                         MemberLogic.removePlayerFromRegion(
@@ -290,6 +295,7 @@ class RegionCommand {
                                     isOnce = true,
                                 )
                             }.exceptionally { throwable ->
+                                announceTask.cancel()
                                 val cause = throwable.cause
                                 val rootCause = if (cause is RuntimeException) cause.cause else cause
 
@@ -332,9 +338,10 @@ class RegionCommand {
                                 val player = args["yv/tils/player"] as CompletableFuture<OfflinePlayer>
                                 val role = args["role"] as String?
 
-                                AsyncActionAnnounce.announceAction(sender)
+                                val announceTask = AsyncActionAnnounce.announceAction(sender)
 
                                 player.thenAccept { offlinePlayer ->
+                                    announceTask.cancel()
                                     CoroutineHandler.launchTask(
                                         suspend {
                                             MemberLogic.changePlayerRoleInRegion(
@@ -348,6 +355,7 @@ class RegionCommand {
                                         isOnce = true,
                                     )
                                 }.exceptionally { throwable ->
+                                    announceTask.cancel()
                                     val cause = throwable.cause
                                     val rootCause = if (cause is RuntimeException) cause.cause else cause
 

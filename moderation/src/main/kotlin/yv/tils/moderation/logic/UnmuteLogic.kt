@@ -20,7 +20,6 @@ import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
-import yv.tils.utils.logger.Logger
 
 class UnmuteLogic {
     /**
@@ -76,7 +75,8 @@ class UnmuteLogic {
                 reason,
                 sender,
                 silent,
-                action = ModerationAction.UNMUTE
+                action = ModerationAction.UNMUTE,
+                offlineTarget = offlinePlayer
             )
         } catch (e: Exception) {
             PlayerUtils.logicError(sender, Exceptions.ModerationActionException, e)

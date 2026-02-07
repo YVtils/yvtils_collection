@@ -23,6 +23,7 @@ import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.UnmuteLogic
+import yv.tils.moderation.utils.TargetUtils
 import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.CompletableFuture
@@ -35,9 +36,13 @@ class UnmuteCommand {
         asyncPlayerProfileArgument("target") {
             replaceSuggestions(ArgumentSuggestions.stringsAsync { info ->
                 CompletableFuture.supplyAsync {
-                    info.sender.sendMessage(LanguageHandler.getMessage(yv.tils.common.language.LangStrings.COMMAND_SUGGESTION_ASYNC_ACTION.key))
+                    val announceTask = AsyncActionAnnounce.announceSuggestion(info.sender)
 
-                    MuteSaveFile().getAllMutes()
+                    TargetUtils().cleanupMutedPlayers()
+                    val suggestions = MuteSaveFile().getAllMutes()
+
+                    announceTask.cancel()
+                    suggestions
                 }
             })
 
@@ -47,12 +52,14 @@ class UnmuteCommand {
                     val target = args["target"] as CompletableFuture<List<PlayerProfile>>
                     val reason = (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
 
-                    AsyncActionAnnounce.announceAction(sender)
+                    val announceTask = AsyncActionAnnounce.announceAction(sender)
 
                     target.thenAccept { offlinePlayers ->
+                        announceTask.cancel()
                         UnmuteLogic().triggerUnmute(offlinePlayers, reason, sender)
                     }.exceptionally { throwable ->
-                        AsyncActionAnnounce.announceError(sender)
+                        announceTask.cancel()
+                        AsyncActionAnnounce.announcePlayerError(sender)
                         Logger.error("Failed to fetch player profiles for the command")
                         Logger.debug("Error details", throwable, DEBUGLEVEL.DETAILED)
                         null

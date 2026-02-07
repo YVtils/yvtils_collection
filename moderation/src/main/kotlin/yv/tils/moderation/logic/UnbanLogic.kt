@@ -21,8 +21,6 @@ import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
-import yv.tils.utils.logger.Logger
-import java.util.Date
 
 class UnbanLogic {
     /**
@@ -67,10 +65,7 @@ class UnbanLogic {
             }
 
             try {
-                val date = Date()
-                date.time = 0L
-
-                Bukkit.getBanList(BanListType.PROFILE).addBan(target, reason, date, sender.name)
+                Bukkit.getBanList(BanListType.PROFILE).pardon(target)
             } catch (e: IllegalArgumentException) {
                 PlayerUtils.logicError(sender, Exceptions.PlayerProfileToOfflinePlayerParseException, e)
                 return

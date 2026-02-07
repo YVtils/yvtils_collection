@@ -36,7 +36,7 @@ class ModGUICommand {
 //                target.thenAccept { offlinePlayers ->
 //                    PlayerGUI().openGUI(sender)
 //            }.exceptionally { throwable ->
-//                AsyncActionAnnounce.announceError(sender)
+//                AsyncActionAnnounce.announcePlayerError(sender)
 //                Logger.error("Failed to fetch player profiles for the command")
 //                Logger.debug("Error details", throwable, DEBUGLEVEL.DETAILED)
 //                null

@@ -23,7 +23,6 @@ import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
 import yv.tils.utils.data.UUID
-import yv.tils.utils.logger.Logger
 
 class WarnLogic {
     /**
@@ -87,7 +86,8 @@ class WarnLogic {
                 reason,
                 sender,
                 silent,
-                action = ModerationAction.WARN
+                action = ModerationAction.WARN,
+                offlineTarget = offlinePlayer
             )
         } catch (e: Exception) {
             PlayerUtils.logicError(sender, Exceptions.ModerationActionException, e)
