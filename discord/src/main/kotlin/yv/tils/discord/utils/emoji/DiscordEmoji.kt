@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -34,7 +34,7 @@ class DiscordEmoji {
      * @throws RuntimeException if the emoji cleanup fails.
      */
     fun setPersistentEmojis() {
-        val emojis = AppLogic.Companion.jda.retrieveApplicationEmojis().complete()
+        val emojis = AppLogic.jda.retrieveApplicationEmojis().complete()
         val emojiCount = emojis.count { it.name.startsWith("yv_") }
 
         try {
@@ -55,7 +55,7 @@ class DiscordEmoji {
      * It retrieves all emojis and adds those that start with "yv_" to the playerEmojis map.
      */
     fun loadPersistentEmojis() {
-        val emojis = AppLogic.Companion.jda.retrieveApplicationEmojis().complete()
+        val emojis = AppLogic.jda.retrieveApplicationEmojis().complete()
         for (emoji in emojis) {
             if (emoji.name.startsWith("yv_")) {
                 playerEmojis[emoji.name.substring(3)] = emoji.idLong
@@ -157,7 +157,7 @@ class DiscordEmoji {
      */
     private fun removeAppEmoji(emojiId: String) {
         try {
-            AppLogic.Companion.jda.retrieveApplicationEmojiById(emojiId).queue { emoji ->
+            AppLogic.jda.retrieveApplicationEmojiById(emojiId).queue { emoji ->
                 emoji.delete().queue()
             }
         } catch (e: Exception) {

@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -23,8 +23,8 @@ class VersionUtils {
     }
 
     fun loadServerVersion() {
-        serverVersion = Data.Companion.instance.server.minecraftVersion
-        isViaVersion = Data.Companion.instance.server.pluginManager.getPlugin("ViaVersion") != null
+        serverVersion = Data.instance.server.minecraftVersion
+        isViaVersion = Data.instance.server.pluginManager.getPlugin("ViaVersion") != null
 
         Logger.debug("Server is running on version: $serverVersion${if (isViaVersion) " with ViaVersion" else ""}")
     }
