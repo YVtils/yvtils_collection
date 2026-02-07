@@ -12,20 +12,41 @@
 
 package yv.tils.moderation.commands
 
+import com.destroystokyo.paper.profile.PlayerProfile
 import dev.jorel.commandapi.kotlindsl.anyExecutor
+import dev.jorel.commandapi.kotlindsl.asyncPlayerProfileArgument
 import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.playerProfileArgument
+import yv.tils.common.other.AsyncActionAnnounce
+import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.gui.PlayerGUI
+import yv.tils.moderation.logic.BanLogic
+import yv.tils.utils.logger.Logger
+import java.util.concurrent.CompletableFuture
 
 class ModGUICommand {
     val command = commandTree("modgui") {
         withPermission(Permissions.COMMAND_MODERATION_MODGUI.permission.name)
         withUsage("modgui [target]")
 
-        playerProfileArgument("target", true) {
-            anyExecutor { sender, arguments ->
+        asyncPlayerProfileArgument("target", true) {
+            anyExecutor { sender, args ->
                 PlayerGUI().openGUI(sender)
+
+//                val target = args["target"] as CompletableFuture<List<PlayerProfile>>
+//                val reason =
+//                    (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
+//
+//                AsyncActionAnnounce.announceAction(sender)
+//
+//                target.thenAccept { offlinePlayers ->
+//                    PlayerGUI().openGUI(sender)
+//                }.exceptionally { throwable ->
+//                    AsyncActionAnnounce.announceError(sender)
+//                    Logger.error("Failed to fetch player profiles for ban command", throwable)
+//                    null
+//                }
             }
         }
     }

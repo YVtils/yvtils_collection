@@ -26,5 +26,14 @@ class AsyncActionAnnounce {
                 )
             )
         }
+
+        fun announceError(sender: CommandSender) {
+            sender.sendMessage(
+                LanguageHandler.getMessage(
+                    LangStrings.COMMAND_EXECUTOR_ASYNC_ERROR.key,
+                    sender,
+                )
+            )
+        }
     }
 }

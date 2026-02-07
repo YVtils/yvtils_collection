@@ -15,29 +15,40 @@ package yv.tils.moderation.commands
 import com.destroystokyo.paper.profile.PlayerProfile
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
+import yv.tils.common.other.AsyncActionAnnounce
 import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
+import yv.tils.moderation.logic.BanLogic
 import yv.tils.moderation.logic.TempBanLogic
 import yv.tils.utils.logger.Logger
+import java.util.concurrent.CompletableFuture
 
 class TempBanCommand {
     val command = commandTree("tempban") {
         withPermission(Permissions.COMMAND_MODERATION_TEMPBAN.permission.name)
         withUsage("tempban <player> <duration> <unit> [reason]")
 
-        playerProfileArgument("target") {
+        asyncPlayerProfileArgument("target") {
             integerArgument("duration") {
                 textArgument("unit") {
                     replaceSuggestions(ArgumentSuggestions.strings("s", "m", "h", "d", "w"))
 
                     greedyStringArgument("reason", true) {
                         anyExecutor { sender, args ->
-                            val target = args["target"] as List<PlayerProfile>
+                            val target = args["target"] as CompletableFuture<List<PlayerProfile>>
                             val duration = args["duration"] as Int
                             val unit = args["unit"] as String
                             val reason = (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
 
-                            TempBanLogic().triggerTempBan(target, reason, duration, unit, sender)
+                            AsyncActionAnnounce.announceAction(sender)
+
+                            target.thenAccept { offlinePlayers ->
+                                TempBanLogic().triggerTempBan(offlinePlayers, reason, duration, unit, sender)
+                            }.exceptionally { throwable ->
+                                AsyncActionAnnounce.announceError(sender)
+                                Logger.error("Failed to fetch player profiles for ban command", throwable)
+                                null
+                            }
                         }
                     }
                 }

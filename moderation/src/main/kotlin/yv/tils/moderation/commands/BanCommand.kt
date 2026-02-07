@@ -14,22 +14,34 @@ package yv.tils.moderation.commands
 
 import com.destroystokyo.paper.profile.PlayerProfile
 import dev.jorel.commandapi.kotlindsl.*
+import yv.tils.common.other.AsyncActionAnnounce
 import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.BanLogic
+import yv.tils.utils.coroutine.CoroutineHandler
+import yv.tils.utils.logger.Logger
+import java.util.concurrent.CompletableFuture
 
 class BanCommand {
     val command = commandTree("ban") {
         withPermission(Permissions.COMMAND_MODERATION_BAN.permission.name)
         withUsage("ban <player> [reason]")
 
-        playerProfileArgument("target") {
+        asyncPlayerProfileArgument("target") {
             greedyStringArgument("reason", true) {
                 anyExecutor { sender, args ->
-                    val target = args["target"] as List<PlayerProfile>
+                    val target = args["target"] as CompletableFuture<List<PlayerProfile>>
                     val reason = (args["reason"] ?: LanguageHandler.getRawMessage("moderation.placeholder.reason.none")) as String
 
-                    BanLogic().triggerBan(target, reason, sender)
+                    AsyncActionAnnounce.announceAction(sender)
+
+                    target.thenAccept { offlinePlayers ->
+                        BanLogic().triggerBan(offlinePlayers, reason, sender)
+                    }.exceptionally { throwable ->
+                        AsyncActionAnnounce.announceError(sender)
+                        Logger.error("Failed to fetch player profiles for ban command", throwable)
+                        null
+                    }
                 }
             }
         }
