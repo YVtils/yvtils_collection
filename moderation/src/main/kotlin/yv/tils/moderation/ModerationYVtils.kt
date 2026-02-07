@@ -19,6 +19,7 @@ import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.data.PermissionsData
 import yv.tils.moderation.language.RegisterStrings
 import yv.tils.moderation.listeners.AsyncChat
+import yv.tils.moderation.utils.MojangProfileLogFilter
 import yv.tils.moderation.utils.TargetUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.data.Data
@@ -43,6 +44,7 @@ class ModerationYVtils : Data.YVtilsModule {
     override fun enablePlugin() {
         Data.addModule(MODULE)
 
+        registerLogFilters()
         registerCommands()
         registerListeners()
         registerCoroutines()
@@ -73,6 +75,10 @@ class ModerationYVtils : Data.YVtilsModule {
         WarnCommand()
 
         //ModGUICommand()
+    }
+
+    private fun registerLogFilters() {
+        MojangProfileLogFilter.register()
     }
 
     private fun registerListeners() {
