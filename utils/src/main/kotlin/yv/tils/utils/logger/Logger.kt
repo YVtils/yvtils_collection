@@ -65,7 +65,7 @@ class Logger {
             val levelInt = level.level
 
             if (debugMode && (levelInt == -1 || levelInt <= debugLevel)) {
-                logger?.error("[$level] $message", throwable)
+                logger?.info("[$level] $message", throwable)
             }
         }
 

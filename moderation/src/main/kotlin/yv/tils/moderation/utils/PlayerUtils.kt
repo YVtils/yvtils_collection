@@ -40,12 +40,14 @@ class PlayerUtils {
                 "command.moderation.broadcast.message.temporary"
             }
 
+            val targetName = target.name ?: "Unknown"
+
             // Send message to all players with specific permission
             LanguageBroadcast.broadcast(
                 langKey,
                 Permissions.MODERATION_BROADCAST.permission.name,
                 mapOf(
-                    "target" to target.name!!,
+                    "target" to targetName,
                     "sender" to sender.name,
                     "reason" to reason,
                     "duration" to (duration ?: LanguageHandler.getMessage("moderation.placeholder.duration.none")),
@@ -58,7 +60,7 @@ class PlayerUtils {
                 langKey,
                 null,
                 mapOf(
-                    "target" to target.name!!,
+                    "target" to targetName,
                     "sender" to sender.name,
                     "reason" to reason,
                     "duration" to (duration ?: LanguageHandler.getMessage("moderation.placeholder.duration.none")),
@@ -74,7 +76,7 @@ class PlayerUtils {
                     langKey.replace("broadcast", "target"),
                     offlineTarget.uniqueId,
                     mapOf(
-                        "target" to target.name!!,
+                        "target" to targetName,
                         "sender" to sender.name,
                         "reason" to reason,
                         "duration" to (duration

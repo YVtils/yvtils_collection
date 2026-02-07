@@ -59,7 +59,7 @@ class TimeUtils {
         when (unit) {
             "s" -> time.add(Calendar.SECOND, duration)
             "m" -> time.add(Calendar.MINUTE, duration)
-            "h" -> time.add(Calendar.HOUR, duration)
+            "h" -> time.add(Calendar.HOUR_OF_DAY, duration)
             "d" -> time.add(Calendar.DAY_OF_MONTH, duration)
             "w" -> time.add(Calendar.WEEK_OF_YEAR, duration)
             else -> {

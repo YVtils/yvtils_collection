@@ -88,7 +88,7 @@ class LanguageHandler {
             }
 
         fun getCleanMessage(key: String, uuid: UUID? = null, params: Map<String, Any>): String {
-            val message = getRawMessage(key, params = params)
+            val message = getRawMessage(key, uuid, params)
             return MessageUtils.strip(message)
         }
 
