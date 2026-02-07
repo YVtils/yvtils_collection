@@ -35,11 +35,12 @@ class ModGUICommand {
 //
 //                target.thenAccept { offlinePlayers ->
 //                    PlayerGUI().openGUI(sender)
-//                }.exceptionally { throwable ->
-//                    AsyncActionAnnounce.announceError(sender)
-//                    Logger.error("Failed to fetch player profiles for ban command", throwable)
-//                    null
-//                }
+//            }.exceptionally { throwable ->
+//                AsyncActionAnnounce.announceError(sender)
+//                Logger.error("Failed to fetch player profiles for the command")
+//                Logger.debug("Error details", throwable, DEBUGLEVEL.DETAILED)
+//                null
+//            }
             }
         }
     }

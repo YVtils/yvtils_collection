@@ -23,6 +23,7 @@ import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
 import yv.tils.utils.time.TimeUtils
+import java.util.Calendar
 
 class TempMuteLogic {
     /**
@@ -40,10 +41,18 @@ class TempMuteLogic {
         sender: CommandSender,
         silent: Boolean = false
     ) {
+        val parsedTime = try {
+            TimeUtils().parseTime(duration, unit)
+        } catch (e: IllegalArgumentException) {
+            PlayerUtils.logicError(sender, Exceptions.TimeUnitParseException, e)
+            return
+        }
+
         val params = mapOf(
             "reason" to reason,
             "duration" to duration,
             "unit" to unit,
+            "parsedTime" to parsedTime,
             "sender" to sender,
             "silent" to silent
         )
@@ -58,6 +67,7 @@ class TempMuteLogic {
         val reason = params["reason"] as String
         val duration = params["duration"] as Int
         val unit = params["unit"] as String
+        val parsedTime = params["parsedTime"] as Calendar
         val sender = params["sender"] as CommandSender
         val silent = params["silent"] as Boolean
 
@@ -82,13 +92,6 @@ class TempMuteLogic {
                     "console",
                     System.currentTimeMillis().toString()
                 )
-            }
-
-            val parsedTime = try {
-                TimeUtils().parseTime(duration, unit)
-            } catch (e: IllegalArgumentException) {
-                PlayerUtils.logicError(sender, Exceptions.TimeUnitParseException, e)
-                return
             }
 
             MuteSaveFile().mutePlayer(offlinePlayer.uniqueId, reason, true, modAction,parsedTime.timeInMillis.toString())

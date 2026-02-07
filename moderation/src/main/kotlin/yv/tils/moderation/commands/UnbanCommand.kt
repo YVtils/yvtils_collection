@@ -24,6 +24,7 @@ import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.UnbanLogic
 import yv.tils.utils.data.Data
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.CompletableFuture
 
@@ -66,7 +67,8 @@ class UnbanCommand {
                         UnbanLogic().triggerUnban(offlinePlayers, reason, sender)
                     }.exceptionally { throwable ->
                         AsyncActionAnnounce.announceError(sender)
-                        Logger.error("Failed to fetch player profiles for ban command", throwable)
+                        Logger.error("Failed to fetch player profiles for the command")
+                        Logger.debug("Error details", throwable, DEBUGLEVEL.DETAILED)
                         null
                     }
                 }

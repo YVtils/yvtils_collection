@@ -85,7 +85,6 @@ class PlayerUtils {
             )
         }
 
-        // TODO: Test this method
         fun logicError(sender: CommandSender, errorKey: Exception, extraInformation: Exception? = null) {
             val senderIsConsole = sender !is Player
             if (senderIsConsole) {
