@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 class TimeUtils {
     companion object {
@@ -41,8 +42,55 @@ class TimeUtils {
 
             return formatTime
         } catch (_: Exception) {
-            Logger.Companion.warn(MessageUtils.Companion.convert(CONFIG_ERROR_INVALID_TIMEZONE))
+            Logger.warn(MessageUtils.convert(CONFIG_ERROR_INVALID_TIMEZONE))
             return "xx/xx/xxxx xx:xx:xx"
+        }
+    }
+
+    /**
+     * Parse time from string to calendar
+     * @param duration [Int] of time duration
+     * @param unit [String] of time unit
+     * @return [Calendar]
+     * @throws [IllegalArgumentException]
+     */
+    fun parseTime(duration: Int, unit: String): Calendar {
+        val time: Calendar = Calendar.getInstance()
+        when (unit) {
+            "s" -> time.add(Calendar.SECOND, duration)
+            "m" -> time.add(Calendar.MINUTE, duration)
+            "h" -> time.add(Calendar.HOUR_OF_DAY, duration)
+            "d" -> time.add(Calendar.DAY_OF_MONTH, duration)
+            "w" -> time.add(Calendar.WEEK_OF_YEAR, duration)
+            else -> {
+                throw IllegalArgumentException("unit $unit is not supported")
+            }
+        }
+
+        return time
+    }
+
+    /**
+     * Format duration from milliseconds to human-readable string
+     * @param durationMillis [Long] duration in milliseconds
+     * @return [String] formatted duration
+     */
+    fun formatDuration(durationMillis: Long): String {
+        val seconds = (durationMillis / 1000) % 60
+        val minutes = (durationMillis / (1000 * 60) % 60)
+        val hours = (durationMillis / (1000 * 60 * 60) % 24)
+        val days = (durationMillis / (1000 * 60 * 60 * 24))
+
+        val parts = mutableListOf<String>()
+        if (days > 0) parts.add("$days d")
+        if (hours > 0) parts.add("$hours h")
+        if (minutes > 0) parts.add("$minutes m")
+        if (seconds > 0) parts.add("$seconds s")
+
+        return if (parts.isEmpty()) {
+            "0 s"
+        } else {
+            parts.joinToString(" ")
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -61,6 +61,14 @@ class Logger {
             }
         }
 
+        fun debug(message: String, throwable: Throwable, level: DEBUGLEVEL) {
+            val levelInt = level.level
+
+            if (debugMode && (levelInt == -1 || levelInt <= debugLevel)) {
+                logger?.info("[$level] $message", throwable)
+            }
+        }
+
         fun info(message: String) {
             logger?.info(message)
         }
@@ -85,21 +93,8 @@ class Logger {
             logger?.error(message)
         }
 
-        @Deprecated("Use own log function with Level enum")
-        fun log(level: Level, message: Component) {
-            when (level) {
-                Level.INFO -> info(message)
-                Level.WARN -> warn(message)
-                Level.ERROR -> error(message)
-                Level.DEBUG -> debug(message)
-            }
-        }
-
-        enum class Level {
-            INFO,
-            WARN,
-            ERROR,
-            DEBUG
+        fun error(message: String, throwable: Throwable) {
+            logger?.error(message, throwable)
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -79,6 +79,26 @@ class LanguageHandler {
 
         fun getCleanMessage(key: String, uuid: UUID? = null): String =
             MessageUtils.strip(getString(key, getLocale(uuid)))
+
+        fun getCleanMessage(key: String, sender: CommandSender): String =
+            if (sender is Player) {
+                getCleanMessage(key, sender.uniqueId)
+            } else {
+                getCleanMessage(key)
+            }
+
+        fun getCleanMessage(key: String, uuid: UUID? = null, params: Map<String, Any>): String {
+            val message = getRawMessage(key, uuid, params)
+            return MessageUtils.strip(message)
+        }
+
+        fun getCleanMessage(key: String, sender: CommandSender, params: Map<String, Any>): String {
+            return if (sender is Player) {
+                getCleanMessage(key, sender.uniqueId, params)
+            } else {
+                getCleanMessage(key, params = params)
+            }
+        }
 
         private fun getLocale(uuid: UUID?): Locale =
             uuid?.let { playerLang.getOrDefault(it, serverDefaultLang) } ?: serverDefaultLang

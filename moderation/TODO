@@ -1,0 +1,56 @@
+--------------------------- COMMANDS ---------------------------
+- [x] Ban
+- [x] Tempban
+- [x] Mute
+- [x] Tempmute
+- [x] Kick
+- [x] Warn
+- [x] Unban
+- [x] Unmute
+
+--------------------------- OTHER FEATURES ---------------------------
+- [ ] GUI
+- [ ] Error handling
+- [ ] Messages
+
+--------------------------- TEST FEATURES ---------------------------
+- [ ] Ban
+  - [ ] online player
+  - [ ] offline player
+  - [ ] non existing player
+  - [ ] banned player
+- [ ] Tempban
+  - [ ] online player
+  - [ ] offline player
+  - [ ] non existing player
+  - [ ] banned player
+- [ ] Unban
+  - [ ] non banned player
+    - [ ] offline
+    - [ ] online
+  - [ ] banned player
+  - [ ] non existing player
+- [ ] Kick
+  - [ ] offline player
+  - [ ] online player
+  - [ ] non existing player
+- [ ] Mute
+  - [ ] Muted player
+  - [ ] online player
+  - [ ] offline player
+  - [ ] non existent player
+- [ ] Tempmute
+    - [ ] Muted player
+    - [ ] online player
+    - [ ] offline player
+    - [ ] non existent player
+- [ ] Unmute
+  - [ ] non muted player
+    - [ ] offline
+    - [ ] online
+  - [ ] muted player
+  - [ ] non existing player
+- [ ] Warn
+  - [ ] online player
+  - [ ] offline player
+  - [ ] non existing player

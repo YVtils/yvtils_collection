@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -15,6 +15,7 @@ package yv.tils.common.permissions
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
 import yv.tils.utils.data.Data
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 
 class PermissionManager {
@@ -25,7 +26,7 @@ class PermissionManager {
                 return
             }
 
-            Logger.debug("Registering permissions: ${perms.joinToString { it.name }}", 1)
+            Logger.debug("Registering permissions: ${perms.joinToString { it.name }}", DEBUGLEVEL.BASIC)
             registerPermission(perms)
         }
 

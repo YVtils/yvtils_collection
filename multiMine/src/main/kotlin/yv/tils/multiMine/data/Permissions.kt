@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -52,7 +52,7 @@ class PermissionsData {
 enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
     COMMAND_MULTIMINE_MANAGE(
         PermissionManager.YVtilsPermission(
-            "${PermissionsData.permissionBase}.command.multiMine.manage",
+            "${PermissionsData.permissionBase}.command.manage",
             "Allows the use of the /multiMine manage subcommand",
             default = false
         )
@@ -60,7 +60,7 @@ enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
 
     COMMAND_MULTIMINE_TOGGLE_SELF(
         PermissionManager.YVtilsPermission(
-            "${PermissionsData.permissionBase}.command.multiMine.toggle.self",
+            "${PermissionsData.permissionBase}.command.toggle.self",
             "Allows the use of the /multiMine toggle subcommand",
             default = true
         )
@@ -68,7 +68,7 @@ enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
 
     COMMAND_MULTIMINE_TOGGLE_OTHERS(
         PermissionManager.YVtilsPermission(
-            "${PermissionsData.permissionBase}.command.multiMine.toggle.others",
+            "${PermissionsData.permissionBase}.command.toggle.others",
             "Allows toggling multiMine for other players using /multiMine toggle <player>",
             default = false
         )
@@ -76,7 +76,7 @@ enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
 
     USE_MULTIMINE(
         PermissionManager.YVtilsPermission(
-            "${PermissionsData.permissionBase}.use.multiMine",
+            "${PermissionsData.permissionBase}.use",
             "Allows the use of the multiMine feature",
             default = true
         )

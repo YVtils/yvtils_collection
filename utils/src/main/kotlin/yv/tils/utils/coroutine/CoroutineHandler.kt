@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -46,16 +46,16 @@ class CoroutineHandler {
         ): String {
             try {
                 if (isOnce) {
-                    Logger.Companion.debug("Launching one-time task $taskName with beforeDelay: $beforeDelay")
+                    Logger.debug("Launching one-time task $taskName with beforeDelay: $beforeDelay")
                     val taskData = launchOnceTaskLogic(task, taskName, beforeDelay)
                     return taskData.taskId
                 }
 
-                Logger.Companion.debug("Launching task $taskName with beforeDelay: $beforeDelay and afterDelay: $afterDelay")
+                Logger.debug("Launching task $taskName with beforeDelay: $beforeDelay and afterDelay: $afterDelay")
                 val taskData = launchTaskLogic(task, taskName, beforeDelay, afterDelay)
                 return taskData.taskId
             } catch (e: Exception) {
-                Logger.Companion.error("Failed to launch task: ${e.message}")
+                Logger.error("Failed to launch task: ${e.message}")
                 throw e
             }
         }
@@ -71,7 +71,7 @@ class CoroutineHandler {
          */
         private fun launchTaskLogic(task: suspend () -> Unit, taskName: String? = null, beforeDelay: Long, afterDelay: Long): Task {
             if (tasks.containsKey(taskName) && taskName != null) {
-                Logger.Companion.debug("There is already a task with the name $taskName")
+                Logger.debug("There is already a task with the name $taskName")
                 throw Exception("There is already a task with the name $taskName")
             }
 
@@ -108,7 +108,7 @@ class CoroutineHandler {
          */
         private fun launchOnceTaskLogic(task: suspend () -> Unit, taskName: String? = null, beforeDelay: Long): Task {
             if (tasks.containsKey(taskName) && taskName != null) {
-                Logger.Companion.debug("There is already a task with the name $taskName")
+                Logger.debug("There is already a task with the name $taskName")
                 throw Exception("There is already a task with the name $taskName")
             }
 
@@ -121,7 +121,7 @@ class CoroutineHandler {
                 task()
                 taskJobs.remove(taskId)
                 tasks.remove(taskName)
-                Logger.Companion.debug("Task $taskName completed and removed")
+                Logger.debug("Task $taskName completed and removed")
             }
             taskJobs[taskId] = job
 
@@ -152,7 +152,7 @@ class CoroutineHandler {
          * This will stop all tasks that are currently running.
          */
         fun cancelAllTasks() {
-            Logger.Companion.info("Disabling all tasks")
+            Logger.info("Disabling all tasks")
             coroutineScope.coroutineContext.cancelChildren()
         }
 
@@ -164,7 +164,7 @@ class CoroutineHandler {
         fun isTaskActive(taskId: String): Boolean {
             val isActive = taskJobs[taskId]?.isActive == true
 
-            Logger.Companion.debug("Checking if task $taskId is active: $isActive")
+            Logger.debug("Checking if task $taskId is active: $isActive")
             return isActive
         }
     }

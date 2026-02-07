@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -28,7 +28,7 @@ class MultiMineYVtils : Data.YVtilsModule {
     companion object {
         val MODULE = Data.YVtilsModuleData(
             "multiMine",
-            "2.0.0-beta.6",
+            "2.0.0-beta.7",
             "MultiMine module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/multiMine/"

@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -16,47 +16,48 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import yv.tils.utils.data.Data
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 
 class MessageUtils {
     companion object {
         fun convert(text: String?): Component {
-            Logger.debug("Converting text to Component: $text")
+            Logger.debug("Converting text to Component: $text", DEBUGLEVEL.SPAM)
             return text?.let { MiniMessage.miniMessage().deserialize(it) } ?: Component.empty()
         }
 
         fun convert(text: Component?): String {
-            Logger.debug("Converting Component to text: $text")
+            Logger.debug("Converting Component to text: $text", DEBUGLEVEL.SPAM)
             return text?.let { MiniMessage.miniMessage().serialize(it) } ?: ""
         }
 
         fun convert(textList: List<String>): List<Component> {
-            Logger.debug("Converting list of text to Component: $textList")
+            Logger.debug("Converting list of text to Component: $textList", DEBUGLEVEL.SPAM)
             return textList.map { convert(it) }
         }
 
         fun convertChatMessage(text: Component): Component {
-            Logger.debug("Converting chat message to Component: $text")
+            Logger.debug("Converting chat message to Component: $text", DEBUGLEVEL.SPAM)
             return convert(strip(text))
         }
 
         fun strip(text: String?): String {
-            Logger.debug("Stripping text: $text")
+            Logger.debug("Stripping text: $text", DEBUGLEVEL.SPAM)
             return text?.let { PlainTextComponentSerializer.plainText().serialize(convert(text)) } ?: ""
         }
 
         fun strip(text: Component?): String {
-            Logger.debug("Stripping Component: $text")
+            Logger.debug("Stripping Component: $text", DEBUGLEVEL.SPAM)
             return text?.let { PlainTextComponentSerializer.plainText().serialize(text) } ?: ""
         }
 
         fun stripChatMessage(text: Component): String {
-            Logger.debug("Stripping chat message: $text")
+            Logger.debug("Stripping chat message: $text", DEBUGLEVEL.SPAM)
             return strip(strip(text))
         }
 
         fun handleLore(text: String): List<Component> {
-            Logger.debug("Handling lore: $text")
+            Logger.debug("Handling lore: $text", DEBUGLEVEL.SPAM)
             val lore = mutableListOf<Component>()
             val mm = MiniMessage.miniMessage()
 
@@ -96,35 +97,35 @@ class MessageUtils {
         }
 
         fun handleLore(text: Component): List<Component> {
-            Logger.debug("Handling component lore: $text")
+            Logger.debug("Handling component lore: $text", DEBUGLEVEL.SPAM)
             return handleLore(convert(text))
         }
 
         fun joinedConvert(vararg text: String): Component {
-            Logger.debug("Joining and converting text: ${text.joinToString(";")}")
+            Logger.debug("Joining and converting text: ${text.joinToString(";")}", DEBUGLEVEL.SPAM)
             val joinedText = text.joinToString("")
             return convert(joinedText)
         }
 
         fun replacer(inPut: Component, replace: Map<String, Any>): Component {
-            Logger.debug("InPut: $inPut")
-            Logger.debug("Replace: $replace")
+            Logger.debug("InPut: $inPut", DEBUGLEVEL.SPAM)
+            Logger.debug("Replace: $replace", DEBUGLEVEL.SPAM)
 
             val text = convert(inPut)
             val outPut = replacerLogic(text, replace)
 
-            Logger.debug("Output: $outPut")
+            Logger.debug("Output: $outPut", DEBUGLEVEL.SPAM)
 
             return outPut
         }
 
         fun replacer(inPut: String, replace: Map<String, Any>): Component {
-            Logger.debug("InPut: $inPut")
-            Logger.debug("Replace: $replace")
+            Logger.debug("InPut: $inPut", DEBUGLEVEL.SPAM)
+            Logger.debug("Replace: $replace", DEBUGLEVEL.SPAM)
 
             val outPut = replacerLogic(inPut, replace)
 
-            Logger.debug("Output: $outPut")
+            Logger.debug("Output: $outPut", DEBUGLEVEL.SPAM)
 
             return outPut
         }

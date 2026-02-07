@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -12,6 +12,7 @@
 
 package yv.tils.gui
 
+import yv.tils.gui.core.GuiManager
 import yv.tils.gui.language.RegisterStrings
 import yv.tils.gui.listeners.AsyncChat
 import yv.tils.gui.listeners.InventoryClickListener
@@ -48,5 +49,8 @@ class GUIYVtils : Data.YVtilsModule {
         pm.registerEvents(AsyncChat(), plugin)
     }
 
-    override fun disablePlugin() {}
+    override fun disablePlugin() {
+        // Clean up all active GUIs
+        GuiManager.clearAll()
+    }
 }

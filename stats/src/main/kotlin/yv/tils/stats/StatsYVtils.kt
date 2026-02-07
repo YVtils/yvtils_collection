@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -16,12 +16,9 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import yv.tils.stats.StatsYVtils.Companion.markOptIn
-import yv.tils.stats.StatsYVtils.Companion.needsOptInPrompt
-import yv.tils.stats.StatsYVtils.Companion.requestOptInPrompt
 import yv.tils.stats.configs.ConfigFile
+import yv.tils.stats.data.StatType
 import yv.tils.stats.language.RegisterStrings
 import yv.tils.stats.logic.StatsPusher
 import yv.tils.stats.logic.StatsService
@@ -240,8 +237,8 @@ class StatsYVtils : Data.YVtilsModule {
             // Server version
             val versionHandle = StatsRegistry.registerString("server_version", "Paper/Bukkit server version")
             try {
-                versionHandle?.set(Bukkit.getVersion())
-            } catch (_: Exception) {
+                versionHandle?.set(org.bukkit.Bukkit.getVersion())
+            } catch (e: Exception) {
                 versionHandle?.set("Unknown")
             }
 
@@ -249,8 +246,8 @@ class StatsYVtils : Data.YVtilsModule {
             if (ConfigFile.getBoolean("metadata.collect_player_count") != false) {
                 val playerCountHandle = StatsRegistry.registerGauge("player_count", "Current online player count")
                 try {
-                    playerCountHandle?.set(Bukkit.getOnlinePlayers().size.toLong())
-                } catch (_: Exception) {
+                    playerCountHandle?.set(org.bukkit.Bukkit.getOnlinePlayers().size.toLong())
+                } catch (e: Exception) {
                     // Bukkit might not be available in tests
                 }
 
@@ -258,8 +255,8 @@ class StatsYVtils : Data.YVtilsModule {
                 CoroutineHandler.launchTask(
                     suspend {
                         try {
-                            StatsRegistry.set("player_count", Bukkit.getOnlinePlayers().size.toLong())
-                        } catch (_: Exception) {
+                            StatsRegistry.set("player_count", org.bukkit.Bukkit.getOnlinePlayers().size.toLong())
+                        } catch (e: Exception) {
                             // Ignore if Bukkit not available
                         }
                     },

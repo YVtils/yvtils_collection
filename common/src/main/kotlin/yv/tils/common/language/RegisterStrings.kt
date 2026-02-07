@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -109,7 +109,23 @@ class RegisterStrings {
             LangStrings.COMMAND_EXECUTOR_ASYNC_ACTION,
             mapOf(
                 FileTypes.EN to "<prefix> <yellow>The command is processing data in the background. Please be patient...",
-                FileTypes.DE to "<prefix> <yellow>Der Befehl wird im Hintergrund verarbeitet. Bitte etwas Geduld...",
+                FileTypes.DE to "<prefix> <yellow>Der Befehl wird im Hintergrund verarbeitet. Bitte habe etwas Geduld...",
+            )
+        )
+
+        registerNewString(
+            LangStrings.COMMAND_SUGGESTION_ASYNC_ACTION,
+            mapOf(
+                FileTypes.EN to "<prefix> <yellow>Suggestions are being loaded in the background. Please be patient...",
+                FileTypes.DE to "<prefix> <yellow>Vorschläge werden im Hintergrund geladen. Bitte habe etwas Geduld...",
+            )
+        )
+
+        registerNewString(
+            LangStrings.COMMAND_EXECUTOR_ASYNC_ERROR_PLAYER,
+            mapOf(
+                FileTypes.EN to "<prefix> <red>An error occurred while trying to resolve the player data for this command. Most likely, the player does not exist or there was a problem with the mojang API. Please try again later.",
+                FileTypes.DE to "<prefix> <red>Beim Versuch, die Spielerdaten für diesen Befehl zu verarbeiten, ist ein Fehler aufgetreten. Es ist sehr wahrscheinlich, dass der Spieler nicht existiert oder es ein Problem mit der Mojang API gab. Bitte versuche es später erneut."
             )
         )
 
@@ -146,5 +162,7 @@ enum class LangStrings(val key: String) {
     COMMAND_EXECUTOR_MISSING_PERMISSION("command.executor.missingPermission"),
     COMMAND_USAGE("command.usage"),
     COMMAND_EXECUTOR_ASYNC_ACTION("command.executor.asyncAction"),
+    COMMAND_SUGGESTION_ASYNC_ACTION("command.suggestion.asyncAction"),
+    COMMAND_EXECUTOR_ASYNC_ERROR_PLAYER("command.executor.asyncError.player"),
     CONFIG_ERROR_INVALID_TIMEZONE("config.error.invalid.timezone"),
 }

@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -17,6 +17,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryCloseEvent
 import yv.tils.config.language.LanguageHandler
+import yv.tils.gui.core.GuiGenericHolder
+import yv.tils.gui.core.GuiManager
 import yv.tils.gui.logic.GuiHolder
 import yv.tils.utils.logger.Logger
 
@@ -25,6 +27,17 @@ class InventoryClose : Listener {
     fun onEvent(e: InventoryCloseEvent) {
         val player = e.player as? Player ?: return
         val uuid = player.uniqueId
+
+        // Handle new generic GUI system
+        val genericHolder = e.inventory.holder as? GuiGenericHolder
+        if (genericHolder != null) {
+            val context = genericHolder.context
+            context.definition?.onClose?.invoke(context)
+            GuiManager.removeContext(player)
+            return
+        }
+
+        // Handle old config-specific system
         val holder = e.inventory.holder as? GuiHolder ?: return
 
         // Check if this is a list GUI being closed

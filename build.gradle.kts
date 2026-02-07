@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -14,9 +14,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.2.21" apply false
-    kotlin("plugin.serialization") version "2.2.21" apply false
-    id("com.gradleup.shadow") version "9.3.0" apply false
+    kotlin("jvm") version "2.3.0" apply false
+    kotlin("plugin.serialization") version "2.3.0" apply false
+    id("com.gradleup.shadow") version "9.3.1" apply false
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19" apply false
     id("xyz.jpenilla.run-paper") version "3.0.2" apply false
 }
@@ -41,7 +41,7 @@ subprojects {
         plugin("xyz.jpenilla.run-paper")
     }
 
-    val commandAPIVersion = "11.0.0"
+    val commandAPIVersion = "11.1.0"
 
     dependencies {
         // Paper API dependency
@@ -53,7 +53,7 @@ subprojects {
 
         // Other
         add("implementation", "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-        add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+        add("implementation", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     }
 
     tasks.withType<KotlinCompile> {

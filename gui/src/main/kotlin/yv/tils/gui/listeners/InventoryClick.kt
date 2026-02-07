@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -22,11 +22,15 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import yv.tils.config.data.ConfigEntry
 import yv.tils.config.data.EntryType
 import yv.tils.config.language.LanguageHandler
+import yv.tils.gui.core.ClickMode
+import yv.tils.gui.core.GuiGenericHolder
+import yv.tils.gui.core.GuiManager
 import yv.tils.gui.logic.ConfigGUI
 import yv.tils.gui.logic.GuiHolder
 import yv.tils.gui.logic.ListContext
 import yv.tils.gui.logic.ListGUI
 import yv.tils.utils.data.Data
+import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
 
 class InventoryClickListener : Listener {
@@ -36,23 +40,54 @@ class InventoryClickListener : Listener {
 
     @EventHandler
     fun onEvent(e: InventoryClickEvent) {
-        val holder = e.inventory.holder as? GuiHolder ?: return
-        e.isCancelled = true
-
         val player = e.whoClicked as Player
         val uuid = player.uniqueId
 
-        // Handle pending list UI first
+        // Try new generic GUI system first
+        val genericHolder = e.inventory.holder as? GuiGenericHolder
+        if (genericHolder != null) {
+            val context = GuiManager.getContext(uuid)
+            if (context != null) {
+                val clickMode = context.definition?.clickMode
+                val isGuiClick = e.rawSlot >= 0 && e.rawSlot < e.inventory.size
+                
+                // Apply click mode
+                when (clickMode) {
+                    ClickMode.CANCEL_ALL -> {
+                        e.isCancelled = true
+                    }
+                    ClickMode.ALLOW_PLAYER_INVENTORY -> {
+                        e.isCancelled = isGuiClick
+                    }
+                    ClickMode.ALLOW_ALL -> {
+                        e.isCancelled = false
+                    }
+
+                    else -> {
+                        e.isCancelled = false
+                    }
+                }
+                
+                if (isGuiClick) {
+                    GuiManager.handleClick(player, e.rawSlot, e.click)
+                }
+            } else {
+                e.isCancelled = true
+            }
+            return
+        }
+
+        val holder = e.inventory.holder as? GuiHolder ?: return
+        e.isCancelled = true
+
         val listContext = GuiListenerState.pendingList[uuid]
         if (listContext != null && listContext.inventory != null && e.inventory == listContext.inventory) {
             handleListClick(e, player, uuid, listContext)
             return
         }
 
-        // Handle navigation (previous/next) for paginated config GUIs
         if (handleNavigation(e, player, holder)) return
 
-        // Handle entry clicks
         handleEntryClick(e, player, holder)
     }
 

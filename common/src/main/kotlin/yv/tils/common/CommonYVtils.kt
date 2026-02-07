@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -58,7 +58,7 @@ class CommonYVtils : Data.YVtilsModule {
             2 to listOf(MessageUtils.convert(modules)),
         )
         val log = printLogWithSplits(data)
-        log.forEach { Logger.log(Logger.Companion.Level.INFO, it) }
+        log.forEach { Logger.info(it) }
 
         if (! checkDependencies()) {
             Data.instance.server.pluginManager.disablePlugin(Data.instance)
@@ -86,7 +86,7 @@ class CommonYVtils : Data.YVtilsModule {
         )
 
         val log = printLogWithSplits(data)
-        log.forEach { Logger.log(Logger.Companion.Level.INFO, it) }
+        log.forEach { Logger.info(it) }
     }
 
     private fun loadConfigs() {
@@ -146,7 +146,7 @@ class CommonYVtils : Data.YVtilsModule {
             val dependencies = core.dependencies
 
             if (dependencies.isEmpty()) {
-                return false
+                return true
             }
 
             val modules = Data.getModuleNames()

@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -88,13 +88,17 @@ enum class Heads(val desc: String, val texture: String) {
 
 object HeadUtils {
     fun createCustomHead(headTexture: Heads, itemName: String): ItemStack {
+        return createCustomHead(headTexture.texture, itemName)
+    }
+
+    fun createCustomHead(headTexture: String, itemName: String): ItemStack {
         val item = ItemStack(Material.PLAYER_HEAD)
         val meta = item.itemMeta as SkullMeta
         val playerProfile = Bukkit.createProfile(UUID.randomUUID())
 
         playerProfile.setProperties(
             Collections.singletonList(
-                ProfileProperty("textures", headTexture.texture, "")
+                ProfileProperty("textures", headTexture, "")
             )
         )
 

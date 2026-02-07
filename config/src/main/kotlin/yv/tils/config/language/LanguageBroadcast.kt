@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -27,14 +27,17 @@ class LanguageBroadcast {
         }
 
         fun broadcast(key: String, permission: String, params: Map<String, Any> = emptyMap()) {
-            Data.instance.server.broadcast(
-                LanguageHandler.getMessage(
-                    key,
-                    null,
-                    params
-                ),
-                permission
-            )
+            for (p in Data.instance.server.onlinePlayers) {
+                if (p.hasPermission(permission)) {
+                    p.sendMessage(
+                        LanguageHandler.getMessage(
+                            key,
+                            p,
+                            params
+                        )
+                    )
+                }
+            }
         }
     }
 }

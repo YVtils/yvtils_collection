@@ -1,6 +1,6 @@
 /*
  * Part of the YVtils Project.
- * Copyright (c) 2025 Lyvric / YVtils
+ * Copyright (c) 2026 Lyvric / YVtils
  *
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
@@ -19,7 +19,7 @@ dependencies {
     implementation(project(":stats"))
 }
 
-val version = "4.0.0-beta.4"
+val version = "4.0.0-beta.5"
 
 tasks {
     runServer {
@@ -33,7 +33,7 @@ tasks {
         archiveFileName.set("YVtils-DC_v${version}.jar")
 
         manifest {
-            attributes["Main-Class"] = "yv.tils.discord.YVtils"
+            attributes["Main-Class"] = "yv.tils.core.YVtils"
         }
     }
 }
