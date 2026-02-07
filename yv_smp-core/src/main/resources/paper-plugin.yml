@@ -1,0 +1,11 @@
+name: YVtils-YV_SMP
+version: 10.0.0-dev.1
+main: yv.tils.core.YVtils
+api-version: '1.21'
+author: YVtils
+website: 'https://yvtils.net/yvtils/'
+prefix: YVtils
+contributors:
+  - Lyvric
+  - SlWed
+  - YV SMP Members
