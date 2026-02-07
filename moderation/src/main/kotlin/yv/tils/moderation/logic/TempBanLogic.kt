@@ -93,7 +93,7 @@ class TempBanLogic {
                         LanguageHandler.getRawMessage(
                             "moderation.placeholder.duration.expires",
                             sender,
-                            mapOf("duration" to TimeUtils().formatDuration(parsedTime.timeInMillis))
+                            mapOf("duration" to TimeUtils().formatDuration(parsedTime.timeInMillis - System.currentTimeMillis()))
                         ),
                 sender,
                 true
