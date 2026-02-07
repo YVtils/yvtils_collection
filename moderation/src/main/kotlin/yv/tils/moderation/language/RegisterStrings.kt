@@ -182,24 +182,24 @@ class RegisterStrings {
         registerNewString(
             "moderation.placeholder.duration.expires",
             mapOf(
-                FileTypes.EN to "Expires in <yellow><duration><white>",
-                FileTypes.DE to "Läuft ab in <yellow><duration><white>",
+                FileTypes.EN to "Expires in <yellow><duration>",
+                FileTypes.DE to "Läuft ab in <yellow><duration>",
             )
         )
 
         registerNewString(
             "moderation.target.muted.chat.player",
             mapOf(
-                FileTypes.EN to "<prefix> <gray>You are muted! Reason: <dark_gray><reason><gray>, Duration: <dark_gray><duration>",
-                FileTypes.DE to "<prefix> <gray>Du bist gemutet! Grund: <dark_gray><reason><gray>, Dauer: <dark_gray><duration>",
+                FileTypes.EN to "<prefix> <white>You are muted! Reason: <${Colors.TERTIARY.color}><reason><white>; Duration: <${Colors.TERTIARY.color}><duration>",
+                FileTypes.DE to "<prefix> <white>Du bist gemutet! Grund: <${Colors.TERTIARY.color}><reason><white>; Dauer: <${Colors.TERTIARY.color}><duration>",
             )
         )
 
         registerNewString(
             "moderation.target.muted.chat.console",
             mapOf(
-                FileTypes.EN to "<prefix> <gray><player> tried to chat while muted. Message: <dark_gray><message><gray>; Reason: <dark_gray><reason><gray>; Duration: <dark_gray><duration>",
-                FileTypes.DE to "<prefix> <gray><player> hat versucht zu schreiben, während er gemutet ist. Nachricht: <dark_gray><message><gray>; Grund: <dark_gray><reason><gray>; Dauer: <dark_gray><duration>",
+                FileTypes.EN to "<prefix> <${Colors.TERTIARY.color}><player> <white>tried to chat while muted. Message: <${Colors.TERTIARY.color}><message><white>; Reason: <${Colors.TERTIARY.color}><reason><white>; Duration: <${Colors.TERTIARY.color}><duration>",
+                FileTypes.DE to "<prefix> <${Colors.TERTIARY.color}><player> <white>hat versucht zu schreiben, während er gemutet ist. Nachricht: <${Colors.TERTIARY.color}><message><white>; Grund: <${Colors.TERTIARY.color}><reason><white>; Dauer: <${Colors.TERTIARY.color}><duration>",
             )
         )
 

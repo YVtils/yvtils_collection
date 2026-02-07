@@ -22,7 +22,7 @@ import yv.tils.common.other.AsyncActionAnnounce
 import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.data.Permissions
-import yv.tils.moderation.logic.UnbanLogic
+import yv.tils.moderation.logic.UnmuteLogic
 import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.CompletableFuture
@@ -50,7 +50,7 @@ class UnmuteCommand {
                     AsyncActionAnnounce.announceAction(sender)
 
                     target.thenAccept { offlinePlayers ->
-                        UnbanLogic().triggerUnban(offlinePlayers, reason, sender)
+                        UnmuteLogic().triggerUnmute(offlinePlayers, reason, sender)
                     }.exceptionally { throwable ->
                         AsyncActionAnnounce.announceError(sender)
                         Logger.error("Failed to fetch player profiles for the command")
