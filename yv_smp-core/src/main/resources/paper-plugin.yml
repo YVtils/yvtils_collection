@@ -9,3 +9,7 @@ contributors:
   - Lyvric
   - SlWed
   - YV SMP Members
+dependencies:
+  server:
+    voicechat:
+      load: BEFORE

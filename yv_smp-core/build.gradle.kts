@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":utils"))
     implementation(project(":config"))
     implementation(project(":gui"))
+    implementation(project(":yv_smp"))
 }
 
 val version = "10.0.0-dev.1"
@@ -22,6 +23,9 @@ val version = "10.0.0-dev.1"
 tasks {
     runServer {
         minecraftVersion("1.21.11")
+        downloadPlugins {
+            modrinth("simple-voice-chat", "bukkit-2.6.12")
+        }
     }
 
     shadowJar {

@@ -23,14 +23,15 @@ import yv.tils.utils.UtilsYVtils
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
+import yv.tils.yv_smp.YV_SMPYVtils
 
 class YVtils: JavaPlugin() {
     companion object {
         val yvtilsVersion = YVtils().pluginMeta.version
         lateinit var instance: YVtils
 
-        const val PLUGIN_NAME_FULL = "YVtils-YV_SMP"
-        const val PLUGIN_NAME = "YV_SMP"
+        const val PLUGIN_NAME_FULL = "YVtils-YV SMP"
+        const val PLUGIN_NAME = "YV SMP"
         const val PLUGIN_NAME_SHORT = "yv_smp"
         const val PLUGIN_COLOR = "#C4FFF8"
     }
@@ -39,6 +40,7 @@ class YVtils: JavaPlugin() {
         ConfigYVtils(),
         UtilsYVtils(),
         GUIYVtils(),
+        YV_SMPYVtils(),
         CommonYVtils()
     )
 
@@ -51,9 +53,7 @@ class YVtils: JavaPlugin() {
         val core = Data.YVtilsCore(
             description = "",
 
-            dependencies = listOf(
-                ""
-            ),
+            dependencies = listOf(),
 
             name = PLUGIN_NAME,
             colorHex = PLUGIN_COLOR,

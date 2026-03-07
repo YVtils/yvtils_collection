@@ -17,6 +17,56 @@ This repository combines all the yvtils minecraft plugins in one place, for easi
 
 ---
 
+## Modules in this Collection
+
+### common
+
+### config
+
+### core
+
+### discord
+
+### discord-core
+
+### essentials
+
+### fusion
+
+### gui
+
+### message
+
+### migration
+
+### moderation
+
+### multiMine
+
+### multiMine-core
+
+### regions
+
+### regions-core
+
+### server
+
+### sit
+
+### stats
+
+### status
+
+### test-core
+
+### vanish
+
+### waypoint
+
+### yv_smp-core
+
+---
+
 - Translations: [Crowdin](https://crowdin.com/project/yvtils-collection)
 
 [![Crowdin](https://badges.crowdin.net/yvtils-collection/localized.svg)](https://crowdin.com)

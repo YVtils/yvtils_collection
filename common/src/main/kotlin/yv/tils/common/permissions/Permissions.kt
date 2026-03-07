@@ -10,11 +10,10 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.common.data
+package yv.tils.common.permissions
 
 import yv.tils.common.CommonYVtils
-import yv.tils.common.data.PermissionsData.Companion.permissionBase
-import yv.tils.common.permissions.PermissionManager
+import yv.tils.common.permissions.PermissionsData.Companion.permissionBase
 
 class PermissionsData {
     companion object {

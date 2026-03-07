@@ -15,7 +15,7 @@ package yv.tils.common.listeners
 import org.bukkit.event.*
 import org.bukkit.event.player.PlayerJoinEvent
 import yv.tils.common.config.ConfigFile
-import yv.tils.common.data.Permissions
+import yv.tils.common.permissions.Permissions
 import yv.tils.common.updateChecker.PluginVersion
 import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.data.Data
