@@ -18,8 +18,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.config.ConfigYVtils
-import yv.tils.gui.GUIYVtils
-import yv.tils.moderation.ModerationYVtils
+import yv.tils.essentials.EssentialYVtils
 import yv.tils.utils.UtilsYVtils
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.DEBUGLEVEL
@@ -40,8 +39,7 @@ class YVtils: JavaPlugin() {
     private val modules: List<Data.YVtilsModule> = listOf(
         ConfigYVtils(),
         UtilsYVtils(),
-        ModerationYVtils(),
-        GUIYVtils(),
+        EssentialYVtils(),
         CommonYVtils()
     )
 

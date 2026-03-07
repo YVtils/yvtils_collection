@@ -14,17 +14,14 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":utils"))
     implementation(project(":config"))
-    implementation(project(":moderation"))
-    implementation(project(":migration"))
-    implementation(project(":gui"))
-    implementation(project(":stats"))
+    implementation(project(":essentials"))
 }
 
 val version = "0.0.1-dev"
 
 tasks {
     runServer {
-        minecraftVersion("1.21.10")
+        minecraftVersion("1.21.11")
     }
 
     shadowJar {
