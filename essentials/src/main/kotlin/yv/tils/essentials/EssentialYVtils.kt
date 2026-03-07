@@ -15,9 +15,13 @@ package yv.tils.essentials
 import dev.jorel.commandapi.CommandAPI
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
+import yv.tils.common.permissions.PermissionManager
+import yv.tils.config.language.LanguageProvider
 import yv.tils.essentials.commands.register.*
-import yv.tils.essentials.language.RegisterStrings
+import yv.tils.essentials.config.ConfigFile
+import yv.tils.essentials.language.LangStrings
 import yv.tils.essentials.listeners.*
+import yv.tils.essentials.permissions.PermissionsData
 import yv.tils.utils.data.Data
 
 class EssentialYVtils : Data.YVtilsModule {
@@ -32,7 +36,8 @@ class EssentialYVtils : Data.YVtilsModule {
     }
 
     override fun onLoad() {
-        RegisterStrings().registerStrings()
+        LanguageProvider.registerEnumStrings<LangStrings>()
+        ConfigFile().registerStrings()
     }
 
     override fun enablePlugin() {
@@ -43,6 +48,8 @@ class EssentialYVtils : Data.YVtilsModule {
         registerCommands()
         registerListeners()
         registerPermissions()
+
+        loadConfigs()
     }
 
     override fun onLateEnablePlugin() {
@@ -54,14 +61,16 @@ class EssentialYVtils : Data.YVtilsModule {
     }
 
     private fun registerCommands() {
+        DimensionCMD()
         FlyCMD()
         GamemodeCMD()
         GlobalMuteCMD()
         GodCMD()
         HealCMD()
+        PingCMD()
+        PvPCMD()
         SeedCMD()
         SpeedCMD()
-        PingCMD()
     }
 
     private fun unregisterCommands() {
@@ -75,16 +84,18 @@ class EssentialYVtils : Data.YVtilsModule {
 
         pm.registerEvents(AsyncChat(), plugin)
         pm.registerEvents(EntityDamage(), plugin)
+        pm.registerEvents(EntityDamageByEntity(), plugin)
         pm.registerEvents(PlayerChangedWorld(), plugin)
         pm.registerEvents(PlayerGameModeChange(), plugin)
         pm.registerEvents(PlayerJoin(), plugin)
+        pm.registerEvents(PlayerPortal(), plugin)
     }
 
     private fun registerPermissions() {
-        val pm = Data.instance.server.pluginManager
-        pm.addPermission(Permission.loadPermission("yvtils.bypass.globalmute", mapOf(
-            "description" to "Bypass the global mute",
-            "default" to PermissionDefault.OP
-        )))
+        PermissionManager.registerPermissions(PermissionsData().getPermissionList(true))
+    }
+
+    private fun loadConfigs() {
+        ConfigFile().loadConfig()
     }
 }

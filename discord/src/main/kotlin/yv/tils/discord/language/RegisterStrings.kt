@@ -451,7 +451,7 @@ class RegisterStrings : LanguageProvider.RegisterStrings {
         )
     }
 
-    enum class LangStrings(override val key: String) : LanguageProvider.LangStrings {
+    enum class LangStrings(override val key: String) : LanguageProvider.OLDLangStrings {
         SLASHCOMMANDS_WHITELIST_DESCRIPTION("discord.slashcommands.whitelist.description"),
         SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEADD_DESCRIPTION("discord.slashcommands.whitelist.subcommands.forceAdd.description"),
         SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEADD_ARGS_MINECRAFTNAME_DESCRIPTION("discord.slashcommands.whitelist.subcommands.forceAdd.args.minecraftName.description"),

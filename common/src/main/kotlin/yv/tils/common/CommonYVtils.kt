@@ -14,7 +14,7 @@ package yv.tils.common
 
 import net.kyori.adventure.text.Component
 import yv.tils.common.config.ConfigFile
-import yv.tils.common.data.PermissionsData
+import yv.tils.common.permissions.PermissionsData
 import yv.tils.common.language.*
 import yv.tils.common.listeners.PlayerJoin
 import yv.tils.common.listeners.PlayerLocaleChange

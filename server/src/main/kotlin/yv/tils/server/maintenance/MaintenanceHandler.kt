@@ -113,7 +113,7 @@ class MaintenanceHandler {
 
     private fun saveState() {
         ConfigFile.set("maintenance.enabled", maintenance)
-        ServerUtils.setServerMaintenance(maintenance)
+        ServerUtils.serverInMaintenance = maintenance
     }
 
     fun loadState() {

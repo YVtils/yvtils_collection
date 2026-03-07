@@ -17,6 +17,8 @@ import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import yv.tils.config.language.LanguageHandler
+import yv.tils.essentials.language.LangStrings
+import yv.tils.essentials.permissions.Permissions
 import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
 
@@ -142,14 +144,14 @@ class GlobalMuteHandler {
      */
     fun playerChatEvent(e: AsyncChatEvent) {
         if (globalMute) {
-            if (e.player.hasPermission("yvtils.bypass.globalmute")) {
+            if (e.player.hasPermission(Permissions.BYPASS_GLOBAL_MUTE.permission.name)) {
                 return
             }
 
             e.isCancelled = true
             e.player.sendMessage(
                 LanguageHandler.getMessage(
-                    "globalmute.try_to_write",
+                    LangStrings.GLOBALMUTE_TRY_TO_WRITE,
                     e.player.uniqueId,
                     params = mapOf(
                         "prefix" to Data.prefix,

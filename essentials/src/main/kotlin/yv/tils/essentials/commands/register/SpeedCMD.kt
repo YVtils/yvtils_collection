@@ -12,20 +12,18 @@
 
 package yv.tils.essentials.commands.register
 
-import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
-import yv.tils.config.language.LanguageHandler
 import org.bukkit.entity.Player
 import yv.tils.essentials.commands.handler.SpeedHandler
-import yv.tils.utils.data.Data
+import yv.tils.essentials.permissions.Permissions
+import yv.tils.essentials.utils.CheckArguments
 
 class SpeedCMD {
     private val speedHandler = SpeedHandler()
 
     val command = commandTree("speed") {
-        withPermission("yvtils.command.speed")
-        withPermission(CommandPermission.OP)
+        withPermission(Permissions.COMMAND_SPEED.permission.name)
         withUsage("speed <speed> [player]")
 
         integerArgument("speed", -10, 10, false) {
@@ -54,31 +52,28 @@ class SpeedCMD {
                     "-10"
                 )
             )
-            playerProfileArgument("player", true) {
+            playerProfileArgument("player", true) { // TODO: Fix player profile argument not working
                 anyExecutor { sender, args ->
-                    if (sender !is Player && args[1] == null) {
-                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
-                        return@anyExecutor
-                    }
+                    val speed = args["speed"].toString()
+                    val target = args["player"]
 
+                    if (!CheckArguments.checkForTargetArg(sender, target)) return@anyExecutor
 
-                    if (args[1] is Player) {
-                        val target = args[1] as Player
-                        speedHandler.speedSwitch(target, args[0].toString(), sender)
+                    if (target is Player) {
+                        speedHandler.speedSwitch(target, speed, sender)
                     } else {
-                        speedHandler.speedSwitch(sender as Player, args[0].toString())
+                        speedHandler.speedSwitch(sender as Player, speed)
                     }
                 }
             }
         }
 
         literalArgument("reset", false) {
-            playerProfileArgument("player", true) {
+            playerProfileArgument("player", true) { // TODO: Fix player profile argument not working
                 anyExecutor { sender, args ->
-                    if (sender !is Player && args[1] == null) {
-                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
-                        return@anyExecutor
-                    }
+                    val target = args["player"]
+
+                    if (!CheckArguments.checkForTargetArg(sender, target)) return@anyExecutor
 
                     if (args[1] is Player) {
                         val target = args[1] as Player
