@@ -96,7 +96,7 @@ class VoiceChatAudioPlayer(
                 if (!AUDIO_EXECUTOR.awaitTermination(5, TimeUnit.SECONDS)) {
                     AUDIO_EXECUTOR.shutdownNow()
                 }
-            } catch (e: InterruptedException) {
+            } catch (_: InterruptedException) {
                 AUDIO_EXECUTOR.shutdownNow()
             }
         }
@@ -113,8 +113,6 @@ class VoiceChatAudioPlayer(
     private val isFadingOut = AtomicBoolean(false)
     private var fadeTask: ScheduledFuture<*>? = null
     private var onEndCallback: (() -> Unit)? = null
-
-    private val plugin = Data.instance
 
     init {
         try {
@@ -147,7 +145,7 @@ class VoiceChatAudioPlayer(
                                 while (audioQueue.isNotEmpty() && running.get()) {
                                     try {
                                         Thread.sleep(100)
-                                    } catch (e: InterruptedException) {
+                                    } catch (_: InterruptedException) {
                                         break
                                     }
                                 }

@@ -29,38 +29,6 @@ import kotlin.math.sin
 /**
  * IslandScanner — detects the shoreline of a floating island by casting rays
  * outward from a center point and finding where land meets non-land.
- *
- * ── How the scan works ───────────────────────────────────────────────────────
- *
- * 1. We cast [angleSteps] evenly-spaced rays in all directions (0° … 360°).
- *
- * 2. Each ray walks outward from the center one block at a time using a
- *    Bresenham-style integer step:
- *
- *      Instead of  bx = (dist * cos(angle)).toInt()   ← skips blocks at shallow angles
- *      We use      bx = round(dist * cos(angle))       ← visits every unique column
- *
- *    At each step we ask: is the highest surface block here solid land?
- *    We use HeightMap.WORLD_SURFACE which considers the first non-air block
- *    from the top (including water), so water = not land.
- *
- * 3. We walk the **full radius** without stopping on non-land blocks (gaps,
- *    water channels, interior voids are all skipped). We keep overwriting
- *    edgeBx / edgeBz every time we touch a land block, so after the walk the
- *    stored value is the **furthest land column** the ray visited — the true
- *    outer cliff edge. Stopping at the first air gap would record an interior
- *    cliff instead of the outer shoreline.
- *
- * 4. Rays that never hit land (pointing away from the island) are simply
- *    discarded after [scanRadius] steps.
- *
- * 5. Many adjacent angle steps resolve to the same integer XZ column
- *    (especially near 0°/90°/180°/270°). We deduplicate by XZ key so each
- *    physical block appears in the result at most once.
- *
- * ─────────────────────────────────────────────────────────────────────────────
- *
- * Results are cached by (world, centerX, centerZ). Call [clearCache] to reset.
  */
 object IslandScanner {
 
@@ -256,14 +224,14 @@ object IslandScanner {
 
         // Fresh scan — overwrites cache
         val edgePoints = scan(center, scanRadius, angleSteps, forceRescan = true, verticalTolerance = verticalTolerance)
-        val edgeXZ     = edgePoints.map { packXZ(it.blockX, it.blockZ) }.toHashSet()
+        edgePoints.map { packXZ(it.blockX, it.blockZ) }.toHashSet()
 
         Logger.info("=== IslandScanner debugScan ===")
         Logger.info("  Center: $cx, ${center.blockY}, $cz  world=${world.name}")
         Logger.info("  islandSurfaceY=$centerSurfaceY  verticalTolerance=$verticalTolerance")
         Logger.info("  Radius=$scanRadius  Rays=$angleSteps  Edges=${edgePoints.size}")
         edgePoints.take(5).forEach {
-            Logger.info("    edge @ ${it.blockX}, ${it.blockY.toInt()}, ${it.blockZ}")
+            Logger.info("    edge @ ${it.blockX}, ${it.blockY}, ${it.blockZ}")
         }
 
         val greenDust  = Particle.DustOptions(org.bukkit.Color.fromRGB(0,   220,  60), 1.0f)
@@ -354,7 +322,7 @@ object IslandScanner {
 
         player.sendMessage(mm.deserialize("<gold>First edge blocks (click to tp):"))
         edgePoints.take(5).forEach { loc ->
-            player.sendMessage(mm.deserialize("  <white>/tp ${loc.blockX} ${loc.blockY.toInt()} ${loc.blockZ}"))
+            player.sendMessage(mm.deserialize("  <white>/tp ${loc.blockX} ${loc.blockY} ${loc.blockZ}"))
         }
     }
 

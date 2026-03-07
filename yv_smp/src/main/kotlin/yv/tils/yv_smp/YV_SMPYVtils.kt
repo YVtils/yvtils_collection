@@ -15,7 +15,6 @@ package yv.tils.yv_smp
 import yv.tils.common.permissions.PermissionManager
 import yv.tils.config.language.LanguageProvider
 import yv.tils.utils.data.Data
-import yv.tils.yv_smp.commands.CinematicDebugCommand
 import yv.tils.yv_smp.commands.MusicCommand
 import yv.tils.yv_smp.commands.StartCommand
 import yv.tils.yv_smp.configs.ConfigFile
@@ -38,7 +37,7 @@ class YV_SMPYVtils : Data.YVtilsModule {
 
     override fun onLoad() {
         LanguageProvider.registerEnumStrings<LangStrings>()
-        yv.tils.yv_smp.configs.ConfigFile().registerStrings()
+        ConfigFile().registerStrings()
     }
 
     override fun enablePlugin() {
@@ -67,7 +66,6 @@ class YV_SMPYVtils : Data.YVtilsModule {
     private fun registerCommands() {
         StartCommand()
         MusicCommand()
-        CinematicDebugCommand()
     }
 
     private fun registerListeners() {
@@ -87,7 +85,5 @@ class YV_SMPYVtils : Data.YVtilsModule {
 
     private fun loadConfigs() {
         ConfigFile().loadConfig()
-
-        val masterVolume = ConfigFile.getMasterVolume()
     }
 }

@@ -15,6 +15,7 @@ package yv.tils.yv_smp.configs
 import yv.tils.config.data.ConfigEntry
 import yv.tils.config.data.EntryType
 import yv.tils.config.files.YMLFileUtils
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 
 /**
@@ -71,7 +72,7 @@ class ConfigFile {
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
             if (value != null) {
-                Logger.debug("Loading YV_SMP config key: $key -> $value", 3)
+                Logger.debug("Loading YV_SMP config key: $key -> $value", DEBUGLEVEL.VERBOSE)
                 config[key] = value
             }
         }

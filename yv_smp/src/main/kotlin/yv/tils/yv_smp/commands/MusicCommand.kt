@@ -12,15 +12,10 @@
 
 package yv.tils.yv_smp.commands
 
-import dev.jorel.commandapi.kotlindsl.commandTree
-import dev.jorel.commandapi.kotlindsl.greedyStringArgument
-import dev.jorel.commandapi.kotlindsl.integerArgument
-import dev.jorel.commandapi.kotlindsl.literalArgument
-import dev.jorel.commandapi.kotlindsl.playerExecutor
+import dev.jorel.commandapi.kotlindsl.*
 import yv.tils.config.language.LanguageHandler
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.logic.music.MusicAPI
-import yv.tils.yv_smp.logic.music.MusicHandler
 import yv.tils.yv_smp.permissions.Permissions
 
 /**

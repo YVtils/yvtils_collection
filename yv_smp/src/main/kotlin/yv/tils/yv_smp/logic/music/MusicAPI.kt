@@ -91,7 +91,7 @@ object MusicAPI {
             )
             MusicHandler.playAudio(player, config)
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -126,7 +126,7 @@ object MusicAPI {
             )
             MusicHandler.playAudio(player, config)
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -159,7 +159,7 @@ object MusicAPI {
             )
             MusicHandler.playAudioBroadcast(config)
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -192,7 +192,7 @@ object MusicAPI {
             )
             MusicHandler.playAudioBroadcast(config)
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }

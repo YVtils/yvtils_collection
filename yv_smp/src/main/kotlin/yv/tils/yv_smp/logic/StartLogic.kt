@@ -17,7 +17,6 @@ import org.bukkit.command.CommandSender
 import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.data.Data
 import yv.tils.utils.player.PlayerUtils
-import yv.tils.yv_smp.commands.StartCommand
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.logic.music.MusicAPI
 import yv.tils.yv_smp.logic.start.PhaseHandler
