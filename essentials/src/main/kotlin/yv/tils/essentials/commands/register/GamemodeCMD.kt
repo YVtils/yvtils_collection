@@ -13,49 +13,38 @@
 package yv.tils.essentials.commands.register
 
 import dev.jorel.commandapi.CommandPermission
-import dev.jorel.commandapi.arguments.ArgumentSuggestions
-import dev.jorel.commandapi.kotlindsl.*
+import dev.jorel.commandapi.kotlindsl.anyExecutor
+import dev.jorel.commandapi.kotlindsl.commandTree
+import dev.jorel.commandapi.kotlindsl.multiLiteralArgument
+import dev.jorel.commandapi.kotlindsl.playerProfileArgument
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
 import yv.tils.essentials.commands.handler.GamemodeHandler
+import yv.tils.essentials.permissions.Permissions
+import yv.tils.essentials.utils.CheckArguments
 import yv.tils.utils.data.Data
+import yv.tils.common.language.LangStrings as CommonLangStrings
 
-// TODO: Switch to multiLiteralArgument
 class GamemodeCMD {
     val command = commandTree("gm") {
-        withPermission("yvtils.command.gamemode")
-        withPermission(CommandPermission.OP)
+        withPermission(Permissions.COMMAND_GAMEMODE.permission.name)
         withUsage("gm <gamemode> [player]")
         withAliases("gamemode")
 
-        stringArgument("gamemode", false) {
-            replaceSuggestions(
-                ArgumentSuggestions.strings(
-                    "survival",
-                    "creative",
-                    "adventure",
-                    "spectator",
-                    "0",
-                    "1",
-                    "2",
-                    "3"
-                )
-            )
-            playerProfileArgument("player", true) {
+        multiLiteralArgument("gamemode", "creative", "survival", "adventure", "spectator", "0", "1", "2", "3", optional = false) {
+            playerProfileArgument("player", true) { // TODO: Fix player profile argument not working
                 anyExecutor { sender, args ->
+                    val gamemode = args["gamemode"].toString().lowercase()
+                    val target = args["player"]
 
-                    if (sender !is Player && args[1] == null) {
-                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
-                        return@anyExecutor
-                    }
+                    if (!CheckArguments.checkForTargetArg(sender, target)) return@anyExecutor
 
                     val gmHandler = GamemodeHandler()
 
-                    if (args[1] is Player) {
-                        val target = args[1] as Player
-                        gmHandler.gamemodeSwitch(target, args[0].toString(), sender)
+                    if (target is Player) {
+                        gmHandler.gamemodeSwitch(target, gamemode, sender)
                     } else {
-                        gmHandler.gamemodeSwitch(sender as Player, args[0].toString())
+                        gmHandler.gamemodeSwitch(sender as Player, gamemode)
                     }
                 }
             }

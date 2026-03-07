@@ -18,11 +18,11 @@ import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.stringArgument
 import yv.tils.essentials.commands.handler.GlobalMuteHandler
+import yv.tils.essentials.permissions.Permissions
 
 class GlobalMuteCMD {
     val command = commandTree("globalmute") {
-        withPermission("yvtils.command.globalmute")
-        withPermission(CommandPermission.OP)
+        withPermission(Permissions.COMMAND_GLOBALMUTE.permission.name)
         withUsage("globalmute [state]")
         withAliases("gmute")
 

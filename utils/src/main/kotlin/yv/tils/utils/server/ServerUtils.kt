@@ -19,6 +19,7 @@ import net.kyori.adventure.text.Component
 class ServerUtils {
     companion object {
         var serverInMaintenance: Boolean = false
+        var isPvPEnabled: Boolean = true
         var serverIP: String = ""
         var serverPort: Int = -1
 
@@ -29,10 +30,6 @@ class ServerUtils {
             get() {
                 return Data.instance.server.hasWhitelist()
             }
-
-        fun setServerMaintenance(status: Boolean) {
-            serverInMaintenance = status
-        }
 
         val serverName: String
             get() {
