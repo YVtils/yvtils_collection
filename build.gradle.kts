@@ -66,8 +66,8 @@ subprojects {
 
     tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
         javaLauncher.set(project.extensions.getByType<JavaToolchainService>().launcherFor {
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion.set(JavaLanguageVersion.of(25))
         })
-        jvmArgs("-XX:+AllowEnhancedClassRedefinition")
+//        jvmArgs("-XX:+AllowEnhancedClassRedefinition")
     }
 }
