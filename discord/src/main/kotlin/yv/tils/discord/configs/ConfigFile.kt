@@ -75,6 +75,7 @@ class ConfigFile {
             entries.add(ConfigEntry("syncFeature.chatSync.enabled", EntryType.BOOLEAN, null, true, "Chat sync enabled"))
             entries.add(ConfigEntry("syncFeature.chatSync.permission", EntryType.STRING, null, "PERMISSION", "Chat sync permission"))
             entries.add(ConfigEntry("syncFeature.chatSync.channel", EntryType.STRING, null, "CHANNEL ID", "Chat sync channel"))
+            entries.add(ConfigEntry("syncFeature.chatSync.embedIcon.limit", EntryType.INT, null, 1800, "Set the maximum of custom emojis the discord app can upload. (Discord allows up to 2000, but we reserve 200 for you users usage)"))
             entries.add(ConfigEntry("syncFeature.chatSync.settings.syncMinecraftMessages", EntryType.BOOLEAN, null, true, "Sync MC messages"))
             entries.add(ConfigEntry("syncFeature.chatSync.settings.syncDiscordMessages", EntryType.BOOLEAN, null, true, "Sync Discord messages"))
             entries.add(ConfigEntry("syncFeature.chatSync.settings.syncAdvancements", EntryType.BOOLEAN, null, true, "Sync advancements"))
