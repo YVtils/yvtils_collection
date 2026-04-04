@@ -39,7 +39,7 @@ class PermissionManager {
                     val perm = Permission(
                         p.name,
                         p.description,
-                        if (p.default) PermissionDefault.TRUE else PermissionDefault.FALSE
+                        if (p.default) PermissionDefault.TRUE else PermissionDefault.OP
                     )
                     created[p.name] = perm
                 }

@@ -24,7 +24,7 @@ class PermissionsData {
             get() = PermissionManager.YVtilsPermission(
                 "${permissionBase}.*",
                 "Wildcard permission for all ${CommonYVtils.MODULE.name} permissions",
-                default = true,
+                default = false,
                 children = getPermissionsForWildcard()
             )
 
