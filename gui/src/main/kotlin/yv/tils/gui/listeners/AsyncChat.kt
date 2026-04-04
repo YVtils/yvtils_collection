@@ -27,7 +27,7 @@ import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
 
 class AsyncChat : Listener {
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     fun onEvent(e: AsyncChatEvent) {
         val uuid = e.player.uniqueId
         

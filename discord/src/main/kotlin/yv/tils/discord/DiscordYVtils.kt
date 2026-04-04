@@ -27,13 +27,11 @@ class DiscordYVtils : Data.YVtilsModule {
     companion object {
         val MODULE = Data.YVtilsModuleData(
             "discord",
-            "4.0.0-beta.5",
+            "4.0.0",
             "Discord integration for YVtils",
             "YVtils",
             "",
         )
-
-        var i = 0
     }
 
     override fun onLoad() {

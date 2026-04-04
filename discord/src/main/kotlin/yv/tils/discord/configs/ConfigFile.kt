@@ -15,6 +15,7 @@ package yv.tils.discord.configs
 import yv.tils.config.files.YMLFileUtils
 import yv.tils.config.data.ConfigEntry
 import yv.tils.config.data.EntryType
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 
 // TODO: Add option to allow multiple whitelist channels
@@ -47,7 +48,7 @@ class ConfigFile {
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
 
-            Logger.debug("Loading config key: $key -> $value")
+            Logger.debug("Loading config key: $key -> $value", DEBUGLEVEL.SPAM)
             config[key] = value as Any
         }
     }
@@ -75,6 +76,7 @@ class ConfigFile {
             entries.add(ConfigEntry("syncFeature.chatSync.enabled", EntryType.BOOLEAN, null, true, "Chat sync enabled"))
             entries.add(ConfigEntry("syncFeature.chatSync.permission", EntryType.STRING, null, "PERMISSION", "Chat sync permission"))
             entries.add(ConfigEntry("syncFeature.chatSync.channel", EntryType.STRING, null, "CHANNEL ID", "Chat sync channel"))
+            entries.add(ConfigEntry("syncFeature.chatSync.embedIcon.limit", EntryType.INT, null, 1800, "Set the maximum number of custom emojis the Discord app can upload. Discord allows up to 2000; the default of 1800 leaves room for server and user emoji usage."))
             entries.add(ConfigEntry("syncFeature.chatSync.settings.syncMinecraftMessages", EntryType.BOOLEAN, null, true, "Sync MC messages"))
             entries.add(ConfigEntry("syncFeature.chatSync.settings.syncDiscordMessages", EntryType.BOOLEAN, null, true, "Sync Discord messages"))
             entries.add(ConfigEntry("syncFeature.chatSync.settings.syncAdvancements", EntryType.BOOLEAN, null, true, "Sync advancements"))
