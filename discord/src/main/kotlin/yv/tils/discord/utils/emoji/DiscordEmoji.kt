@@ -16,8 +16,10 @@ import net.dv8tion.jda.api.entities.Icon
 import net.dv8tion.jda.api.entities.emoji.ApplicationEmoji
 import okio.IOException
 import org.bukkit.entity.Player
+import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.logic.AppLogic
 import yv.tils.discord.utils.emoji.EmojiUtils.Companion.playerEmojis
+import yv.tils.utils.logger.Logger
 import yv.tils.utils.player.PlayerUtils
 import java.io.File
 import java.net.URI
@@ -25,12 +27,33 @@ import java.net.URI
 class DiscordEmoji {
     companion object {
         var persistentEmojis = true
+        val emojiLimit: Int
+            get() {
+                val defaultVal = 1800
+                val configVal = ConfigFile.getValueAsInt("syncFeature.chatSync.embedIcon.limit")
+
+                when (configVal) {
+                    null, defaultVal -> {
+                        return defaultVal
+                    }
+                    !in 1..2000 -> {
+                        Logger.warn("Found invalid emoji limit in config: $configVal.")
+                        Logger.warn("Please note that the emoji limit must be between 1 and 2000 and is recommended to be at least 100 to avoid hitting Discord's limitations.")
+                        Logger.warn("Reverting to default emoji limit: $defaultVal.")
+                        return defaultVal
+                    }
+                    else -> {
+                        return configVal
+                    }
+                }
+            }
     }
 
     /**
      * Sets the persistent emojis based on the current application emojis.
-     * If there are more than 1800 emojis, it disables persistent emojis and cleans up old emojis.
-     * If there are less than 1800 emojis, it enables persistent emojis and keeps them for 90 days.
+     * Uses the configured emoji limit as the threshold for enabling or disabling persistent emojis.
+     * If there are more than the limit, it disables persistent emojis and cleans up old emojis.
+     * If there are less than the limit, it enables persistent emojis and keeps them for 90 days.
      * @throws RuntimeException if the emoji cleanup fails.
      */
     fun setPersistentEmojis() {
@@ -38,12 +61,12 @@ class DiscordEmoji {
         val emojiCount = emojis.count { it.name.startsWith("yv_") }
 
         try {
-            if (emojiCount > 1800) {
+            if (emojiCount > emojiLimit) {
                 persistentEmojis = false
                 cleanupAppEmojis(emojis = emojis)
             } else {
                 persistentEmojis = true
-                cleanupAppEmojis(90 * 24 * 60 * 60 * 1000L, emojis) // Keep emojis for 90 days if less than 1800 emojis
+                cleanupAppEmojis(90 * 24 * 60 * 60 * 1000L, emojis) // Keep emojis for 90 days if less than defined limit
             }
         } catch (e: Exception) {
             throw RuntimeException("Failed to set persistent emojis: ${e.message}", e)

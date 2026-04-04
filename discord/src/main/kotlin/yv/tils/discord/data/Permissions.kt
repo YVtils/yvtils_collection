@@ -23,7 +23,7 @@ class PermissionsData {
             get() = PermissionManager.YVtilsPermission(
                 "${permissionBase}.*",
                 "Wildcard permission for all ${DiscordYVtils.MODULE.name} permissions",
-                default = true,
+                default = false,
                 children = getPermissionsForWildcard()
             )
 

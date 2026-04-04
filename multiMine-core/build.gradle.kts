@@ -20,11 +20,11 @@ dependencies {
     implementation(project(":stats"))
 }
 
-val version = "2.0.0-beta.7"
+val version = "2.0.0"
 
 tasks {
     runServer {
-        minecraftVersion("1.21.9")
+        minecraftVersion("26.1.1")
     }
 
     shadowJar {
