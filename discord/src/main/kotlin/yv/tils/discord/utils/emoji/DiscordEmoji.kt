@@ -51,7 +51,7 @@ class DiscordEmoji {
 
     /**
      * Sets the persistent emojis based on the current application emojis.
-     * Uses set emoji limit to define if more emojis than allowed to exist.
+     * Uses the configured emoji limit as the threshold for enabling or disabling persistent emojis.
      * If there are more than the limit, it disables persistent emojis and cleans up old emojis.
      * If there are less than the limit, it enables persistent emojis and keeps them for 90 days.
      * @throws RuntimeException if the emoji cleanup fails.
