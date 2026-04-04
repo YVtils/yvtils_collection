@@ -30,27 +30,18 @@ class MultiMineCommand {
         withUsage("multiMine <add/remove/addMultiple/removeMultiple> [block]")
         withAliases("mm")
 
-        stringArgument("action") {
+        multiLiteralArgument("action", "add", "remove", "addMultiple", "removeMultiple", "settings") {
             withPermission(Permissions.COMMAND_MULTIMINE_MANAGE.permission.name)
-            replaceSuggestions(
-                ArgumentSuggestions.strings(
-                    "add",
-                    "remove",
-                    "addMultiple",
-                    "removeMultiple",
-                    "gui",
-                )
-            )
 
             itemStackArgument("block", true) {
                 anyExecutor { sender, args ->
-                    when (args[0]) {
+                    when (args["action"]) {
                         "add" -> {
-                            blockManage.addBlock(sender, args[1])
+                            blockManage.addBlock(sender, args["block"])
                         }
 
                         "remove" -> {
-                            blockManage.removeBlock(sender, args[1])
+                            blockManage.removeBlock(sender, args["block"])
                         }
 
                         "addMultiple" -> {
@@ -61,7 +52,7 @@ class MultiMineCommand {
                             blockManage.removeMultiple(sender)
                         }
 
-                        "gui" -> {
+                        "settings" -> {
                             if (sender is Player) {
                                 manageGUI.openGUI(sender)
                             } else {
