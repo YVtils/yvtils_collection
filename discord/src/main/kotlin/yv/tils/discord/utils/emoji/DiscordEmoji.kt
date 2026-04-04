@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.entities.Icon
 import net.dv8tion.jda.api.entities.emoji.ApplicationEmoji
 import okio.IOException
 import org.bukkit.entity.Player
-import org.jline.utils.Log
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.logic.AppLogic
 import yv.tils.discord.utils.emoji.EmojiUtils.Companion.playerEmojis

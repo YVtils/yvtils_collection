@@ -15,6 +15,7 @@ package yv.tils.discord.configs
 import yv.tils.config.files.YMLFileUtils
 import yv.tils.config.data.ConfigEntry
 import yv.tils.config.data.EntryType
+import yv.tils.utils.logger.DEBUGLEVEL
 import yv.tils.utils.logger.Logger
 
 // TODO: Add option to allow multiple whitelist channels
@@ -47,7 +48,7 @@ class ConfigFile {
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
 
-            Logger.debug("Loading config key: $key -> $value")
+            Logger.debug("Loading config key: $key -> $value", DEBUGLEVEL.SPAM)
             config[key] = value as Any
         }
     }
