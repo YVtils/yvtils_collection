@@ -17,7 +17,7 @@ import org.bukkit.Sound
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 class GamemodeHandler {
     /**
@@ -60,7 +60,7 @@ class GamemodeHandler {
                         "command.usage",
                         sender,
                         params = mapOf(
-                            "prefix" to Data.prefix,
+                            "prefix" to Core.prefix,
                             "command" to "/gm <survival/creative/adventure/spectator> [player]"
                         )
                     )
@@ -77,7 +77,7 @@ class GamemodeHandler {
                 "command.gamemode.self",
                 player.uniqueId,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "gamemode" to LanguageHandler.getRawMessage(gamemodeName, player.uniqueId),
                 )
             ),
@@ -89,7 +89,7 @@ class GamemodeHandler {
                     "command.gamemode.other",
                     sender,
                     mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                         "gamemode" to LanguageHandler.getRawMessage(gamemodeName, sender),
                         "player" to player.name
                     )

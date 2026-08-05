@@ -16,7 +16,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import yv.tils.config.files.FileUtils.Companion.loadFilesFromFolder
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.io.File
 import java.io.FileNotFoundException
@@ -30,7 +30,7 @@ class JSONFileUtils {
                 File(path)
             } else {
                 val relPath = path.trimStart('/','\\')
-                File(Data.pluginFolder, relPath)
+                File(Core.pluginFolder, relPath)
             }
 
             if (!file.exists()) throw FileNotFoundException("File not found: $path")
@@ -111,7 +111,7 @@ class JSONFileUtils {
             val jsonString = json.encodeToString(content)
             val jsonObject = json.decodeFromString(JsonObject.serializer(), jsonString)
             val relPath = path.trimStart('/','\\')
-            val file = File(Data.pluginFolder, relPath)
+            val file = File(Core.pluginFolder, relPath)
 
             Logger.debug("JSON object: $jsonObject", 3)
 

@@ -16,12 +16,13 @@ import yv.tils.server.configs.ConfigFile
 import yv.tils.server.language.RegisterStrings
 import yv.tils.server.listeners.*
 import yv.tils.server.maintenance.MaintenanceCMD
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 import yv.tils.utils.logger.Logger
 
-class ServerYVtils : Data.YVtilsModule {
+class ServerYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "server",
             "1.0.0",
             "Server module for YVtils",
@@ -36,7 +37,7 @@ class ServerYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
 
         registerCommands()
         registerListeners()
@@ -58,7 +59,7 @@ class ServerYVtils : Data.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(PlayerJoin(), plugin)
@@ -72,7 +73,7 @@ class ServerYVtils : Data.YVtilsModule {
     }
 
     private fun registerPermissions() {
-        Data.instance.server.pluginManager
+        Core.instance.server.pluginManager
 
     }
 

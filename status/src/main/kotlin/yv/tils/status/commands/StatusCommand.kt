@@ -12,7 +12,7 @@
 
 package yv.tils.status.commands
 
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
@@ -60,7 +60,7 @@ class StatusCommand {
                 withPermission(CommandPermission.OP)
                 anyExecutor { sender, args ->
                     if (sender !is Player && args[0] == null) {
-                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
+                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Core.prefix)))
                         return@anyExecutor
                     }
 
@@ -70,7 +70,7 @@ class StatusCommand {
                                 "command.status.clear.notAllowed",
                                 sender,
                                 mapOf(
-                                    "prefix" to Data.prefix,
+                                    "prefix" to Core.prefix,
                                 )
                             ))
                             return@anyExecutor

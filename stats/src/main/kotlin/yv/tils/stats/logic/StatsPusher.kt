@@ -17,8 +17,8 @@ import kotlinx.serialization.json.Json
 import org.bukkit.Bukkit
 import yv.tils.stats.configs.ConfigFile
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.data.Data
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.modules.Core
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
@@ -305,7 +305,7 @@ object StatsPusher {
                 is PushResult.Error -> {
                     consecutiveFailures.incrementAndGet()
                     Logger.warn("[Stats] Failed to push stats: ${result.message} (code: ${result.code})")
-                    Logger.debug("[Stats] Payload was: $jsonPayload", DEBUGLEVEL.DETAILED)
+                    Logger.debug("[Stats] Payload was: $jsonPayload", DEBUG_LEVEL.DETAILED)
                 }
                 else -> {}
             }
@@ -337,7 +337,7 @@ object StatsPusher {
         }
 
         val pluginVersion = try {
-            Data.yvtilsVersion
+            Core.yvtilsVersion
         } catch (e: Exception) {
             "Unknown"
         }

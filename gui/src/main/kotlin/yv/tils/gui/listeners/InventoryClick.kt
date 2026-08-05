@@ -29,7 +29,7 @@ import yv.tils.gui.logic.ConfigGUI
 import yv.tils.gui.logic.GuiHolder
 import yv.tils.gui.logic.ListContext
 import yv.tils.gui.logic.ListGUI
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
 
@@ -173,7 +173,7 @@ class InventoryClickListener : Listener {
                         targetEntry.value = list.toList()
                         holder.dirty = true
                     }
-                    Bukkit.getScheduler().runTask(Data.instance, Runnable {
+                    Bukkit.getScheduler().runTask(Core.instance, Runnable {
                         ConfigGUI.createGUI(player, holder.configName, holder.entries, holder.onSave, holder)
                     })
                 }

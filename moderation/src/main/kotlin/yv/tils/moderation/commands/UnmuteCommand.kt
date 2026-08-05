@@ -24,7 +24,7 @@ import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.UnmuteLogic
 import yv.tils.moderation.utils.TargetUtils
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.CompletableFuture
 
@@ -61,7 +61,7 @@ class UnmuteCommand {
                         announceTask.cancel()
                         AsyncActionAnnounce.announcePlayerError(sender)
                         Logger.error("Failed to fetch player profiles for the command")
-                        Logger.debug("Error details", throwable, DEBUGLEVEL.DETAILED)
+                        Logger.debug("Error details", DEBUG_LEVEL.DETAILED, throwable)
                         null
                     }
                 }

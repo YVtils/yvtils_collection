@@ -12,7 +12,7 @@
 
 package yv.tils.essentials.commands.handler
 
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.message.MessageUtils
 import org.bukkit.Bukkit
@@ -33,7 +33,7 @@ class SeedHandler {
         if (seedMap.keys.size == 1) {
             sender.sendMessage(
                 MessageUtils.convert(
-                    Data.prefix + " Seed: <gray>[<green><click:copy_to_clipboard:${seedMap.keys.first()}><hover:show_text:'${
+                    Core.prefix + " Seed: <gray>[<green><click:copy_to_clipboard:${seedMap.keys.first()}><hover:show_text:'${
                         LanguageHandler.getRawMessage(
                             "text.action.copy",
                             sender,
@@ -57,7 +57,7 @@ class SeedHandler {
 
             sender.sendMessage(
                 MessageUtils.convert(
-                    Data.prefix + " Seeds:<newline>"
+                    Core.prefix + " Seeds:<newline>"
                 ).append(
                     MessageUtils.convert(
                         seedList.joinToString("<newline>")

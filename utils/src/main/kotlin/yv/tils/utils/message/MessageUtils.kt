@@ -15,49 +15,49 @@ package yv.tils.utils.message
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
-import yv.tils.utils.data.Data
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.modules.Core
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
 class MessageUtils {
     companion object {
         fun convert(text: String?): Component {
-            Logger.debug("Converting text to Component: $text", DEBUGLEVEL.SPAM)
+            Logger.debug("Converting text to Component: $text", DEBUG_LEVEL.SPAM)
             return text?.let { MiniMessage.miniMessage().deserialize(it) } ?: Component.empty()
         }
 
         fun convert(text: Component?): String {
-            Logger.debug("Converting Component to text: $text", DEBUGLEVEL.SPAM)
+            Logger.debug("Converting Component to text: $text", DEBUG_LEVEL.SPAM)
             return text?.let { MiniMessage.miniMessage().serialize(it) } ?: ""
         }
 
         fun convert(textList: List<String>): List<Component> {
-            Logger.debug("Converting list of text to Component: $textList", DEBUGLEVEL.SPAM)
+            Logger.debug("Converting list of text to Component: $textList", DEBUG_LEVEL.SPAM)
             return textList.map { convert(it) }
         }
 
         fun convertChatMessage(text: Component): Component {
-            Logger.debug("Converting chat message to Component: $text", DEBUGLEVEL.SPAM)
+            Logger.debug("Converting chat message to Component: $text", DEBUG_LEVEL.SPAM)
             return convert(strip(text))
         }
 
         fun strip(text: String?): String {
-            Logger.debug("Stripping text: $text", DEBUGLEVEL.SPAM)
+            Logger.debug("Stripping text: $text", DEBUG_LEVEL.SPAM)
             return text?.let { PlainTextComponentSerializer.plainText().serialize(convert(text)) } ?: ""
         }
 
         fun strip(text: Component?): String {
-            Logger.debug("Stripping Component: $text", DEBUGLEVEL.SPAM)
+            Logger.debug("Stripping Component: $text", DEBUG_LEVEL.SPAM)
             return text?.let { PlainTextComponentSerializer.plainText().serialize(text) } ?: ""
         }
 
         fun stripChatMessage(text: Component): String {
-            Logger.debug("Stripping chat message: $text", DEBUGLEVEL.SPAM)
+            Logger.debug("Stripping chat message: $text", DEBUG_LEVEL.SPAM)
             return strip(strip(text))
         }
 
         fun handleLore(text: String): List<Component> {
-            Logger.debug("Handling lore: $text", DEBUGLEVEL.SPAM)
+            Logger.debug("Handling lore: $text", DEBUG_LEVEL.SPAM)
             val lore = mutableListOf<Component>()
             val mm = MiniMessage.miniMessage()
 
@@ -97,35 +97,35 @@ class MessageUtils {
         }
 
         fun handleLore(text: Component): List<Component> {
-            Logger.debug("Handling component lore: $text", DEBUGLEVEL.SPAM)
+            Logger.debug("Handling component lore: $text", DEBUG_LEVEL.SPAM)
             return handleLore(convert(text))
         }
 
         fun joinedConvert(vararg text: String): Component {
-            Logger.debug("Joining and converting text: ${text.joinToString(";")}", DEBUGLEVEL.SPAM)
+            Logger.debug("Joining and converting text: ${text.joinToString(";")}", DEBUG_LEVEL.SPAM)
             val joinedText = text.joinToString("")
             return convert(joinedText)
         }
 
         fun replacer(inPut: Component, replace: Map<String, Any>): Component {
-            Logger.debug("InPut: $inPut", DEBUGLEVEL.SPAM)
-            Logger.debug("Replace: $replace", DEBUGLEVEL.SPAM)
+            Logger.debug("InPut: $inPut", DEBUG_LEVEL.SPAM)
+            Logger.debug("Replace: $replace", DEBUG_LEVEL.SPAM)
 
             val text = convert(inPut)
             val outPut = replacerLogic(text, replace)
 
-            Logger.debug("Output: $outPut", DEBUGLEVEL.SPAM)
+            Logger.debug("Output: $outPut", DEBUG_LEVEL.SPAM)
 
             return outPut
         }
 
         fun replacer(inPut: String, replace: Map<String, Any>): Component {
-            Logger.debug("InPut: $inPut", DEBUGLEVEL.SPAM)
-            Logger.debug("Replace: $replace", DEBUGLEVEL.SPAM)
+            Logger.debug("InPut: $inPut", DEBUG_LEVEL.SPAM)
+            Logger.debug("Replace: $replace", DEBUG_LEVEL.SPAM)
 
             val outPut = replacerLogic(inPut, replace)
 
-            Logger.debug("Output: $outPut", DEBUGLEVEL.SPAM)
+            Logger.debug("Output: $outPut", DEBUG_LEVEL.SPAM)
 
             return outPut
         }
@@ -138,7 +138,7 @@ class MessageUtils {
                 text = text.replace(oldString, replace[i].toString())
             }
 
-            text = text.replace("<prefix>", Data.prefix)
+            text = text.replace("<prefix>", Core.prefix)
 
             if (text.startsWith(" ")) {
                 text = text.replaceFirst(" ", "")

@@ -24,7 +24,7 @@ class MSGCommand {
         withUsage("msg <player> <message>")
         withAliases("yv/tils/message", "tell", "whisper", "dm", "w")
 
-        playerArgument("yv/tils/player") {
+        entitySelectorArgumentOnePlayer("yv/tils/player") {
             greedyStringArgument("yv/tils/message") {
                 anyExecutor { sender, args ->
                     val target = args[0] as Player

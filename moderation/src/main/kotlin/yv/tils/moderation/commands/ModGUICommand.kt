@@ -38,7 +38,7 @@ class ModGUICommand {
 //            }.exceptionally { throwable ->
 //                AsyncActionAnnounce.announcePlayerError(sender)
 //                Logger.error("Failed to fetch player profiles for the command")
-//                Logger.debug("Error details", throwable, DEBUGLEVEL.DETAILED)
+//                Logger.debug("Error details", throwable, DEBUG_LEVEL.DETAILED)
 //                null
 //            }
             }

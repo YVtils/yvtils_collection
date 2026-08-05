@@ -18,7 +18,7 @@ import dev.jorel.commandapi.kotlindsl.*
 import yv.tils.config.language.LanguageHandler
 import org.bukkit.entity.Player
 import yv.tils.essentials.commands.handler.SpeedHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 class SpeedCMD {
     private val speedHandler = SpeedHandler()
@@ -57,7 +57,7 @@ class SpeedCMD {
             playerProfileArgument("player", true) {
                 anyExecutor { sender, args ->
                     if (sender !is Player && args[1] == null) {
-                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
+                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Core.prefix)))
                         return@anyExecutor
                     }
 
@@ -76,7 +76,7 @@ class SpeedCMD {
             playerProfileArgument("player", true) {
                 anyExecutor { sender, args ->
                     if (sender !is Player && args[1] == null) {
-                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
+                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Core.prefix)))
                         return@anyExecutor
                     }
 

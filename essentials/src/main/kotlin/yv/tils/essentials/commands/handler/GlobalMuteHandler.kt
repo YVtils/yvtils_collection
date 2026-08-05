@@ -17,7 +17,7 @@ import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 
 class GlobalMuteHandler {
@@ -82,7 +82,7 @@ class GlobalMuteHandler {
                         "command.globalmute.enable",
                         player.uniqueId,
                         params = mapOf(
-                            "prefix" to Data.prefix,
+                            "prefix" to Core.prefix,
                         )
                     )
                 )
@@ -92,7 +92,7 @@ class GlobalMuteHandler {
                         "command.globalmute.disable",
                         player.uniqueId,
                         params = mapOf(
-                            "prefix" to Data.prefix,
+                            "prefix" to Core.prefix,
                         )
                     )
                 )
@@ -103,14 +103,14 @@ class GlobalMuteHandler {
             Logger.info(LanguageHandler.getMessage(
                 "command.globalmute.enable",
                 params = mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                 )
             ))
         } else {
             Logger.info(LanguageHandler.getMessage(
                 "command.globalmute.disable",
                 params = mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                 )
             ))
         }
@@ -128,7 +128,7 @@ class GlobalMuteHandler {
                     "command.globalmute.already",
                     sender,
                     params = mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                     )
                 )
             )
@@ -152,7 +152,7 @@ class GlobalMuteHandler {
                     "globalmute.try_to_write",
                     e.player.uniqueId,
                     params = mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                     )
                 )
             )

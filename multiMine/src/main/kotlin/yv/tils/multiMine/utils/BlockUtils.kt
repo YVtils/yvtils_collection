@@ -19,8 +19,8 @@ import org.bukkit.inventory.ItemStack
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.logic.LeaveDecayHandler
 import yv.tils.multiMine.utils.ToolUtils.Companion.toolBroke
-import yv.tils.utils.data.Data
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.modules.Core
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -79,7 +79,7 @@ class BlockUtils {
 
         // Check break limit BEFORE attempting to break
         if (brokenMap[player.uniqueId]!!.load() >= breakLimit) {
-            Logger.debug("Break limit reached for ${player.name}: ${brokenMap[player.uniqueId]}/$breakLimit",DEBUGLEVEL.DETAILED)
+            Logger.debug("Break limit reached for ${player.name}: ${brokenMap[player.uniqueId]}/$breakLimit",DEBUG_LEVEL.DETAILED)
             return false
         }
 
@@ -97,7 +97,7 @@ class BlockUtils {
             }
 
             brokenMap[player.uniqueId]?.incrementAndFetch()
-            Logger.debug("Block broken by ${player.name}. Count: ${brokenMap[player.uniqueId]}/$breakLimit",DEBUGLEVEL.DETAILED)
+            Logger.debug("Block broken by ${player.name}. Count: ${brokenMap[player.uniqueId]}/$breakLimit",DEBUG_LEVEL.DETAILED)
 
             block.breakNaturally(item, true, true)
             return true
@@ -171,7 +171,7 @@ class BlockUtils {
                     }
                     tasksScheduled++
 
-                    Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+                    Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                         try {
                             if (breakBlock(newBlock, player, item, customBlockList)) {
                                 area.include(newLoc.blockX, newLoc.blockY, newLoc.blockZ)

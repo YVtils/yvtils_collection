@@ -24,7 +24,7 @@ import yv.tils.stats.logic.StatsPusher
 import yv.tils.stats.logic.StatsService
 import yv.tils.stats.registry.StatsRegistry
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Module
 import yv.tils.utils.logger.Logger
 
 /**
@@ -49,9 +49,9 @@ import yv.tils.utils.logger.Logger
  * - [markOptIn] - Set opt-in decision
  * - [requestOptInPrompt] - Show opt-in prompt to admin
  */
-class StatsYVtils : Data.YVtilsModule {
+class StatsYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "stats",
             "1.0.0-beta.1",
             "Stats module for YVtils",
@@ -232,7 +232,7 @@ class StatsYVtils : Data.YVtilsModule {
 
             // Used plugins list
             val pluginsHandle = StatsRegistry.registerList("used_yvtils_plugins", "List of YVtils modules in use")
-            pluginsHandle?.set(Data.getModuleNames(sorted = true))
+            pluginsHandle?.set(Module.getModuleNames(sort = true))
 
             // Server version
             val versionHandle = StatsRegistry.registerString("server_version", "Paper/Bukkit server version")
@@ -277,7 +277,7 @@ class StatsYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
 
         registerCommands()
         registerCoroutines()
@@ -299,7 +299,7 @@ class StatsYVtils : Data.YVtilsModule {
         // Update module list after all modules are loaded
         if (isOptedIn()) {
             val pluginsHandle = StatsRegistry.registerList("used_yvtils_plugins", "List of YVtils modules in use")
-            pluginsHandle?.set(Data.getModuleNames(sorted = true))
+            pluginsHandle?.set(Module.getModuleNames(sort = true))
         }
     }
 
@@ -310,7 +310,7 @@ class StatsYVtils : Data.YVtilsModule {
         // Clear registry
         StatsRegistry.clear()
 
-        Data.removeModule(MODULE)
+        Module.removeModule(MODULE)
         Logger.info("[Stats] Module disabled")
     }
 

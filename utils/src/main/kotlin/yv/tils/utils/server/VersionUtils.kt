@@ -12,7 +12,7 @@
 
 package yv.tils.utils.server
 
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 
 
@@ -23,8 +23,8 @@ class VersionUtils {
     }
 
     fun loadServerVersion() {
-        serverVersion = Data.instance.server.minecraftVersion
-        isViaVersion = Data.instance.server.pluginManager.getPlugin("ViaVersion") != null
+        serverVersion = Core.instance.server.minecraftVersion
+        isViaVersion = Core.instance.server.pluginManager.getPlugin("ViaVersion") != null
 
         Logger.debug("Server is running on version: $serverVersion${if (isViaVersion) " with ViaVersion" else ""}")
     }

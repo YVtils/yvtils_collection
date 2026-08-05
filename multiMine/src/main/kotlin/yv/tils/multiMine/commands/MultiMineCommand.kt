@@ -20,7 +20,7 @@ import yv.tils.multiMine.data.Permissions
 import yv.tils.multiMine.logic.BlockManage
 import yv.tils.multiMine.logic.ManageGUI
 import yv.tils.multiMine.logic.MultiMineHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 class MultiMineCommand {
     val blockManage = BlockManage()
@@ -58,7 +58,7 @@ class MultiMineCommand {
                             } else {
                                 sender.sendMessage(LanguageHandler.getMessage(
                                     "command.executor.notPlayer",
-                                    params = mapOf("prefix" to Data.prefix)
+                                    params = mapOf("prefix" to Core.prefix)
                                 ))
                             }
                         }
@@ -69,7 +69,7 @@ class MultiMineCommand {
                                     "command.usage",
                                     sender,
                                     params = mapOf(
-                                        "prefix" to Data.prefix,
+                                        "prefix" to Core.prefix,
                                         "command" to "/mm <add/remove/addMultiple/removeMultiple> [block]"
                                     )
                                 )

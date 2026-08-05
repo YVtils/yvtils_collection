@@ -18,11 +18,12 @@ import org.bukkit.permissions.PermissionDefault
 import yv.tils.essentials.commands.register.*
 import yv.tils.essentials.language.RegisterStrings
 import yv.tils.essentials.listeners.*
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 
-class EssentialYVtils : Data.YVtilsModule {
+class EssentialYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "essentials",
             "1.0.0",
             "Essentials module for YVtils",
@@ -36,7 +37,7 @@ class EssentialYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
 
         unregisterCommands()
 
@@ -70,7 +71,7 @@ class EssentialYVtils : Data.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(AsyncChat(), plugin)
@@ -81,7 +82,7 @@ class EssentialYVtils : Data.YVtilsModule {
     }
 
     private fun registerPermissions() {
-        val pm = Data.instance.server.pluginManager
+        val pm = Core.instance.server.pluginManager
         pm.addPermission(Permission.loadPermission("yvtils.bypass.globalmute", mapOf(
             "description" to "Bypass the global mute",
             "default" to PermissionDefault.OP

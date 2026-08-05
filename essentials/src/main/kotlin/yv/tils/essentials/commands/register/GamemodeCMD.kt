@@ -18,7 +18,7 @@ import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
 import yv.tils.essentials.commands.handler.GamemodeHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 // TODO: Switch to multiLiteralArgument
 class GamemodeCMD {
@@ -45,7 +45,7 @@ class GamemodeCMD {
                 anyExecutor { sender, args ->
 
                     if (sender !is Player && args[1] == null) {
-                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
+                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Core.prefix)))
                         return@anyExecutor
                     }
 

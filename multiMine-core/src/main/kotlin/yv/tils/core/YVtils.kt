@@ -21,12 +21,14 @@ import yv.tils.config.ConfigYVtils
 import yv.tils.gui.GUIYVtils
 import yv.tils.migration.MigrationYVtils
 import yv.tils.multiMine.MultiMineYVtils
-import yv.tils.stats.StatsYVtils
 import yv.tils.utils.UtilsYVtils
-import yv.tils.utils.data.Data
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 
-class YVtils: JavaPlugin() {
+@Suppress("UnstableApiUsage")
+class YVtils : JavaPlugin() {
     companion object {
         val yvtilsVersion = YVtils().pluginMeta.version
         lateinit var instance: YVtils
@@ -37,7 +39,7 @@ class YVtils: JavaPlugin() {
         const val PLUGIN_COLOR = "#66cbe8"
     }
 
-    private val modules: List<Data.YVtilsModule> = listOf(
+    private val modules: List<Module.YVtilsModule> = listOf(
         ConfigYVtils(),
         UtilsYVtils(),
         MigrationYVtils(), // TODO: Remove with 2.1.0
@@ -51,15 +53,17 @@ class YVtils: JavaPlugin() {
         instance = this
 
         Logger.logger = componentLogger
-        Logger.debug("$PLUGIN_NAME_FULL v$yvtilsVersion is loading...")
+        Logger.debug("$PLUGIN_NAME_FULL v$yvtilsVersion is loading...", DEBUG_LEVEL.BASIC)
 
-        val core = Data.YVtilsCore(
+        val core = Core.YVtilsCore(
             description = "",
             url = "https://modrinth.com/plugin/yvtils_mm",
 
             dependencies = listOf(
                 "multiMine"
             ),
+
+            supportedVersions = listOf(),
 
             name = PLUGIN_NAME,
             colorHex = PLUGIN_COLOR,
@@ -71,7 +75,7 @@ class YVtils: JavaPlugin() {
             key = NamespacedKey(this, "yvtils"),
         )
 
-        Data.initCore(core)
+        Core.initCore(core)
 
         CommandAPI.onLoad(
             CommandAPIPaperConfig(instance)
@@ -90,7 +94,7 @@ class YVtils: JavaPlugin() {
     }
 
     override fun onEnable() {
-        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is starting...")
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is starting...", DEBUG_LEVEL.BASIC)
 
         try {
             modules.forEach { it.enablePlugin() }
@@ -105,7 +109,7 @@ class YVtils: JavaPlugin() {
     }
 
     fun onLateEnablePlugin() {
-        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is performing late enable...")
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is performing late enable...", DEBUG_LEVEL.BASIC)
 
         try {
             modules.forEach { it.onLateEnablePlugin() }
@@ -113,10 +117,49 @@ class YVtils: JavaPlugin() {
             Logger.error("Error during YVtils late startup: ${e.message}")
             e.printStackTrace()
         }
+
+        if (!CheckVersion().serverVersion()) {
+            Logger.error("----------")
+            Logger.error("YVtils does not support the current server version (${Core.instance.server.version}).")
+            Logger.error("Please use a supported server version: ${Core.core.supportedVersions.joinToString(", ")}")
+            Logger.error("If you are still having issues, please contact the YVtils support team.")
+            Logger.error("You can find the support team on our Discord server: https://yvtils.net/yvtils/support")
+            Logger.error("----------")
+            Logger.error("The plugin will now disable to prevent further issues.")
+
+            instance.server.pluginManager.disablePlugin(instance)
+            return
+        }
+
+        val dependencyCheck = CheckRequirements().checkModules()
+        if (!dependencyCheck.first) {
+            Logger.error("----------")
+            Logger.error("Missing dependency: ${dependencyCheck.second}")
+            Logger.error("The YVtils Core, of the plugin you are using, requires this dependency to function properly.")
+            Logger.error("Please check if you filled in required values into the config files.")
+            Logger.error("If you are still having issues, please contact the YVtils support team.")
+            Logger.error("You can find the support team on our Discord server: https://yvtils.net/yvtils/support")
+            Logger.error("----------")
+            Logger.error("The plugin will now disable to prevent further issues.")
+
+            instance.server.pluginManager.disablePlugin(instance)
+            return
+        }
+
+        val loadedModules = Module.getModulesString(true)
+
+        Logger.info("----------")
+        Logger.info("YVtils Collection by YVtils")
+        Logger.info("$PLUGIN_NAME v$yvtilsVersion has been enabled successfully!")
+        Logger.info("The following modules have been enabled:")
+        Logger.info(loadedModules)
+        Logger.info("If you are having issues, please contact the YVtils support team.")
+        Logger.info("You can find the support team on our Discord server: https://yvtils.net/yvtils/support")
+        Logger.info("----------")
     }
 
     override fun onDisable() {
-        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is stopping...")
+        Logger.debug("$PLUGIN_NAME v$yvtilsVersion is stopping...", DEBUG_LEVEL.BASIC)
 
         try {
             modules.forEach { it.disablePlugin() }
@@ -124,5 +167,10 @@ class YVtils: JavaPlugin() {
             Logger.error("Error during YVtils shutdown: ${e.message}")
             e.printStackTrace()
         }
+
+        Logger.info("----------")
+        Logger.info("YVtils Collection by YVtils")
+        Logger.info("$PLUGIN_NAME v$yvtilsVersion has been disabled successfully!")
+        Logger.info("----------")
     }
 }

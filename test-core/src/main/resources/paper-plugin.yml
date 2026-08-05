@@ -1,6 +1,7 @@
 name: TEST-YVTILS-CORE
-version: 0.0.1-dev
+version: ${version}
 main: yv.tils.core.YVtils
+loader: yv.tils.core.loader.DynamicModuleLoader
 api-version: '1.21'
 author: YVtils
 website: 'https://yvtils.net/yvtils/'

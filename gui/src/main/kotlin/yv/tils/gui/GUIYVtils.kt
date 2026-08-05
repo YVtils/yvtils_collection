@@ -17,11 +17,12 @@ import yv.tils.gui.language.RegisterStrings
 import yv.tils.gui.listeners.AsyncChat
 import yv.tils.gui.listeners.InventoryClickListener
 import yv.tils.gui.listeners.InventoryClose
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 
-class GUIYVtils : Data.YVtilsModule {
+class GUIYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "gui",
             "1.0.0",
             "GUI module for YVtils",
@@ -35,14 +36,14 @@ class GUIYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
         registerListeners()
     }
 
     override fun onLateEnablePlugin() {}
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
         pm.registerEvents(InventoryClickListener(), plugin)
         pm.registerEvents(InventoryClose(), plugin)

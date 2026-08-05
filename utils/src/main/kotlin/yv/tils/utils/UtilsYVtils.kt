@@ -13,14 +13,13 @@
 package yv.tils.utils
 
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.data.Data
-import yv.tils.utils.server.VersionUtils
+import yv.tils.utils.modules.Module
 
-class UtilsYVtils : Data.YVtilsModule {
+class UtilsYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "utils",
-            "1.0.0",
+            "26.08.01",
             "Utils module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/utils/"
@@ -30,9 +29,7 @@ class UtilsYVtils : Data.YVtilsModule {
     override fun onLoad() {}
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
-
-        VersionUtils().loadServerVersion()
+        Module.addModule(MODULE)
     }
 
     override fun onLateEnablePlugin() {
@@ -41,5 +38,6 @@ class UtilsYVtils : Data.YVtilsModule {
 
     override fun disablePlugin() {
         CoroutineHandler.cancelAllTasks()
+        Module.removeModule(MODULE)
     }
 }

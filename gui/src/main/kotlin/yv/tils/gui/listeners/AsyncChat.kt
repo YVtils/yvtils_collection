@@ -22,7 +22,7 @@ import yv.tils.config.language.LanguageHandler
 import yv.tils.gui.logic.ConfigGUI
 import yv.tils.gui.logic.ListContext
 import yv.tils.gui.logic.ListGUI
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
 
@@ -77,7 +77,7 @@ class AsyncChat : Listener {
             e.isCancelled = true
             Logger.debug("Player ${e.player.name} cancelled text edit", 2)
             // Reopen the GUI when cancelled
-            Bukkit.getScheduler().runTask(Data.instance, Runnable {
+            Bukkit.getScheduler().runTask(Core.instance, Runnable {
                 ConfigGUI.createGUI(e.player, holder.configName, holder.entries, holder.onSave, holder)
             })
             return
@@ -89,13 +89,13 @@ class AsyncChat : Listener {
         Logger.debug("Player ${e.player.name} updated config entry $key to: $message", 2)
 
         e.isCancelled = true
-        Bukkit.getScheduler().runTask(Data.instance, Runnable {
+        Bukkit.getScheduler().runTask(Core.instance, Runnable {
             ConfigGUI.createGUI(e.player, holder.configName, holder.entries, holder.onSave, holder)
         })
     }
 
     private fun reopenListGUI(player: org.bukkit.entity.Player, context: ListContext) {
-        Bukkit.getScheduler().runTask(Data.instance, Runnable {
+        Bukkit.getScheduler().runTask(Core.instance, Runnable {
             ListGUI.openList(player, context)
             // Re-register the context so clicks work
             GuiListenerState.pendingList[player.uniqueId] = context

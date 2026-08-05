@@ -13,6 +13,7 @@
 package yv.tils.utils.coroutine
 
 import kotlinx.coroutines.*
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
 class CoroutineHandler {
@@ -46,12 +47,13 @@ class CoroutineHandler {
         ): String {
             try {
                 if (isOnce) {
-                    Logger.debug("Launching one-time task $taskName with beforeDelay: $beforeDelay")
+                    Logger.debug("Launching one-time task $taskName with beforeDelay: $beforeDelay", DEBUG_LEVEL.BASIC)
                     val taskData = launchOnceTaskLogic(task, taskName, beforeDelay)
                     return taskData.taskId
                 }
 
-                Logger.debug("Launching task $taskName with beforeDelay: $beforeDelay and afterDelay: $afterDelay")
+                Logger.debug("Launching task $taskName with beforeDelay: $beforeDelay and afterDelay: $afterDelay",
+                    DEBUG_LEVEL.BASIC)
                 val taskData = launchTaskLogic(task, taskName, beforeDelay, afterDelay)
                 return taskData.taskId
             } catch (e: Exception) {
@@ -71,7 +73,7 @@ class CoroutineHandler {
          */
         private fun launchTaskLogic(task: suspend () -> Unit, taskName: String? = null, beforeDelay: Long, afterDelay: Long): Task {
             if (tasks.containsKey(taskName) && taskName != null) {
-                Logger.debug("There is already a task with the name $taskName")
+                Logger.debug("There is already a task with the name $taskName", DEBUG_LEVEL.BASIC)
                 throw Exception("There is already a task with the name $taskName")
             }
 
@@ -108,7 +110,7 @@ class CoroutineHandler {
          */
         private fun launchOnceTaskLogic(task: suspend () -> Unit, taskName: String? = null, beforeDelay: Long): Task {
             if (tasks.containsKey(taskName) && taskName != null) {
-                Logger.debug("There is already a task with the name $taskName")
+                Logger.debug("There is already a task with the name $taskName", DEBUG_LEVEL.BASIC)
                 throw Exception("There is already a task with the name $taskName")
             }
 
@@ -121,7 +123,7 @@ class CoroutineHandler {
                 task()
                 taskJobs.remove(taskId)
                 tasks.remove(taskName)
-                Logger.debug("Task $taskName completed and removed")
+                Logger.debug("Task $taskName completed and removed", DEBUG_LEVEL.BASIC)
             }
             taskJobs[taskId] = job
 
@@ -164,7 +166,7 @@ class CoroutineHandler {
         fun isTaskActive(taskId: String): Boolean {
             val isActive = taskJobs[taskId]?.isActive == true
 
-            Logger.debug("Checking if task $taskId is active: $isActive")
+            Logger.debug("Checking if task $taskId is active: $isActive", DEBUG_LEVEL.BASIC)
             return isActive
         }
     }

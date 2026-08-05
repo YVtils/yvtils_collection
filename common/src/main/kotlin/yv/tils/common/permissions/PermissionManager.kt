@@ -14,8 +14,8 @@ package yv.tils.common.permissions
 
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
-import yv.tils.utils.data.Data
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.modules.Core
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
 class PermissionManager {
@@ -26,13 +26,13 @@ class PermissionManager {
                 return
             }
 
-            Logger.debug("Registering permissions: ${perms.joinToString { it.name }}", DEBUGLEVEL.BASIC)
+            Logger.debug("Registering permissions: ${perms.joinToString { it.name }}", DEBUG_LEVEL.BASIC)
             registerPermission(perms)
         }
 
         private fun registerPermission(perms: List<YVtilsPermission>) {
             try {
-                val pluginManager = Data.instance.server.pluginManager
+                val pluginManager = Core.instance.server.pluginManager
                 val created = mutableMapOf<String, Permission>()
 
                 perms.forEach { p ->

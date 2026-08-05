@@ -13,9 +13,9 @@
 val jdaVersion = "6.4.1"
 
 dependencies {
-    implementation(project(":config"))
-    implementation(project(":utils"))
-    implementation(project(":common"))
+    compileOnly(project(":config"))
+    compileOnly(project(":utils"))
+    compileOnly(project(":common"))
 
     implementation("net.dv8tion:JDA:${jdaVersion}")
 }

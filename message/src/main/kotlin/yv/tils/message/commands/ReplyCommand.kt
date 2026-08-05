@@ -19,7 +19,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
 import yv.tils.message.logic.MessageHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 class ReplyCommand {
     val command = commandTree("reply") {
@@ -42,7 +42,7 @@ class ReplyCommand {
                     "command.reply.noSession",
                     sender.uniqueId,
                     mapOf(
-                        "prefix" to Data.prefix
+                        "prefix" to Core.prefix
                     )
                 )
             )

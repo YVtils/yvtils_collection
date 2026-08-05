@@ -15,7 +15,7 @@ package yv.tils.common.language
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerLocaleChangeEvent
 import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.util.*
 
@@ -34,7 +34,7 @@ class LoadPlayerLanguage {
     fun asyncCleanup() {
         val iterator = LanguageHandler.playerLang.keys.iterator()
 
-        val onlinePlayers = Data.instance.server.onlinePlayers
+        val onlinePlayers = Core.instance.server.onlinePlayers
         val onlinePlayerUUIDs = onlinePlayers.map { it.uniqueId }.toSet()
 
         while (iterator.hasNext()) {

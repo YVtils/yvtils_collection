@@ -12,7 +12,7 @@
 
 package yv.tils.status.logic
 
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.message.MessageUtils
 import org.bukkit.event.player.PlayerJoinEvent
@@ -41,7 +41,7 @@ class StatusJoinQuit {
                     "status.server.join",
                     player,
                     mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                         "status" to MessageUtils.convert(displayCompo),
                     )
                 )

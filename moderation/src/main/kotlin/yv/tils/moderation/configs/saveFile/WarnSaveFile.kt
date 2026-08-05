@@ -23,7 +23,7 @@ import yv.tils.utils.logger.Logger
 import java.util.UUID
 
 import yv.tils.moderation.configs.saveFile.MuteSave
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 
 //  {
 //      saves: [
@@ -54,12 +54,12 @@ class WarnSaveFile {
         val saveList = jsonFile["saves"]?.jsonArray ?: return
 
         if (saveList.isEmpty()) {
-            Logger.debug("No saves found in the save file.", DEBUGLEVEL.SPAM)
+            Logger.debug("No saves found in the save file.", DEBUG_LEVEL.SPAM)
             return
         }
 
         for (save in saveList) {
-            Logger.debug("Loading save: $save", DEBUGLEVEL.SPAM)
+            Logger.debug("Loading save: $save", DEBUG_LEVEL.SPAM)
 
             val uuid = save.jsonObject["uuid"]?.toString()?.replace("\"", "") ?: continue
             val warningCount = save.jsonObject["warningCount"]?.toString()?.toInt() ?: continue
@@ -69,7 +69,7 @@ class WarnSaveFile {
             val warnings = mutableListOf<Warning>()
 
             for (warning in warningsJSON) {
-                Logger.debug("Loading warning: $warning", DEBUGLEVEL.SPAM)
+                Logger.debug("Loading warning: $warning", DEBUG_LEVEL.SPAM)
 
                 val warnID = warning.jsonObject["id"]?.toString()?.replace("\"", "") ?: continue
                 val reason = warning.jsonObject["reason"]?.toString()?.replace("\"", "") ?: continue
