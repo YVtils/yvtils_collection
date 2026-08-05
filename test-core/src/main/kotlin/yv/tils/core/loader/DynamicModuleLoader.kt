@@ -31,9 +31,15 @@ import java.nio.file.StandardCopyOption
  *    and embedded as a plugin resource - see `test-core/build.gradle.kts`) via
  *    a local [JarLibrary]. No network access is required for this; it's always
  *    bundled inside this plugin's own jar.
- * 2. Reads `modules.yml` from the plugin's data directory and fetches each
+ * 2. Reads `modules.yml` from the shared `plugins/yvtils` data directory
+ *    (see [ModuleConfig.sharedDataDirectory] - shared across every installed
+ *    core, not this specific plugin's own data folder) and fetches each
  *    enabled feature module from the configured Maven repository (Reposilite)
- *    via [MavenLibraryResolver].
+ *    via [MavenLibraryResolver]. Each module's resolver is also given a small,
+ *    fixed set of well-known third-party repositories ([THIRD_PARTY_REPOSITORIES])
+ *    as fallbacks, so transitive third-party dependencies (e.g. `discord`'s JDA,
+ *    `gui-v2`'s InvUI) resolve directly instead of depending on Reposilite being
+ *    configured as a proxy/mirror for every upstream host a module might need.
  *
  * Each feature module is registered as its OWN `MavenLibraryResolver` instance
  * (rather than one shared resolver with multiple dependencies added to it), so
@@ -91,18 +97,44 @@ class DynamicModuleLoader : PluginLoader {
          */
         private fun devSkipChecksums(): Boolean =
             System.getenv("YVTILS_DEV_SKIP_CHECKSUMS")?.equals("true", ignoreCase = true) == true
+
+        /**
+         * Well-known upstream repositories for *third-party* (non-YVtils) transitive
+         * dependencies that feature modules may declare (e.g. `discord`'s JDA, or
+         * `gui-v2`'s InvUI). These are added as fallbacks alongside the Reposilite
+         * registry on every module's resolver, so resolution does NOT depend on
+         * Reposilite being configured as a proxy/mirror for every possible upstream
+         * host a module might need - each resolver can reach these repositories
+         * directly instead.
+         *
+         * Add an entry here whenever a new feature module introduces a dependency
+         * hosted somewhere that isn't already covered (Maven Central covers the vast
+         * majority of the Java/Kotlin ecosystem, including JDA).
+         *
+         * NOTE: Maven Central itself is intentionally resolved through Paper's
+         * [MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR] (a Google-hosted CDN
+         * mirror), not the raw `repo.maven.apache.org` URL - hitting Central
+         * directly like that is against its Terms of Service and Paper explicitly
+         * warns/guards against it (see `MavenLibraryResolver.addRepository`).
+         */
+        private val THIRD_PARTY_REPOSITORIES: List<Pair<String, String>> = listOf(
+            "maven-central" to MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR,
+            "papermc" to "https://repo.papermc.io/repository/maven-public/",
+            "xenondevs" to "https://repo.xenondevs.xyz/releases",
+        )
     }
 
     override fun classloader(classpathBuilder: PluginClasspathBuilder) {
         val logger = classpathBuilder.context.logger
-        val dataDirectory = classpathBuilder.context.dataDirectory
+        val sharedDirectory = ModuleConfig.sharedDataDirectory(classpathBuilder.context.dataDirectory)
         val repositoryUrl = repositoryUrl()
         val skipChecksums = devSkipChecksums()
 
-        Files.createDirectories(dataDirectory)
-        addEmbeddedRuntimeBundle(classpathBuilder, dataDirectory)
+        Files.createDirectories(sharedDirectory)
+        addEmbeddedRuntimeBundle(classpathBuilder, sharedDirectory)
 
-        val enabledModules = ModuleConfig.readEnabledModules(dataDirectory)
+        val enabledModules = ModuleConfig.readEnabledModules(sharedDirectory)
+        logger.info("[DynamicModuleLoader] Shared data directory: $sharedDirectory")
         logger.info("[DynamicModuleLoader] Enabled modules from config: $enabledModules")
         logger.info("[DynamicModuleLoader] Resolving against repository: $repositoryUrl")
 
@@ -130,6 +162,13 @@ class DynamicModuleLoader : PluginLoader {
                 )
             }
             resolver.addRepository(repositoryBuilder.build())
+
+            // Fallbacks for third-party transitive dependencies (JDA, InvUI, ...) -
+            // see THIRD_PARTY_REPOSITORIES for why this is needed in addition to
+            // the registry above.
+            THIRD_PARTY_REPOSITORIES.forEach { (id, url) ->
+                resolver.addRepository(RemoteRepository.Builder(id, "default", url).build())
+            }
 
             resolver.addDependency(
                 Dependency(

@@ -19,9 +19,12 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
+import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.ItemWrapper
 import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.message.MessageUtils
-import java.util.*
+import java.util.Collections
+import java.util.UUID
 
 enum class Heads(val desc: String, val texture: String) {
     NUMBER_1(
@@ -86,10 +89,15 @@ enum class Heads(val desc: String, val texture: String) {
     ),
 }
 
+/**
+ * Builds custom-textured player head [ItemProvider]s for use as InvUI [xyz.xenondevs.invui.item.Item]s.
+ *
+ * Head textures are applied via a raw Bukkit [ItemStack] (same approach as the legacy `gui` module)
+ * and then wrapped as an [ItemProvider] using [ItemWrapper].
+ */
 object HeadUtils {
-    fun createCustomHead(headTexture: Heads, itemName: String): ItemStack {
-        return createCustomHead(headTexture.texture, itemName)
-    }
+    fun createCustomHead(headTexture: Heads, itemName: String): ItemStack =
+        createCustomHead(headTexture.texture, itemName)
 
     fun createCustomHead(headTexture: String, itemName: String): ItemStack {
         val item = ItemStack(Material.PLAYER_HEAD)
@@ -97,9 +105,7 @@ object HeadUtils {
         val playerProfile = Bukkit.createProfile(UUID.randomUUID())
 
         playerProfile.setProperties(
-            Collections.singletonList(
-                ProfileProperty("textures", headTexture, "")
-            )
+            Collections.singletonList(ProfileProperty("textures", headTexture, ""))
         )
 
         meta.playerProfile = playerProfile
@@ -116,17 +122,26 @@ object HeadUtils {
         val playerProfile = Bukkit.createProfile(UUID.randomUUID())
 
         playerProfile.setProperties(
-            Collections.singletonList(
-                ProfileProperty("textures", headTexture.texture, "")
-            )
+            Collections.singletonList(ProfileProperty("textures", headTexture.texture, ""))
         )
 
         meta.playerProfile = playerProfile
-        val localizedName = LanguageHandler.getMessage(languageKey, player)
-        meta.displayName(localizedName)
+        meta.displayName(LanguageHandler.getMessage(languageKey, player))
         meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
         item.itemMeta = meta
 
         return item
     }
+
+    /**
+     * Builds an [ItemProvider] for a custom head, localized for [player] via [languageKey].
+     */
+    fun provider(headTexture: Heads, player: Player, languageKey: String): ItemProvider =
+        ItemWrapper(createCustomHead(headTexture, player, languageKey))
+
+    /**
+     * Builds an [ItemProvider] for a custom head with a raw (already resolved) [itemName].
+     */
+    fun provider(headTexture: Heads, itemName: String): ItemProvider =
+        ItemWrapper(createCustomHead(headTexture, itemName))
 }

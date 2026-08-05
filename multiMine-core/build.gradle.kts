@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":config"))
     implementation(project(":multiMine"))
     implementation(project(":migration"))
-    implementation(project(":gui"))
+    implementation(project(":gui-v2"))
     implementation(project(":stats"))
 }
 
@@ -24,7 +24,7 @@ val version = "2.0.0"
 
 tasks {
     runServer {
-        minecraftVersion("26.1.1")
+        minecraftVersion("26.1.2")
     }
 
     shadowJar {

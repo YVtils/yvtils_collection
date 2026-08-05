@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.config.ConfigYVtils
 import yv.tils.core.loader.DynamicModuleDriver
+import yv.tils.core.loader.ModuleConfig
 import yv.tils.utils.UtilsYVtils
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
@@ -43,7 +44,7 @@ class YVtils: JavaPlugin() {
         CommonYVtils()
     )
 
-    // SPIKE: modules fetched dynamically via DynamicModuleLoader + reflectively
+    // Modules fetched dynamically via DynamicModuleLoader + reflectively
     // discovered here. Populated in onLoad(), driven alongside `modules` below.
     private var dynamicModules: List<Module.YVtilsModule> = listOf()
     private var dynamicModuleDiscovery: DynamicModuleDriver.DiscoveryResult? = null
@@ -97,8 +98,10 @@ class YVtils: JavaPlugin() {
             e.printStackTrace()
         }
 
-        // SPIKE: discover dynamically-fetched modules now that the classpath is final.
-        val discovery = DynamicModuleDriver.discover(dataFolder.toPath())
+        // Discover dynamically-fetched modules now that the classpath is final.
+        // Uses the same shared `plugins/yvtils` directory the loader used (see
+        // ModuleConfig.sharedDataDirectory) - NOT this plugin's own dataFolder.
+        val discovery = DynamicModuleDriver.discover(ModuleConfig.sharedDataDirectory(dataFolder.toPath()))
 
         discovery.succeeded.forEach {
             Logger.info("[DynamicModuleDriver] Module '$it' resolved and loaded successfully.")
@@ -179,7 +182,7 @@ class YVtils: JavaPlugin() {
             return
         }
 
-        // SPIKE: failure policy for dynamically-fetched modules - if at least one
+        // Failure policy for dynamically-fetched modules - if at least one
         // module was requested but NONE could be resolved/loaded, disable; a
         // partial success (>=1 loaded) is allowed to continue with a warning.
         val discovery = dynamicModuleDiscovery

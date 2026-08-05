@@ -46,6 +46,36 @@ import java.nio.file.Path
  */
 object ModuleConfig {
     private const val FILE_NAME = "modules.yml"
+    private const val SHARED_DIRECTORY_NAME = "yvtils"
+
+    /**
+     * Computes the shared `plugins/yvtils` data directory used by every core,
+     * instead of each core's own product-specific data folder (e.g.
+     * `plugins/TEST-YVTILS-CORE`, `plugins/YVtils-Discord`, ...).
+     *
+     * This is always resolved as a sibling of the given per-plugin data
+     * directory (`<perPluginDataDirectory>/../yvtils`), so it works
+     * regardless of the server's actual directory layout and without needing
+     * `Bukkit`/server access (which isn't safely available yet at the point
+     * [DynamicModuleLoader] runs).
+     *
+     * Sharing one directory across every installed core means:
+     * - The embedded runtime bundle only needs to be extracted once, not
+     *   once per installed core.
+     * - `modules.yml` becomes a single, shared enablement list - a core
+     *   simply ignores any entry it doesn't have in its own
+     *   [DynamicModuleRegistry.KNOWN_MODULES].
+     *
+     * Note: since every core (currently just `test-core`) is built from this
+     * same monorepo in lockstep, the embedded runtime bundle version is
+     * always identical across cores today. If that ever changes (cores
+     * released independently, out of sync), the first core to boot on a
+     * server "wins" and provides its runtime bundle version to every other
+     * core sharing this directory - keep that in mind before decoupling
+     * core release versioning.
+     */
+    fun sharedDataDirectory(perPluginDataDirectory: Path): Path =
+        (perPluginDataDirectory.parent ?: perPluginDataDirectory).resolve(SHARED_DIRECTORY_NAME)
 
     /**
      * Reads the set of enabled module names from `<dataDirectory>/modules.yml`.
