@@ -30,7 +30,11 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+
+        maven {
+            name = "maven-snapshots"
+            url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+        }
 
         maven {
             name = "papermc"
@@ -72,8 +76,6 @@ val publishableModules = setOf(
     "server",
     "message",
     "moderation",
-    "gui-v2",
-    "migration",
     "stats",
 )
 
@@ -89,6 +91,7 @@ val publishableModules = setOf(
  */
 val dynamicCoreModules = setOf(
     "test-core",
+    "core"
 )
 
 // Modules that must rely on the shared runtime tier (embedded JarLibrary +

@@ -18,21 +18,14 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.config.ConfigYVtils
-import yv.tils.discord.DiscordYVtils
-import yv.tils.essentials.EssentialYVtils
-import yv.tils.message.MessageYVtils
-import yv.tils.multiMine.MultiMineYVtils
-import yv.tils.regions.RegionsYVtils
-import yv.tils.server.ServerYVtils
-import yv.tils.sit.SitYVtils
-import yv.tils.status.StatusYVtils
+import yv.tils.core.loader.DynamicModuleDriver
+import yv.tils.core.loader.ModuleConfig
 import yv.tils.utils.UtilsYVtils
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
 
-@Suppress("UnstableApiUsage")
 class YVtils : JavaPlugin() {
     companion object {
         val yvtilsVersion = YVtils().pluginMeta.version
@@ -40,23 +33,18 @@ class YVtils : JavaPlugin() {
 
         const val PLUGIN_NAME_FULL = "YVtils Collection"
         const val PLUGIN_NAME = "Collection"
-        const val PLUGIN_NAME_SHORT = "c"
-        const val PLUGIN_COLOR = "#4CAF50"
+        const val PLUGIN_NAME_SHORT = "col"
+        const val PLUGIN_COLOR = "#D6E0C6"
     }
 
     private val modules: List<Module.YVtilsModule> = listOf(
         ConfigYVtils(),
         UtilsYVtils(),
-        EssentialYVtils(),
-        SitYVtils(),
-        MessageYVtils(),
-        MultiMineYVtils(),
-        StatusYVtils(),
-        ServerYVtils(),
-        RegionsYVtils(),
-        DiscordYVtils(),
         CommonYVtils()
     )
+
+    private var dynamicModules: List<Module.YVtilsModule> = listOf()
+    private var dynamicModuleDiscovery: DynamicModuleDriver.DiscoveryResult? = null
 
     override fun onLoad() {
         instance = this
@@ -66,20 +54,16 @@ class YVtils : JavaPlugin() {
 
         val core = Core.YVtilsCore(
             description = "A collection of useful plugins for Minecraft servers.",
-            url = "https://modrinth.com/organization/yvtils",
+            url = "https://modrinth.com/plugin/yvtils",
 
             dependencies = listOf(
-                "essentials",
-                "sit",
-                "message",
-                "multiMine",
-                "status",
-                "server",
-                "regions",
-                "discord",
+                "common",
             ),
 
-            supportedVersions = listOf(),
+            supportedVersions = listOf(
+                "26.1.2",
+                "26.2"
+            ),
 
             name = PLUGIN_NAME,
             colorHex = PLUGIN_COLOR,
@@ -97,7 +81,7 @@ class YVtils : JavaPlugin() {
             CommandAPIPaperConfig(instance)
                 .setNamespace("yvtils")
                 .silentLogs(true)
-                .verboseOutput(false)
+                .verboseOutput(true)
                 .fallbackToLatestNMS(true)
         )
 
@@ -107,6 +91,25 @@ class YVtils : JavaPlugin() {
             Logger.error("Error during YVtils loading: ${e.message}")
             e.printStackTrace()
         }
+
+        val discovery = DynamicModuleDriver.discover(ModuleConfig.sharedDataDirectory(dataFolder.toPath()))
+
+        discovery.succeeded.forEach {
+            Logger.info("[DynamicModuleDriver] Module '$it' resolved and loaded successfully.")
+        }
+        discovery.failed.forEach { (name, reason) ->
+            Logger.warn("[DynamicModuleDriver] Module '$name' failed to load: $reason")
+        }
+
+        dynamicModules = discovery.loaded
+        dynamicModuleDiscovery = discovery
+
+        try {
+            dynamicModules.forEach { it.onLoad() }
+        } catch (e: Exception) {
+            Logger.error("Error during dynamic module loading: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     override fun onEnable() {
@@ -114,6 +117,7 @@ class YVtils : JavaPlugin() {
 
         try {
             modules.forEach { it.enablePlugin() }
+            dynamicModules.forEach { it.enablePlugin() }
         } catch (e: Exception) {
             Logger.error("Error during YVtils startup: ${e.message}")
             e.printStackTrace()
@@ -129,6 +133,7 @@ class YVtils : JavaPlugin() {
 
         try {
             modules.forEach { it.onLateEnablePlugin() }
+            dynamicModules.forEach { it.onLateEnablePlugin() }
         } catch (e: Exception) {
             Logger.error("Error during YVtils late startup: ${e.message}")
             e.printStackTrace()
@@ -162,6 +167,24 @@ class YVtils : JavaPlugin() {
             return
         }
 
+        val discovery = dynamicModuleDiscovery
+        if (discovery != null && discovery.failed.isNotEmpty()) {
+            Logger.warn("----------")
+            Logger.warn("${discovery.failed.size} dynamic module(s) failed to load:")
+            discovery.failed.forEach { (name, reason) -> Logger.warn(" - $name: $reason") }
+            Logger.warn("----------")
+
+            if (discovery.succeeded.isEmpty() && discovery.failed.isNotEmpty()) {
+                Logger.error("----------")
+                Logger.error("None of the configured dynamic modules could be loaded.")
+                Logger.error("The plugin will now disable to prevent further issues.")
+                Logger.error("----------")
+
+                instance.server.pluginManager.disablePlugin(instance)
+                return
+            }
+        }
+
         val loadedModules = Module.getModulesString(true)
 
         Logger.info("----------")
@@ -179,6 +202,7 @@ class YVtils : JavaPlugin() {
 
         try {
             modules.forEach { it.disablePlugin() }
+            dynamicModules.forEach { it.disablePlugin() }
         } catch (e: Exception) {
             Logger.error("Error during YVtils shutdown: ${e.message}")
             e.printStackTrace()

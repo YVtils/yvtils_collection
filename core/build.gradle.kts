@@ -11,21 +11,45 @@
  */
 
 dependencies {
-    implementation(project(":common"))
-    implementation(project(":utils"))
-    implementation(project(":essentials"))
-    implementation(project(":config"))
-    implementation(project(":sit"))
-    implementation(project(":message"))
-    implementation(project(":multiMine"))
-    implementation(project(":status"))
-    implementation(project(":server"))
-    implementation(project(":regions"))
-    implementation(project(":discord"))
+    compileOnly(project(":common"))
+    compileOnly(project(":config"))
+    compileOnly(project(":utils"))
+}
+
+val moduleVersion = project.version.toString()
+val embeddedResourcesDir = layout.buildDirectory.dir("generated/embeddedResources")
+
+val embedRuntime = tasks.register<Copy>("embedRuntime") {
+    description = "Embed plugin runtime"
+    dependsOn(":common:shadowJar")
+    from(project(":common").tasks.named("shadowJar"))
+    into(embeddedResourcesDir.map { it.dir("embedded") })
+    rename { "yvtils-runtime.jar" }
+}
+
+sourceSets {
+    main {
+        resources.srcDir(embeddedResourcesDir)
+    }
+}
+
+tasks.named("processResources") {
+    dependsOn(embedRuntime)
 }
 
 tasks {
     runServer {
-        minecraftVersion("1.21.5")
+        minecraftVersion("26.1.2")
+    }
+
+    shadowJar {
+        archiveBaseName.set("YVtils")
+        archiveVersion.set(moduleVersion)
+        archiveClassifier.set("")
+        archiveFileName.set("YVtils_v${moduleVersion}.jar")
+
+        manifest {
+            attributes["Main-Class"] = "yv.tils.core.YVtils"
+        }
     }
 }
