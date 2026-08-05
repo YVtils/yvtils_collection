@@ -14,5 +14,5 @@ dependencies {
     compileOnly(project(":utils"))
     compileOnly(project(":config"))
     compileOnly(project(":common"))
-    implementation(project(":gui"))
+    implementation(project(":gui-v2"))
 }

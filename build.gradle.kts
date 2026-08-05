@@ -10,15 +10,16 @@
  * the YVtils Brand Protection Clause.
  */
 
+import io.papermc.paperweight.userdev.PaperweightUserDependenciesExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinMonorepoVersion = "2.4.0"
+    val kotlinMonorepoVersion = "2.4.10"
 
     kotlin("jvm") version kotlinMonorepoVersion apply false
     kotlin("plugin.serialization") version kotlinMonorepoVersion apply false
-    id("com.gradleup.shadow") version "9.4.2" apply false
+    id("com.gradleup.shadow") version "9.6.1" apply false
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.21" apply false
     id("xyz.jpenilla.run-paper") version "3.0.2" apply false
 }
@@ -29,8 +30,17 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+
+        maven {
+            name = "papermc"
+            url = uri("https://repo.papermc.io/repository/maven-public/")
+        }
+
+        maven {
+            name = "xenondevs"
+            url = uri("https://repo.xenondevs.xyz/releases")
+        }
     }
 }
 
@@ -62,7 +72,7 @@ val publishableModules = setOf(
     "server",
     "message",
     "moderation",
-    "gui",
+    "gui-v2",
     "migration",
     "stats",
 )
@@ -95,7 +105,7 @@ subprojects {
         plugin("xyz.jpenilla.run-paper")
     }
 
-    val commandAPIVersion = "11.2.0"
+    val commandAPIVersion = "12.0.0"
 
     // Modules going through the shared runtime tier get CommandAPI/coroutines/
     // serialization as `compileOnly` (available at compile time, but NOT shaded
@@ -107,7 +117,7 @@ subprojects {
 
     dependencies {
         // Paper API dependency
-        add("paperweightDevelopmentBundle", "io.papermc.paper:dev-bundle:1.21.10-R0.1-SNAPSHOT")
+        the<PaperweightUserDependenciesExtension>().paperDevBundle("26.1.2.build.+")
 
         // CommandAPI dependencies
         add(runtimeDependencyScope, "dev.jorel:commandapi-paper-shade:$commandAPIVersion")
@@ -205,8 +215,10 @@ fun digestHex(file: File, algorithm: String): String {
 
 val generateLocalMavenChecksums by tasks.registering {
     group = "yvtils dev"
-    description = "Generates missing .sha1/.md5 files for locally-published yv.yvtils artifacts " +
-        "(publishToMavenLocal doesn't produce them, but Aether requires them for resolution)."
+    description = "(Re)generates .sha1/.md5 files for locally-published yv.yvtils artifacts " +
+            "(publishToMavenLocal doesn't produce them, but Aether requires them for resolution). " +
+            "Always overwrites, since a republish under the same version changes the artifact's " +
+            "content/hash but does not remove a previously-generated checksum file."
 
     doLast {
         val repoDir = File(System.getProperty("user.home"), ".m2/repository/yv/yvtils")
@@ -224,26 +236,22 @@ val generateLocalMavenChecksums by tasks.registering {
                 val sha1File = File(file.parentFile, "${file.name}.sha1")
                 val md5File = File(file.parentFile, "${file.name}.md5")
 
-                if (!sha1File.exists()) {
-                    sha1File.writeText(sha1Hex(file))
-                    generated++
-                }
-
-                if (!md5File.exists()) {
-                    md5File.writeText(md5Hex(file))
-                    generated++
-                }
+                // Always (re)write: a republish under the same version overwrites `file`'s
+                // content, so a pre-existing checksum here is not necessarily still correct.
+                sha1File.writeText(sha1Hex(file))
+                md5File.writeText(md5Hex(file))
+                generated += 2
             }
 
-        logger.lifecycle("Generated $generated checksum file(s) under $repoDir")
+        logger.lifecycle("(Re)generated $generated checksum file(s) under $repoDir")
     }
 }
 
 val publishAllModulesLocally by tasks.registering {
     group = "yvtils dev"
     description = "Publishes every feature module to the local Maven cache (~/.m2/repository) and " +
-        "generates the checksum files Aether needs, for local development against a temporary " +
-        "HTTP-served repository (see docs/migrating-to-dynamic-modules.md)."
+            "generates the checksum files Aether needs, for local development against a temporary " +
+            "HTTP-served repository (see docs/migrating-to-dynamic-modules.md)."
 
     publishableModules.forEach { moduleName ->
         dependsOn(":$moduleName:publishToMavenLocal")

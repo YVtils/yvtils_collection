@@ -62,7 +62,7 @@ If you only remember one thing from this document, remember that.
 | Component | Status |
 |---|---|
 | `utils`, `config`, `common` | Not published individually. Bundled together via `common`'s own `shadowJar` output and embedded as a `JarLibrary` resource by migrated cores. No change needed to these modules themselves. |
-| `discord`, `regions`, `multiMine`, `essentials`, `sit`, `status`, `server`, `message`, `moderation`, `gui`, `migration`, `stats` | **Gradle-level migration done.** All 12 are in `publishableModules` in the root `build.gradle.kts`, have `compileOnly` on `utils`/`config`/`common`, and get CommandAPI/coroutines/serialization as `compileOnly` automatically. `sit` has been round-tripped through a real publish+fetch+enable test. The other 11 have not been individually verified yet - do that before relying on them. |
+| `discord`, `regions`, `multiMine`, `essentials`, `sit`, `status`, `server`, `message`, `moderation`, `gui-v2`, `migration`, `stats` | **Gradle-level migration done.** All 12 are in `publishableModules` in the root `build.gradle.kts`, have `compileOnly` on `utils`/`config`/`common`, and get CommandAPI/coroutines/serialization as `compileOnly` automatically. `sit` has been round-tripped through a real publish+fetch+enable test. The other 11 have not been individually verified yet - do that before relying on them. |
 | `test-core` | **Fully migrated.** Reference implementation - has the `PluginLoader`, the embedded runtime bundle, and dynamic module discovery wired up end-to-end. |
 | `core`, `discord-core`, `regions-core`, `multiMine-core` | **Not migrated yet.** Still shade every module directly (old pattern). This is the main remaining work - see [Part 2](#part-2---migrating-a-corelauncher). |
 
@@ -89,7 +89,7 @@ dependencies {
 ```
 
 If your module depends on **another feature module** that is itself
-dynamically fetched (e.g. `multiMine` depends on `gui`), keep that as a real
+dynamically fetched (e.g. `multiMine` depends on `gui-v2`), keep that as a real
 `implementation` dependency - it needs to show up in the published POM as a
 proper transitive Maven dependency so it gets fetched automatically:
 
@@ -102,9 +102,15 @@ dependencies {
 }
 ```
 
-Third-party runtime dependencies (e.g. `discord`'s JDA dependency) also stay
-as normal `implementation` - they're resolvable from Maven Central/wherever
-and aren't part of the shared runtime bundle.
+Third-party runtime dependencies (e.g. `discord`'s JDA dependency, `gui-v2`'s
+InvUI dependency) also stay as normal `implementation` - you do **not** need
+to make Reposilite aware of them or proxy their host. `DynamicModuleLoader`
+adds a small, fixed list of well-known upstream repositories (Maven Central,
+PaperMC, xenondevs - see `THIRD_PARTY_REPOSITORIES` in
+`DynamicModuleLoader.kt`) as fallbacks on every module's resolver, so
+transitive third-party dependencies resolve directly from their real host
+instead of requiring Reposilite to mirror it. If your module pulls in a
+dependency from some other host not already in that list, add it there.
 
 You do **not** need to touch CommandAPI/coroutines/serialization dependencies
 yourself - the root `build.gradle.kts` already adds those as `compileOnly`
@@ -388,7 +394,7 @@ The whole "publish + checksum" dance is automated by one root-level task:
    with `true`/`false` - then edit + restart).
 
 Remember a module's dependencies on *other* feature modules (e.g. `multiMine`
-depends on `gui`) are real Maven dependencies - `publishAllModulesLocally`
+depends on `gui-v2`) are real Maven dependencies - `publishAllModulesLocally`
 covers this automatically since it publishes everything, but if you're only
 publishing a single module by hand, publish its dependencies too or you'll
 just trade one `ArtifactNotFoundException` for another.
@@ -398,6 +404,29 @@ set `YVTILS_DEV_SKIP_CHECKSUMS=true` alongside `REPOSILITE_URL` - this is an
 explicit, opt-in escape hatch in `DynamicModuleLoader` that disables checksum
 validation entirely. It only ever applies when you set it yourself; the real
 registry's checksums are always validated normally.
+
+**There are two separate local caches, not one.** Beyond your own
+`~/.m2/repository` (populated by `publishAllModulesLocally`, served by
+`jwebserver`), Paper's `MavenLibraryResolver` maintains its **own** resolved-
+library cache under `<core>/run/libraries/` (e.g.
+`test-core/run/libraries/yv/yvtils/<module>/<version>/`), completely separate
+from `~/.m2`. Once a module+version has been resolved once, Paper reuses that
+cached copy on subsequent server starts and only re-validates it against the
+checksum it cached the *first* time - it does NOT go back to your `jwebserver`
+for that exact coordinate again.
+
+If you republish a module under the **same version** with different content
+(very easy to do while iterating without bumping the version each time), you
+will get a confusing `ChecksumFailureException: Checksum validation failed,
+expected '<old-hash>' ... but is actually '<new-hash>'` - the mismatch is
+between Paper's cached copy in `run/libraries/` and whatever your `~/.m2`/
+`jwebserver` is serving now, not a corruption of either individual cache.
+
+The reliable fix: **bump the version string whenever you republish while
+iterating**, so each attempt gets its own coordinate and there's nothing to
+collide with. If you deliberately want to reuse a version, delete the stale
+entry from `<core>/run/libraries/yv/yvtils/<module>/<version>/` (not just
+`~/.m2/repository/yv`) before restarting the server.
 
 Remember to stop the local HTTP server and remove the local `~/.m2/repository/yv`
 artifacts afterward so you don't accidentally test against stale local copies
@@ -426,7 +455,9 @@ to test it against a throwaway local repository instead of the real registry.
 | `IllegalStateException: Tried to access InternalConfig, but it was null! Are you using CommandAPI features before calling CommandAPI#onLoad?` thrown from a fetched module's command registration | CommandAPI got resolved twice - once shaded into the core, once transitively via the fetched module's own POM | Make sure the core is in `dynamicCoreModules` (root `build.gradle.kts`) and the feature module is in `publishableModules`, so both get CommandAPI as `compileOnly` |
 | `NoTransporterException: Unsupported transport protocol file` | Pointed `MavenLibraryResolver` at a `file://` URI | Use an HTTP(S) endpoint - see [local testing](#testing-your-migration-locally) |
 | `ChecksumFailureException: Checksum validation failed, no checksums available` | Testing against `~/.m2/repository` directly, which has no `.sha1`/`.md5` files (a real Reposilite deploy always includes them) | Run `./gradlew publishAllModulesLocally` (or `generateLocalMavenChecksums` after a manual `publishToMavenLocal`), or set `YVTILS_DEV_SKIP_CHECKSUMS=true` for quick iteration |
+| `ChecksumFailureException: Checksum validation failed, expected '<hash1>' ... but is actually '<hash2>'` | A module was republished under the **same version** with different content while iterating - Paper's own `<core>/run/libraries/` cache still has the old checksum from a previous resolve and doesn't match what `~/.m2`/`jwebserver` serves now | Bump the version before republishing, or delete the stale `<core>/run/libraries/yv/yvtils/<module>/<version>/` entry (in addition to `~/.m2/repository/yv`) before restarting |
 | `ArtifactNotFoundException: Could not find artifact yv.yvtils:<module>:jar:<version>` | The module hasn't been published to whichever repository you're pointed at | Against the real registry: it genuinely isn't published yet (check the [migration status table](#current-migration-status)). Locally: publish it first - see [testing a not-yet-published module](#testing-a-not-yet-published-module-eg-artifactnotfoundexception) |
+| `ArtifactNotFoundException: Could not find artifact <group>:<third-party-lib>:jar:<version>` (group is NOT `yv.yvtils`) | A module's transitive third-party dependency (JDA, InvUI, ...) is hosted somewhere not in `DynamicModuleLoader`'s `THIRD_PARTY_REPOSITORIES` fallback list | Add `"<id>" to "<repo-url>"` to `THIRD_PARTY_REPOSITORIES` in `DynamicModuleLoader.kt` |
 | A module's published POM lists `utils`/`config`/`common`/CommandAPI/coroutines/serialization as dependencies | Something is still `implementation` that should be `compileOnly` | Check the module's `build.gradle.kts` and confirm it's listed in `publishableModules` |
 | Plugin logs "does not support the current server version" even on a version that should be supported | `CheckVersion.serverVersion()` was comparing against the full build string (`1.21.10-130-...`) instead of the clean version | Already fixed in all `CheckVersion.kt` copies - if you copied an older version, make sure it uses `Core.instance.server.minecraftVersion` |
 | Static state set in `DynamicModuleLoader` (a `PluginLoader`) isn't visible from `YVtils.onLoad()` | Paper loads `PluginLoader` classes through a separate/isolated classloader from the actual plugin instance | Don't rely on shared mutable state between the two - only stateless, file-based communication (like `ModuleConfig` re-reading the same config file in both places) works reliably |

@@ -18,10 +18,10 @@ import yv.tils.utils.modules.Module
 import java.nio.file.Path
 
 /**
- * SPIKE: reflectively discovers and instantiates whichever dynamically-fetched
+ * Reflectively discovers and instantiates whichever dynamically-fetched
  * modules actually made it onto the classpath (via [DynamicModuleLoader]).
  *
- * This re-reads the same `modules.txt` config file that the loader used - it
+ * This re-reads the same `modules.yml` config file that the loader used - it
  * CANNOT rely on any state set by [DynamicModuleLoader], since that class runs
  * in a separate classloader per Paper's `PluginLoader` docs. By the time this
  * runs (from `YVtils.onLoad()`), the classpath is already final, so we just

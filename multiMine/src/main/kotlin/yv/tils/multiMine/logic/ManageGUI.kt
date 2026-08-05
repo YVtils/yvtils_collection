@@ -13,13 +13,13 @@
 package yv.tils.multiMine.logic
 
 import org.bukkit.entity.Player
-import yv.tils.gui.logic.ConfigGUI
+import yv.tils.gui.logic.ConfigGui
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.utils.logger.Logger
 
 class ManageGUI {
     fun openGUI(sender: Player) {
-        ConfigGUI.createGUI(
+        ConfigGui.open(
             sender,
             "MultiMine Config",
             ConfigFile.configNew,

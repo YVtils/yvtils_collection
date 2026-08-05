@@ -44,7 +44,7 @@ object DynamicModuleRegistry {
         "server" to ModuleArtifact("server", "26.08.01", "yv.tils.server.ServerYVtils"),
         "message" to ModuleArtifact("message", "26.08.01", "yv.tils.message.MessageYVtils"),
         "moderation" to ModuleArtifact("moderation", "26.08.01", "yv.tils.moderation.ModerationYVtils"),
-        "gui" to ModuleArtifact("gui", "26.08.01", "yv.tils.gui.GUIYVtils"),
+        "gui-v2" to ModuleArtifact("gui-v2", "26.08.01", "yv.tils.gui.GUIYVtils"),
         "migration" to ModuleArtifact("migration", "26.08.01", "yv.tils.migration.MigrationYVtils"),
         "stats" to ModuleArtifact("stats", "26.08.01", "yv.tils.stats.StatsYVtils"),
     )

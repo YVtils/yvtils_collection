@@ -49,7 +49,7 @@ tasks.named("processResources") {
 
 tasks {
     runServer {
-        minecraftVersion("1.21.10")
+        minecraftVersion("26.1.2")
     }
 
     shadowJar {
