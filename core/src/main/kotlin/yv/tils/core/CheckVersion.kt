@@ -15,7 +15,6 @@ package yv.tils.core
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.bukkit.entity.Player
-import yv.tils.config.GeneralConfig
 import yv.tils.config.GeneralConfigManager
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.DEBUG_LEVEL
@@ -42,14 +41,19 @@ class CheckVersion {
     fun serverVersion(): Boolean {
         val supportedVersions = Core.core.supportedVersions
         if (supportedVersions.isEmpty()) {
-            Logger.debug("No supported versions specified for ${Core.core.name}. Skipping version check.", DEBUG_LEVEL.BASIC)
+            Logger.debug(
+                "No supported versions specified for ${Core.core.name}. Skipping version check.",
+                DEBUG_LEVEL.BASIC
+            )
             return true
         }
 
         val serverVersion = Core.instance.server.minecraftVersion
 
-        Logger.debug("Checking server version: $serverVersion against supported versions: ${supportedVersions.joinToString(", ")}",
-            DEBUG_LEVEL.BASIC)
+        Logger.debug(
+            "Checking server version: $serverVersion against supported versions: ${supportedVersions.joinToString(", ")}",
+            DEBUG_LEVEL.BASIC
+        )
 
         return supportedVersions.contains(serverVersion)
     }
@@ -131,7 +135,10 @@ class CheckVersion {
                 cloudVersion = versionData.version
                 return versionData.version
             } else {
-                Logger.debug("Failed to fetch data from API (URL: $url). Response code: $responseCode", DEBUG_LEVEL.BASIC)
+                Logger.debug(
+                    "Failed to fetch data from API (URL: $url). Response code: $responseCode",
+                    DEBUG_LEVEL.BASIC
+                )
                 return null
             }
         } catch (e: Exception) {

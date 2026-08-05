@@ -38,9 +38,12 @@ class CheckRequirements {
             Logger.debug("All dependencies are loaded: ${requirements.joinToString(", ")}", DEBUG_LEVEL.BASIC)
 
             return Pair(true, null)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Logger.error("YVtils core is not initialized. Please ensure the core is loaded before using YVtils features.")
-            return Pair(false, "YVtils core is not initialized. Please ensure the core is loaded before using YVtils features.")
+            return Pair(
+                false,
+                "YVtils core is not initialized. Please ensure the core is loaded before using YVtils features."
+            )
         }
     }
 }
