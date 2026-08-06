@@ -12,6 +12,7 @@
 
 package yv.tils.status
 
+import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.status.commands.StatusCommand
 import yv.tils.status.configs.ConfigFile
 import yv.tils.status.configs.SaveFile
@@ -39,6 +40,13 @@ class StatusYVtils : Module.YVtilsModule {
     }
 
     override fun enablePlugin() {
+        // Must run before anything in this module builds an InvUI Window
+        // (e.g. StatusManager.manageStatus()). NOT in onLoad(): InvUI.setPlugin()
+        // registers itself as a Bukkit Listener, which requires the plugin
+        // to already be enabled - onLoad() runs before that. See
+        // InvUIBootstrap's KDoc for the full explanation.
+        InvUIBootstrap.ensure()
+
         Module.addModule(MODULE)
 
         registerCommands()

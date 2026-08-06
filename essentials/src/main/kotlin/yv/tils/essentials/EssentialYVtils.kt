@@ -13,15 +13,13 @@
 package yv.tils.essentials
 
 import dev.jorel.commandapi.CommandAPI
-import org.bukkit.permissions.Permission
-import org.bukkit.permissions.PermissionDefault
-import yv.tils.essentials.permissions.PermissionsData
 import yv.tils.common.permissions.PermissionManager
 import yv.tils.config.language.LanguageProvider
 import yv.tils.essentials.commands.register.*
 import yv.tils.essentials.config.ConfigFile
 import yv.tils.essentials.language.LangStrings
 import yv.tils.essentials.listeners.*
+import yv.tils.essentials.permissions.PermissionsData
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
 
@@ -29,7 +27,7 @@ class EssentialYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "essentials",
-            "1.0.0",
+            "26.08.01",
             "Essentials module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/essentials/"

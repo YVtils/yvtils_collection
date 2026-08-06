@@ -12,7 +12,6 @@
 
 package yv.tils.multiMine.commands
 
-import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
@@ -56,10 +55,12 @@ class MultiMineCommand {
                             if (sender is Player) {
                                 manageGUI.openGUI(sender)
                             } else {
-                                sender.sendMessage(LanguageHandler.getMessage(
-                                    "command.executor.notPlayer",
-                                    params = mapOf("prefix" to Core.prefix)
-                                ))
+                                sender.sendMessage(
+                                    LanguageHandler.getMessage(
+                                        "command.executor.notPlayer",
+                                        params = mapOf("prefix" to Core.prefix)
+                                    )
+                                )
                             }
                         }
 
@@ -82,7 +83,10 @@ class MultiMineCommand {
 
         literalArgument("toggle", true) {
             withPermission(Permissions.COMMAND_MULTIMINE_TOGGLE_SELF.permission.name)
-            playerProfileArgument("target", true) {
+            playerProfileArgument(
+                "target",
+                true
+            ) { // TODO: Test if this works with playerProfile ot needs to be migrated to entitySelectorArgumentOnePlayer
                 withPermission(Permissions.COMMAND_MULTIMINE_TOGGLE_OTHERS.permission.name)
                 anyExecutor { sender, args ->
                     MultiMineHandler().toggle(sender, args)

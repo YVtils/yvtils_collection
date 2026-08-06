@@ -14,12 +14,12 @@ package yv.tils.essentials.commands.register
 
 import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.commandTree
+import dev.jorel.commandapi.kotlindsl.entitySelectorArgumentOnePlayer
 import dev.jorel.commandapi.kotlindsl.multiLiteralArgument
-import dev.jorel.commandapi.kotlindsl.playerProfileArgument
-import yv.tils.essentials.permissions.Permissions
-import yv.tils.essentials.utils.CheckArguments
 import org.bukkit.entity.Player
 import yv.tils.essentials.commands.handler.GamemodeHandler
+import yv.tils.essentials.permissions.Permissions
+import yv.tils.essentials.utils.CheckArguments
 
 class GamemodeCMD {
     val command = commandTree("gm") {
@@ -39,7 +39,7 @@ class GamemodeCMD {
             "3",
             optional = false
         ) {
-            playerProfileArgument("player", true) { // TODO: Fix player profile argument not working
+            entitySelectorArgumentOnePlayer("player", true) {
                 anyExecutor { sender, args ->
                     val gamemode = args["gamemode"].toString().lowercase()
                     val target = args["player"]

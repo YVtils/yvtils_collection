@@ -13,6 +13,7 @@
 package yv.tils.moderation
 
 import yv.tils.common.permissions.PermissionManager
+import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.moderation.commands.*
 import yv.tils.moderation.configs.ConfigFile
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
@@ -43,6 +44,12 @@ class ModerationYVtils : Module.YVtilsModule {
     }
 
     override fun enablePlugin() {
+        // Must run before anything in this module builds an InvUI Window.
+        // NOT in onLoad(): InvUI.setPlugin() registers itself as a Bukkit
+        // Listener, which requires the plugin to already be enabled -
+        // onLoad() runs before that. See InvUIBootstrap's KDoc for details.
+        InvUIBootstrap.ensure()
+
         Module.addModule(MODULE)
 
         registerLogFilters()

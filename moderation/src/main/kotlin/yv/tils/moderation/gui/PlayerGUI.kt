@@ -36,6 +36,9 @@ class PlayerGUI {
             return
         }
 
+        // No InvUIBootstrap.ensure() call needed here - ModerationYVtils.enablePlugin()
+        // already guarantees InvUI is initialized before any command can run.
+
         val items = Core.instance.server.onlinePlayers.map { player ->
             Item.builder()
                 .setItemProvider { ItemWrapper(buildPlayerHead(player)) }

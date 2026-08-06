@@ -12,6 +12,7 @@
 
 package yv.tils.config
 
+import yv.tils.config.language.Language
 import yv.tils.utils.modules.Module
 
 class ConfigYVtils : Module.YVtilsModule {
@@ -32,7 +33,10 @@ class ConfigYVtils : Module.YVtilsModule {
     }
 
     override fun onLateEnablePlugin() {
-
+        // Runs after every module's onLoad() (where they register their
+        // language strings via RegisterStrings) has completed, so this is
+        // the first safe point to (re)build and load the language files.
+        Language().loadLanguageFiles()
     }
 
     override fun disablePlugin() {

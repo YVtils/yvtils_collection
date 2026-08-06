@@ -52,7 +52,7 @@ class SpeedCMD {
                     "-10"
                 )
             )
-            playerProfileArgument("player", true) { // TODO: Fix player profile argument not working
+            entitySelectorArgumentOnePlayer("player", true) {
                 anyExecutor { sender, args ->
                     val speed = args["speed"].toString()
                     val target = args["player"]
@@ -69,7 +69,7 @@ class SpeedCMD {
         }
 
         literalArgument("reset", false) {
-            playerProfileArgument("player", true) { // TODO: Fix player profile argument not working
+            entitySelectorArgumentOnePlayer("player", true) {
                 anyExecutor { sender, args ->
                     val target = args["player"]
 

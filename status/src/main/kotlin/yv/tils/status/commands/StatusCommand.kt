@@ -29,11 +29,15 @@ class StatusCommand {
         withUsage("status <set/default/clear> [status/player]")
         withAliases("prefix", "role")
 
-        asyncPlayerProfileArgument("player", false) {
+        entitySelectorArgumentOnePlayer("player", true) {
             withPermission("yvtils.command.status.manage.others")
             withPermission(CommandPermission.OP)
             playerExecutor { sender, args ->
-                StatusManager().manageStatus(sender, args["player"])
+                if (args["player"] is Player) {
+                    StatusManager().manageStatus(sender, args["player"] as Player)
+                } else {
+                    StatusManager().manageStatus(sender)
+                }
             }
             anyExecutor { sender, args ->
                 // Send error message that this command can only be used by player
@@ -68,7 +72,7 @@ class StatusCommand {
         literalArgument("clear", false) {
             withPermission("yvtils.command.status.clear")
             withPermission(CommandPermission.NONE)
-            asyncPlayerProfileArgument("player", true) {
+            entitySelectorArgumentOnePlayer("player", true) {
                 withPermission("yvtils.command.status.clear.others")
                 withPermission(CommandPermission.OP)
                 anyExecutor { sender, args ->

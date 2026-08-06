@@ -41,14 +41,13 @@ class GUIYVtils : Module.YVtilsModule {
         )
     }
 
-    override fun onLoad() {
-        // Delegates to the same idempotent bootstrap used by ConfigGui.open(),
-        // so calling it here (when this class's lifecycle IS driven) and there
-        // (unconditionally, in case it isn't) never does redundant work.
-        InvUIBootstrap.ensure()
-    }
+    override fun onLoad() {}
 
     override fun enablePlugin() {
+        // NOT in onLoad(): InvUI.setPlugin() registers itself as a Bukkit
+        // Listener, which requires the plugin to already be enabled -
+        // onLoad() runs before that. See InvUIBootstrap's KDoc for details.
+        InvUIBootstrap.ensure()
         Module.addModule(MODULE)
     }
 

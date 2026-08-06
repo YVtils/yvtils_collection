@@ -12,7 +12,7 @@
 
 package yv.tils.config.language
 
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
 class LanguageProvider {
@@ -44,7 +44,7 @@ class LanguageProvider {
         fun registerEnumStrings(enumClass: Class<out Enum<*>>) {
             // Check if already registered to avoid duplicates
             if (registeredEnumClasses.contains(enumClass)) {
-                Logger.debug("Enum class ${enumClass.simpleName} already registered, skipping", DEBUGLEVEL.SPAM)
+                Logger.debug("Enum class ${enumClass.simpleName} already registered, skipping", DEBUG_LEVEL.SPAM)
                 return
             }
 
@@ -54,7 +54,7 @@ class LanguageProvider {
             val enumConstants = enumClass.enumConstants
 
             if (enumConstants.isEmpty()) {
-                Logger.debug("No enum constants found in ${enumClass.simpleName}", DEBUGLEVEL.SPAM)
+                Logger.debug("No enum constants found in ${enumClass.simpleName}", DEBUG_LEVEL.SPAM)
                 return
             }
 
@@ -70,7 +70,7 @@ class LanguageProvider {
                     if (enumConstant is LangStrings) {
                         registerString(enumConstant)
                         registeredCount++
-                        Logger.debug("Registered: ${enumConstant.key}", DEBUGLEVEL.SPAM)
+                        Logger.debug("Registered: ${enumConstant.key}", DEBUG_LEVEL.SPAM)
                     }
                 } catch (e: Exception) {
                     Logger.debug("Failed to register enum constant ${enumConstant.name}: ${e.message}")

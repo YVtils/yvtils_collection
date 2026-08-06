@@ -15,7 +15,7 @@ package yv.tils.essentials.utils
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 class CheckArguments {
     companion object {
@@ -30,7 +30,7 @@ class CheckArguments {
                 sender.sendMessage(
                     LanguageHandler.getMessage(
                         "command.missing.player",
-                        params = mapOf("prefix" to Data.prefix)
+                        params = mapOf("prefix" to Core.prefix)
                     )
                 )
                 return false

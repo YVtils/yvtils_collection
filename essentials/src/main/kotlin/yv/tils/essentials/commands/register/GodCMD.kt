@@ -12,12 +12,11 @@
 
 package yv.tils.essentials.commands.register
 
-import dev.jorel.commandapi.CommandPermission
-import dev.jorel.commandapi.kotlindsl.*
+import dev.jorel.commandapi.kotlindsl.anyExecutor
+import dev.jorel.commandapi.kotlindsl.commandTree
+import dev.jorel.commandapi.kotlindsl.entitySelectorArgumentOnePlayer
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
 import yv.tils.essentials.commands.handler.GodHandler
-import yv.tils.utils.modules.Core
 import yv.tils.essentials.permissions.Permissions
 import yv.tils.essentials.utils.CheckArguments
 
@@ -26,7 +25,7 @@ class GodCMD {
         withPermission(Permissions.COMMAND_GOD.permission.name)
         withUsage("god [player]")
 
-        playerProfileArgument("player", true) { // TODO: Fix player profile argument not working
+        entitySelectorArgumentOnePlayer("player", true) {
             anyExecutor { sender, args ->
                 val target = args["player"]
 
