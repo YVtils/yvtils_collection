@@ -12,6 +12,7 @@
 
 package yv.tils.common
 
+import yv.tils.common.language.RegisterStrings
 import yv.tils.utils.modules.Module
 
 class CommonYVtils : Module.YVtilsModule {
@@ -30,6 +31,8 @@ class CommonYVtils : Module.YVtilsModule {
     }
 
     override fun enablePlugin() {
+        RegisterStrings().registerStrings()
+
         Module.addModule(MODULE)
     }
 

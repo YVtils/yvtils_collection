@@ -80,10 +80,26 @@ object ModuleConfig {
     /**
      * Reads the set of enabled module names from `<dataDirectory>/modules.yml`.
      * If the file does not exist yet (e.g. first ever boot), it is generated
-     * listing every module in [knownModules] (defaulting to everything
-     * [DynamicModuleRegistry] knows about), with [defaultEnabledModules] set
-     * to `true` and everything else `false`, so the admin can see every
-     * available module and simply flip the ones they want on.
+     * listing every *configurable* module in [knownModules] (defaulting to
+     * everything [DynamicModuleRegistry] knows about, minus any
+     * [DynamicModuleRegistry.ModuleArtifact.hidden] ones - see below), with
+     * [defaultEnabledModules] set to `true` and everything else `false`, so
+     * the admin can see every available module and simply flip the ones they
+     * want on.
+     *
+     * Modules marked [DynamicModuleRegistry.ModuleArtifact.hidden] (e.g.
+     * `gui-v2`, `migration`) are always EXCLUDED from the returned set,
+     * regardless of what's in the file - even if an admin hand-edits the
+     * file to add e.g. `migration: true`, that line is ignored. This is
+     * deliberately "always excluded", not "always force-enabled": this
+     * result feeds [DynamicModuleLoader]/[DynamicModuleDriver], which
+     * actually attempt to *resolve the artifact over the network* for every
+     * enabled module - forcing a hidden module "on" here would mean it's
+     * unconditionally Maven-resolved on every boot even in environments
+     * where that artifact was never published (e.g. a throwaway local dev
+     * registry), which previously hard-crashed plugin loading entirely for
+     * `migration`. Hidden modules are internal/not meant to be toggled by an
+     * admin through this generic mechanism at all - not "always on".
      */
     fun readEnabledModules(
         dataDirectory: Path,
@@ -91,21 +107,88 @@ object ModuleConfig {
         defaultEnabledModules: Set<String> = emptySet(),
     ): List<String> {
         val file = dataDirectory.resolve(FILE_NAME)
+        val configurableModules = knownModules.filterNot(::isHidden)
 
         if (!Files.exists(file)) {
             Files.createDirectories(dataDirectory)
-            Files.writeString(file, buildDefaultFile(knownModules, defaultEnabledModules))
+            Files.writeString(file, buildDefaultFile(configurableModules, defaultEnabledModules))
         }
 
         return parse(Files.readAllLines(file))
-            .filter { (_, enabled) -> enabled }
+            .filter { (name, enabled) -> enabled && !isHidden(name) }
             .map { (name, _) -> name }
     }
+
+    /**
+     * Writes [enabledModules] out to `<dataDirectory>/modules.yml`, listing
+     * every *configurable* module in [knownModules] (defaulting to
+     * everything [DynamicModuleRegistry] knows about, minus any
+     * [DynamicModuleRegistry.ModuleArtifact.hidden] ones) with `true`/`false`
+     * depending on whether it's contained in [enabledModules].
+     *
+     * Like [readEnabledModules], this always regenerates the full file from
+     * [knownModules] - any entries not in [knownModules] are dropped, exactly
+     * like the file that gets generated on first boot. Hidden modules are
+     * intentionally never written here either - see [readEnabledModules].
+     *
+     * Note: since dynamic modules are only resolved/instantiated once, at
+     * [DynamicModuleDriver.discover] time (called from `onLoad()`), toggling
+     * a module here only takes effect after the server is restarted.
+     */
+    fun writeEnabledModules(
+        dataDirectory: Path,
+        enabledModules: Set<String>,
+        knownModules: Collection<String> = DynamicModuleRegistry.KNOWN_MODULES.keys,
+    ) {
+        Files.createDirectories(dataDirectory)
+
+        Files.writeString(
+            dataDirectory.resolve(FILE_NAME),
+            buildDefaultFile(knownModules.filterNot(::isHidden), enabledModules)
+        )
+    }
+
+    /**
+     * Convenience wrapper around [readEnabledModules]/[writeEnabledModules]
+     * that flips a single module's enabled state, leaving every other
+     * module's state untouched.
+     *
+     * A no-op for modules marked [DynamicModuleRegistry.ModuleArtifact.hidden]
+     * - they can't be toggled through this API at all (this mirrors
+     * [YVtilsModulesGui][yv.tils.core.commands.gui.YVtilsModulesGui] already
+     * excluding them from the toggle GUI entirely, but guards against any
+     * other/future caller too).
+     */
+    fun setModuleEnabled(dataDirectory: Path, moduleName: String, enabled: Boolean) {
+        if (isHidden(moduleName)) return
+
+        val current = readEnabledModules(dataDirectory).toMutableSet()
+
+        if (enabled) {
+            current.add(moduleName)
+        } else {
+            current.remove(moduleName)
+        }
+
+        writeEnabledModules(dataDirectory, current)
+    }
+
+    /**
+     * Whether [moduleName] is marked
+     * [DynamicModuleRegistry.ModuleArtifact.hidden] in
+     * [DynamicModuleRegistry.KNOWN_MODULES] - i.e. excluded from
+     * `modules.yml`/the in-game GUI entirely (see [readEnabledModules]).
+     * Unknown module names are never considered hidden.
+     */
+    private fun isHidden(moduleName: String): Boolean =
+        DynamicModuleRegistry.KNOWN_MODULES[moduleName]?.hidden == true
 
     private fun buildDefaultFile(knownModules: Collection<String>, defaultEnabledModules: Set<String>): String {
         val header = """
             |# YVtils dynamic module configuration.
             |# Set each module to true or false, then restart the server for changes to take effect.
+            |# Note: some internal modules (e.g. gui-v2, migration) are intentionally not
+            |# listed here and cannot be enabled through this file.
             |
             """.trimMargin()
 

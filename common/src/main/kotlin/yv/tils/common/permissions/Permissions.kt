@@ -56,4 +56,11 @@ enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
             default = false
         )
     ),
+    YVTILS_MANAGE_COMMAND(
+        PermissionManager.YVtilsPermission(
+            "$permissionBase.command.yvtils",
+            "Allow player to manage deep plugin settings, like loaded modules",
+            default = false
+        )
+    )
 }

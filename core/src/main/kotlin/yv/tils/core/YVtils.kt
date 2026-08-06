@@ -18,6 +18,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
 import yv.tils.configv2.ConfigV2YVtils
+import yv.tils.core.commands.register.YVtilsCommand
 import yv.tils.core.loader.DynamicModuleDriver
 import yv.tils.core.loader.ModuleConfig
 import yv.tils.utils.UtilsYVtils
@@ -126,6 +127,8 @@ class YVtils : JavaPlugin() {
             Logger.error("Error during YVtils startup: ${e.message}")
             e.printStackTrace()
         }
+
+        YVtilsCommand()
 
         if (instance.isEnabled) {
             onLateEnablePlugin()

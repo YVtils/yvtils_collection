@@ -14,6 +14,7 @@ dependencies {
     compileOnly(project(":common"))
     compileOnly(project(":config-v2"))
     compileOnly(project(":utils"))
+    implementation(project(":gui-v2"))
 }
 
 val moduleVersion = project.version.toString()
