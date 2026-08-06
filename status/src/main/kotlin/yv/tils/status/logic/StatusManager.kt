@@ -36,14 +36,6 @@ import yv.tils.gui.utils.Heads
 import yv.tils.status.utils.StatusUtils
 import yv.tils.utils.message.MessageUtils
 
-/**
- * Builds the InvUI-powered status management flow, split into three windows:
- *
- * - [buildMenuWindow]: the entry point, offering "edit", "clear" and "browse defaults".
- * - [buildEditorWindow]: an [AnvilWindow] with the current status (raw, editable) in the
- *   left slot and a live preview of the new status (rendered) in the result slot.
- * - [buildDefaultsWindow]: a paginated list of the configured default statuses.
- */
 class StatusManager {
     fun manageStatus(
         player: Player,
@@ -51,10 +43,6 @@ class StatusManager {
     ) {
         buildMenuWindow(player, target).open(player)
     }
-
-    // ---------------------------------------------------------------------
-    // Menu: clear / edit / browse defaults
-    // ---------------------------------------------------------------------
 
     private fun buildMenuWindow(player: Player, target: Player): Window.Builder<*, *> {
         val statusHeadItem = Item.builder()
@@ -115,9 +103,6 @@ class StatusManager {
         head.itemMeta = meta
 
         return ItemBuilder(head)
-            // setCustomName (not setName!): PLAYER_HEAD has a hardcoded
-            // vanilla "<owner>'s Head" name override that only yields to
-            // CUSTOM_NAME, not the cosmetic ITEM_NAME set by setName.
             .setCustomName(MessageUtils.convert("<white>${target.name}"))
             .addLoreLines(
                 LanguageHandler.getMessage("status.gui.editor.currentLabel", player),
@@ -128,25 +113,13 @@ class StatusManager {
             )
     }
 
-    // ---------------------------------------------------------------------
-    // Editor: anvil with raw current status -> rendered preview
-    // ---------------------------------------------------------------------
-
     @OptIn(ExperimentalReactiveApi::class)
     private fun buildEditorWindow(player: Player, target: Player): AnvilWindow.Builder {
         val currentStatus = StatusUtils.currentStatus(target)?.content ?: ""
         val input = mutableProvider(currentStatus)
 
-        // Static (not reactive!): this item sits in the anvil's actual input
-        // slot. Vanilla anvils seed their rename text field from this item's
-        // CUSTOM_NAME and treat any change to this item as "the input item
-        // was swapped", resetting the text field. So it must be built once,
-        // from the original status, and never touched again while editing.
         val currentItem = Item.simple(
             ItemBuilder(Material.NAME_TAG)
-                // setCustomName (not setName!) is required here: anvils read
-                // CUSTOM_NAME to populate their rename text field, while
-                // setName only sets the cosmetic ITEM_NAME component.
                 .setCustomName(Component.text(currentStatus))
                 .addLoreLines(
                     LanguageHandler.getMessage("status.gui.editor.currentLabel", player),
@@ -161,7 +134,6 @@ class StatusManager {
             .setItemProvider(
                 input.map { raw ->
                     ItemBuilder(Material.LIME_DYE)
-                        // Fully rendered preview as the title, matching the real display design.
                         .setName(
                             if (raw.isEmpty())
                                 LanguageHandler.getMessage("status.gui.editor.empty", player)
@@ -192,10 +164,6 @@ class StatusManager {
             .addRenameHandler(input)
             .setFallbackWindow(buildMenuWindow(player, target).build(player))
     }
-
-    // ---------------------------------------------------------------------
-    // Defaults: paginated list of configured default statuses
-    // ---------------------------------------------------------------------
 
     private fun buildDefaultsWindow(player: Player, target: Player, page: Int): Window.Builder<*, *> {
         val items = StatusUtils.generateDefaultStatus().map { status -> buildDefaultItem(player, target, status) }

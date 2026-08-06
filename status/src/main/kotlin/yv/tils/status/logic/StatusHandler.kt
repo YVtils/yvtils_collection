@@ -26,14 +26,16 @@ class StatusHandler {
         val maxLength = ConfigFile.config["maxLength"] as Int
 
         if (MessageUtils.strip(status).length > maxLength) {
-            player.sendMessage(LanguageHandler.getMessage(
-                "command.status.input.tooLong",
-                player,
-                mapOf(
-                    "prefix" to Core.prefix,
-                    "maxLength" to maxLength.toString()
+            player.sendMessage(
+                LanguageHandler.getMessage(
+                    "command.status.input.tooLong",
+                    player,
+                    mapOf(
+                        "prefix" to Core.prefix,
+                        "maxLength" to maxLength.toString()
+                    )
                 )
-            ))
+            )
             return
         }
 
@@ -43,14 +45,16 @@ class StatusHandler {
     fun setDefaultStatus(player: Player, status: String) {
         val suggestions = generateDefaultStatus()
         if (!suggestions.contains(status)) {
-            player.sendMessage(LanguageHandler.getMessage(
-                "command.status.default.notFound",
-                player,
-                mapOf(
-                    "prefix" to Core.prefix,
-                    "status" to status,
+            player.sendMessage(
+                LanguageHandler.getMessage(
+                    "command.status.default.notFound",
+                    player,
+                    mapOf(
+                        "prefix" to Core.prefix,
+                        "status" to status,
+                    )
                 )
-            ))
+            )
             return
         }
 
@@ -59,23 +63,27 @@ class StatusHandler {
 
     fun clearStatus(player: Player, sender: CommandSender = player) {
         setStatusDisplay(player, "")
-        player.sendMessage(LanguageHandler.getMessage(
-            "command.status.clear.cleared.self",
-            sender,
-            mapOf(
-                "prefix" to Core.prefix,
-            )
-        ))
-
-        if (sender != player) {
-            sender.sendMessage(LanguageHandler.getMessage(
-                "command.status.clear.cleared.other",
+        player.sendMessage(
+            LanguageHandler.getMessage(
+                "command.status.clear.cleared.self",
                 sender,
                 mapOf(
                     "prefix" to Core.prefix,
-                    "yv/tils/player" to player.name
                 )
-            ))
+            )
+        )
+
+        if (sender != player) {
+            sender.sendMessage(
+                LanguageHandler.getMessage(
+                    "command.status.clear.cleared.other",
+                    sender,
+                    mapOf(
+                        "prefix" to Core.prefix,
+                        "player" to player.name
+                    )
+                )
+            )
         }
     }
 
@@ -91,14 +99,16 @@ class StatusHandler {
                 )
             )
 
-            player.sendMessage(LanguageHandler.getMessage(
-                "command.status.set",
-                player,
-                mapOf(
-                    "prefix" to Core.prefix,
-                    "status" to MessageUtils.convert(displayCompo)
+            player.sendMessage(
+                LanguageHandler.getMessage(
+                    "command.status.set",
+                    player,
+                    mapOf(
+                        "prefix" to Core.prefix,
+                        "status" to MessageUtils.convert(displayCompo)
+                    )
                 )
-            ))
+            )
         }
     }
 }

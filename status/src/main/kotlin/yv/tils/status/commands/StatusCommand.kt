@@ -39,9 +39,6 @@ class StatusCommand {
                     StatusManager().manageStatus(sender)
                 }
             }
-            anyExecutor { sender, args ->
-                // Send error message that this command can only be used by player
-            }
         }
 
         literalArgument("set", false) {
