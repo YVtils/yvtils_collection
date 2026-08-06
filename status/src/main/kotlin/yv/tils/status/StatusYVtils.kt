@@ -40,11 +40,6 @@ class StatusYVtils : Module.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        // Must run before anything in this module builds an InvUI Window
-        // (e.g. StatusManager.manageStatus()). NOT in onLoad(): InvUI.setPlugin()
-        // registers itself as a Bukkit Listener, which requires the plugin
-        // to already be enabled - onLoad() runs before that. See
-        // InvUIBootstrap's KDoc for the full explanation.
         InvUIBootstrap.ensure()
 
         Module.addModule(MODULE)
