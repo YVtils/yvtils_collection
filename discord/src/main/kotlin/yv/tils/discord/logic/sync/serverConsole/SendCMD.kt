@@ -14,7 +14,7 @@ package yv.tils.discord.logic.sync.serverConsole
 
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
 import net.dv8tion.jda.api.entities.channel.ChannelType
@@ -51,9 +51,9 @@ class SendCMD : ListenerAdapter() {
                 e.message.addReaction(Emoji.fromUnicode("🖥️")).queue()
                 Logger.info(MessageUtils.convert("<gray>[<${Colors.MAIN.color}>DC Console<gray>]<white> $content"))
                 GetConsole().clearHistory()
-                Data.instance.server.scheduler.runTask(Data.instance, Runnable {
+                Core.instance.server.scheduler.runTask(Core.instance, Runnable {
                     try {
-                        Data.instance.server.dispatchCommand(Data.instance.server.consoleSender, content)
+                        Core.instance.server.dispatchCommand(Core.instance.server.consoleSender, content)
                     } catch (ex: Exception) {
                         Logger.error("Error executing command from discord console: ${ex.message}")
                     }

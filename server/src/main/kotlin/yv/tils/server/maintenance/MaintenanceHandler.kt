@@ -17,7 +17,7 @@ import org.bukkit.command.CommandSender
 import yv.tils.config.language.LanguageBroadcast
 import yv.tils.config.language.LanguageHandler
 import yv.tils.server.configs.ConfigFile
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.player.PlayerUtils
 import yv.tils.utils.server.ServerUtils
 
@@ -68,7 +68,7 @@ class MaintenanceHandler {
                     "maintenance.player.join.unallowed",
                     player.uniqueId,
                     mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                     )
                 )
             )
@@ -78,7 +78,7 @@ class MaintenanceHandler {
             "maintenance.announcement.global",
             "yvtils.bypass.maintenance",
             mapOf(
-                "prefix" to Data.prefix,
+                "prefix" to Core.prefix,
                 "state" to if (maintenance) LanguageHandler.getMessage("maintenance.state.on") else LanguageHandler.getMessage("maintenance.state.off"),
             )
         )
@@ -91,7 +91,7 @@ class MaintenanceHandler {
                     "maintenance.announcement.sender.already",
                     sender,
                     mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                         "state" to if (maintenance) LanguageHandler.getMessage("maintenance.state.on") else LanguageHandler.getMessage("maintenance.state.off"),
                     )
                 )
@@ -104,7 +104,7 @@ class MaintenanceHandler {
                 "maintenance.announcement.sender.changed",
                 sender,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "state" to if (maintenance) LanguageHandler.getMessage("maintenance.state.on") else LanguageHandler.getMessage("maintenance.state.off"),
                 )
             )

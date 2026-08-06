@@ -22,11 +22,12 @@ import yv.tils.moderation.listeners.AsyncChat
 import yv.tils.moderation.utils.MojangProfileLogFilter
 import yv.tils.moderation.utils.TargetUtils
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 
-class ModerationYVtils : Data.YVtilsModule {
+class ModerationYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "moderation",
             "1.0.0-beta.1",
             "Moderation module for YVtils",
@@ -42,7 +43,7 @@ class ModerationYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
 
         registerLogFilters()
         registerCommands()
@@ -82,7 +83,7 @@ class ModerationYVtils : Data.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(AsyncChat(), plugin)

@@ -15,7 +15,7 @@ package yv.tils.moderation.configs
 import yv.tils.config.data.ConfigEntry
 import yv.tils.config.data.EntryType
 import yv.tils.config.files.YMLFileUtils
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
 class ConfigFile {
@@ -46,7 +46,7 @@ class ConfigFile {
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
 
-            Logger.debug("Loading config key: $key -> $value", DEBUGLEVEL.VERBOSE)
+            Logger.debug("Loading config key: $key -> $value", DEBUG_LEVEL.VERBOSE)
             if (value != null) config[key] = value
         }
 
@@ -63,7 +63,7 @@ class ConfigFile {
     }
 
     fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
-        Logger.debug("ConfigFile.registerStrings called with ${content.size} entries", DEBUGLEVEL.DETAILED)
+        Logger.debug("ConfigFile.registerStrings called with ${content.size} entries", DEBUG_LEVEL.DETAILED)
 
         // Always start from base default entries
         ensureBaseEntries()
@@ -74,7 +74,7 @@ class ConfigFile {
                 if (content.containsKey(entry.key)) {
                     Logger.debug(
                         "Updating entry ${entry.key} from ${entry.value} to ${content[entry.key]}",
-                        DEBUGLEVEL.VERBOSE
+                        DEBUG_LEVEL.VERBOSE
                     )
                     entry.value = content[entry.key]
                 }
@@ -86,13 +86,13 @@ class ConfigFile {
 
         Logger.debug(
             "ConfigFile.registerStrings: about to create YAML file with ${configNew.size} entries",
-            DEBUGLEVEL.DETAILED
+            DEBUG_LEVEL.DETAILED
         )
         val ymlFile = YMLFileUtils.makeYAMLFileFromEntries("/moderation/config.yml", configNew)
-        Logger.debug("ConfigFile.registerStrings: about to update file on disk", DEBUGLEVEL.DETAILED)
+        Logger.debug("ConfigFile.registerStrings: about to update file on disk", DEBUG_LEVEL.DETAILED)
         // Use updateFile with overwriteExisting = true so GUI edits overwrite existing keys
         yv.tils.config.files.FileUtils.updateFile("/moderation/config.yml", ymlFile, overwriteExisting = true)
-        Logger.debug("ConfigFile.registerStrings: file update complete", DEBUGLEVEL.DETAILED)
+        Logger.debug("ConfigFile.registerStrings: file update complete", DEBUG_LEVEL.DETAILED)
     }
 
     private fun syncEntriesToMap() {

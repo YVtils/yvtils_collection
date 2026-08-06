@@ -21,7 +21,7 @@ import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.configs.saveFile.MuteSave
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.data.Exceptions.Companion.TargetToOfflinePlayerParseException
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.time.TimeUtils
@@ -43,7 +43,7 @@ class TargetUtils {
 
                 return offlinePlayer
             } catch (e: Exception) {
-                Logger.debug("An error occurred while trying to parse the target to offline player. ${e.message}",DEBUGLEVEL.DETAILED)
+                Logger.debug("An error occurred while trying to parse the target to offline player. ${e.message}",DEBUG_LEVEL.DETAILED)
                 throw TargetToOfflinePlayerParseException
             }
         }
@@ -129,7 +129,7 @@ class TargetUtils {
                 if (currentTime > expiresLong) {
                     iterator.remove()
                     MuteSaveFile().unmutePlayer(entry.key)
-                    Logger.debug("Unmuted player with UUID: ${entry.key} as the mute duration has expired.", DEBUGLEVEL.BASIC)
+                    Logger.debug("Unmuted player with UUID: ${entry.key} as the mute duration has expired.", DEBUG_LEVEL.BASIC)
                 }
             }
         }

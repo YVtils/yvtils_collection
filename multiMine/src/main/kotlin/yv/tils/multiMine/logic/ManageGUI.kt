@@ -41,7 +41,7 @@ class ManageGUI {
                     }
                     ConfigFile().registerStrings(map)
                     Logger.debug("ManageGUI.saver: save complete", 2)
-                    Logger.debug("ManageGUI.saver: File should be at: ${yv.tils.utils.data.Data.pluginFolder.absolutePath}/multiMine/config.yml", 2)
+                    Logger.debug("ManageGUI.saver: File should be at: ${yv.tils.utils.modules.Core.pluginFolder.absolutePath}/multiMine/config.yml", 2)
                 } catch (ex: Exception) {
                     Logger.error("ManageGUI.saver: save failed: ${ex.message}")
                     ex.printStackTrace()

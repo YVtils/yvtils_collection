@@ -15,7 +15,7 @@ package yv.tils.utils.player
 import net.kyori.adventure.text.Component
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.message.MessageUtils
 import java.util.*
 
@@ -39,7 +39,7 @@ class PlayerUtils {
 
         val onlinePlayersAsCount: Int
             get() {
-                val onlinePlayers = Data.instance.server.onlinePlayers.size
+                val onlinePlayers = Core.instance.server.onlinePlayers.size
 
                 // TODO: Add vanish logic
 
@@ -50,7 +50,7 @@ class PlayerUtils {
             get() {
                 val players = mutableListOf<String>()
 
-                for (player in Data.instance.server.onlinePlayers) {
+                for (player in Core.instance.server.onlinePlayers) {
                     // TODO: Add vanish logic
 
                     players.add(player.name)
@@ -66,7 +66,7 @@ class PlayerUtils {
 
         val maxOnlinePlayers: Int
             get() {
-                return Data.instance.server.maxPlayers
+                return Core.instance.server.maxPlayers
             }
 
         /**
@@ -79,7 +79,7 @@ class PlayerUtils {
         fun onlinePlayersAsPlayers(permission: String = "", needPerm: Boolean = true): List<Player> {
             val players = mutableListOf<Player>()
 
-            for (player in Data.instance.server.onlinePlayers) {
+            for (player in Core.instance.server.onlinePlayers) {
                 if (permission.isNotEmpty()) {
                     if (needPerm && player.hasPermission(permission)) {
                         players.add(player)
@@ -121,7 +121,7 @@ class PlayerUtils {
          * @return OfflinePlayer object.
          */
         fun uuidToPlayer(uuid: UUID): OfflinePlayer {
-            return Data.instance.server.getOfflinePlayer(uuid)
+            return Core.instance.server.getOfflinePlayer(uuid)
         }
 
         /**
@@ -139,7 +139,7 @@ class PlayerUtils {
          * @return OfflinePlayer object.
          */
         fun nameToPlayer(name: String): OfflinePlayer {
-            return Data.instance.server.getOfflinePlayer(name)
+            return Core.instance.server.getOfflinePlayer(name)
         }
 
         /**

@@ -13,7 +13,7 @@
 package yv.tils.migration
 
 import yv.tils.config.files.FileUtils
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Module
 import yv.tils.utils.logger.Logger
 
 /**
@@ -25,10 +25,10 @@ import yv.tils.utils.logger.Logger
 @Deprecated(
     "This module will be removed with these releases: yvtils-discord:4.1.0; yvtils-smp:1.3.0; yvtils-multiMine:1.3.0"
 )
-class MigrationYVtils: Data.YVtilsModule {
+class MigrationYVtils: Module.YVtilsModule {
     companion object {
         val MODULE =
-            Data.YVtilsModuleData(
+            Module.YVtilsModuleData(
                 name = "migration",
                 version = "1.0.0",
                 description = "Migration module for YVtils",
@@ -61,7 +61,7 @@ class MigrationYVtils: Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
     }
 
     override fun onLateEnablePlugin() {}

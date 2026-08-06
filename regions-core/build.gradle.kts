@@ -31,7 +31,7 @@ tasks {
         archiveFileName.set("YVtils-RG_v${version}.jar")
 
         manifest {
-            attributes["Main-Class"] = "yv.tils.rg.YVtils"
+            attributes["Main-Class"] = "yv.tils.core.YVtils"
         }
     }
 }

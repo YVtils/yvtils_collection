@@ -18,11 +18,12 @@ import yv.tils.regions.data.FlagManager
 import yv.tils.regions.language.RegisterStrings
 import yv.tils.regions.listeners.*
 import yv.tils.regions.listeners.cause.*
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 
-class RegionsYVtils : Data.YVtilsModule {
+class RegionsYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "regions",
             "1.0.0-beta.2",
             "Regions module for YVtils",
@@ -39,7 +40,7 @@ class RegionsYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
 
         unregisterCommands()
 
@@ -67,7 +68,7 @@ class RegionsYVtils : Data.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(PlayerMove(), plugin)

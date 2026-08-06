@@ -12,7 +12,7 @@
 
 package yv.tils.utils.server
 
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.message.MessageUtils
 import net.kyori.adventure.text.Component
 
@@ -24,11 +24,11 @@ class ServerUtils {
         var serverPort: Int = -1
 
         val difficulty: String
-            get() = Data.instance.server.worlds[0].difficulty.name
+            get() = Core.instance.server.worlds[0].difficulty.name
 
         val isWhitelistActive: Boolean
             get() {
-                return Data.instance.server.hasWhitelist()
+                return Core.instance.server.hasWhitelist()
             }
 
         val serverName: String
@@ -38,7 +38,7 @@ class ServerUtils {
 
         val motd: Component
             get() {
-                return Data.instance.server.motd()
+                return Core.instance.server.motd()
             }
 
         val motdAsString: String

@@ -12,12 +12,12 @@
 
 package yv.tils.config.language
 
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 class LanguageBroadcast {
     companion object {
         fun broadcast(key: String, params: Map<String, Any> = emptyMap()) {
-            Data.instance.server.broadcast(
+            Core.instance.server.broadcast(
                 LanguageHandler.getMessage(
                     key,
                     null,
@@ -27,7 +27,7 @@ class LanguageBroadcast {
         }
 
         fun broadcast(key: String, permission: String, params: Map<String, Any> = emptyMap()) {
-            for (p in Data.instance.server.onlinePlayers) {
+            for (p in Core.instance.server.onlinePlayers) {
                 if (p.hasPermission(permission)) {
                     p.sendMessage(
                         LanguageHandler.getMessage(

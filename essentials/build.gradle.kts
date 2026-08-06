@@ -11,7 +11,7 @@
  */
 
 dependencies {
-    implementation(project(":config"))
-    implementation(project(":utils"))
-    implementation(project(":common"))
+    compileOnly(project(":config"))
+    compileOnly(project(":utils"))
+    compileOnly(project(":common"))
 }

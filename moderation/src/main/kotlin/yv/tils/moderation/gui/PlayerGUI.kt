@@ -22,7 +22,7 @@ import yv.tils.gui.core.GuiHelpers.createPaginationButtons
 import yv.tils.gui.core.GuiManager
 import yv.tils.gui.core.GuiSlot
 import yv.tils.utils.colors.Colors
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 class PlayerGUI {
     fun openGUI(sender: CommandSender, page: Int = 1) {
@@ -41,7 +41,7 @@ class PlayerGUI {
         val slotRanges = listOf(10..16, 19..25, 28..34, 37..43)
         val slotRange = slotRanges.flatMap { it.toList() }
 
-        val onlinePlayers = Data.instance.server.onlinePlayers.toList()
+        val onlinePlayers = Core.instance.server.onlinePlayers.toList()
         val items: MutableList<GuiSlot> = mutableListOf()
 
         for (player in onlinePlayers) {

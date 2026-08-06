@@ -16,7 +16,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import java.util.*
 
 class GodHandler {
@@ -39,7 +39,7 @@ class GodHandler {
                 LanguageHandler.getMessage(
                     "command.god.enable.self",
                     player.uniqueId,
-                    params = mapOf("prefix" to Data.prefix)
+                    params = mapOf("prefix" to Core.prefix)
                 )
             )
         } else {
@@ -49,7 +49,7 @@ class GodHandler {
                 LanguageHandler.getMessage(
                     "command.god.disable.self",
                     player.uniqueId,
-                    params = mapOf("prefix" to Data.prefix)
+                    params = mapOf("prefix" to Core.prefix)
                 )
             )
         }
@@ -60,7 +60,7 @@ class GodHandler {
                     LanguageHandler.getMessage(
                         "command.god.disable.other",
                         sender,
-                        params = mapOf("prefix" to Data.prefix, "player" to player.name)
+                        params = mapOf("prefix" to Core.prefix, "player" to player.name)
                     )
                 )
             } else {
@@ -68,7 +68,7 @@ class GodHandler {
                     LanguageHandler.getMessage(
                         "command.god.enable.other",
                         sender,
-                        params = mapOf("prefix" to Data.prefix, "player" to player.name)
+                        params = mapOf("prefix" to Core.prefix, "player" to player.name)
                     )
                 )
             }

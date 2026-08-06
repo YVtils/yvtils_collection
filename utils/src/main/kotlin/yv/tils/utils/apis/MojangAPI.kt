@@ -15,7 +15,7 @@ package yv.tils.utils.apis
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.bukkit.OfflinePlayer
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -73,11 +73,11 @@ class MojangAPI {
     }
 
     fun nameToUUID(playerName: String): UUID {
-        return Data.instance.server.getOfflinePlayer(playerName).uniqueId
+        return Core.instance.server.getOfflinePlayer(playerName).uniqueId
     }
 
     fun nameToOfflinePlayer(playerName: String): OfflinePlayer {
-        return Data.instance.server.getOfflinePlayer(playerName)
+        return Core.instance.server.getOfflinePlayer(playerName)
     }
 
     private fun sendRequest(url: String): MojangResponse {

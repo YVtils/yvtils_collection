@@ -19,7 +19,7 @@ import yv.tils.config.data.ConfigEntry
 import yv.tils.config.data.EntryType
 import yv.tils.config.files.YMLFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
 // TODO: Think about splitting block list and config file into separate files
@@ -73,7 +73,7 @@ class ConfigFile {
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
 
-            Logger.debug("Loading config key: $key -> $value", DEBUGLEVEL.VERBOSE)
+            Logger.debug("Loading config key: $key -> $value", DEBUG_LEVEL.VERBOSE)
             if (value != null) config[key] = value
         }
 
@@ -98,13 +98,13 @@ class ConfigFile {
                 blockList.add(Material.getMaterial(it)!!)
             } catch (e: NullPointerException) {
                 Logger.error("Trying to load a block that does not exist: $it")
-                Logger.debug("Error details: ${e.message}", DEBUGLEVEL.EXTRA)
+                Logger.debug("Error details: ${e.message}", DEBUG_LEVEL.EXTRA)
             }
         }
     }
 
     fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
-        Logger.debug("ConfigFile.registerStrings called with ${content.size} entries", DEBUGLEVEL.DETAILED)
+        Logger.debug("ConfigFile.registerStrings called with ${content.size} entries", DEBUG_LEVEL.DETAILED)
         
         // Always start from base default entries
         ensureBaseEntries()
@@ -113,7 +113,7 @@ class ConfigFile {
         if (content.isNotEmpty()) {
             for (entry in configNew) {
                 if (content.containsKey(entry.key)) {
-                    Logger.debug("Updating entry ${entry.key} from ${entry.value} to ${content[entry.key]}",DEBUGLEVEL.VERBOSE)
+                    Logger.debug("Updating entry ${entry.key} from ${entry.value} to ${content[entry.key]}",DEBUG_LEVEL.VERBOSE)
                     entry.value = content[entry.key]
                 }
             }
@@ -122,12 +122,12 @@ class ConfigFile {
         // sync index and legacy map
         syncEntriesToMap()
 
-        Logger.debug("ConfigFile.registerStrings: about to create YAML file with ${configNew.size} entries", DEBUGLEVEL.DETAILED)
+        Logger.debug("ConfigFile.registerStrings: about to create YAML file with ${configNew.size} entries", DEBUG_LEVEL.DETAILED)
         val ymlFile = YMLFileUtils.makeYAMLFileFromEntries("/multiMine/config.yml", configNew)
-        Logger.debug("ConfigFile.registerStrings: about to update file on disk", DEBUGLEVEL.DETAILED)
+        Logger.debug("ConfigFile.registerStrings: about to update file on disk", DEBUG_LEVEL.DETAILED)
         // Use updateFile with overwriteExisting = true so GUI edits overwrite existing keys
         yv.tils.config.files.FileUtils.updateFile("/multiMine/config.yml", ymlFile, overwriteExisting = true)
-        Logger.debug("ConfigFile.registerStrings: file update complete", DEBUGLEVEL.DETAILED)
+        Logger.debug("ConfigFile.registerStrings: file update complete", DEBUG_LEVEL.DETAILED)
     }
 
     private fun syncEntriesToMap() {

@@ -15,7 +15,7 @@ package yv.tils.config.files
 import org.bukkit.configuration.file.YamlConfiguration
 import yv.tils.config.files.FileUtils.Companion.loadFilesFromFolder
 import yv.tils.config.files.FileUtils.Companion.makeYAML
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.io.File
 import java.io.FileNotFoundException
@@ -29,7 +29,7 @@ class YMLFileUtils {
                 File(path)
             } else {
                 val relPath = path.trimStart('/','\\')
-                File(Data.pluginFolder, relPath)
+                File(Core.pluginFolder, relPath)
             }
 
             if (!file.exists()) throw FileNotFoundException("File not found: $path")
@@ -46,7 +46,7 @@ class YMLFileUtils {
 
             val yaml = makeYAML(content)
             val relPath = path.trimStart('/','\\')
-            val file = File(Data.pluginFolder, relPath)
+            val file = File(Core.pluginFolder, relPath)
 
             Logger.debug("YAML object: $yaml", 3)
 

@@ -17,9 +17,9 @@ import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
 import yv.tils.essentials.commands.handler.HealHandler
+import yv.tils.utils.modules.Core
 import yv.tils.essentials.permissions.Permissions
 import yv.tils.essentials.utils.CheckArguments
-import yv.tils.utils.data.Data
 
 class HealCMD {
     val command = commandTree("heal") {

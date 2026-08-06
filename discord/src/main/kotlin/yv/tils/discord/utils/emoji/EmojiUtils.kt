@@ -14,7 +14,7 @@ package yv.tils.discord.utils.emoji
 
 import org.bukkit.entity.Player
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.player.PlayerUtils
 
@@ -53,7 +53,7 @@ class EmojiUtils {
                     addPlayerEmoji(skinHash, emojiId)
                 } catch (e: Exception) {
                     Logger.error("Failed to create player emoji for ${player.name}: ${e.message}")
-                    Logger.debug("Stack trace: ${e.stackTraceToString()}", DEBUGLEVEL.DETAILED)
+                    Logger.debug("Stack trace: ${e.stackTraceToString()}", DEBUG_LEVEL.DETAILED)
                 }
             },
             taskName = "createPlayerEmoji",
@@ -80,7 +80,7 @@ class EmojiUtils {
                 removePlayerEmoji(skinHash)
             } catch (e: Exception) {
                 Logger.error("Failed to remove player emoji for ${player.name}: ${e.message}")
-                Logger.debug("Stack trace: ${e.stackTraceToString()}", DEBUGLEVEL.DETAILED)
+                Logger.debug("Stack trace: ${e.stackTraceToString()}", DEBUG_LEVEL.DETAILED)
             }
         }
     }

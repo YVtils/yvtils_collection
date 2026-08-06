@@ -12,7 +12,7 @@
 
 package yv.tils.status.logic
 
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
@@ -30,7 +30,7 @@ class StatusHandler {
                 "command.status.input.tooLong",
                 player,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "maxLength" to maxLength.toString()
                 )
             ))
@@ -47,7 +47,7 @@ class StatusHandler {
                 "command.status.default.notFound",
                 player,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "status" to status,
                 )
             ))
@@ -63,7 +63,7 @@ class StatusHandler {
             "command.status.clear.cleared.self",
             sender,
             mapOf(
-                "prefix" to Data.prefix,
+                "prefix" to Core.prefix,
             )
         ))
 
@@ -72,7 +72,7 @@ class StatusHandler {
                 "command.status.clear.cleared.other",
                 sender,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "yv/tils/player" to player.name
                 )
             ))
@@ -95,7 +95,7 @@ class StatusHandler {
                 "command.status.set",
                 player,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "status" to MessageUtils.convert(displayCompo)
                 )
             ))
@@ -116,7 +116,7 @@ class StatusHandler {
                 "command.status.input.invalid",
                 player,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "status" to status,
                 )
             ))

@@ -2,6 +2,13 @@
 
 This repository combines all the yvtils minecraft plugins in one place, for easier access and management.
 
+## For contributors
+
+- Creating a new feature module? See
+  [docs/adding-a-new-module.md](./docs/adding-a-new-module.md).
+- Migrating an existing module or core to the new dynamic module system? See
+  [docs/migrating-to-dynamic-modules.md](./docs/migrating-to-dynamic-modules.md).
+
 ## Plugins included in this collection
 - YVtils-SMP **(IN MIGRATION PROCESS)**
 - YVtils-Discord ([Modrinth](https://modrinth.com/plugin/yvtils_dc))

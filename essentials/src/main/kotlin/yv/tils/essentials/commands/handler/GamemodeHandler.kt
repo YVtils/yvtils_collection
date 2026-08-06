@@ -18,10 +18,11 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.config.language.Language
 import yv.tils.config.language.LanguageHandler
+import yv.tils.utils.modules.Core
+
 import yv.tils.config.language.LanguageProvider
 import yv.tils.essentials.language.LangStrings
 import yv.tils.common.language.LangStrings as CommonLangStrings
-import yv.tils.utils.data.Data
 
 class GamemodeHandler {
     /**
@@ -60,7 +61,7 @@ class GamemodeHandler {
                         CommonLangStrings.COMMAND_USAGE.key,
                         sender,
                         params = mapOf(
-                            "prefix" to Data.prefix,
+                            "prefix" to Core.prefix,
                             "command" to "/gm <survival/creative/adventure/spectator> [player]"
                         )
                     )
@@ -77,7 +78,7 @@ class GamemodeHandler {
                 LangStrings.COMMAND_GAMEMODE_SELF,
                 player.uniqueId,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "gamemode" to LanguageHandler.getRawMessage(gamemodeName, player.uniqueId),
                 )
             ),
@@ -89,7 +90,7 @@ class GamemodeHandler {
                     LangStrings.COMMAND_GAMEMODE_OTHER,
                     sender,
                     mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                         "gamemode" to LanguageHandler.getRawMessage(gamemodeName, sender),
                         "player" to player.name
                     )

@@ -18,7 +18,7 @@ import yv.tils.common.config.ConfigFile
 import yv.tils.common.language.LangStrings
 import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -50,7 +50,7 @@ class PluginVersion {
     }
 
     private fun checkForUpdates() {
-        val latestVersion = getLatestVersion(Data.pluginShortName)
+        val latestVersion = getLatestVersion(Core.core.pluginShort)
         if (latestVersion == null) {
             Logger.warn("Failed to fetch latest plugin version from API.")
             return
@@ -64,7 +64,7 @@ class PluginVersion {
 
         versionState = compareVersions(latestVersion, currentVersion)
 
-        val formatedPluginURL = "<click:open_url:${Data.pluginURL}>${Data.pluginURL}</click>"
+        val formatedPluginURL = "<click:open_url:${Core.core.url}>${Core.core.url}</click>"
 
         when (versionState) {
             VersionState.UP_TO_DATE -> {
@@ -167,7 +167,7 @@ class PluginVersion {
     }
 
     private fun getPluginVersion(): String? {
-        val version = Data.yvtilsVersion
+        val version = Core.yvtilsVersion
 
         if (version == "") {
             return null

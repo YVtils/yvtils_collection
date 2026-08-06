@@ -13,7 +13,7 @@
 package yv.tils.migration.base
 
 import yv.tils.migration.config.SaveFile
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.io.File
 
@@ -88,7 +88,7 @@ abstract class BaseMigrator {
             return false
         }
 
-        val newFile = File(Data.pluginFolder, newPath)
+        val newFile = File(Core.pluginFolder, newPath)
         return ! newFile.exists()
     }
 }
