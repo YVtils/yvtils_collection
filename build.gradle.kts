@@ -81,6 +81,7 @@ val publishableModules = setOf(
     "message",
     "moderation",
     "stats",
+    "gui-v2",
 )
 
 /*

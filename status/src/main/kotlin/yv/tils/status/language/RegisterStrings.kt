@@ -80,6 +80,14 @@ class RegisterStrings {
                 FileTypes.DE to "<prefix> <gold>Willkommen zurück!<newline><gray>Aktueller Status: <white><status>"
             )
         )
+
+        registerNewString(
+            "status.gui.clear",
+            mapOf(
+                FileTypes.EN to "<red>Clear the status!",
+                FileTypes.DE to "<red>Status löschen!",
+            )
+        )
     }
 
     private fun registerNewString(langKey: String, translations: Map<FileTypes, String>) {

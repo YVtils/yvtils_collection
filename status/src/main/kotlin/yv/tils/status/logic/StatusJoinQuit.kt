@@ -12,20 +12,21 @@
 
 package yv.tils.status.logic
 
-import yv.tils.utils.modules.Core
-import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.message.MessageUtils
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import yv.tils.config.language.LanguageHandler
 import yv.tils.status.configs.ConfigFile
-import yv.tils.status.configs.SaveFile
+import yv.tils.status.utils.StatusUtils
+import yv.tils.status.utils.StatusUtils.Companion.setStatusDisplay
+import yv.tils.utils.message.MessageUtils
+import yv.tils.utils.modules.Core
 
 class StatusJoinQuit {
     fun loadPlayer(e: PlayerJoinEvent) {
         val player = e.player
-        val status = SaveFile.saves[player.uniqueId] ?: return
+        val status = StatusUtils.currentStatus(player) ?: return
 
-        if (StatusHandler().setStatusDisplay(player, status.content)) {
+        if (setStatusDisplay(player, status.content)) {
             val display = ConfigFile.config["display"] as String
 
             val displayCompo = MessageUtils.replacer(

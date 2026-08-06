@@ -12,9 +12,9 @@
 
 package yv.tils.common.config
 
-import yv.tils.config.files.YMLFileUtils
 import yv.tils.config.data.ConfigEntry
 import yv.tils.config.data.EntryType
+import yv.tils.config.files.YMLFileUtils
 import yv.tils.utils.logger.Logger
 
 class ConfigFile {
@@ -41,7 +41,7 @@ class ConfigFile {
     private val filePath = "/config.yml"
 
     fun loadConfig() {
-    val file = YMLFileUtils.loadYAMLFile(filePath)
+        val file = YMLFileUtils.loadYAMLFile(filePath)
 
         for (key in file.content.getKeys(true)) {
             val value = file.content.get(key)
@@ -55,7 +55,15 @@ class ConfigFile {
         val entries = mutableListOf<ConfigEntry>()
 
         if (content.isEmpty()) {
-            entries.add(ConfigEntry("documentation", EntryType.STRING, null, "https://docs.yvtils.net/config.yml", "Documentation URL"))
+            entries.add(
+                ConfigEntry(
+                    "documentation",
+                    EntryType.STRING,
+                    null,
+                    "https://docs.yvtils.net/config.yml",
+                    "Documentation URL"
+                )
+            )
             entries.add(ConfigEntry("language", EntryType.STRING, null, "en", "Default language"))
             entries.add(ConfigEntry("serverIP", EntryType.STRING, null, "smp.net", "Server IP"))
             entries.add(ConfigEntry("serverPort", EntryType.INT, null, -1, "Server port"))
