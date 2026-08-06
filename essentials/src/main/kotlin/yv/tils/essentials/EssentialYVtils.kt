@@ -20,6 +20,7 @@ import yv.tils.essentials.config.ConfigFile
 import yv.tils.essentials.language.LangStrings
 import yv.tils.essentials.listeners.*
 import yv.tils.essentials.permissions.PermissionsData
+import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
 
 class EssentialYVtils : Module.YVtilsModule {
@@ -77,7 +78,7 @@ class EssentialYVtils : Module.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(AsyncChat(), plugin)

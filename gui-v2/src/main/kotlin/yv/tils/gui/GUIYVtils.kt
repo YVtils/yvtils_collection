@@ -45,9 +45,7 @@ class GUIYVtils : Module.YVtilsModule {
 
     override fun enablePlugin() {
         InvUIBootstrap.ensure()
-    }
 
-    override fun enablePlugin() {
         Module.addModule(MODULE)
     }
 
