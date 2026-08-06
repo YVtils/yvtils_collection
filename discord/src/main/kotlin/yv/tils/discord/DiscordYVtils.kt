@@ -13,7 +13,7 @@
 package yv.tils.discord
 
 import yv.tils.common.permissions.PermissionManager
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.discord.actions.commands.JDACommandsRegister
 import yv.tils.discord.configs.*
 import yv.tils.discord.data.PermissionsData

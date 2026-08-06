@@ -12,8 +12,8 @@
 
 package yv.tils.yv_smp.language
 
-import yv.tils.config.language.FileTypes
-import yv.tils.config.language.LanguageProvider
+import yv.tils.configv2.language.FileTypes
+import yv.tils.configv2.language.LanguageProvider
 
 enum class LangStrings(override val key: String, override val translations: Map<FileTypes, String>) : LanguageProvider.LangStrings {
     START_TITLE_HEAL(

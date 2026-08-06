@@ -13,9 +13,8 @@
 package yv.tils.migration.config
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import yv.tils.config.files.JSONFileUtils
+import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.JsonFileUtils
 import yv.tils.utils.logger.Logger
 
 class SaveFile {
@@ -30,20 +29,19 @@ class SaveFile {
     private val filePath = "/migration/save.json"
 
     fun loadConfig() {
-    val file = JSONFileUtils.loadJSONFile(filePath)
-    val jsonFile = file.content
-        val saveList = jsonFile["saves"]?.jsonArray ?: return
+        val file = JsonFileUtils.loadJsonFile(filePath)
+        val saveListNode = file.node.node("saves")
 
-        if (saveList.isEmpty()) {
+        if (saveListNode.virtual() || !saveListNode.isList()) {
             Logger.debug("No saves found in the save file.")
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save")
+        for (saveNode in saveListNode.childrenList()) {
+            Logger.debug("Loading save: ${saveNode.raw()}")
 
-            val configFileName = save.jsonObject["configFileName"]?.toString()?.replace("\"", "") ?: continue
-            val migrated = save.jsonObject["migrated"]?.toString()?.toBoolean() ?: false
+            val configFileName = saveNode.node("configFileName").string ?: continue
+            val migrated = saveNode.node("migrated").get(Boolean::class.javaObjectType) ?: false
 
             val migrationEntry = MigrationEntry(configFileName, migrated)
             saveFile.add(migrationEntry)
@@ -52,15 +50,19 @@ class SaveFile {
     }
 
     fun registerStrings(saveList: MutableList<MigrationEntry> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
+        val saveWrapper = mapOf(
+            "saves" to saveList.map { mapOf("configFileName" to it.configFileName, "migrated" to it.migrated) }
+        )
+        val jsonFile = JsonFileUtils.makeJsonFile(filePath, saveWrapper)
+        ConfigurateFileUtils.update(jsonFile, overwriteExisting = false)
     }
 
     private fun upgradeStrings(saveList: MutableList<MigrationEntry> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile, true)
+        val saveWrapper = mapOf(
+            "saves" to saveList.map { mapOf("configFileName" to it.configFileName, "migrated" to it.migrated) }
+        )
+        val jsonFile = JsonFileUtils.makeJsonFile(filePath, saveWrapper)
+        ConfigurateFileUtils.update(jsonFile, overwriteExisting = true)
     }
 }
 

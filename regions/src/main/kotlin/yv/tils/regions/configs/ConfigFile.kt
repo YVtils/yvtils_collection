@@ -12,9 +12,11 @@
 
 package yv.tils.regions.configs
 
-import yv.tils.config.files.YMLFileUtils
-import yv.tils.config.data.ConfigEntry
-import yv.tils.config.data.EntryType
+import yv.tils.configv2.data.ConfigEntry
+import yv.tils.configv2.data.ConfigEntryFileUtils
+import yv.tils.configv2.data.EntryType
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ConfigurateFileUtils
 import yv.tils.regions.data.*
 import yv.tils.utils.logger.Logger
 
@@ -131,13 +133,12 @@ class ConfigFile {
     private val filePath = "/regions/config.yml"
 
     fun loadConfig() {
-    val file = YMLFileUtils.loadYAMLFile(filePath)
+        val file = ConfigurateFileUtils.load(filePath, ConfigFormat.YAML)
+        val flattened = ConfigurateFileUtils.flattenToMap(file.node)
 
-        for (key in file.content.getKeys(true)) {
-            val value = file.content.get(key)
-
+        for ((key, value) in flattened) {
             Logger.debug("Loading config key: $key -> $value")
-            config[key] = value as Any
+            config[key] = value
         }
     }
 
@@ -179,8 +180,8 @@ class ConfigFile {
         entries.add(ConfigEntry("flags.role_based.${Flag.INTERACT.name}", EntryType.STRING, null, parseIDToName(Flag.INTERACT.defaultValue as Int), "Role-based INTERACT flag"))
         entries.add(ConfigEntry("flags.role_based.${Flag.TELEPORT.name}", EntryType.STRING, null, parseIDToName(Flag.TELEPORT.defaultValue as Int), "Role-based TELEPORT flag"))
 
-        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries(filePath, entries)
-        yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
+        val ymlFile = ConfigEntryFileUtils.buildConfigFile(filePath, entries, ConfigFormat.YAML)
+        ConfigurateFileUtils.save(ymlFile)
     }
 
     private fun parseIDToName(id: Int): String {

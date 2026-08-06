@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import yv.tils.common.config.ConfigFile
 import yv.tils.common.language.LangStrings
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger

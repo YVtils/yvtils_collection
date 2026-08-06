@@ -17,7 +17,7 @@ import dev.jorel.commandapi.CommandAPIPaperConfig
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
-import yv.tils.config.ConfigYVtils
+import yv.tils.configv2.ConfigV2YVtils
 import yv.tils.core.loader.DynamicModuleDriver
 import yv.tils.core.loader.ModuleConfig
 import yv.tils.utils.UtilsYVtils
@@ -39,7 +39,7 @@ class YVtils: JavaPlugin() {
     }
 
     private val modules: List<Module.YVtilsModule> = listOf(
-        ConfigYVtils(),
+        ConfigV2YVtils(),
         UtilsYVtils(),
         CommonYVtils()
     )

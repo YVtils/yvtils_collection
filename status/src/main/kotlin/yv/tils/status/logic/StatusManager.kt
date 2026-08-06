@@ -29,7 +29,7 @@ import xyz.xenondevs.invui.item.setItemProvider
 import xyz.xenondevs.invui.window.AnvilWindow
 import xyz.xenondevs.invui.window.Window
 import xyz.xenondevs.invui.window.addRenameHandler
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.HeadUtils
 import yv.tils.gui.utils.Heads

@@ -16,7 +16,7 @@ import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.scheduler.BukkitTask
 import yv.tils.common.language.LangStrings
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.utils.modules.Core
 
 class AsyncActionAnnounce {

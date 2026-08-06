@@ -12,10 +12,12 @@
 
 package yv.tils.yv_smp.configs
 
-import yv.tils.config.data.ConfigEntry
-import yv.tils.config.data.EntryType
-import yv.tils.config.files.YMLFileUtils
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.configv2.data.ConfigEntry
+import yv.tils.configv2.data.ConfigEntryFileUtils
+import yv.tils.configv2.data.EntryType
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
 /**
@@ -67,14 +69,12 @@ class ConfigFile {
     private val filePath = "/yv_smp/config.yml"
 
     fun loadConfig() {
-        val file = YMLFileUtils.loadYAMLFile(filePath)
+        val file = ConfigurateFileUtils.load(filePath, ConfigFormat.YAML)
+        val flattened = ConfigurateFileUtils.flattenToMap(file.node)
 
-        for (key in file.content.getKeys(true)) {
-            val value = file.content.get(key)
-            if (value != null) {
-                Logger.debug("Loading YV_SMP config key: $key -> $value", DEBUGLEVEL.VERBOSE)
-                config[key] = value
-            }
+        for ((key, value) in flattened) {
+            Logger.debug("Loading YV_SMP config key: $key -> $value", DEBUG_LEVEL.VERBOSE)
+            config[key] = value
         }
     }
 
@@ -144,8 +144,8 @@ class ConfigFile {
         }
 
         // Create YAML file
-        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries(filePath, entries)
-        yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
+        val ymlFile = ConfigEntryFileUtils.buildConfigFile(filePath, entries, ConfigFormat.YAML)
+        ConfigurateFileUtils.save(ymlFile)
     }
 }
 

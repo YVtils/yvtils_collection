@@ -13,10 +13,8 @@
 package yv.tils.multiMine.configs
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import yv.tils.config.files.FileUtils
-import yv.tils.config.files.JSONFileUtils
+import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.JsonFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 import java.util.*
@@ -24,32 +22,36 @@ import java.util.*
 class SaveFile {
     companion object {
         val saves = mutableMapOf<UUID, MultiMineSave>()
+
+        private const val FILE_PATH = "/multiMine/save.json"
     }
 
     fun loadConfig() {
-    val file = JSONFileUtils.loadJSONFile("/multiMine/save.json")
-    val jsonFile = file.content
-        val saveList = jsonFile["saves"]?.jsonArray ?: return
+        val file = runCatching { JsonFileUtils.loadJsonFile(FILE_PATH) }.getOrNull() ?: return
+        val saveListNode = file.node.node("saves")
 
-        if (saveList.isEmpty()) {
+        if (saveListNode.virtual() || !saveListNode.isList()) {
             Logger.debug("No saves found in the save file.")
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save")
+        for (saveNode in saveListNode.childrenList()) {
+            Logger.debug("Loading save: ${saveNode.raw()}")
 
-            val uuid = save.jsonObject["uuid"]?.toString()?.replace("\"", "") ?: continue
-            val toggled = save.jsonObject["toggled"]?.toString()?.toBoolean() ?: continue
+            val uuid = saveNode.node("uuid").string ?: continue
+            val toggled = saveNode.node("toggled").get(Boolean::class.javaObjectType) ?: continue
 
             saves[UUID.fromString(uuid)] = MultiMineSave(uuid, toggled)
         }
     }
 
     fun registerStrings(saveList: MutableList<MultiMineSave> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-        val jsonFile = JSONFileUtils.makeJSONFile("/multiMine/save.json", saveWrapper)
-        FileUtils.updateFile("/multiMine/save.json", jsonFile, true)
+        val saveWrapper = mapOf(
+            "saves" to saveList.map { mapOf("uuid" to it.uuid, "toggled" to it.toggled) }
+        )
+
+        val jsonFile = JsonFileUtils.makeJsonFile(FILE_PATH, saveWrapper)
+        ConfigurateFileUtils.update(jsonFile, overwriteExisting = true)
     }
 
     fun updatePlayerSetting(uuid: UUID, state: Boolean) {

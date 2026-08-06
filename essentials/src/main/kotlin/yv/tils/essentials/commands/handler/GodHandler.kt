@@ -15,7 +15,7 @@ package yv.tils.essentials.commands.handler
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.utils.modules.Core
 import java.util.*
 

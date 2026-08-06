@@ -14,7 +14,7 @@ package yv.tils.message.logic
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.utils.modules.Core
 import java.util.*
 

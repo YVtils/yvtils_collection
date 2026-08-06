@@ -13,7 +13,7 @@
 package yv.tils.yv_smp
 
 import yv.tils.common.permissions.PermissionManager
-import yv.tils.config.language.LanguageProvider
+import yv.tils.configv2.language.LanguageProvider
 import yv.tils.utils.data.Data
 import yv.tils.yv_smp.commands.MusicCommand
 import yv.tils.yv_smp.commands.StartCommand

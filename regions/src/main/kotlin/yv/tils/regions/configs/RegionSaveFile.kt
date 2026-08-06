@@ -12,8 +12,8 @@
 
 package yv.tils.regions.configs
 
-import kotlinx.serialization.json.*
-import yv.tils.config.files.JSONFileUtils
+import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.JsonFileUtils
 import yv.tils.regions.data.*
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
@@ -23,50 +23,49 @@ class RegionSaveFile {
     private val filePath = "/regions/region_save.json"
 
     fun loadConfig() {
-    val file = JSONFileUtils.loadJSONFile(filePath)
-    val jsonFile = file.content
-        val saveList = jsonFile["regions"]?.jsonArray ?: return
+        val file = runCatching { JsonFileUtils.loadJsonFile(filePath) }.getOrNull() ?: return
+        val saveListNode = file.node.node("regions")
 
-        if (saveList.isEmpty()) {
+        if (saveListNode.virtual() || !saveListNode.isList()) {
             Logger.debug("No saves found in the save file.")
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save")
+        for (saveNode in saveListNode.childrenList()) {
+            Logger.debug("Loading save: ${saveNode.raw()}")
 
             try {
-                val id = save.jsonObject["id"]?.jsonPrimitive?.content ?: continue
-                val name = save.jsonObject["name"]?.jsonPrimitive?.content ?: continue
-                val world = save.jsonObject["world"]?.jsonPrimitive?.content ?: continue
-                val x = save.jsonObject["x"]?.jsonPrimitive?.content?.toInt() ?: continue
-                val z = save.jsonObject["z"]?.jsonPrimitive?.content?.toInt() ?: continue
-                val x2 = save.jsonObject["x2"]?.jsonPrimitive?.content?.toInt() ?: continue
-                val z2 = save.jsonObject["z2"]?.jsonPrimitive?.content?.toInt() ?: continue
-                val created = save.jsonObject["created"]?.jsonPrimitive?.content?.toLong() ?: continue
-                val flags = save.jsonObject["flags"]?.jsonObject ?: continue
-                val globalFlags = flags["global"]?.jsonObject ?: continue
-                val roleBasedFlags = flags["roleBased"]?.jsonObject ?: continue
+                val id = saveNode.node("id").string ?: continue
+                val name = saveNode.node("name").string ?: continue
+                val world = saveNode.node("world").string ?: continue
+                val x = saveNode.node("x").get(Int::class.javaObjectType) ?: continue
+                val z = saveNode.node("z").get(Int::class.javaObjectType) ?: continue
+                val x2 = saveNode.node("x2").get(Int::class.javaObjectType) ?: continue
+                val z2 = saveNode.node("z2").get(Int::class.javaObjectType) ?: continue
+                val created = saveNode.node("created").get(Long::class.javaObjectType) ?: continue
+                val flagsNode = saveNode.node("flags")
+                val globalFlagsNode = flagsNode.node("global")
+                val roleBasedFlagsNode = flagsNode.node("roleBased")
 
                 val global = mutableMapOf<Flag, Boolean>()
                 val roleBased = mutableMapOf<Flag, Int>()
-                for (flag in globalFlags) {
+                for ((flagKeyRaw, flagNode) in globalFlagsNode.childrenMap()) {
                     val flagKey = try {
-                        Flag.valueOf(flag.key)
+                        Flag.valueOf(flagKeyRaw.toString())
                     } catch (e: IllegalArgumentException) {
-                        Logger.warn("Invalid flag key ${flag.key} for region $id: ${e.message}")
+                        Logger.warn("Invalid flag key $flagKeyRaw for region $id: ${e.message}")
                         continue
                     }
-                    global[flagKey] = flag.value.jsonPrimitive.content.toBoolean()
+                    global[flagKey] = flagNode.get(Boolean::class.javaObjectType) ?: continue
                 }
-                for (flag in roleBasedFlags) {
+                for ((flagKeyRaw, flagNode) in roleBasedFlagsNode.childrenMap()) {
                     val flagKey = try {
-                        Flag.valueOf(flag.key)
+                        Flag.valueOf(flagKeyRaw.toString())
                     } catch (e: IllegalArgumentException) {
-                        Logger.warn("Invalid flag key ${flag.key} for region $id: ${e.message}")
+                        Logger.warn("Invalid flag key $flagKeyRaw for region $id: ${e.message}")
                         continue
                     }
-                    roleBased[flagKey] = flag.value.jsonPrimitive.content.toInt()
+                    roleBased[flagKey] = flagNode.get(Int::class.javaObjectType) ?: continue
                 }
 
                 val region = RegionManager.RegionData(
@@ -95,9 +94,9 @@ class RegionSaveFile {
     }
 
     fun registerStrings(saveList: MutableList<RegionManager.RegionData> = mutableListOf()) {
-        val saveWrapper = mapOf("regions" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
+        val saveWrapper = mapOf("regions" to saveList.map { regionToMap(it) })
+        val jsonFile = JsonFileUtils.makeJsonFile(filePath, saveWrapper)
+        ConfigurateFileUtils.update(jsonFile, overwriteExisting = false)
     }
 
     fun updateRegionSetting(uuid: UUID, content: RegionManager.RegionData?) {
@@ -113,8 +112,37 @@ class RegionSaveFile {
     }
 
     private fun upgradeStrings(saveList: MutableList<RegionManager.RegionData> = mutableListOf()) {
-        val saveWrapper = mapOf("regions" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile, true)
+        val saveWrapper = mapOf("regions" to saveList.map { regionToMap(it) })
+        val jsonFile = JsonFileUtils.makeJsonFile(filePath, saveWrapper)
+        ConfigurateFileUtils.update(jsonFile, overwriteExisting = true)
     }
+
+    /**
+     * Converts a [RegionManager.RegionData] into a plain nested
+     * `Map<String, Any?>`/`List` structure that [JsonFileUtils.makeJsonFile]
+     * (via `ConfigurationNode.raw()`) can persist directly - the
+     * Configurate-backed replacement for what `kotlinx.serialization`'s
+     * `Json.encodeToString` used to do for `@Serializable` classes.
+     *
+     * Enum-keyed flag maps (`Map<Flag, Boolean>`/`Map<Flag, Int>`) are
+     * converted to `Map<String, ...>` via [Flag.name], matching how
+     * [loadConfig] reads them back with `Flag.valueOf(key)` and how the
+     * original `kotlinx.serialization` output represented enum map keys.
+     */
+    private fun regionToMap(region: RegionManager.RegionData): Map<String, Any?> = mapOf(
+        "id" to region.id,
+        "name" to region.name,
+        "world" to region.world,
+        "x" to region.x,
+        "z" to region.z,
+        "x2" to region.x2,
+        "z2" to region.z2,
+        "created" to region.created,
+        "flags" to mapOf(
+            "global" to region.flags.global.mapKeys { it.key.name },
+            "roleBased" to region.flags.roleBased.mapKeys { it.key.name },
+            "lockedGlobal" to region.flags.lockedGlobal.mapKeys { it.key.name },
+            "lockedRoleBased" to region.flags.lockedRoleBased.mapKeys { it.key.name },
+        ),
+    )
 }

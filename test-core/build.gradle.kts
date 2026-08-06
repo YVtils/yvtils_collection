@@ -12,20 +12,21 @@
 
 dependencies {
     // Provided at compile time only - these are NOT shaded into this jar.
-    // Instead, `common`'s own shadowJar (which already bundles config+utils+
-    // common+CommandAPI+coroutines+serialization together) is embedded as a
-    // resource and added to the classpath at runtime via a local JarLibrary in
-    // DynamicModuleLoader. This keeps everything that needs to interoperate
-    // with dynamically-fetched feature modules in the same classloader tier -
-    // see DynamicModuleLoader's docs for the full explanation.
+    // Instead, `common`'s own shadowJar (which already bundles config-v2+
+    // utils+common+CommandAPI+coroutines+serialization together) is embedded
+    // as a resource and added to the classpath at runtime via a local
+    // JarLibrary in DynamicModuleLoader. This keeps everything that needs to
+    // interoperate with dynamically-fetched feature modules in the same
+    // classloader tier - see DynamicModuleLoader's docs for the full
+    // explanation.
     compileOnly(project(":common"))
-    compileOnly(project(":config"))
+    compileOnly(project(":config-v2"))
     compileOnly(project(":utils"))
 }
 
 val moduleVersion = project.version.toString()
 
-// Embeds `common`'s shadowJar output (utils+config+common+CommandAPI+
+// Embeds `common`'s shadowJar output (utils+config-v2+common+CommandAPI+
 // coroutines+serialization, all bundled together) as a plugin resource, so
 // DynamicModuleLoader can extract it and add it via JarLibrary at runtime.
 val embeddedResourcesDir = layout.buildDirectory.dir("generated/embeddedResources")

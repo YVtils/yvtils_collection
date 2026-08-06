@@ -12,8 +12,8 @@
 
 package yv.tils.essentials.language
 
-import yv.tils.config.language.FileTypes
-import yv.tils.config.language.LanguageProvider
+import yv.tils.configv2.language.FileTypes
+import yv.tils.configv2.language.LanguageProvider
 import yv.tils.utils.colors.ColorUtils
 import yv.tils.utils.colors.Colors
 

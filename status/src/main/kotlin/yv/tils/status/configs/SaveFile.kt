@@ -13,9 +13,8 @@
 package yv.tils.status.configs
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import yv.tils.config.files.JSONFileUtils
+import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.JsonFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 import java.util.*
@@ -28,30 +27,34 @@ class SaveFile {
     private val filePath = "/status/save.json"
 
     fun loadConfig() {
-    val file = JSONFileUtils.loadJSONFile(filePath)
-    val jsonFile = file.content
-        val saveList = jsonFile["saves"]?.jsonArray ?: return
+        val file = runCatching { JsonFileUtils.loadJsonFile(filePath) }.getOrNull() ?: return
+        val saveListNode = file.node.node("saves")
 
-        if (saveList.isEmpty()) {
+        if (saveListNode.virtual() || !saveListNode.isList()) {
             Logger.debug("No saves found in the save file.")
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save")
+        for (saveNode in saveListNode.childrenList()) {
+            Logger.debug("Loading save: ${saveNode.raw()}")
 
-            val uuid = save.jsonObject["uuid"]?.toString()?.replace("\"", "") ?: continue
-            val content = save.jsonObject["content"]?.toString() ?: continue
+            val uuid = saveNode.node("uuid").string ?: continue
+            val content = saveNode.node("content").string ?: continue
 
             saves[UUID.fromString(uuid)] = StatusSave(uuid, content)
         }
     }
 
     fun registerStrings(saveList: MutableList<StatusSave> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    // Use FileUtils.updateFile for merging/overwriting logic (keeps existing behavior)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
+        val saveWrapper = mapOf(
+            "saves" to saveList.map { mapOf("uuid" to it.uuid, "content" to it.content) }
+        )
+
+        val jsonFile = JsonFileUtils.makeJsonFile(filePath, saveWrapper)
+        // Matches the original's `FileUtils.updateFile(path, jsonFile)` (no
+        // explicit overwrite flag, i.e. `overwriteExisting = false`) - merge
+        // with whatever's already on disk rather than fully replacing it.
+        ConfigurateFileUtils.update(jsonFile, overwriteExisting = false)
     }
 
     fun updatePlayerSetting(uuid: UUID, content: String) {

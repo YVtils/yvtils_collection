@@ -14,7 +14,7 @@ package yv.tils.status.logic
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.status.configs.ConfigFile
 import yv.tils.status.utils.StatusUtils.Companion.generateDefaultStatus
 import yv.tils.status.utils.StatusUtils.Companion.setStatusDisplay

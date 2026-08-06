@@ -20,7 +20,7 @@ import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.components.thumbnail.Thumbnail
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.utils.FileUpload
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.WhitelistLogic
 import yv.tils.utils.colors.ColorUtils

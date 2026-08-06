@@ -13,7 +13,7 @@
 dependencies {
     implementation(project(":common"))
     implementation(project(":utils"))
-    implementation(project(":config"))
+    implementation(project(":config-v2"))
     implementation(project(":regions"))
 }
 

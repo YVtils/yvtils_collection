@@ -14,7 +14,7 @@ package yv.tils.multiMine.commands
 
 import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.multiMine.data.Permissions
 import yv.tils.multiMine.logic.BlockManage
 import yv.tils.multiMine.logic.ManageGUI

@@ -23,7 +23,7 @@ import net.dv8tion.jda.api.components.separator.Separator
 import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.components.thumbnail.Thumbnail
 import net.dv8tion.jda.api.entities.emoji.Emoji
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.discord.data.Components
 import yv.tils.discord.data.Components.Companion.errorColor
 import yv.tils.discord.data.Components.Companion.infoColor

@@ -14,10 +14,8 @@ package yv.tils.moderation.configs.saveFile
 
 import jdk.jfr.internal.event.EventConfiguration.timestamp
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import yv.tils.config.files.FileUtils
-import yv.tils.config.files.JSONFileUtils
+import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.JsonFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 import java.util.UUID
@@ -49,33 +47,34 @@ class WarnSaveFile {
     }
 
     fun loadConfig() {
-        val file = JSONFileUtils.loadJSONFile("/moderation/warnedPlayers.json")
-        val jsonFile = file.content
-        val saveList = jsonFile["saves"]?.jsonArray ?: return
+        val file = runCatching { JsonFileUtils.loadJsonFile("/moderation/warnedPlayers.json") }.getOrNull() ?: return
+        val saveListNode = file.node.node("saves")
 
-        if (saveList.isEmpty()) {
+        if (saveListNode.virtual() || !saveListNode.isList()) {
             Logger.debug("No saves found in the save file.", DEBUG_LEVEL.SPAM)
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save", DEBUG_LEVEL.SPAM)
+        for (saveNode in saveListNode.childrenList()) {
+            Logger.debug("Loading save: ${saveNode.raw()}", DEBUG_LEVEL.SPAM)
 
-            val uuid = save.jsonObject["uuid"]?.toString()?.replace("\"", "") ?: continue
-            val warningCount = save.jsonObject["warningCount"]?.toString()?.toInt() ?: continue
+            val uuid = saveNode.node("uuid").string ?: continue
+            val warningCount = saveNode.node("warningCount").get(Int::class.javaObjectType) ?: continue
 
-            val warningsJSON = save.jsonObject["warnings"]?.jsonArray ?: continue
+            val warningsNode = saveNode.node("warnings")
+            if (warningsNode.virtual() || !warningsNode.isList()) continue
 
             val warnings = mutableListOf<Warning>()
 
-            for (warning in warningsJSON) {
-                Logger.debug("Loading warning: $warning", DEBUG_LEVEL.SPAM)
+            for (warningNode in warningsNode.childrenList()) {
+                Logger.debug("Loading warning: ${warningNode.raw()}", DEBUG_LEVEL.SPAM)
 
-                val warnID = warning.jsonObject["id"]?.toString()?.replace("\"", "") ?: continue
-                val reason = warning.jsonObject["reason"]?.toString()?.replace("\"", "") ?: continue
-                val modActionJSON = warning.jsonObject["modAction"]?.jsonObject ?: continue
-                val modUUID = modActionJSON.jsonObject["uuid"]?.toString()?.replace("\"", "") ?: continue
-                val timestamp = modActionJSON.jsonObject["timestamp"]?.toString()?.replace("\"", "") ?: continue
+                val warnID = warningNode.node("id").string ?: continue
+                val reason = warningNode.node("reason").string ?: continue
+                val modActionNode = warningNode.node("modAction")
+                if (modActionNode.virtual()) continue
+                val modUUID = modActionNode.node("uuid").string ?: continue
+                val timestamp = modActionNode.node("timestamp").string ?: continue
 
                 val modAction = ModAction(
                     uuid = modUUID,
@@ -96,9 +95,26 @@ class WarnSaveFile {
     }
 
     fun registerStrings(saveList: MutableList<WarnSave> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-        val jsonFile = JSONFileUtils.makeJSONFile("/moderation/warnedPlayers.json", saveWrapper)
-        FileUtils.updateFile("/moderation/warnedPlayers.json", jsonFile, true)
+        val saveWrapper = mapOf(
+            "saves" to saveList.map {
+                mapOf(
+                    "uuid" to it.uuid,
+                    "warningCount" to it.warningCount,
+                    "warnings" to it.warnings.map { warning ->
+                        mapOf(
+                            "id" to warning.id,
+                            "reason" to warning.reason,
+                            "modAction" to mapOf(
+                                "uuid" to warning.modAction.uuid,
+                                "timestamp" to warning.modAction.timestamp,
+                            ),
+                        )
+                    },
+                )
+            }
+        )
+        val jsonFile = JsonFileUtils.makeJsonFile("/moderation/warnedPlayers.json", saveWrapper)
+        ConfigurateFileUtils.update(jsonFile, overwriteExisting = true)
     }
 
     fun warnPlayer(uuid: UUID, newWarn: Warning) {

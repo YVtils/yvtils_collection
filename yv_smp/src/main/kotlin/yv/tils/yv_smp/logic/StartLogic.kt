@@ -14,7 +14,7 @@ package yv.tils.yv_smp.logic
 
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.utils.data.Data
 import yv.tils.utils.player.PlayerUtils
 import yv.tils.yv_smp.language.LangStrings

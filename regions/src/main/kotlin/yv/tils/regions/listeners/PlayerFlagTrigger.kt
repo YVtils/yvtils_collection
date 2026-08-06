@@ -15,7 +15,7 @@ package yv.tils.regions.listeners
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.*
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.regions.data.Flag
 import yv.tils.regions.data.RegionManager
 import yv.tils.regions.language.LangStrings

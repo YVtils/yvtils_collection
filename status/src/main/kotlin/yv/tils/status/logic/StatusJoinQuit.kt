@@ -14,7 +14,7 @@ package yv.tils.status.logic
 
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.status.configs.ConfigFile
 import yv.tils.status.utils.StatusUtils
 import yv.tils.status.utils.StatusUtils.Companion.setStatusDisplay

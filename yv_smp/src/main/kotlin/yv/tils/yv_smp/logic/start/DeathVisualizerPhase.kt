@@ -19,7 +19,7 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.utils.data.Data
 import yv.tils.utils.message.MessageUtils
 import yv.tils.yv_smp.language.LangStrings

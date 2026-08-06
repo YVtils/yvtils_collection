@@ -12,9 +12,11 @@
 
 package yv.tils.server.configs
 
-import yv.tils.config.files.YMLFileUtils
-import yv.tils.config.data.ConfigEntry
-import yv.tils.config.data.EntryType
+import yv.tils.configv2.data.ConfigEntry
+import yv.tils.configv2.data.ConfigEntryFileUtils
+import yv.tils.configv2.data.EntryType
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ConfigurateFileUtils
 import yv.tils.utils.logger.Logger
 
 class ConfigFile {
@@ -34,13 +36,12 @@ class ConfigFile {
     private val filePath = "/server/config.yml"
 
     fun loadConfig() {
-    val file = YMLFileUtils.loadYAMLFile(filePath)
+        val file = ConfigurateFileUtils.load(filePath, ConfigFormat.YAML)
 
-        for (key in file.content.getKeys(true)) {
-            val value = file.content.get(key)
-
+        val flattened = ConfigurateFileUtils.flattenToMap(file.node)
+        for ((key, value) in flattened) {
             Logger.debug("Loading config key: $key -> $value")
-            config[key] = value as Any
+            config[key] = value
         }
     }
 
@@ -82,7 +83,7 @@ class ConfigFile {
             }
         }
 
-        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries(filePath, entries)
-        yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
+        val ymlFile = ConfigEntryFileUtils.buildConfigFile(filePath, entries, ConfigFormat.YAML)
+        ConfigurateFileUtils.save(ymlFile)
     }
 }

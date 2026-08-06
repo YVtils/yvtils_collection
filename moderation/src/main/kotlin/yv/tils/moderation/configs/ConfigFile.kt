@@ -12,9 +12,11 @@
 
 package yv.tils.moderation.configs
 
-import yv.tils.config.data.ConfigEntry
-import yv.tils.config.data.EntryType
-import yv.tils.config.files.YMLFileUtils
+import yv.tils.configv2.data.ConfigEntry
+import yv.tils.configv2.data.ConfigEntryFileUtils
+import yv.tils.configv2.data.EntryType
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ConfigurateFileUtils
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
@@ -41,21 +43,17 @@ class ConfigFile {
     }
 
     fun loadConfig() {
-        val file = YMLFileUtils.loadYAMLFile("/moderation/config.yml")
-        // populate legacy config map
-        for (key in file.content.getKeys(true)) {
-            val value = file.content.get(key)
+        val file = ConfigurateFileUtils.load("/moderation/config.yml", ConfigFormat.YAML)
 
-            Logger.debug("Loading config key: $key -> $value", DEBUG_LEVEL.VERBOSE)
-            if (value != null) config[key] = value
-        }
+        // populate legacy config map
+        val flattened = ConfigurateFileUtils.flattenToMap(file.node)
+        config.putAll(flattened)
 
         // ensure configNew contains base entries and then load values into them
         ensureBaseEntries()
         // load values into entries and populate index
+        ConfigEntryFileUtils.loadFromNode(file.node, configNew)
         for (entry in configNew) {
-            val v = file.content.get(entry.key)
-            if (v != null) entry.value = v
             configIndex[entry.key] = entry
             val vv = entry.value ?: entry.defaultValue
             if (vv != null) config[entry.key] = vv
@@ -88,10 +86,10 @@ class ConfigFile {
             "ConfigFile.registerStrings: about to create YAML file with ${configNew.size} entries",
             DEBUG_LEVEL.DETAILED
         )
-        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries("/moderation/config.yml", configNew)
+        val ymlFile = ConfigEntryFileUtils.buildConfigFile("/moderation/config.yml", configNew, ConfigFormat.YAML)
         Logger.debug("ConfigFile.registerStrings: about to update file on disk", DEBUG_LEVEL.DETAILED)
-        // Use updateFile with overwriteExisting = true so GUI edits overwrite existing keys
-        yv.tils.config.files.FileUtils.updateFile("/moderation/config.yml", ymlFile, overwriteExisting = true)
+        // Use update() with overwriteExisting = true so GUI edits overwrite existing keys
+        ConfigurateFileUtils.update(ymlFile, overwriteExisting = true)
         Logger.debug("ConfigFile.registerStrings: file update complete", DEBUG_LEVEL.DETAILED)
     }
 

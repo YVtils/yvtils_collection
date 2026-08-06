@@ -18,6 +18,6 @@ dependencies {
     api("xyz.xenondevs.invui:invui-kotlin:2.1.1")
 
     compileOnly(project(":utils"))
-    compileOnly(project(":config"))
+    compileOnly(project(":config-v2"))
     compileOnly(project(":common"))
 }

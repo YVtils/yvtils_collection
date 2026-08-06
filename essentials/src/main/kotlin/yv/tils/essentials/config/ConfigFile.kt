@@ -13,9 +13,11 @@
 package yv.tils.essentials.config
 
 import org.bukkit.Material
-import yv.tils.config.data.ConfigEntry
-import yv.tils.config.data.EntryType
-import yv.tils.config.files.YMLFileUtils
+import yv.tils.configv2.data.ConfigEntry
+import yv.tils.configv2.data.ConfigEntryFileUtils
+import yv.tils.configv2.data.EntryType
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ConfigurateFileUtils
 import yv.tils.essentials.commands.handler.DimensionHandler
 import yv.tils.essentials.commands.handler.PvPHandler
 import yv.tils.utils.logger.Logger
@@ -57,21 +59,16 @@ class ConfigFile {
     }
 
     fun loadConfig() {
-        val file = YMLFileUtils.loadYAMLFile("/essentials/config.yml")
+        val file = ConfigurateFileUtils.load("/essentials/config.yml", ConfigFormat.YAML)
         // populate legacy config map
-        for (key in file.content.getKeys(true)) {
-            val value = file.content.get(key)
-
-            Logger.debug("Loading config key: $key -> $value", DEBUGLEVEL.VERBOSE)
-            if (value != null) config[key] = value
-        }
+        val flattened = ConfigurateFileUtils.flattenToMap(file.node)
+        config.putAll(flattened)
 
         // ensure configNew contains base entries and then load values into them
         ensureBaseEntries()
         // load values into entries and populate index
+        ConfigEntryFileUtils.loadFromNode(file.node, configNew)
         for (entry in configNew) {
-            val v = file.content.get(entry.key)
-            if (v != null) entry.value = v
             configIndex[entry.key] = entry
             val vv = entry.value ?: entry.defaultValue
             if (vv != null) config[entry.key] = vv
@@ -107,10 +104,10 @@ class ConfigFile {
             "ConfigFile.registerStrings: about to create YAML file with ${configNew.size} entries",
             DEBUGLEVEL.DETAILED
         )
-        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries("/essentials/config.yml", configNew)
+        val ymlFile = ConfigEntryFileUtils.buildConfigFile("/essentials/config.yml", configNew, ConfigFormat.YAML)
         Logger.debug("ConfigFile.registerStrings: about to update file on disk", DEBUGLEVEL.DETAILED)
-        // Use updateFile with overwriteExisting = true so GUI edits overwrite existing keys
-        yv.tils.config.files.FileUtils.updateFile("/essentials/config.yml", ymlFile, overwriteExisting = true)
+        // Use update() with overwriteExisting = true so GUI edits overwrite existing keys
+        ConfigurateFileUtils.update(ymlFile, overwriteExisting = true)
         Logger.debug("ConfigFile.registerStrings: file update complete", DEBUGLEVEL.DETAILED)
     }
 

@@ -19,7 +19,7 @@ import dev.jorel.commandapi.kotlindsl.asyncPlayerProfileArgument
 import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.greedyStringArgument
 import yv.tils.common.other.AsyncActionAnnounce
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.UnmuteLogic

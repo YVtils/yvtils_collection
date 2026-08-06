@@ -12,8 +12,8 @@
 
 package yv.tils.regions.configs
 
-import kotlinx.serialization.json.*
-import yv.tils.config.files.JSONFileUtils
+import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.JsonFileUtils
 import yv.tils.regions.data.PlayerManager
 import yv.tils.regions.data.RegionRoles
 import yv.tils.utils.coroutine.CoroutineHandler
@@ -24,27 +24,27 @@ class PlayerSaveFile {
     private val filePath = "/regions/player_save.json"
 
     fun loadConfig() {
-    val file = JSONFileUtils.loadJSONFile(filePath)
-    val jsonFile = file.content
-        val saveList = jsonFile["players"]?.jsonArray ?: return
+        val file = runCatching { JsonFileUtils.loadJsonFile(filePath) }.getOrNull() ?: return
+        val saveListNode = file.node.node("players")
 
-        if (saveList.isEmpty()) {
+        if (saveListNode.virtual() || !saveListNode.isList()) {
             Logger.debug("No saves found in the save file.")
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save")
-            val playerStr = save.jsonObject["uuid"]?.jsonPrimitive?.content ?: run {
+        for (saveNode in saveListNode.childrenList()) {
+            Logger.debug("Loading save: ${saveNode.raw()}")
+
+            val playerStr = saveNode.node("uuid").string ?: run {
                 Logger.debug("Player UUID is empty, skipping.")
                 continue
             }
 
-            val regionStr = save.jsonObject["region"]?.jsonPrimitive?.content ?: run {
+            val regionStr = saveNode.node("region").string ?: run {
                 Logger.debug("Region UUID is empty, skipping.")
                 continue
             }
-            val roleStr = save.jsonObject["role"]?.jsonPrimitive?.content ?: run {
+            val roleStr = saveNode.node("role").string ?: run {
                 Logger.debug("Role is empty, skipping.")
                 continue
             }
@@ -67,9 +67,14 @@ class PlayerSaveFile {
     }
 
     fun registerStrings(saveList: MutableList<PlayerManager.PlayerRegion> = mutableListOf()) {
-    val saveWrapper = mapOf("players" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
+        val saveWrapper = mapOf(
+            "players" to saveList.map { mapOf("uuid" to it.uuid, "region" to it.region, "role" to it.role.name) }
+        )
+        val jsonFile = JsonFileUtils.makeJsonFile(filePath, saveWrapper)
+        // Matches the original's `FileUtils.updateFile(path, jsonFile)` (no
+        // explicit overwrite flag, i.e. `overwriteExisting = false`) - merge
+        // with whatever's already on disk rather than fully replacing it.
+        ConfigurateFileUtils.update(jsonFile, overwriteExisting = false)
     }
 
     fun updatePlayerSetting(uuid: UUID, rUUID: UUID, content: PlayerManager.PlayerRegion?) {
@@ -88,8 +93,10 @@ class PlayerSaveFile {
     }
 
     private fun upgradeStrings(saveList: MutableList<PlayerManager.PlayerRegion> = mutableListOf()) {
-    val saveWrapper = mapOf("players" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile, true)
+        val saveWrapper = mapOf(
+            "players" to saveList.map { mapOf("uuid" to it.uuid, "region" to it.region, "role" to it.role.name) }
+        )
+        val jsonFile = JsonFileUtils.makeJsonFile(filePath, saveWrapper)
+        ConfigurateFileUtils.update(jsonFile, overwriteExisting = true)
     }
 }

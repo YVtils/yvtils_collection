@@ -15,8 +15,8 @@ package yv.tils.core
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.bukkit.entity.Player
-import yv.tils.config.GeneralConfig
-import yv.tils.config.GeneralConfigManager
+import yv.tils.configv2.GeneralConfig
+import yv.tils.configv2.GeneralConfigManager
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger

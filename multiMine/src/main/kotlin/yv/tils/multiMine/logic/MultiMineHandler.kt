@@ -19,7 +19,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import yv.tils.common.language.LangStrings
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.multiMine.configs.MultiMineConfig
 import yv.tils.multiMine.data.Permissions
 import yv.tils.multiMine.utils.BlockUtils

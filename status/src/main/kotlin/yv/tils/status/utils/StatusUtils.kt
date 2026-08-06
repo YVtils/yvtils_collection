@@ -13,7 +13,7 @@
 package yv.tils.status.utils
 
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.status.configs.ConfigFile
 import yv.tils.status.configs.SaveFile
 import yv.tils.status.logic.StatusTeamManager

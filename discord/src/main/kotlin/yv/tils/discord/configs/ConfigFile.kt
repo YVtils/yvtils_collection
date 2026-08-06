@@ -12,9 +12,11 @@
 
 package yv.tils.discord.configs
 
-import yv.tils.config.files.YMLFileUtils
-import yv.tils.config.data.ConfigEntry
-import yv.tils.config.data.EntryType
+import yv.tils.configv2.data.ConfigEntry
+import yv.tils.configv2.data.ConfigEntryFileUtils
+import yv.tils.configv2.data.EntryType
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ConfigurateFileUtils
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
@@ -43,13 +45,12 @@ class ConfigFile {
     private val filePath = "/discord/config.yml"
 
     fun loadConfig() {
-    val file = YMLFileUtils.loadYAMLFile(filePath)
+        val file = ConfigurateFileUtils.load(filePath, ConfigFormat.YAML)
+        val flattened = ConfigurateFileUtils.flattenToMap(file.node)
 
-        for (key in file.content.getKeys(true)) {
-            val value = file.content.get(key)
-
+        for ((key, value) in flattened) {
             Logger.debug("Loading config key: $key -> $value", DEBUG_LEVEL.SPAM)
-            config[key] = value as Any
+            config[key] = value
         }
     }
 
@@ -109,10 +110,23 @@ class ConfigFile {
             entries.add(ConfigEntry("syncFeature.serverStats.settings.showServerVersion", EntryType.BOOLEAN, null, true, "Show server version"))
             entries.add(ConfigEntry("syncFeature.serverStats.settings.showServerPlayers", EntryType.BOOLEAN, null, true, "Show server players"))
             entries.add(ConfigEntry("syncFeature.serverStats.settings.showLastRefresh", EntryType.BOOLEAN, null, true, "Show last refresh"))
+        } else {
+            for ((k, v) in content) {
+                val type = when (v) {
+                    is Boolean -> EntryType.BOOLEAN
+                    is Int -> EntryType.INT
+                    is Double -> EntryType.DOUBLE
+                    is List<*> -> EntryType.LIST
+                    is Map<*, *> -> EntryType.MAP
+                    is String -> EntryType.STRING
+                    else -> EntryType.UNKNOWN
+                }
+                entries.add(ConfigEntry(k, type, null, v, null))
+            }
         }
 
-        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries(filePath, entries)
-        yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
+        val ymlFile = ConfigEntryFileUtils.buildConfigFile(filePath, entries, ConfigFormat.YAML)
+        ConfigurateFileUtils.save(ymlFile)
     }
 
 }

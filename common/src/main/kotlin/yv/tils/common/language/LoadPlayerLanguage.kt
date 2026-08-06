@@ -14,7 +14,7 @@ package yv.tils.common.language
 
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerLocaleChangeEvent
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.util.*

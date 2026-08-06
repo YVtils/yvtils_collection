@@ -17,7 +17,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import yv.tils.common.config.ConfigFile
 import yv.tils.common.permissions.Permissions
 import yv.tils.common.updateChecker.PluginVersion
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.utils.modules.Core
 
 class PlayerJoin : Listener {

@@ -12,7 +12,8 @@
 
 package yv.tils.migration
 
-import yv.tils.config.files.FileUtils
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ConfigurateFileUtils
 import yv.tils.utils.modules.Module
 import yv.tils.utils.logger.Logger
 
@@ -49,9 +50,9 @@ class MigrationYVtils: Module.YVtilsModule {
     private fun enableEarlyDebugMode() {
         try {
             // Try to read debug settings directly from config file
-            val configFile = yv.tils.config.files.YMLFileUtils.loadYAMLFile("/config.yml")
-            val debugActive = configFile.content.getBoolean("debug.active")
-            val debugLevel = configFile.content.getInt("debug.level")
+            val configFile = ConfigurateFileUtils.load("/config.yml", ConfigFormat.YAML)
+            val debugActive = configFile.node.node("debug", "active").get(Boolean::class.javaObjectType) ?: false
+            val debugLevel = configFile.node.node("debug", "level").get(Int::class.javaObjectType) ?: 0
 
             if (debugActive) {
                 Logger.setDebugMode(debugActive, debugLevel)

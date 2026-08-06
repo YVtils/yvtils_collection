@@ -16,7 +16,7 @@ import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.status.logic.StatusManager
 import yv.tils.status.utils.StatusUtils.Companion.generateDefaultStatus
 import yv.tils.utils.modules.Core

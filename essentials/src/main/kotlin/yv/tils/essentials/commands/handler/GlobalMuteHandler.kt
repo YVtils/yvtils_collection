@@ -16,7 +16,7 @@ import dev.jorel.commandapi.executors.CommandArguments
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.utils.modules.Core
 import yv.tils.essentials.language.LangStrings
 import yv.tils.essentials.permissions.Permissions

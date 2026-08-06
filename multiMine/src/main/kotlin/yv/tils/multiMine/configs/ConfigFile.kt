@@ -14,10 +14,12 @@ package yv.tils.multiMine.configs
 
 import org.bukkit.Material
 import org.bukkit.Tag
-import org.jline.utils.Log
-import yv.tils.config.data.ConfigEntry
-import yv.tils.config.data.EntryType
-import yv.tils.config.files.YMLFileUtils
+import yv.tils.configv2.data.ConfigEntry
+import yv.tils.configv2.data.ConfigEntryFileUtils
+import yv.tils.configv2.data.EntryType
+import yv.tils.configv2.files.ConfigFile as ConfigurateConfigFile
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ConfigurateFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
@@ -25,6 +27,8 @@ import yv.tils.utils.logger.Logger
 // TODO: Think about splitting block list and config file into separate files
 class ConfigFile {
     companion object {
+        private const val FILE_PATH = "/multiMine/config.yml"
+
         val config: MutableMap<String, Any> = mutableMapOf()
         var blockList: MutableList<Material> = mutableListOf()
         val configNew: MutableList<ConfigEntry> = mutableListOf()
@@ -68,21 +72,17 @@ class ConfigFile {
     }
 
     fun loadConfig() {
-    val file = YMLFileUtils.loadYAMLFile("/multiMine/config.yml")
-        // populate legacy config map
-        for (key in file.content.getKeys(true)) {
-            val value = file.content.get(key)
+        val file = ConfigurateFileUtils.load(FILE_PATH, ConfigFormat.YAML)
 
-            Logger.debug("Loading config key: $key -> $value", DEBUG_LEVEL.VERBOSE)
-            if (value != null) config[key] = value
-        }
+        // populate legacy config map
+        val flattened = ConfigurateFileUtils.flattenToMap(file.node)
+        config.putAll(flattened)
 
         // ensure configNew contains base entries and then load values into them
         ensureBaseEntries()
         // load values into entries and populate index
+        ConfigEntryFileUtils.loadFromNode(file.node, configNew)
         for (entry in configNew) {
-            val v = file.content.get(entry.key)
-            if (v != null) entry.value = v
             configIndex[entry.key] = entry
             val vv = entry.value ?: entry.defaultValue
             if (vv != null) config[entry.key] = vv
@@ -91,8 +91,8 @@ class ConfigFile {
         loadBlockList(file)
     }
 
-    private fun loadBlockList(file: YMLFileUtils.Companion.YAMLFile) {
-        val blocks = file.content.getStringList("blocks")
+    private fun loadBlockList(file: ConfigurateConfigFile) {
+        val blocks = file.node.node("blocks").getList(String::class.java) ?: emptyList()
         blocks.forEach {
             try {
                 blockList.add(Material.getMaterial(it)!!)
@@ -105,7 +105,7 @@ class ConfigFile {
 
     fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
         Logger.debug("ConfigFile.registerStrings called with ${content.size} entries", DEBUG_LEVEL.DETAILED)
-        
+
         // Always start from base default entries
         ensureBaseEntries()
 
@@ -123,10 +123,10 @@ class ConfigFile {
         syncEntriesToMap()
 
         Logger.debug("ConfigFile.registerStrings: about to create YAML file with ${configNew.size} entries", DEBUG_LEVEL.DETAILED)
-        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries("/multiMine/config.yml", configNew)
+        val ymlFile = ConfigEntryFileUtils.buildConfigFile(FILE_PATH, configNew, ConfigFormat.YAML)
         Logger.debug("ConfigFile.registerStrings: about to update file on disk", DEBUG_LEVEL.DETAILED)
-        // Use updateFile with overwriteExisting = true so GUI edits overwrite existing keys
-        yv.tils.config.files.FileUtils.updateFile("/multiMine/config.yml", ymlFile, overwriteExisting = true)
+        // Use update() with overwriteExisting = true so GUI edits overwrite existing keys
+        ConfigurateFileUtils.update(ymlFile, overwriteExisting = true)
         Logger.debug("ConfigFile.registerStrings: file update complete", DEBUG_LEVEL.DETAILED)
     }
 

@@ -15,7 +15,7 @@ package yv.tils.moderation.logic
 import com.destroystokyo.paper.profile.PlayerProfile
 import org.bukkit.command.CommandSender
 import org.bukkit.event.player.PlayerKickEvent
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils

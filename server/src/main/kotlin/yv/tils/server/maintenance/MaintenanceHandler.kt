@@ -14,8 +14,8 @@ package yv.tils.server.maintenance
 
 import dev.jorel.commandapi.executors.CommandArguments
 import org.bukkit.command.CommandSender
-import yv.tils.config.language.LanguageBroadcast
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageBroadcast
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.server.configs.ConfigFile
 import yv.tils.utils.modules.Core
 import yv.tils.utils.player.PlayerUtils

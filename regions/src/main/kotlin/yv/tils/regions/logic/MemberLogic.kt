@@ -14,7 +14,7 @@ package yv.tils.regions.logic
 
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.regions.configs.ConfigFile
 import yv.tils.regions.data.*
 import yv.tils.regions.language.LangStrings

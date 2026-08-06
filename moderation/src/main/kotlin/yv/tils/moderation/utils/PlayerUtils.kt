@@ -16,8 +16,8 @@ import com.destroystokyo.paper.profile.PlayerProfile
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageBroadcast
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageBroadcast
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.utils.logger.Logger
 

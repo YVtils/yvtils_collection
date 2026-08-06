@@ -12,8 +12,8 @@
 
 package yv.tils.message.language
 
-import yv.tils.config.language.BuildLanguage
-import yv.tils.config.language.FileTypes
+import yv.tils.configv2.language.BuildLanguage
+import yv.tils.configv2.language.FileTypes
 import yv.tils.utils.colors.Colors
 
 class RegisterStrings {

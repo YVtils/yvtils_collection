@@ -14,9 +14,10 @@ package yv.tils.migration.modules
 
 import org.bukkit.Material
 import org.bukkit.Tag
-import yv.tils.config.files.FileUtils
-import yv.tils.config.files.JSONFileUtils
-import yv.tils.config.files.YMLFileUtils
+import yv.tils.configv2.files.ConfigFile
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.JsonFileUtils
 import yv.tils.migration.base.BaseMigrator
 import yv.tils.utils.logger.Logger
 import java.io.File
@@ -63,14 +64,14 @@ class MultiMineMigrator: BaseMigrator() {
         createBackup(oldFile, "backup_config.yml")
 
         // Load old config using FileUtils
-        val oldYaml = YMLFileUtils.loadYAMLFile(oldConfigPath, true)
+        val oldYaml = ConfigurateFileUtils.load(oldConfigPath, ConfigFormat.YAML, overwriteParentDir = true)
 
         // Transform structure to new format
         val newStructure = transformConfigFile(oldYaml)
 
         // Save new config
-        val newYamlFile = YMLFileUtils.makeYAMLFile(newConfigPath, newStructure)
-        FileUtils.saveFile(newConfigPath, newYamlFile)
+        val newYamlFile = ConfigurateFileUtils.create(newConfigPath, newStructure, ConfigFormat.YAML)
+        ConfigurateFileUtils.save(newYamlFile)
 
         Logger.info("MultiMine config migrated successfully")
         return true
@@ -88,36 +89,36 @@ class MultiMineMigrator: BaseMigrator() {
         createBackup(oldFile, "backup_save.yml")
 
         // Load old save
-        val oldYaml = YMLFileUtils.loadYAMLFile(oldSavePath, true)
+        val oldYaml = ConfigurateFileUtils.load(oldSavePath, ConfigFormat.YAML, overwriteParentDir = true)
 
         // Transform to new structure
         val saveEntries = transformSaveFile(oldYaml)
         val saveWrapper = mapOf("saves" to saveEntries)
 
         // Save as JSON
-        val jsonFile = JSONFileUtils.makeJSONFile(newSavePath, saveWrapper)
-        FileUtils.saveFile(newSavePath, jsonFile)
+        val jsonFile = JsonFileUtils.makeJsonFile(newSavePath, saveWrapper)
+        ConfigurateFileUtils.save(jsonFile)
 
         Logger.info("MultiMine save migrated successfully (${saveEntries.size} entries)")
         return true
     }
 
     private fun transformConfigFile(
-        oldYAML: YMLFileUtils.Companion.YAMLFile,
+        oldYAML: ConfigFile,
     ): Map<String, Any> {
         val newConfig = mutableMapOf<String, Any>()
-        val yaml = oldYAML.content
+        val yaml = oldYAML.node
 
         newConfig["documentation"] = "https://docs.yvtils.net/user/modules/multimine/configs"
-        newConfig["defaultState"] = yaml.getBoolean("defaultState", true)
-        newConfig["animationTime"] = yaml.getInt("animationTime", 3)
-        newConfig["cooldownTime"] = yaml.getInt("cooldownTime", 3)
-        newConfig["breakLimit"] = yaml.getInt("breakLimit", 250)
+        newConfig["defaultState"] = yaml.node("defaultState").get(Boolean::class.javaObjectType) ?: true
+        newConfig["animationTime"] = yaml.node("animationTime").get(Int::class.javaObjectType) ?: 3
+        newConfig["cooldownTime"] = yaml.node("cooldownTime").get(Int::class.javaObjectType) ?: 3
+        newConfig["breakLimit"] = yaml.node("breakLimit").get(Int::class.javaObjectType) ?: 250
 
         newConfig["leaveDecay"] = true
         newConfig["matchBlockTypeOnly"] = true
 
-        val oldBlocks = yaml.getStringList("blocks")
+        val oldBlocks = yaml.node("blocks").getList(String::class.java) ?: emptyList()
         val blocks = if (oldBlocks.isEmpty()) {
             createTemplateBlocks()
         } else {
@@ -129,18 +130,19 @@ class MultiMineMigrator: BaseMigrator() {
     }
 
     private fun transformSaveFile(
-        oldYAML: YMLFileUtils.Companion.YAMLFile,
+        oldYAML: ConfigFile,
     ): List<Map<String, Any>> {
         val entries = mutableListOf<Map<String, Any>>()
-        val yaml = oldYAML.content
+        val yaml = oldYAML.node
 
-        for (key in yaml.getKeys(false)) {
-            if (key == "documentation") continue
+        for ((key, child) in yaml.childrenMap()) {
+            val keyStr = key.toString()
+            if (keyStr == "documentation") continue
 
-            val value = yaml.getBoolean(key)
+            val value = child.get(Boolean::class.javaObjectType) ?: false
 
             val entry = mapOf(
-                "uuid" to key,
+                "uuid" to keyStr,
                 "toggled" to value,
             )
             entries.add(entry)

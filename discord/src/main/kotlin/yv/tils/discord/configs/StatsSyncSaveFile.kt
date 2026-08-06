@@ -12,10 +12,9 @@
 
 package yv.tils.discord.configs
 
-import yv.tils.config.files.JSONFileUtils
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
+import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.JsonFileUtils
 import yv.tils.utils.logger.Logger
 
 class StatsSyncSaveFile {
@@ -26,23 +25,22 @@ class StatsSyncSaveFile {
     private val filePath = "/discord/statsSync.json"
 
     fun loadConfig() {
-    val file = JSONFileUtils.loadJSONFile(filePath)
-    val jsonFile = file.content
-        val saveList = jsonFile["saves"]?.jsonArray ?: return
+        val file = runCatching { JsonFileUtils.loadJsonFile(filePath) }.getOrNull() ?: return
+        val saveListNode = file.node.node("saves")
 
-        if (saveList.isEmpty()) {
+        if (saveListNode.virtual() || !saveListNode.isList()) {
             Logger.debug("No saves found in the save file.")
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save")
+        for (saveNode in saveListNode.childrenList()) {
+            Logger.debug("Loading save: ${saveNode.raw()}")
 
-            val guildID = save.jsonObject["guildID"]?.toString()?.replace("\"", "") ?: continue
-            val status = save.jsonObject["status"]?.toString()?.replace("\"", "") ?: continue
-            val version = save.jsonObject["version"]?.toString()?.replace("\"", "") ?: continue
-            val playerCount = save.jsonObject["playerCount"]?.toString()?.replace("\"", "") ?: continue
-            val lastRefreshed = save.jsonObject["lastRefreshed"]?.toString()?.replace("\"", "") ?: continue
+            val guildID = saveNode.node("guildID").string ?: continue
+            val status = saveNode.node("status").string ?: continue
+            val version = saveNode.node("version").string ?: continue
+            val playerCount = saveNode.node("playerCount").string ?: continue
+            val lastRefreshed = saveNode.node("lastRefreshed").string ?: continue
 
             saves[guildID] = StatsSyncSave(
                 guildID = guildID,
@@ -55,9 +53,23 @@ class StatsSyncSaveFile {
     }
 
     fun registerStrings(saveList: MutableList<StatsSyncSave> = mutableListOf()) {
-    val saveWrapper = mapOf("saves" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
+        val saveWrapper = mapOf(
+            "saves" to saveList.map {
+                mapOf(
+                    "guildID" to it.guildID,
+                    "status" to it.status,
+                    "version" to it.version,
+                    "playerCount" to it.playerCount,
+                    "lastRefreshed" to it.lastRefreshed,
+                )
+            }
+        )
+
+        val jsonFile = JsonFileUtils.makeJsonFile(filePath, saveWrapper)
+        // Matches the original's `FileUtils.updateFile(path, jsonFile)` (no
+        // explicit overwrite flag, i.e. `overwriteExisting = false`) - merge
+        // with whatever's already on disk rather than fully replacing it.
+        ConfigurateFileUtils.update(jsonFile, overwriteExisting = false)
     }
 
     @Serializable
