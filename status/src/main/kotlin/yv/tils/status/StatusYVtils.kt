@@ -12,33 +12,37 @@
 
 package yv.tils.status
 
+import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.status.commands.StatusCommand
 import yv.tils.status.configs.ConfigFile
+import yv.tils.status.configs.ManageGUI
 import yv.tils.status.configs.SaveFile
 import yv.tils.status.language.RegisterStrings
 import yv.tils.status.listeners.PlayerJoin
 import yv.tils.status.listeners.PlayerQuit
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 
-class StatusYVtils : Data.YVtilsModule {
+class StatusYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "status",
-            "1.0.0",
+            "26.08.01",
             "Status module for YVtils",
             "YVtils",
-            "https://docs.yvtils.net/status/"
+            "https://docs.yvtils.net/status/",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
-        ConfigFile().registerStrings()
-        SaveFile().registerStrings()
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        InvUIBootstrap.ensure()
+
+        Module.addModule(MODULE)
 
         registerCommands()
         registerListeners()
@@ -60,7 +64,7 @@ class StatusYVtils : Data.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(PlayerJoin(), plugin)
@@ -72,7 +76,7 @@ class StatusYVtils : Data.YVtilsModule {
     }
 
     private fun registerPermissions() {
-        Data.instance.server.pluginManager
+        Core.instance.server.pluginManager
 
     }
 

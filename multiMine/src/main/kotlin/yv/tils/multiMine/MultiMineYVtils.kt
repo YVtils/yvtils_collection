@@ -13,6 +13,7 @@
 package yv.tils.multiMine
 
 import yv.tils.common.permissions.PermissionManager
+import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.multiMine.commands.MultiMineCommand
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.configs.SaveFile
@@ -20,29 +21,37 @@ import yv.tils.multiMine.data.PermissionsData
 import yv.tils.multiMine.language.RegisterStrings
 import yv.tils.multiMine.listeners.BlockBreak
 import yv.tils.multiMine.listeners.PlayerJoin
+import yv.tils.multiMine.logic.ManageGUI
 import yv.tils.multiMine.utils.CooldownUtils
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 
-class MultiMineYVtils : Data.YVtilsModule {
+class MultiMineYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "multiMine",
             "2.0.0",
             "MultiMine module for YVtils",
             "YVtils",
-            "https://docs.yvtils.net/multiMine/"
+            "https://docs.yvtils.net/multiMine/",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
-        ConfigFile().registerStrings()
-        SaveFile().registerStrings()
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        // Must run before anything in this module builds an InvUI Window
+        // (e.g. ManageGUI -> ConfigGui). NOT in onLoad(): InvUI.setPlugin()
+        // registers itself as a Bukkit Listener, which requires the plugin
+        // to already be enabled - onLoad() runs before that. See
+        // InvUIBootstrap's KDoc for the full explanation.
+        InvUIBootstrap.ensure()
+
+        Module.addModule(MODULE)
 
         registerCommands()
         registerListeners()
@@ -65,7 +74,7 @@ class MultiMineYVtils : Data.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(BlockBreak(), plugin)

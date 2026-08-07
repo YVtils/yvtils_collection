@@ -24,6 +24,18 @@ class LanguageHandler {
         val playerLang = mutableMapOf<UUID, Locale>()
         private var serverDefaultLang: Locale = Locale.ENGLISH
 
+        fun getMessage(key: LanguageProvider.LangStrings, uuid: UUID? = null): Component =
+            getMessage(key.key, uuid)
+
+        fun getMessage(key: LanguageProvider.LangStrings, sender: CommandSender): Component =
+            getMessage(key.key, sender)
+
+        fun getMessage(key: LanguageProvider.LangStrings, uuid: UUID? = null, params: Map<String, Any>): Component =
+            getMessage(key.key, uuid, params)
+
+        fun getMessage(key: LanguageProvider.LangStrings, sender: CommandSender, params: Map<String, Any>): Component =
+            getMessage(key.key, sender, params)
+
         fun getMessage(key: String, uuid: UUID? = null): Component {
             val message = getString(key, getLocale(uuid))
             return MessageUtils.replacer(message, mapOf())
@@ -53,6 +65,18 @@ class LanguageHandler {
                 getMessage(key, params = params)
             }
         }
+
+        fun getRawMessage(key: LanguageProvider.LangStrings, uuid: UUID? = null): String =
+            getRawMessage(key.key, uuid)
+
+        fun getRawMessage(key: LanguageProvider.LangStrings, sender: CommandSender): String =
+            getRawMessage(key.key, sender)
+
+        fun getRawMessage(key: LanguageProvider.LangStrings, uuid: UUID? = null, params: Map<String, Any>): String =
+            getRawMessage(key.key, uuid, params)
+
+        fun getRawMessage(key: LanguageProvider.LangStrings, sender: CommandSender, params: Map<String, Any>): String =
+            getRawMessage(key.key, sender, params)
 
         fun getRawMessage(key: String, uuid: UUID? = null): String =
             getString(key, getLocale(uuid))

@@ -12,10 +12,10 @@
 
 package yv.tils.essentials.commands.handler
 
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 class SpeedHandler {
     /**
@@ -35,7 +35,7 @@ class SpeedHandler {
                 "command.speed.change.self",
                 player.uniqueId,
                 params = mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "speed" to speed
                 )
             )
@@ -47,7 +47,7 @@ class SpeedHandler {
                     "command.speed.change.other",
                     sender,
                     params = mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                         "speed" to speed,
                         "player" to player.name
                     )
@@ -69,7 +69,7 @@ class SpeedHandler {
             LanguageHandler.getMessage(
                 "command.speed.reset.self",
                 player.uniqueId,
-                params = mapOf("prefix" to Data.prefix)
+                params = mapOf("prefix" to Core.prefix)
             )
         )
 
@@ -79,7 +79,7 @@ class SpeedHandler {
                     "command.speed.reset.other",
                     sender,
                     params = mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                         "player" to player.name
                     )
                 )

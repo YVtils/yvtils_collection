@@ -19,7 +19,7 @@ import org.bukkit.OfflinePlayer
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.configs.SaveFile
 import yv.tils.discord.logic.AppLogic
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 
 class WhitelistLogic {
@@ -90,7 +90,7 @@ class WhitelistLogic {
         fun addEntry(entry: WhitelistEntry, player: OfflinePlayer? = null) {
             if (isValidUsername(entry.minecraftName)) {
                 if (player != null && !player.isWhitelisted) {
-                    Data.instance.server.scheduler.runTask(Data.instance, Runnable {
+                    Core.instance.server.scheduler.runTask(Core.instance, Runnable {
                         player.isWhitelisted = true
                     })
                 }
@@ -115,7 +115,7 @@ class WhitelistLogic {
         fun removeEntry(discordUserID: String, player: OfflinePlayer? = null) {
             if (containsEntry(discordUserID)) {
                 if (player != null && player.isWhitelisted) {
-                    Data.instance.server.scheduler.runTask(Data.instance, Runnable {
+                    Core.instance.server.scheduler.runTask(Core.instance, Runnable {
                         player.isWhitelisted = false
 
                         if (player.isOnline) {

@@ -12,12 +12,14 @@
 
 package yv.tils.status.commands
 
-import yv.tils.utils.data.Data
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
-import yv.tils.config.language.LanguageHandler
 import org.bukkit.entity.Player
+import yv.tils.configv2.language.LanguageHandler
+import yv.tils.status.logic.StatusManager
+import yv.tils.status.utils.StatusUtils.Companion.generateDefaultStatus
+import yv.tils.utils.modules.Core
 import yv.tils.status.logic.StatusHandler as handler
 
 class StatusCommand {
@@ -26,6 +28,18 @@ class StatusCommand {
         withPermission(CommandPermission.NONE)
         withUsage("status <set/default/clear> [status/player]")
         withAliases("prefix", "role")
+
+        entitySelectorArgumentOnePlayer("player", true) {
+            withPermission("yvtils.command.status.manage.others")
+            withPermission(CommandPermission.OP)
+            playerExecutor { sender, args ->
+                if (args["player"] is Player) {
+                    StatusManager().manageStatus(sender, args["player"] as Player)
+                } else {
+                    StatusManager().manageStatus(sender)
+                }
+            }
+        }
 
         literalArgument("set", false) {
             withPermission("yvtils.command.status.set")
@@ -42,7 +56,7 @@ class StatusCommand {
                 withPermission("yvtils.command.status.default")
                 withPermission(CommandPermission.NONE)
                 replaceSuggestions(ArgumentSuggestions.strings { _ ->
-                    val suggestions = handler().generateDefaultStatus()
+                    val suggestions = generateDefaultStatus()
                     suggestions.toTypedArray()
                 })
 
@@ -55,24 +69,31 @@ class StatusCommand {
         literalArgument("clear", false) {
             withPermission("yvtils.command.status.clear")
             withPermission(CommandPermission.NONE)
-            asyncPlayerProfileArgument("yv/tils/player", true) {
+            entitySelectorArgumentOnePlayer("player", true) {
                 withPermission("yvtils.command.status.clear.others")
                 withPermission(CommandPermission.OP)
                 anyExecutor { sender, args ->
                     if (sender !is Player && args[0] == null) {
-                        sender.sendMessage(LanguageHandler.getMessage("command.missing.player", params = mapOf("prefix" to Data.prefix)))
+                        sender.sendMessage(
+                            LanguageHandler.getMessage(
+                                "command.missing.player",
+                                params = mapOf("prefix" to Core.prefix)
+                            )
+                        )
                         return@anyExecutor
                     }
 
-                    if (args[0] == null) {
+                    if (args[0] != null) { // TODO: Test if this if statement is correct
                         if (!sender.hasPermission("yvtils.command.status.clear.others")) {
-                            sender.sendMessage(LanguageHandler.getMessage(
-                                "command.status.clear.notAllowed",
-                                sender,
-                                mapOf(
-                                    "prefix" to Data.prefix,
+                            sender.sendMessage(
+                                LanguageHandler.getMessage(
+                                    "command.status.clear.notAllowed",
+                                    sender,
+                                    mapOf(
+                                        "prefix" to Core.prefix,
+                                    )
                                 )
-                            ))
+                            )
                             return@anyExecutor
                         }
                     }

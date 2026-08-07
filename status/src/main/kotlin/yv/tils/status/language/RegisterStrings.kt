@@ -12,8 +12,8 @@
 
 package yv.tils.status.language
 
-import yv.tils.config.language.BuildLanguage
-import yv.tils.config.language.FileTypes
+import yv.tils.configv2.language.BuildLanguage
+import yv.tils.configv2.language.FileTypes
 
 class RegisterStrings {
     fun registerStrings() {
@@ -78,6 +78,54 @@ class RegisterStrings {
             mapOf(
                 FileTypes.EN to "<prefix> <gold>Welcome back!<newline><gray>Current status: <white><status>",
                 FileTypes.DE to "<prefix> <gold>Willkommen zurück!<newline><gray>Aktueller Status: <white><status>"
+            )
+        )
+
+        registerNewString(
+            "status.gui.title",
+            mapOf(
+                FileTypes.EN to "<white>Status",
+                FileTypes.DE to "<white>Status",
+            )
+        )
+
+        registerNewString(
+            "status.gui.clear",
+            mapOf(
+                FileTypes.EN to "<red>Clear the status!",
+                FileTypes.DE to "<red>Status löschen!",
+            )
+        )
+
+        registerNewString(
+            "status.gui.menu.edit",
+            mapOf(
+                FileTypes.EN to "<yellow>Edit your status",
+                FileTypes.DE to "<yellow>Status bearbeiten",
+            )
+        )
+
+        registerNewString(
+            "status.gui.menu.defaults",
+            mapOf(
+                FileTypes.EN to "<aqua>Default statuses",
+                FileTypes.DE to "<aqua>Standard-Status",
+            )
+        )
+
+        registerNewString(
+            "status.gui.editor.currentLabel",
+            mapOf(
+                FileTypes.EN to "<dark_gray>Preview:",
+                FileTypes.DE to "<dark_gray>Vorschau:",
+            )
+        )
+
+        registerNewString(
+            "status.gui.editor.empty",
+            mapOf(
+                FileTypes.EN to "<gray><italic>No status set",
+                FileTypes.DE to "<gray><italic>Kein Status gesetzt",
             )
         )
     }

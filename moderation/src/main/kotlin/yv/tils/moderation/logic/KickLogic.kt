@@ -15,12 +15,12 @@ package yv.tils.moderation.logic
 import com.destroystokyo.paper.profile.PlayerProfile
 import org.bukkit.command.CommandSender
 import org.bukkit.event.player.PlayerKickEvent
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.moderation.data.Exceptions
 import yv.tils.moderation.utils.ModerationAction
 import yv.tils.moderation.utils.PlayerUtils
 import yv.tils.moderation.utils.TargetUtils
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
 
@@ -67,7 +67,7 @@ class KickLogic {
 
             val player = offlinePlayer.player ?: run {
                 PlayerUtils.logicError(sender, Exceptions.ModerationActionException)
-                Logger.debug("KickLogic.kickLogic: offlinePlayer.player is null despite being online", DEBUGLEVEL.BASIC)
+                Logger.debug("KickLogic.kickLogic: offlinePlayer.player is null despite being online", DEBUG_LEVEL.BASIC)
                 return
             }
 

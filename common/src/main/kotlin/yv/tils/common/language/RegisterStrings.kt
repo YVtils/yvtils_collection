@@ -12,8 +12,8 @@
 
 package yv.tils.common.language
 
-import yv.tils.config.language.BuildLanguage
-import yv.tils.config.language.FileTypes
+import yv.tils.configv2.language.BuildLanguage
+import yv.tils.configv2.language.FileTypes
 
 class RegisterStrings {
     fun registerStrings() {
@@ -136,6 +136,118 @@ class RegisterStrings {
                 FileTypes.DE to "<prefix> <red>Ungültige Zeitzone in der Konfig angegeben! Bitte überprüfe deine Einstellungen."
             )
         )
+
+        registerNewString(
+            LangStrings.YVTILS_INFO,
+            mapOf(
+                FileTypes.EN to "<prefix> <white>YVtils <gray>v<version><newline><prefix> <white>Active modules (<gray><moduleCount><white>): <gray><modules><newline><prefix> <updateStatus>",
+                FileTypes.DE to "<prefix> <white>YVtils <gray>v<version><newline><prefix> <white>Aktive Module (<gray><moduleCount><white>): <gray><modules><newline><prefix> <updateStatus>"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_INFO_UPDATE_UP_TO_DATE,
+            mapOf(
+                FileTypes.EN to "<green>You are running the latest version.",
+                FileTypes.DE to "<green>Du verwendest bereits die neueste Version."
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_INFO_UPDATE_AVAILABLE,
+            mapOf(
+                FileTypes.EN to "<yellow>Update available: <gray><newVersion> <white>(current: <gray><currentVersion><white>)",
+                FileTypes.DE to "<yellow>Update verfügbar: <gray><newVersion> <white>(aktuell: <gray><currentVersion><white>)"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_INFO_UPDATE_UNKNOWN,
+            mapOf(
+                FileTypes.EN to "<gray>Update status unknown (check disabled or failed).",
+                FileTypes.DE to "<gray>Update-Status unbekannt (Prüfung deaktiviert oder fehlgeschlagen)."
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_MODULES_GUI_TITLE,
+            mapOf(
+                FileTypes.EN to "Modules",
+                FileTypes.DE to "Module"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_MODULES_STATUS_ENABLED,
+            mapOf(
+                FileTypes.EN to "<green>Enabled",
+                FileTypes.DE to "<green>Aktiviert"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_MODULES_STATUS_DISABLED,
+            mapOf(
+                FileTypes.EN to "<red>Disabled",
+                FileTypes.DE to "<red>Deaktiviert"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_MODULES_STATUS_PENDING_ENABLE,
+            mapOf(
+                FileTypes.EN to "<yellow>Will be enabled after restart",
+                FileTypes.DE to "<yellow>Wird nach Neustart aktiviert"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_MODULES_STATUS_PENDING_DISABLE,
+            mapOf(
+                FileTypes.EN to "<yellow>Will be disabled after restart",
+                FileTypes.DE to "<yellow>Wird nach Neustart deaktiviert"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_MODULES_LORE_TOGGLE,
+            mapOf(
+                FileTypes.EN to "<gray>Left-Click: <white>Enable/Disable",
+                FileTypes.DE to "<gray>Linksklick: <white>Aktivieren/Deaktivieren"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_MODULES_TOGGLE_ENABLE,
+            mapOf(
+                FileTypes.EN to "<green>Click to enable",
+                FileTypes.DE to "<green>Klicke zum Aktivieren"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_MODULES_TOGGLE_DISABLE,
+            mapOf(
+                FileTypes.EN to "<red>Click to disable",
+                FileTypes.DE to "<red>Klicke zum Deaktivieren"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_CONFIG_GUI_TITLE,
+            mapOf(
+                FileTypes.EN to "Configs",
+                FileTypes.DE to "Konfigurationen"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_CONFIG_GUI_LORE_OPEN,
+            mapOf(
+                FileTypes.EN to "<gray>Left-Click: <white>Open config",
+                FileTypes.DE to "<gray>Linksklick: <white>Konfiguration öffnen"
+            )
+        )
     }
 
     private fun registerNewString(langKey: LangStrings, translations: Map<FileTypes, String>) {
@@ -165,4 +277,18 @@ enum class LangStrings(val key: String) {
     COMMAND_SUGGESTION_ASYNC_ACTION("command.suggestion.asyncAction"),
     COMMAND_EXECUTOR_ASYNC_ERROR_PLAYER("command.executor.asyncError.player"),
     CONFIG_ERROR_INVALID_TIMEZONE("config.error.invalid.timezone"),
+    YVTILS_INFO("yvtils.info.summary"),
+    YVTILS_INFO_UPDATE_UP_TO_DATE("yvtils.info.update.upToDate"),
+    YVTILS_INFO_UPDATE_AVAILABLE("yvtils.info.update.available"),
+    YVTILS_INFO_UPDATE_UNKNOWN("yvtils.info.update.unknown"),
+    YVTILS_MODULES_GUI_TITLE("yvtils.modules.gui.title"),
+    YVTILS_MODULES_STATUS_ENABLED("yvtils.modules.status.enabled"),
+    YVTILS_MODULES_STATUS_DISABLED("yvtils.modules.status.disabled"),
+    YVTILS_MODULES_STATUS_PENDING_ENABLE("yvtils.modules.status.pendingEnable"),
+    YVTILS_MODULES_STATUS_PENDING_DISABLE("yvtils.modules.status.pendingDisable"),
+    YVTILS_MODULES_LORE_TOGGLE("yvtils.modules.lore.toggle"),
+    YVTILS_MODULES_TOGGLE_ENABLE("yvtils.modules.toggle.enable"),
+    YVTILS_MODULES_TOGGLE_DISABLE("yvtils.modules.toggle.disable"),
+    YVTILS_CONFIG_GUI_TITLE("yvtils.config.gui.title"),
+    YVTILS_CONFIG_GUI_LORE_OPEN("yvtils.config.gui.lore.open"),
 }

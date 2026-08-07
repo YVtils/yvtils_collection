@@ -19,14 +19,14 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import yv.tils.common.language.LangStrings
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.multiMine.configs.MultiMineConfig
 import yv.tils.multiMine.data.Permissions
 import yv.tils.multiMine.utils.BlockUtils
 import yv.tils.multiMine.utils.BlockUtils.Companion.blocks
 import yv.tils.multiMine.utils.CooldownUtils
 import yv.tils.multiMine.utils.ToolUtils
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
@@ -78,7 +78,7 @@ class MultiMineHandler {
                     LanguageHandler.getMessage(
                         "$langMessageState.self",
                         sender,
-                        mapOf("prefix" to Data.prefix)
+                        mapOf("prefix" to Core.prefix)
                     )
                 )
             } else {
@@ -103,7 +103,7 @@ class MultiMineHandler {
                 val langMessageState = if (!value) "command.multiMine.activate" else "command.multiMine.deactivate"
 
                 // Check if target is online to send them a message
-                val onlinePlayer = Data.instance.server.getPlayer(uuid)
+                val onlinePlayer = Core.instance.server.getPlayer(uuid)
                 onlinePlayer?.sendMessage(
                     LanguageHandler.getMessage(
                         "$langMessageState.self",

@@ -12,9 +12,6 @@
 
 package yv.tils.moderation.configs.saveFile
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class MuteSave(
     val uuid: String,
     var reason: String,
@@ -23,21 +20,18 @@ data class MuteSave(
     val modAction: ModAction
 )
 
-@Serializable
 data class WarnSave(
     val uuid: String,
     var warningCount: Int,
     val warnings: MutableList<Warning>
 )
 
-@Serializable
 data class Warning(
     val id: String,
     var reason: String,
     val modAction: ModAction
 )
 
-@Serializable
 data class ModAction(
     val uuid: String,
     val timestamp: String,

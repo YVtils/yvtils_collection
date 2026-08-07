@@ -19,8 +19,8 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.*
-import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.configv2.language.LanguageHandler
+import yv.tils.utils.modules.Core
 import java.util.*
 
 class FlyHandler {
@@ -44,12 +44,12 @@ class FlyHandler {
             player.isFlying = true
             if (!silent) {
                 player.sendMessage(
-                    LanguageHandler.getMessage("command.fly.enable.self", player.uniqueId, params = mapOf("prefix" to Data.prefix))
+                    LanguageHandler.getMessage("command.fly.enable.self", player.uniqueId, params = mapOf("prefix" to Core.prefix))
                 )
 
                 if (player != sender) {
                     sender.sendMessage(
-                        LanguageHandler.getMessage("command.fly.enable.other", sender, params = mapOf("prefix" to Data.prefix, "player" to player.name))
+                        LanguageHandler.getMessage("command.fly.enable.other", sender, params = mapOf("prefix" to Core.prefix, "player" to player.name))
                     )
                 }
             }
@@ -66,12 +66,12 @@ class FlyHandler {
 
             if (!silent) {
                 player.sendMessage(
-                    LanguageHandler.getMessage("command.fly.disable.self", player.uniqueId, params = mapOf("prefix" to Data.prefix))
+                    LanguageHandler.getMessage("command.fly.disable.self", player.uniqueId, params = mapOf("prefix" to Core.prefix))
                 )
 
                 if (player != sender) {
                     sender.sendMessage(
-                        LanguageHandler.getMessage("command.fly.disable.other", sender, params = mapOf("prefix" to Data.prefix, "player" to player.name))
+                        LanguageHandler.getMessage("command.fly.disable.other", sender, params = mapOf("prefix" to Core.prefix, "player" to player.name))
                     )
                 }
             }
@@ -137,7 +137,7 @@ class FlyHandler {
         val uuid = player.uniqueId
 
         Bukkit.getScheduler().runTaskLater(
-            Data.instance,
+            Core.instance,
             Runnable {
                 if (fly[uuid] == true) {
                     player.allowFlight = true

@@ -18,8 +18,8 @@ import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
-import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.configv2.language.LanguageHandler
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 
 class HealHandler {
@@ -53,7 +53,7 @@ class HealHandler {
             LanguageHandler.getMessage(
                 "command.heal.self",
                 player.uniqueId,
-                params = mapOf("prefix" to Data.prefix)
+                params = mapOf("prefix" to Core.prefix)
             )
         )
 
@@ -62,7 +62,7 @@ class HealHandler {
                 LanguageHandler.getMessage(
                     "command.heal.other",
                     sender,
-                    params = mapOf("prefix" to Data.prefix, "player" to player.name)
+                    params = mapOf("prefix" to Core.prefix, "player" to player.name)
                 )
             )
         }

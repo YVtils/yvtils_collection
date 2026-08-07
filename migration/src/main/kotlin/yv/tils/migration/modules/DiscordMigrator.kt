@@ -12,8 +12,10 @@
 
 package yv.tils.migration.modules
 
-import yv.tils.config.files.YMLFileUtils
-import yv.tils.config.files.JSONFileUtils
+import yv.tils.configv2.files.ConfigFile
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.JsonFileUtils
 import yv.tils.migration.base.BaseMigrator
 import yv.tils.utils.logger.Logger
 import java.io.File
@@ -61,14 +63,14 @@ class DiscordMigrator: BaseMigrator() {
         createBackup(oldFile, "backup_config.yml")
 
         // Load old config using FileUtils
-    val oldYaml = YMLFileUtils.loadYAMLFile(oldConfigPath, true)
+    val oldYaml = ConfigurateFileUtils.load(oldConfigPath, ConfigFormat.YAML, overwriteParentDir = true)
 
         // Transform structure to new format
         val newStructure = transformConfigStructure(oldYaml)
 
         // Save new config
-    val newYamlFile = YMLFileUtils.makeYAMLFile(newConfigPath, newStructure)
-    yv.tils.config.files.FileUtils.saveFile(newConfigPath, newYamlFile)
+    val newYamlFile = ConfigurateFileUtils.create(newConfigPath, newStructure, ConfigFormat.YAML)
+    ConfigurateFileUtils.save(newYamlFile)
 
         Logger.info("Discord config migrated successfully")
         return true
@@ -87,47 +89,47 @@ class DiscordMigrator: BaseMigrator() {
         createBackup(oldFile, "backup_save.yml")
 
         // Load old save
-    val oldYaml = YMLFileUtils.loadYAMLFile(oldSavePath, true)
+    val oldYaml = ConfigurateFileUtils.load(oldSavePath, ConfigFormat.YAML, overwriteParentDir = true)
 
         // Transform to new structure
         val saveEntries = transformSaveStructure(oldYaml)
         val saveWrapper = mapOf("saves" to saveEntries)
 
         // Save as JSON
-    val jsonFile = JSONFileUtils.makeJSONFile(newSavePath, saveWrapper)
-    yv.tils.config.files.FileUtils.saveFile(newSavePath, jsonFile)
+    val jsonFile = JsonFileUtils.makeJsonFile(newSavePath, saveWrapper)
+    ConfigurateFileUtils.save(jsonFile)
 
         Logger.info("Discord save migrated successfully (${saveEntries.size} entries)")
         return true
     }
 
     /** Transforms Discord config structure from old to new format */
-    private fun transformConfigStructure(oldYaml: YMLFileUtils.Companion.YAMLFile): Map<String, Any> {
+    private fun transformConfigStructure(oldYaml: ConfigFile): Map<String, Any> {
         val newRoot = mutableMapOf<String, Any>()
-        val yaml = oldYaml.content
+        val yaml = oldYaml.node
 
         // 1. Direct key renames and basic values
         newRoot["documentation"] = "https://docs.yvtils.net/discord/config.yml"
-        newRoot["appToken"] = yaml.getString("botToken") ?: "YOUR TOKEN HERE"
-        newRoot["mainGuild"] = yaml.getString("mainGuild") ?: "GUILD ID"
+        newRoot["appToken"] = yaml.node("botToken").string ?: "YOUR TOKEN HERE"
+        newRoot["mainGuild"] = yaml.node("mainGuild").string ?: "GUILD ID"
 
         // 2. Bot settings (preserve existing)
         val botSettings = mutableMapOf<String, Any>()
-        val oldBotSettings = yaml.getConfigurationSection("botSettings")
-        if (oldBotSettings != null) {
-            botSettings["onlineStatus"] = oldBotSettings.getString("onlineStatus") ?: "online"
-            botSettings["activity"] = oldBotSettings.getString("activity") ?: "PLAYING"
+        val oldBotSettings = yaml.node("botSettings")
+        if (!oldBotSettings.virtual()) {
+            botSettings["onlineStatus"] = oldBotSettings.node("onlineStatus").string ?: "online"
+            botSettings["activity"] = oldBotSettings.node("activity").string ?: "PLAYING"
             botSettings["activityMessage"] =
-                oldBotSettings.getString("activityMessage") ?: "Minecraft"
+                oldBotSettings.node("activityMessage").string ?: "Minecraft"
         }
         newRoot["botSettings"] = botSettings
 
 //        // 3. Embed settings (preserve existing)
 //        val embedSettings = mutableMapOf<String, Any>()
-//        val oldEmbedSettings = yaml.getConfigurationSection("embedSettings")
-//        if (oldEmbedSettings != null) {
-//            embedSettings["author"] = oldEmbedSettings.getString("author") ?: "Server"
-//            embedSettings["authorIconURL"] = oldEmbedSettings.getString("authorIconURL") ?: "URL"
+//        val oldEmbedSettings = yaml.node("embedSettings")
+//        if (!oldEmbedSettings.virtual()) {
+//            embedSettings["author"] = oldEmbedSettings.node("author").string ?: "Server"
+//            embedSettings["authorIconURL"] = oldEmbedSettings.node("authorIconURL").string ?: "URL"
 //        }
 //        newRoot["embedSettings"] = embedSettings
 
@@ -136,19 +138,19 @@ class DiscordMigrator: BaseMigrator() {
 
         // Whitelist command
         val whitelistCommand = mutableMapOf<String, Any>()
-        val oldWhitelistCommand = yaml.getConfigurationSection("whitelistCommand")
-        if (oldWhitelistCommand != null) {
+        val oldWhitelistCommand = yaml.node("whitelistCommand")
+        if (!oldWhitelistCommand.virtual()) {
             whitelistCommand["permission"] =
-                oldWhitelistCommand.getString("permission") ?: "PERMISSION"
+                oldWhitelistCommand.node("permission").string ?: "PERMISSION"
         }
         commands["whitelistCommand"] = whitelistCommand
 
         // Server info command
         val serverInfoCommand = mutableMapOf<String, Any>()
-        val oldServerInfoCommand = yaml.getConfigurationSection("serverInfoCommand")
-        if (oldServerInfoCommand != null) {
+        val oldServerInfoCommand = yaml.node("serverInfoCommand")
+        if (!oldServerInfoCommand.virtual()) {
             serverInfoCommand["permission"] =
-                oldServerInfoCommand.getString("permission") ?: "PERMISSION"
+                oldServerInfoCommand.node("permission").string ?: "PERMISSION"
         }
         commands["serverInfoCommand"] = serverInfoCommand
 
@@ -156,11 +158,11 @@ class DiscordMigrator: BaseMigrator() {
 
         // 5. Whitelist feature (restructured)
         val whitelistFeature = mutableMapOf<String, Any>()
-        val oldWhitelistFeature = yaml.getConfigurationSection("whitelistFeature")
-        if (oldWhitelistFeature != null) {
+        val oldWhitelistFeature = yaml.node("whitelistFeature")
+        if (!oldWhitelistFeature.virtual()) {
             whitelistFeature["roles"] =
-                oldWhitelistFeature.getString("role") ?: "ROLE ID 1, ROLE ID 2, ROLE ID ..."
-            whitelistFeature["channel"] = oldWhitelistFeature.getString("channel") ?: "CHANNEL ID"
+                oldWhitelistFeature.node("role").string ?: "ROLE ID 1, ROLE ID 2, ROLE ID ..."
+            whitelistFeature["channel"] = oldWhitelistFeature.node("channel").string ?: "CHANNEL ID"
         }
         newRoot["whitelistFeature"] = whitelistFeature
 
@@ -169,47 +171,47 @@ class DiscordMigrator: BaseMigrator() {
 
         // Chat sync
         val chatSync = mutableMapOf<String, Any>()
-        val oldChatSync = yaml.getConfigurationSection("chatSync")
-        if (oldChatSync != null) {
-            chatSync["enabled"] = oldChatSync.getBoolean("enabled", true)
-            chatSync["permission"] = oldChatSync.getString("permission") ?: "PERMISSION"
-            chatSync["channel"] = oldChatSync.getString("channel") ?: "CHANNEL ID"
+        val oldChatSync = yaml.node("chatSync")
+        if (!oldChatSync.virtual()) {
+            chatSync["enabled"] = oldChatSync.node("enabled").get(Boolean::class.javaObjectType) ?: true
+            chatSync["permission"] = oldChatSync.node("permission").string ?: "PERMISSION"
+            chatSync["channel"] = oldChatSync.node("channel").string ?: "CHANNEL ID"
         }
         syncFeature["chatSync"] = chatSync
 
         // Console sync
         val consoleSync = mutableMapOf<String, Any>()
-        val oldConsoleSync = yaml.getConfigurationSection("consoleSync")
-        if (oldConsoleSync != null) {
-            consoleSync["enabled"] = oldConsoleSync.getBoolean("enabled", true)
-            consoleSync["channel"] = oldConsoleSync.getString("channel") ?: "CHANNEL ID"
+        val oldConsoleSync = yaml.node("consoleSync")
+        if (!oldConsoleSync.virtual()) {
+            consoleSync["enabled"] = oldConsoleSync.node("enabled").get(Boolean::class.javaObjectType) ?: true
+            consoleSync["channel"] = oldConsoleSync.node("channel").string ?: "CHANNEL ID"
         }
         syncFeature["consoleSync"] = consoleSync
 
         // Server stats (complex restructuring)
         val serverStats = mutableMapOf<String, Any>()
-        val oldServerStats = yaml.getConfigurationSection("serverStats")
-        if (oldServerStats != null) {
-            serverStats["enabled"] = oldServerStats.getBoolean("enabled", true)
-            serverStats["mode"] = oldServerStats.getString("mode") ?: "description"
-            serverStats["channel"] = oldServerStats.getString("channel") ?: "CHANNEL ID"
+        val oldServerStats = yaml.node("serverStats")
+        if (!oldServerStats.virtual()) {
+            serverStats["enabled"] = oldServerStats.node("enabled").get(Boolean::class.javaObjectType) ?: true
+            serverStats["mode"] = oldServerStats.node("mode").string ?: "description"
+            serverStats["channel"] = oldServerStats.node("channel").string ?: "CHANNEL ID"
 
             // Transform layout structure
             val design = mutableMapOf<String, Any>()
-            val oldLayout = oldServerStats.getConfigurationSection("layout")
-            if (oldLayout != null) {
+            val oldLayout = oldServerStats.node("layout")
+            if (!oldLayout.virtual()) {
                 // Server status with emoji mapping
                 val serverStatus = mutableMapOf<String, Any>()
-                val oldServerStatus = oldLayout.getConfigurationSection("serverStatus")
-                if (oldServerStatus != null) {
+                val oldServerStatus = oldLayout.node("serverStatus")
+                if (!oldServerStatus.virtual()) {
                     serverStatus["text"] =
-                        oldServerStatus.getString("text") ?: "<emoji> | SERVER <status>"
+                        oldServerStatus.node("text").string ?: "<emoji> | SERVER <status>"
 
                     val emoji = mutableMapOf<String, Any>()
-                    val oldEmoji = oldServerStatus.getConfigurationSection("emoji")
-                    if (oldEmoji != null) {
-                        emoji["online"] = oldEmoji.getString("online") ?: "💚"
-                        emoji["offline"] = oldEmoji.getString("offline") ?: "❤️"
+                    val oldEmoji = oldServerStatus.node("emoji")
+                    if (!oldEmoji.virtual()) {
+                        emoji["online"] = oldEmoji.node("online").string ?: "💚"
+                        emoji["offline"] = oldEmoji.node("offline").string ?: "❤️"
                     }
                     serverStatus["emoji"] = emoji
                 }
@@ -217,7 +219,7 @@ class DiscordMigrator: BaseMigrator() {
 
                 // Server version with emoji
                 val version = mutableMapOf<String, Any>()
-                val oldVersion = oldLayout.getString("serverVersion")
+                val oldVersion = oldLayout.node("serverVersion").string
                 if (oldVersion != null) {
                     version["text"] = oldVersion
                     version["emoji"] = "🛠️"
@@ -226,7 +228,7 @@ class DiscordMigrator: BaseMigrator() {
 
                 // Server players with emoji
                 val players = mutableMapOf<String, Any>()
-                val oldPlayers = oldLayout.getString("lastPlayerCount")
+                val oldPlayers = oldLayout.node("lastPlayerCount").string
                 if (oldPlayers != null) {
                     players["text"] = oldPlayers.replace("<count>", "<players> / <maxPlayers>")
                     players["emoji"] = "👥"
@@ -235,7 +237,7 @@ class DiscordMigrator: BaseMigrator() {
 
                 // Last refresh time with emoji
                 val lastRefresh = mutableMapOf<String, Any>()
-                val oldLastRefresh = oldLayout.getString("lastRefreshed")
+                val oldLastRefresh = oldLayout.node("lastRefreshed").string
                 if (oldLastRefresh != null) {
                     lastRefresh["text"] = oldLastRefresh
                     lastRefresh["emoji"] = "⌚"
@@ -249,35 +251,36 @@ class DiscordMigrator: BaseMigrator() {
         newRoot["syncFeature"] = syncFeature
 
 //        // 6. Log channel (direct copy)
-//        newRoot["logChannel"] = yaml.getString("logChannel") ?: "CHANNEL ID"
+//        newRoot["logChannel"] = yaml.node("logChannel").string ?: "CHANNEL ID"
 
         return newRoot
     }
 
     /** Transforms Discord save structure from YAML to JSON format */
     private fun transformSaveStructure(
-        oldYaml: YMLFileUtils.Companion.YAMLFile,
+        oldYaml: ConfigFile,
     ): List<Map<String, String>> {
         val entries = mutableListOf<Map<String, String>>()
-        val yaml = oldYaml.content
+        val yaml = oldYaml.node
 
         // Process each entry (Discord ID -> "username uuid")
-        for (key in yaml.getKeys(false)) {
-            if (key == "documentation") continue
+        for ((key, child) in yaml.childrenMap()) {
+            val keyStr = key.toString()
+            if (keyStr == "documentation") continue
 
-            val raw = yaml.getString(key) ?: continue
+            val raw = child.string ?: continue
             val parts = raw.split(" ")
 
             if (parts.size >= 2) {
                 val entry =
                     mapOf(
-                        "discordID" to key,
+                        "discordID" to keyStr,
                         "playerName" to parts[0],
                         "playerUUID" to parts[1]
                     )
                 entries.add(entry)
             } else {
-                Logger.warn("Malformed save entry: $key -> $raw")
+                Logger.warn("Malformed save entry: $keyStr -> $raw")
             }
         }
 

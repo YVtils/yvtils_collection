@@ -15,10 +15,10 @@ package yv.tils.common.listeners
 import org.bukkit.event.*
 import org.bukkit.event.player.PlayerJoinEvent
 import yv.tils.common.config.ConfigFile
-import yv.tils.common.data.Permissions
+import yv.tils.common.permissions.Permissions
 import yv.tils.common.updateChecker.PluginVersion
-import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.configv2.language.LanguageHandler
+import yv.tils.utils.modules.Core
 
 class PlayerJoin : Listener {
     @EventHandler(ignoreCancelled = false, priority = EventPriority.HIGHEST)
@@ -38,7 +38,7 @@ class PlayerJoin : Listener {
                     mapOf(
                         "oldVersion" to currentVersion,
                         "newVersion" to latestVersion,
-                        "link" to "<click:open_url:${Data.pluginURL}>${Data.pluginURL}</click>",
+                        "link" to "<click:open_url:${Core.core.url}>${Core.core.url}</click>",
                     )
                 )
             )

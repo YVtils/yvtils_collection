@@ -2,15 +2,75 @@
 
 This repository combines all the yvtils minecraft plugins in one place, for easier access and management.
 
+## For contributors
+
+- Creating a new feature module? See
+  [docs/adding-a-new-module.md](./docs/adding-a-new-module.md).
+- Migrating an existing module or core to the new dynamic module system? See
+  [docs/migrating-to-dynamic-modules.md](./docs/migrating-to-dynamic-modules.md).
+
 ## Plugins included in this collection
 - YVtils-SMP **(IN MIGRATION PROCESS)**
 - YVtils-Discord ([Modrinth](https://modrinth.com/plugin/yvtils_dc))
   - [Core](https://github.com/YVtils/yvtils_collection/tree/main/discord-core)
   - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/discord)
-- YVtils-MultiMine **(IN MIGRATION PROCESS)**
-- YVtils-Regions ([Modrinth](https://modrinth.com/plugin/yvtils_rg))
+- YVtils-MultiMine ([Modrinth](https://modrinth.com/plugin/yvtils_mm))
+  - [Core](https://github.com/YVtils/yvtils_collection/tree/main/multiMine-core)
+  - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/multiMine)
+- YVtils-Regions ([Modrinth](https://modrinth.com/plugin/yvtils_rg)) **(IN RECODE PROCESS)**
   - [Core](https://github.com/YVtils/yvtils_collection/tree/main/regions-core)
   - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/regions)
+- YVtils-YV_SMP **(IN MIGRATION PROCESS)**
+
+---
+
+## Modules in this Collection
+
+### common
+
+### config
+
+### core
+
+### discord
+
+### discord-core
+
+### essentials
+
+### fusion
+
+### gui
+
+### message
+
+### migration
+
+### moderation
+
+### multiMine
+
+### multiMine-core
+
+### regions
+
+### regions-core
+
+### server
+
+### sit
+
+### stats
+
+### status
+
+### test-core
+
+### vanish
+
+### waypoint
+
+### yv_smp-core
 
 ---
 

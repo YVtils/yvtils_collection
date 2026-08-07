@@ -13,36 +13,35 @@
 package yv.tils.discord
 
 import yv.tils.common.permissions.PermissionManager
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.discord.actions.commands.JDACommandsRegister
 import yv.tils.discord.configs.*
 import yv.tils.discord.data.PermissionsData
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.listener.*
 import yv.tils.discord.logic.AppLogic
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 import yv.tils.utils.logger.Logger
 
-class DiscordYVtils : Data.YVtilsModule {
+class DiscordYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "discord",
             "4.0.0",
             "Discord integration for YVtils",
             "YVtils",
             "",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
-        ConfigFile().registerStrings()
-        SaveFile().registerStrings()
-        StatsSyncSaveFile().registerStrings()
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
 
         registerListeners()
         registerPermissions()
@@ -66,11 +65,11 @@ class DiscordYVtils : Data.YVtilsModule {
     }
 
     fun unregisterModule() {
-        Data.removeModule(MODULE)
+        Module.removeModule(MODULE)
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(AsyncChat(), plugin)

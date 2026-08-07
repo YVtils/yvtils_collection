@@ -1,11 +1,10 @@
 name: YVtils-Collection
-version: 1.1.0
+version: ${version}
 main: yv.tils.core.YVtils
-api-version: '1.21'
-author: WolfiiYV
+loader: yv.tils.core.loader.DynamicModuleLoader
+api-version: '26.1'
+author: YVtils
 website: 'https://yvtils.net/yvtils/'
 prefix: YVtils
 contributors:
-  - SlWed
-  - black_Kittys
-  - Silver
+  - Lyv (LyvricYV)

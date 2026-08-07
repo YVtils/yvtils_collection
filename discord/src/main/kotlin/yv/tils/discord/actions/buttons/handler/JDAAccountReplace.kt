@@ -13,7 +13,7 @@
 package yv.tils.discord.actions.buttons.handler
 
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.discord.data.Components
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.*

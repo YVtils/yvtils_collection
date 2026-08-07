@@ -5,18 +5,11 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.migration.config
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import yv.tils.config.files.JSONFileUtils
-import yv.tils.utils.logger.Logger
+import yv.tils.configv2.files.ObjectMapperFileUtils
 
 class SaveFile {
     companion object {
@@ -30,41 +23,22 @@ class SaveFile {
     private val filePath = "/migration/save.json"
 
     fun loadConfig() {
-    val file = JSONFileUtils.loadJSONFile(filePath)
-    val jsonFile = file.content
-        val saveList = jsonFile["saves"]?.jsonArray ?: return
+        val loaded = ObjectMapperFileUtils.loadList<MigrationEntry>(filePath)
 
-        if (saveList.isEmpty()) {
-            Logger.debug("No saves found in the save file.")
+        if (loaded.isEmpty()) {
+            registerStrings()
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save")
-
-            val configFileName = save.jsonObject["configFileName"]?.toString()?.replace("\"", "") ?: continue
-            val migrated = save.jsonObject["migrated"]?.toString()?.toBoolean() ?: false
-
-            val migrationEntry = MigrationEntry(configFileName, migrated)
-            saveFile.add(migrationEntry)
-            Logger.debug("Migration entry loaded: $migrationEntry")
-        }
+        saveFile.clear()
+        saveFile.addAll(loaded)
     }
 
     fun registerStrings(saveList: MutableList<MigrationEntry> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
-    }
-
-    private fun upgradeStrings(saveList: MutableList<MigrationEntry> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile, true)
+        ObjectMapperFileUtils.saveList(filePath, saveList)
     }
 }
 
-@Serializable
 data class MigrationEntry(
     val configFileName: String,
     val migrated: Boolean,

@@ -15,11 +15,12 @@ package yv.tils.sit
 import yv.tils.sit.commands.SitCommand
 import yv.tils.sit.listeners.EntityDismount
 import yv.tils.sit.listeners.PlayerQuit
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 
-class SitYVtils : Data.YVtilsModule {
+class SitYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "sit",
             "1.0.0",
             "Sit module for YVtils",
@@ -31,7 +32,7 @@ class SitYVtils : Data.YVtilsModule {
     override fun onLoad() {}
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
 
         registerCommands()
         registerListeners()
@@ -50,7 +51,7 @@ class SitYVtils : Data.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(EntityDismount(), plugin)

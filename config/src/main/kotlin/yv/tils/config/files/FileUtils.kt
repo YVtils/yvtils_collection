@@ -13,7 +13,7 @@
 package yv.tils.config.files
 
 import org.bukkit.configuration.file.YamlConfiguration
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.io.File
 import java.io.FileNotFoundException
@@ -28,7 +28,7 @@ class FileUtils {
             } else {
                 // Normalize path to avoid leading slash creating absolute paths on Windows
                 val relPath = path.trimStart('/','\\')
-                File(Data.pluginFolder, relPath)
+                File(Core.pluginFolder, relPath)
             }
 
             if (!file.exists()) throw FileNotFoundException("File not found: $path")
@@ -64,7 +64,7 @@ class FileUtils {
             val directory = if (overwriteParentDir) {
                 File(folder)
             } else {
-                File(Data.pluginFolder, folder)
+                File(Core.pluginFolder, folder)
             }
 
             if (!directory.exists() || !directory.isDirectory) return emptyList()
@@ -79,7 +79,7 @@ class FileUtils {
         fun saveFile(path: String, content: Any) {
             Logger.debug("Saving file: $path")
 
-            val file = File(Data.pluginFolder, path)
+            val file = File(Core.pluginFolder, path)
 
             if (!file.exists()) {
                 file.parentFile.mkdirs()
@@ -106,7 +106,7 @@ class FileUtils {
 
             // Normalize path to avoid leading slash creating absolute paths on Windows
             val relPath = path.trimStart('/','\\')
-            val file = File(Data.pluginFolder, relPath)
+            val file = File(Core.pluginFolder, relPath)
 
             if (!file.exists()) {
                 Logger.debug("File doesn't exist, creating new file: $path")

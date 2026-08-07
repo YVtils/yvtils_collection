@@ -23,10 +23,10 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockStateMeta
 import org.bukkit.inventory.meta.BundleMeta
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.configs.MultiMineConfig
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.server.VersionUtils
 
 
@@ -39,7 +39,7 @@ class BlockManage {
                 sender.sendMessage(LanguageHandler.getMessage(
                     "command.multiMine.noBlock.asParam",
                     sender,
-                    mapOf("prefix" to Data.prefix)
+                    mapOf("prefix" to Core.prefix)
                 ))
                 return
             }
@@ -49,7 +49,7 @@ class BlockManage {
                 sender.sendMessage(LanguageHandler.getMessage(
                     "command.multiMine.block.added",
                     sender,
-                    mapOf("prefix" to Data.prefix, "block" to material.name)
+                    mapOf("prefix" to Core.prefix, "block" to material.name)
                 ))
             }
         } else {
@@ -58,7 +58,7 @@ class BlockManage {
                     sender.sendMessage(LanguageHandler.getMessage(
                         "command.multiMine.noBlock.inHand",
                         sender,
-                        mapOf("prefix" to Data.prefix)
+                        mapOf("prefix" to Core.prefix)
                     ))
                     return
                 } else {
@@ -71,7 +71,7 @@ class BlockManage {
                 sender.sendMessage(LanguageHandler.getMessage(
                     "command.multiMine.block.added",
                     sender,
-                    mapOf("prefix" to Data.prefix, "block" to material.name)
+                    mapOf("prefix" to Core.prefix, "block" to material.name)
                 ))
             }
         }
@@ -85,7 +85,7 @@ class BlockManage {
                 sender.sendMessage(LanguageHandler.getMessage(
                     "command.multiMine.noBlock.asParam",
                     sender,
-                    mapOf("prefix" to Data.prefix)
+                    mapOf("prefix" to Core.prefix)
                 ))
                 return
             }
@@ -95,7 +95,7 @@ class BlockManage {
                 sender.sendMessage(LanguageHandler.getMessage(
                     "command.multiMine.block.removed",
                     sender,
-                    mapOf("prefix" to Data.prefix, "block" to material.name)
+                    mapOf("prefix" to Core.prefix, "block" to material.name)
                 ))
             }
         } else {
@@ -104,7 +104,7 @@ class BlockManage {
                     sender.sendMessage(LanguageHandler.getMessage(
                         "command.multiMine.noBlock.inHand",
                         sender,
-                        mapOf("prefix" to Data.prefix)
+                        mapOf("prefix" to Core.prefix)
                     ))
                     return
                 } else {
@@ -118,7 +118,7 @@ class BlockManage {
                 sender.sendMessage(LanguageHandler.getMessage(
                     "command.multiMine.block.removed",
                     sender,
-                    mapOf("prefix" to Data.prefix, "block" to material.name)
+                    mapOf("prefix" to Core.prefix, "block" to material.name)
                 ))
             }
         }
@@ -200,7 +200,7 @@ class BlockManage {
         sender.sendMessage(LanguageHandler.getMessage(
             "command.multiMine.multiple.added",
             sender,
-            mapOf("prefix" to Data.prefix, "blocks" to blocks.joinToString(", ") { it.name })
+            mapOf("prefix" to Core.prefix, "blocks" to blocks.joinToString(", ") { it.name })
         ))
     }
 
@@ -221,7 +221,7 @@ class BlockManage {
         sender.sendMessage(LanguageHandler.getMessage(
             "command.multiMine.multiple.removed",
             sender,
-            mapOf("prefix" to Data.prefix, "blocks" to blocks.joinToString(", ") { it.name })
+            mapOf("prefix" to Core.prefix, "blocks" to blocks.joinToString(", ") { it.name })
         ))
     }
 
@@ -231,7 +231,7 @@ class BlockManage {
                 LanguageHandler.getMessage(
                     "command.multiMine.multiple.console",
                     sender,
-                    mapOf("prefix" to Data.prefix)
+                    mapOf("prefix" to Core.prefix)
                 )
             )
             return false
@@ -242,7 +242,7 @@ class BlockManage {
                 LanguageHandler.getMessage(
                     "command.multiMine.multiple.noContainer",
                     sender,
-                    mapOf("prefix" to Data.prefix)
+                    mapOf("prefix" to Core.prefix)
                 )
             )
             return false
@@ -259,7 +259,7 @@ class BlockManage {
                 sender.sendMessage(LanguageHandler.getMessage(
                     "command.multiMine.block.alreadyInList",
                     sender,
-                    mapOf("prefix" to Data.prefix, "block" to block.name)
+                    mapOf("prefix" to Core.prefix, "block" to block.name)
                 ))
                 return false
             }
@@ -270,7 +270,7 @@ class BlockManage {
                 sender.sendMessage(LanguageHandler.getMessage(
                     "command.multiMine.block.notInList",
                     sender,
-                    mapOf("prefix" to Data.prefix, "block" to block.name)
+                    mapOf("prefix" to Core.prefix, "block" to block.name)
                 ))
                 return false
             }

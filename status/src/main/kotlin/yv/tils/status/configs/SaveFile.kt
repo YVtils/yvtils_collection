@@ -5,19 +5,12 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.status.configs
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import yv.tils.config.files.JSONFileUtils
+import yv.tils.configv2.files.ObjectMapperFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.logger.Logger
 import java.util.*
 
 class SaveFile {
@@ -28,30 +21,19 @@ class SaveFile {
     private val filePath = "/status/save.json"
 
     fun loadConfig() {
-    val file = JSONFileUtils.loadJSONFile(filePath)
-    val jsonFile = file.content
-        val saveList = jsonFile["saves"]?.jsonArray ?: return
+        val loaded = ObjectMapperFileUtils.loadList<StatusSave>(filePath)
 
-        if (saveList.isEmpty()) {
-            Logger.debug("No saves found in the save file.")
+        if (loaded.isEmpty()) {
+            registerStrings()
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save")
-
-            val uuid = save.jsonObject["uuid"]?.toString()?.replace("\"", "") ?: continue
-            val content = save.jsonObject["content"]?.toString() ?: continue
-
-            saves[UUID.fromString(uuid)] = StatusSave(uuid, content)
-        }
+        saves.clear()
+        loaded.forEach { saves[UUID.fromString(it.uuid)] = it }
     }
 
     fun registerStrings(saveList: MutableList<StatusSave> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-    val jsonFile = JSONFileUtils.makeJSONFile(filePath, saveWrapper)
-    // Use FileUtils.updateFile for merging/overwriting logic (keeps existing behavior)
-    yv.tils.config.files.FileUtils.updateFile(filePath, jsonFile)
+        ObjectMapperFileUtils.saveList(filePath, saveList)
     }
 
     fun updatePlayerSetting(uuid: UUID, content: String) {
@@ -68,8 +50,7 @@ class SaveFile {
         )
     }
 
-    @Serializable
-    data class StatusSave (
+    data class StatusSave(
         val uuid: String,
         var content: String,
     )

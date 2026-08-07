@@ -16,8 +16,8 @@ import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.scheduler.BukkitTask
 import yv.tils.common.language.LangStrings
-import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.configv2.language.LanguageHandler
+import yv.tils.utils.modules.Core
 
 class AsyncActionAnnounce {
     companion object {
@@ -29,7 +29,7 @@ class AsyncActionAnnounce {
          * @return A BukkitTask that can be cancelled if the operation completes quickly
          */
         fun announceAction(sender: CommandSender): BukkitTask {
-            return Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+            return Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                 sender.sendMessage(
                     LanguageHandler.getMessage(
                         LangStrings.COMMAND_EXECUTOR_ASYNC_ACTION.key,
@@ -47,7 +47,7 @@ class AsyncActionAnnounce {
          * @return A BukkitTask that can be cancelled if the operation completes quickly
          */
         fun announceSuggestion(sender: CommandSender): BukkitTask {
-            return Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+            return Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                 sender.sendMessage(
                     LanguageHandler.getMessage(
                         LangStrings.COMMAND_SUGGESTION_ASYNC_ACTION.key,

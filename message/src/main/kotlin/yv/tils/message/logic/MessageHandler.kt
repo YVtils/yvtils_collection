@@ -14,8 +14,8 @@ package yv.tils.message.logic
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.configv2.language.LanguageHandler
+import yv.tils.utils.modules.Core
 import java.util.*
 
 class MessageHandler {
@@ -37,7 +37,7 @@ class MessageHandler {
                 "command.msg.note",
                 sender,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "yv/tils/message" to message
                 )
             ))
@@ -51,7 +51,7 @@ class MessageHandler {
                 "command.msg.message",
                 sender,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "sender" to senderName,
                     "receiver" to targetName,
                     "yv/tils/message" to message
@@ -63,7 +63,7 @@ class MessageHandler {
                 "command.msg.message",
                 target.uniqueId,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "sender" to senderName,
                     "receiver" to targetName,
                     "yv/tils/message" to message

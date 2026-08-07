@@ -20,7 +20,7 @@ import org.apache.logging.log4j.core.LogEvent
 import org.apache.logging.log4j.core.Logger
 import org.apache.logging.log4j.core.filter.AbstractFilter
 import org.apache.logging.log4j.message.Message
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 
 /**
  * Log4j2 filter to suppress Mojang profile lookup warnings.
@@ -42,7 +42,7 @@ class MojangProfileLogFilter : AbstractFilter() {
         }.getBoolean(null) ||
         yv.tils.utils.logger.Logger.Companion::class.java.getDeclaredField("debugLevel").apply {
             isAccessible = true
-        }.getInt(null) < DEBUGLEVEL.EXTRA.level
+        }.getInt(null) < DEBUG_LEVEL.EXTRA.level
     }
 
     override fun filter(event: LogEvent?): Filter.Result {

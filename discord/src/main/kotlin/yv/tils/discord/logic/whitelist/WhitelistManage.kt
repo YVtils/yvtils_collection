@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.AppLogic
@@ -25,7 +25,7 @@ import yv.tils.utils.apis.MojangAPI
 import yv.tils.utils.apis.MojangAPI.ErrorResponse
 import yv.tils.utils.apis.MojangAPI.SuccessfulResponse
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.TimeUnit
 
@@ -319,7 +319,7 @@ class WhitelistManage: ListenerAdapter() {
         guildID: String? = null,
         initiator: User? = null,
     ): WhitelistEntry {
-        val player = Data.instance.server.getOfflinePlayer(name)
+        val player = Core.instance.server.getOfflinePlayer(name)
 
         if (verifyMinecraftAccount) {
             try {

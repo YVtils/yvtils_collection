@@ -16,8 +16,13 @@ import org.bukkit.GameMode
 import org.bukkit.Sound
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.configv2.language.Language
+import yv.tils.configv2.language.LanguageHandler
+import yv.tils.utils.modules.Core
+
+import yv.tils.configv2.language.LanguageProvider
+import yv.tils.essentials.language.LangStrings
+import yv.tils.common.language.LangStrings as CommonLangStrings
 
 class GamemodeHandler {
     /**
@@ -27,40 +32,36 @@ class GamemodeHandler {
      * @param sender CommandSender to send messages
      */
     fun gamemodeSwitch(player: Player, gamemode: String, sender: CommandSender = player) {
-        val gamemodeName: String
+        val gamemodeName: LanguageProvider.LangStrings
 
         when (gamemode) {
             "survival", "0" -> {
-                gamemodeName = "gamemode.survival"
-
+                gamemodeName = LangStrings.GAMEMODE_SURVIVAL
                 player.gameMode = GameMode.SURVIVAL
             }
 
             "creative", "1" -> {
-                gamemodeName = "gamemode.creative"
-
+                gamemodeName = LangStrings.GAMEMODE_CREATIVE
                 player.gameMode = GameMode.CREATIVE
             }
 
             "adventure", "2" -> {
-                gamemodeName = "gamemode.adventure"
-
+                gamemodeName = LangStrings.GAMEMODE_ADVENTURE
                 player.gameMode = GameMode.ADVENTURE
             }
 
             "spectator", "3" -> {
-                gamemodeName = "gamemode.spectator"
-
+                gamemodeName = LangStrings.GAMEMODE_SPECTATOR
                 player.gameMode = GameMode.SPECTATOR
             }
 
             else -> {
                 sender.sendMessage(
                     LanguageHandler.getMessage(
-                        "command.usage",
+                        CommonLangStrings.COMMAND_USAGE.key,
                         sender,
                         params = mapOf(
-                            "prefix" to Data.prefix,
+                            "prefix" to Core.prefix,
                             "command" to "/gm <survival/creative/adventure/spectator> [player]"
                         )
                     )
@@ -74,10 +75,10 @@ class GamemodeHandler {
 
         player.sendMessage(
             LanguageHandler.getMessage(
-                "command.gamemode.self",
+                LangStrings.COMMAND_GAMEMODE_SELF,
                 player.uniqueId,
                 mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                     "gamemode" to LanguageHandler.getRawMessage(gamemodeName, player.uniqueId),
                 )
             ),
@@ -86,10 +87,10 @@ class GamemodeHandler {
         if (player != sender) {
             sender.sendMessage(
                 LanguageHandler.getMessage(
-                    "command.gamemode.other",
+                    LangStrings.COMMAND_GAMEMODE_OTHER,
                     sender,
                     mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                         "gamemode" to LanguageHandler.getRawMessage(gamemodeName, sender),
                         "player" to player.name
                     )

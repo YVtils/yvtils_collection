@@ -15,7 +15,7 @@ package yv.tils.server.connect
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import yv.tils.config.language.LanguageBroadcast
+import yv.tils.configv2.language.LanguageBroadcast
 import yv.tils.server.configs.ConfigFile
 import yv.tils.utils.logger.Logger
 

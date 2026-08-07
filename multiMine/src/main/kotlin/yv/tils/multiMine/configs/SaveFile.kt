@@ -5,51 +5,38 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.multiMine.configs
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import yv.tils.config.files.FileUtils
-import yv.tils.config.files.JSONFileUtils
+import yv.tils.configv2.files.ObjectMapperFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.logger.Logger
 import java.util.*
 
 class SaveFile {
     companion object {
         val saves = mutableMapOf<UUID, MultiMineSave>()
+
+        private const val FILE_PATH = "/multiMine/save.json"
     }
 
     fun loadConfig() {
-    val file = JSONFileUtils.loadJSONFile("/multiMine/save.json")
-    val jsonFile = file.content
-        val saveList = jsonFile["saves"]?.jsonArray ?: return
+        val loaded = ObjectMapperFileUtils.loadList<MultiMineSave>(FILE_PATH)
 
-        if (saveList.isEmpty()) {
-            Logger.debug("No saves found in the save file.")
+        if (loaded.isEmpty()) {
+            // Either save.json doesn't exist yet (first run) or it's genuinely empty (no
+            // player has toggled multiMine yet) - either way there's nothing to lose, so
+            // (re-)writing an empty list is safe and ensures the file exists going forward.
+            registerStrings()
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save")
-
-            val uuid = save.jsonObject["uuid"]?.toString()?.replace("\"", "") ?: continue
-            val toggled = save.jsonObject["toggled"]?.toString()?.toBoolean() ?: continue
-
-            saves[UUID.fromString(uuid)] = MultiMineSave(uuid, toggled)
-        }
+        saves.clear()
+        loaded.forEach { saves[UUID.fromString(it.uuid)] = it }
     }
 
     fun registerStrings(saveList: MutableList<MultiMineSave> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-        val jsonFile = JSONFileUtils.makeJSONFile("/multiMine/save.json", saveWrapper)
-        FileUtils.updateFile("/multiMine/save.json", jsonFile, true)
+        ObjectMapperFileUtils.saveList(FILE_PATH, saveList)
     }
 
     fun updatePlayerSetting(uuid: UUID, state: Boolean) {
@@ -66,8 +53,7 @@ class SaveFile {
         )
     }
 
-    @Serializable
-    data class MultiMineSave (
+    data class MultiMineSave(
         val uuid: String,
         var toggled: Boolean,
     )

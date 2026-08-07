@@ -13,7 +13,7 @@
 package yv.tils.config.language
 
 import yv.tils.config.files.FileUtils
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import java.util.*
 
@@ -54,7 +54,7 @@ class Language {
 
             // Process only deepest keys
             deepestKeys.forEach { key ->
-                Logger.debug("Processing key: $key", DEBUGLEVEL.SPAM)
+                Logger.debug("Processing key: $key", DEBUG_LEVEL.SPAM)
                 val string = tempLangStrings[key]
 
                 if (string == null) {

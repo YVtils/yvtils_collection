@@ -17,7 +17,7 @@ import net.dv8tion.jda.api.components.container.ContainerChildComponent
 import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import org.bukkit.advancement.Advancement
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.discord.data.Components.Companion.errorColor
 import yv.tils.discord.data.Components.Companion.successColor
 import yv.tils.discord.data.Components.Companion.warningColor

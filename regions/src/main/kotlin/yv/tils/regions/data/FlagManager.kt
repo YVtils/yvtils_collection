@@ -12,7 +12,6 @@
 
 package yv.tils.regions.data
 
-import kotlinx.serialization.Serializable
 import org.bukkit.command.CommandSender
 import yv.tils.regions.configs.ConfigFile
 import yv.tils.regions.configs.RegionSaveFile
@@ -130,7 +129,6 @@ class FlagManager {
      * @property lockedGlobal A map of locked global flags and their values.
      * @property lockedRoleBased A map of locked role-based flags and their values.
      */
-    @Serializable
     data class RegionFlags(
         /**
          * MutableMap of global flags and their values.

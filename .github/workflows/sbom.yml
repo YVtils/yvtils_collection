@@ -1,0 +1,48 @@
+name: Publish SBOM to Dependency-Track
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [ closed ]
+    branches: [ main ]
+
+jobs:
+  sbom:
+    # Only run automatically once a PR is actually merged into `main` (not
+    # just closed) - manual runs via workflow_dispatch always execute.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # For a merged-PR event, check out the actual commit that landed on
+          # `main` instead of the ephemeral PR merge-preview ref (which is all
+          # `pull_request` events check out by default).
+          ref: ${{ github.event.pull_request.merge_commit_sha || github.ref }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Aggregate CycloneDX SBOM for the whole monorepo, see the
+      # `cyclonedxBom` task configuration in the root build.gradle.kts.
+      - name: Generate SBOM
+        run: ./gradlew cyclonedxBom --no-daemon
+
+      - name: Upload SBOM to Dependency-Track
+        uses: DependencyTrack/gh-upload-sbom@v4.1
+        with:
+          serverHostname: ${{ secrets.DTRACK_HOSTNAME }}
+          protocol: https
+          apiKey: ${{ secrets.DTRACK_API_KEY }}
+          project: ${{ secrets.DTRACK_PROJECT_ID }}
+          bomFilename: build/reports/bom.json

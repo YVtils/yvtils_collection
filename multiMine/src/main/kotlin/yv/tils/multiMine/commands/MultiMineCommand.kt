@@ -12,15 +12,14 @@
 
 package yv.tils.multiMine.commands
 
-import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.*
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.multiMine.data.Permissions
 import yv.tils.multiMine.logic.BlockManage
 import yv.tils.multiMine.logic.ManageGUI
 import yv.tils.multiMine.logic.MultiMineHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 class MultiMineCommand {
     val blockManage = BlockManage()
@@ -56,10 +55,12 @@ class MultiMineCommand {
                             if (sender is Player) {
                                 manageGUI.openGUI(sender)
                             } else {
-                                sender.sendMessage(LanguageHandler.getMessage(
-                                    "command.executor.notPlayer",
-                                    params = mapOf("prefix" to Data.prefix)
-                                ))
+                                sender.sendMessage(
+                                    LanguageHandler.getMessage(
+                                        "command.executor.notPlayer",
+                                        params = mapOf("prefix" to Core.prefix)
+                                    )
+                                )
                             }
                         }
 
@@ -69,7 +70,7 @@ class MultiMineCommand {
                                     "command.usage",
                                     sender,
                                     params = mapOf(
-                                        "prefix" to Data.prefix,
+                                        "prefix" to Core.prefix,
                                         "command" to "/mm <add/remove/addMultiple/removeMultiple> [block]"
                                     )
                                 )
@@ -82,7 +83,10 @@ class MultiMineCommand {
 
         literalArgument("toggle", true) {
             withPermission(Permissions.COMMAND_MULTIMINE_TOGGLE_SELF.permission.name)
-            playerProfileArgument("target", true) {
+            playerProfileArgument(
+                "target",
+                true
+            ) { // TODO: Test if this works with playerProfile ot needs to be migrated to entitySelectorArgumentOnePlayer
                 withPermission(Permissions.COMMAND_MULTIMINE_TOGGLE_OTHERS.permission.name)
                 anyExecutor { sender, args ->
                     MultiMineHandler().toggle(sender, args)

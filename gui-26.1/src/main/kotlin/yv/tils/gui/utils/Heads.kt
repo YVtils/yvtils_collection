@@ -1,0 +1,189 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2026 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
+package yv.tils.gui.utils
+
+import com.destroystokyo.paper.profile.ProfileProperty
+import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemFlag
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.SkullMeta
+import xyz.xenondevs.invui.item.ItemProvider
+import xyz.xenondevs.invui.item.ItemWrapper
+import yv.tils.configv2.language.LanguageHandler
+import yv.tils.utils.message.MessageUtils
+import java.util.Collections
+import java.util.UUID
+
+enum class Heads(val desc: String, val texture: String) {
+    NUMBER_1(
+        "1",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWZlMmNjMWM0ZjhjZGJmMTAwZTE4NDUzNmExMWM1NDViZmNjMWNjZDQyZDgwZGIyZDlkZjE5ODc4MjgxNWIwYyJ9fX0="
+    ),
+    NUMBER_2(
+        "2",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjE3NzRhMWQ2YTQzYjM3ZGU1NWE3ZjZlY2Y4NzBkYzVjNDhjZTlkZDNkNmMwYzVkNzkyZTk4NGQ1OWM0Y2RhNyJ9fX0="
+    ),
+    NUMBER_3(
+        "3",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzU5YmI5NTE3MzQ5MzQ1MzkwMDcyYmUzNWZhNTRjNWMzY2I2YmE0MmQ4OWM1ODYzMTdkNTA0OWVkMWY4MjZlYyJ9fX0="
+    ),
+    NUMBER_4(
+        "4",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzVlNTM5MDQ0YjdjMGRhZjIwMWY3ZmM1YjI4NDVmNDdlNWU5ZmMwNjU3Y2JkNDJhZDJiOWM3MDUyYmE0NjY3YyJ9fX0="
+    ),
+    NUMBER_5(
+        "5",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2YwZTA5YTg0MWMyNjMxNTA2ZDhmOTBjYTg0YTRjNmM1ZDZjNGU2ZDQxOTM3M2M5MzU0YWUzMTNlMzMyMTU1NiJ9fX0="
+    ),
+    NUMBER_6(
+        "6",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjk1NmFlMzAyODk0ODJlMmE4OWQxNDliNGMwNzZjNDkyMDA0ZDNlNzQyNGM0MGMzN2VlNDQ0NTE3NmYwZDEzOCJ9fX0="
+    ),
+    NUMBER_7(
+        "7",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGQ1YjJlNGVjM2RhNGEwMzVkY2Q4NDVjYzRkODIyYWFkOGQ1ODkyMGI4NWQ0ZmYyNDExNzY3NGI5NWQ4M2JhMiJ9fX0="
+    ),
+    NUMBER_8(
+        "8",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTE1MGIxMWUzYTExOTY4ZWY1Mjg1NzA1ZTEyMTgyMDA3NGE5NDE2OThjZmY3MzZhOThmYjUwMTc0MGRjY2U5NiJ9fX0="
+    ),
+    NUMBER_9(
+        "9",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDUyMDYzNDlhYmRhYWYzY2NjNzgwMjlmOGEyMmUyNGVlNDY3ZTRkNTNjM2RhZjBmNDczN2NlNGFlYmVhZWY5MyJ9fX0="
+    ),
+    NUMBER_NINE_PLUS(
+        "9+",
+        "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTFiZjQ3NWQ2MGQ3NGM2ZDg3NWIxMzhmOTQzMzNkNzJhOWZhYmRhYWM3MzIzNWQwNWYzOWJjMWVlNTY4NWVkMyJ9fX0="
+    ),
+    PREVIOUS_PAGE(
+        "Back",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjg0ZjU5NzEzMWJiZTI1ZGMwNThhZjg4OGNiMjk4MzFmNzk1OTliYzY3Yzk1YzgwMjkyNWNlNGFmYmEzMzJmYyJ9fX0="
+    ),
+    NEXT_PAGE(
+        "Next",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGVmMzU2YWQyYWE3YjE2NzhhZWNiODgyOTBlNWZhNWEzNDI3ZTVlNDU2ZmY0MmZiNTE1NjkwYzY3NTE3YjgifX19"
+    ),
+    PLUS_CHARACTER(
+        "Plus",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDdhMGZjNmRjZjczOWMxMWZlY2U0M2NkZDE4NGRlYTc5MWNmNzU3YmY3YmQ5MTUzNmZkYmM5NmZhNDdhY2ZiIn19fQ=="
+    ),
+    I_CHARACTER(
+        "Info",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDA3MmU3NjcwOTVjMDY5ZWI2NGIyMzQwMzFkZGU4YzViYmJhZTk0YzJkMDUxOGM5OTBlNTU2ZWJmZTc2ZTM0MCJ9fX0="
+    ),
+    X_CHARACTER(
+        "Close",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmViNTg4YjIxYTZmOThhZDFmZjRlMDg1YzU1MmRjYjA1MGVmYzljYWI0MjdmNDYwNDhmMThmYzgwMzQ3NWY3In19fQ=="
+    ),
+    CHECK_MARK(
+        "Enabled",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDMxMmNhNDYzMmRlZjVmZmFmMmViMGQ5ZDdjYzdiNTVhNTBjNGUzOTIwZDkwMzcyYWFiMTQwNzgxZjVkZmJjNCJ9fX0="
+    ),
+
+    // --- Module identity icons (used by `core`'s `/yvtils modules` GUI) ---
+    DISCORD_LOGO(
+        "Discord",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWY4NjViYjg4ZjU2Y2UwMTBhOGQ5YWVhYWNlNDRhMmRkY2QzZDYzMTdhZWQ4OTkwYjQxYjRmZmEwMzk4MzZjMyJ9fX0="
+    ),
+    PICKAXE(
+        "Pickaxe",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDVmZmFhYWQ0NjkwN2ZhMDVkOTc1MTk0OWMwNTU1NTg2OTQ1ZTk3MDRkYWUxMmIwYjNlZTg2ZTVkMzIyZTM5MSJ9fX0="
+    ),
+    TOOLBOX(
+        "Toolbox",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODM2MjQzOGZmNGVjZjhmNGEyY2FhMTI3NzU2MWM5NTEzYzlhOTg2ZGJlMzhhODBiOWJhZmNiZmVkOGIyYTljOCJ9fX0="
+    ),
+    OAK_STOOL(
+        "Oak Stool",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjcwNTkyNjc5N2JhYzU1YjYxMGE4NmM1NGI0ZDM1ODM0NzFlOTUwNjY1ZjMzMTcwYzM2MjNhOTlkZjA4NjczNiJ9fX0="
+    ),
+    HEART_RED(
+        "Heart",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGE2ZjYyOTNlMjMxZmY0MzMxNGQ4NzUwN2QyZjMxMGE5MDFlYzM0NGIyY2RmM2ZkYWY0NGZiNjkyMTQxMDgyZSJ9fX0="
+    ),
+    ENVELOPE(
+        "Envelope",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzcwNWU2OTI5M2UzMmFmMWQ2ODZlMzcwMTIxNTBiOTc5NDFhZjE4ZWEwNGQwYWJhYzdlNjIxYWUyMjdiMTI4NSJ9fX0="
+    ),
+    SHIELD(
+        "Shield",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjUyNTU5ZjJiY2VhZDk4M2Y0YjY1NjFjMmI1ZjJiNTg4ZjBkNjExNmQ0NDY2NmNlZmYxMjAyMDc5ZDI3Y2E3NCJ9fX0="
+    ),
+    CHART(
+        "Chart",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzNjY2I0ZGIyYzE5NjkyODM0M2U2YzFjNzlhMjdkNzM3ZTY1NWQwYzlmOTE2OWI3YTg4ZDE3NDQ1NzE0MTcifX19"
+    ),
+    SERVER_RACK(
+        "Server",
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTM4YjA1ZTUwZWYxYzhjMDJjZTMwZDhkMDliODQ2ZTdlOTE0NWFjNDExNzE1N2Y2NTMwYjRkOGUxZTMyOTg1NCJ9fX0="
+    ),
+}
+
+/**
+ * Builds custom-textured player head [ItemProvider]s for use as InvUI [xyz.xenondevs.invui.item.Item]s.
+ *
+ * Head textures are applied via a raw Bukkit [ItemStack] (same approach as the legacy `gui` module)
+ * and then wrapped as an [ItemProvider] using [ItemWrapper].
+ */
+object HeadUtils {
+    fun createCustomHead(headTexture: Heads, itemName: String): ItemStack =
+        createCustomHead(headTexture.texture, itemName)
+
+    fun createCustomHead(headTexture: String, itemName: String): ItemStack {
+        val item = ItemStack(Material.PLAYER_HEAD)
+        val meta = item.itemMeta as SkullMeta
+        val playerProfile = Bukkit.createProfile(UUID.randomUUID())
+
+        playerProfile.setProperties(
+            Collections.singletonList(ProfileProperty("textures", headTexture, ""))
+        )
+
+        meta.playerProfile = playerProfile
+        meta.displayName(MessageUtils.convert(itemName))
+        meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
+        item.itemMeta = meta
+
+        return item
+    }
+
+    fun createCustomHead(headTexture: Heads, player: Player, languageKey: String): ItemStack {
+        val item = ItemStack(Material.PLAYER_HEAD)
+        val meta = item.itemMeta as SkullMeta
+        val playerProfile = Bukkit.createProfile(UUID.randomUUID())
+
+        playerProfile.setProperties(
+            Collections.singletonList(ProfileProperty("textures", headTexture.texture, ""))
+        )
+
+        meta.playerProfile = playerProfile
+        meta.displayName(LanguageHandler.getMessage(languageKey, player))
+        meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
+        item.itemMeta = meta
+
+        return item
+    }
+
+    /**
+     * Builds an [ItemProvider] for a custom head, localized for [player] via [languageKey].
+     */
+    fun provider(headTexture: Heads, player: Player, languageKey: String): ItemProvider =
+        ItemWrapper(createCustomHead(headTexture, player, languageKey))
+
+    /**
+     * Builds an [ItemProvider] for a custom head with a raw (already resolved) [itemName].
+     */
+    fun provider(headTexture: Heads, itemName: String): ItemProvider =
+        ItemWrapper(createCustomHead(headTexture, itemName))
+}

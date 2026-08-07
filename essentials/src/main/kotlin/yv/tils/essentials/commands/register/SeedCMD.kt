@@ -17,11 +17,11 @@ import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.literalArgument
 import yv.tils.essentials.commands.handler.SeedHandler
+import yv.tils.essentials.permissions.Permissions
 
 class SeedCMD {
     val command = commandTree("seed") {
-        withPermission("yvtils.command.seed")
-        withPermission(CommandPermission.OP)
+        withPermission(Permissions.COMMAND_SEED.permission.name)
         withUsage("seed show")
 
         literalArgument("show", false) {

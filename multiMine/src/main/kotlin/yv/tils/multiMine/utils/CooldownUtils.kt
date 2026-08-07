@@ -13,7 +13,7 @@
 package yv.tils.multiMine.utils
 
 import yv.tils.multiMine.configs.ConfigFile
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import java.util.*
 
@@ -46,7 +46,7 @@ class CooldownUtils {
      * Decreases the cooldown time by 1 second for each player in the map
      */
     fun cooldownHandler() {
-        Logger.debug("Handling multiMine cooldowns...", DEBUGLEVEL.SPAM)
+        Logger.debug("Handling multiMine cooldowns...", DEBUG_LEVEL.SPAM)
         for (entry in cooldownMap) {
             if (entry.value == 0) continue
             cooldownMap[entry.key] = entry.value - 1

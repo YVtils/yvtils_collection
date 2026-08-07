@@ -5,100 +5,34 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.moderation.configs.saveFile
 
-import jdk.jfr.internal.event.EventConfiguration.timestamp
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import yv.tils.config.files.FileUtils
-import yv.tils.config.files.JSONFileUtils
-import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.logger.Logger
+import yv.tils.configv2.files.ObjectMapperFileUtils
 import java.util.UUID
-
-import yv.tils.moderation.configs.saveFile.MuteSave
-import yv.tils.utils.logger.DEBUGLEVEL
-
-//  {
-//      saves: [
-//          {
-//              "uuid": <uuid>,
-//              "warningCount": <number>,
-//              "warnings": [
-//                  {
-//                      "id": <number>,
-//                      "reason": <reason>,
-//                      "modAction": {
-//                          "uuid": <uuid>,
-//                          "timestamp": <timestamp>
-//                      }
-//                  }
-//              ]
-//      ]
-//  }
 
 class WarnSaveFile {
     companion object {
         val saves = mutableMapOf<UUID, WarnSave>()
     }
 
-    fun loadConfig() {
-        val file = JSONFileUtils.loadJSONFile("/moderation/warnedPlayers.json")
-        val jsonFile = file.content
-        val saveList = jsonFile["saves"]?.jsonArray ?: return
+    private val filePath = "/moderation/warnedPlayers.json"
 
-        if (saveList.isEmpty()) {
-            Logger.debug("No saves found in the save file.", DEBUGLEVEL.SPAM)
+    fun loadConfig() {
+        val loaded = ObjectMapperFileUtils.loadList<WarnSave>(filePath)
+
+        if (loaded.isEmpty()) {
+            registerStrings()
             return
         }
 
-        for (save in saveList) {
-            Logger.debug("Loading save: $save", DEBUGLEVEL.SPAM)
-
-            val uuid = save.jsonObject["uuid"]?.toString()?.replace("\"", "") ?: continue
-            val warningCount = save.jsonObject["warningCount"]?.toString()?.toInt() ?: continue
-
-            val warningsJSON = save.jsonObject["warnings"]?.jsonArray ?: continue
-
-            val warnings = mutableListOf<Warning>()
-
-            for (warning in warningsJSON) {
-                Logger.debug("Loading warning: $warning", DEBUGLEVEL.SPAM)
-
-                val warnID = warning.jsonObject["id"]?.toString()?.replace("\"", "") ?: continue
-                val reason = warning.jsonObject["reason"]?.toString()?.replace("\"", "") ?: continue
-                val modActionJSON = warning.jsonObject["modAction"]?.jsonObject ?: continue
-                val modUUID = modActionJSON.jsonObject["uuid"]?.toString()?.replace("\"", "") ?: continue
-                val timestamp = modActionJSON.jsonObject["timestamp"]?.toString()?.replace("\"", "") ?: continue
-
-                val modAction = ModAction(
-                    uuid = modUUID,
-                    timestamp = timestamp,
-                )
-
-                val warning = Warning(
-                    id = warnID,
-                    reason = reason,
-                    modAction = modAction
-                )
-
-                warnings.add(warning)
-            }
-
-            saves[UUID.fromString(uuid)] = WarnSave(uuid, warningCount, warnings)
-        }
+        saves.clear()
+        loaded.forEach { saves[UUID.fromString(it.uuid)] = it }
     }
 
     fun registerStrings(saveList: MutableList<WarnSave> = mutableListOf()) {
-        val saveWrapper = mapOf("saves" to saveList)
-        val jsonFile = JSONFileUtils.makeJSONFile("/moderation/warnedPlayers.json", saveWrapper)
-        FileUtils.updateFile("/moderation/warnedPlayers.json", jsonFile, true)
+        ObjectMapperFileUtils.saveList(filePath, saveList)
     }
 
     fun warnPlayer(uuid: UUID, newWarn: Warning) {
@@ -114,6 +48,8 @@ class WarnSaveFile {
                 warnings = mutableListOf(newWarn)
             )
         }
+
+        registerStrings(saves.values.toMutableList())
     }
 
     fun getWarnings(uuid: UUID): List<Warning> {
@@ -133,9 +69,13 @@ class WarnSaveFile {
 
         warnSave.warnings.remove(warningToRemove)
         warnSave.warningCount -= 1
+
+        registerStrings(saves.values.toMutableList())
     }
 
     fun clearWarnings(uuid: UUID) {
         saves.remove(uuid)
+
+        registerStrings(saves.values.toMutableList())
     }
 }

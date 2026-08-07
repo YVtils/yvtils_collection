@@ -12,7 +12,6 @@
 
 package yv.tils.regions.data
 
-import kotlinx.serialization.Serializable
 import org.bukkit.OfflinePlayer
 import yv.tils.regions.configs.PlayerSaveFile
 import yv.tils.regions.data.RegionManager.Companion.regions
@@ -168,7 +167,6 @@ class PlayerManager {
         val players = mutableMapOf<UUID, MutableMap<UUID, PlayerRegion>>()
     }
 
-    @Serializable
     data class PlayerRegion (
         val uuid: String,
         val region: String,
@@ -176,7 +174,6 @@ class PlayerManager {
     )
 }
 
-@Serializable
 enum class RegionRoles(val permLevel: Int) {
     OWNER(0),
     MODERATOR(1),

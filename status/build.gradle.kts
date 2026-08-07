@@ -11,6 +11,12 @@
  */
 
 dependencies {
-    implementation(project(":utils"))
-    implementation(project(":config"))
+    compileOnly(project(":utils"))
+    compileOnly(project(":config-v2"))
+    // Compile-time only, to reference GUI types - NOT shaded into this module's own
+    // published artifact. The actual gui-<version> build used at runtime is resolved
+    // dynamically by core's DynamicModuleLoader, matching the running server's Minecraft
+    // version (InvUI, which `gui` wraps, dropped multi-version support in v2 - see
+    // DynamicModuleRegistry.GUI_ARTIFACTS for the full explanation).
+    compileOnly(project(":gui-26.1"))
 }

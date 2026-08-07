@@ -13,18 +13,21 @@
 package yv.tils.essentials
 
 import dev.jorel.commandapi.CommandAPI
-import org.bukkit.permissions.Permission
-import org.bukkit.permissions.PermissionDefault
+import yv.tils.common.permissions.PermissionManager
+import yv.tils.configv2.language.LanguageProvider
 import yv.tils.essentials.commands.register.*
-import yv.tils.essentials.language.RegisterStrings
+import yv.tils.essentials.config.StatesFile
+import yv.tils.essentials.language.LangStrings
 import yv.tils.essentials.listeners.*
-import yv.tils.utils.data.Data
+import yv.tils.essentials.permissions.PermissionsData
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 
-class EssentialYVtils : Data.YVtilsModule {
+class EssentialYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "essentials",
-            "1.0.0",
+            "26.08.01",
             "Essentials module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/essentials/"
@@ -32,17 +35,19 @@ class EssentialYVtils : Data.YVtilsModule {
     }
 
     override fun onLoad() {
-        RegisterStrings().registerStrings()
+        LanguageProvider.registerEnumStrings<LangStrings>()
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
 
         unregisterCommands()
 
         registerCommands()
         registerListeners()
         registerPermissions()
+
+        loadConfigs()
     }
 
     override fun onLateEnablePlugin() {
@@ -54,14 +59,16 @@ class EssentialYVtils : Data.YVtilsModule {
     }
 
     private fun registerCommands() {
+        DimensionCMD()
         FlyCMD()
         GamemodeCMD()
         GlobalMuteCMD()
         GodCMD()
         HealCMD()
+        PingCMD()
+        PvPCMD()
         SeedCMD()
         SpeedCMD()
-        PingCMD()
     }
 
     private fun unregisterCommands() {
@@ -70,21 +77,23 @@ class EssentialYVtils : Data.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(AsyncChat(), plugin)
         pm.registerEvents(EntityDamage(), plugin)
+        pm.registerEvents(EntityDamageByEntity(), plugin)
         pm.registerEvents(PlayerChangedWorld(), plugin)
         pm.registerEvents(PlayerGameModeChange(), plugin)
         pm.registerEvents(PlayerJoin(), plugin)
+        pm.registerEvents(PlayerPortal(), plugin)
     }
 
     private fun registerPermissions() {
-        val pm = Data.instance.server.pluginManager
-        pm.addPermission(Permission.loadPermission("yvtils.bypass.globalmute", mapOf(
-            "description" to "Bypass the global mute",
-            "default" to PermissionDefault.OP
-        )))
+        PermissionManager.registerPermissions(PermissionsData().getPermissionList(true))
+    }
+
+    private fun loadConfigs() {
+        StatesFile().loadConfig()
     }
 }

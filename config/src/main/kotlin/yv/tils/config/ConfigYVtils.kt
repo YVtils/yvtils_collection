@@ -12,13 +12,14 @@
 
 package yv.tils.config
 
-import yv.tils.utils.data.Data
+import yv.tils.config.language.Language
+import yv.tils.utils.modules.Module
 
-class ConfigYVtils : Data.YVtilsModule {
+class ConfigYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "config",
-            "1.0.0",
+            "26.08.01",
             "YVtils Config Module",
             "YVtils",
             "https://docs.yvtils.net/config/"
@@ -28,14 +29,14 @@ class ConfigYVtils : Data.YVtilsModule {
     override fun onLoad() {}
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
     }
 
     override fun onLateEnablePlugin() {
-
+        Language().loadLanguageFiles()
     }
 
     override fun disablePlugin() {
-
+        Module.removeModule(MODULE)
     }
 }

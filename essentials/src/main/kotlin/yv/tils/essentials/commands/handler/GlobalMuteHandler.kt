@@ -16,8 +16,10 @@ import dev.jorel.commandapi.executors.CommandArguments
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.configv2.language.LanguageHandler
+import yv.tils.utils.modules.Core
+import yv.tils.essentials.language.LangStrings
+import yv.tils.essentials.permissions.Permissions
 import yv.tils.utils.logger.Logger
 
 class GlobalMuteHandler {
@@ -82,7 +84,7 @@ class GlobalMuteHandler {
                         "command.globalmute.enable",
                         player.uniqueId,
                         params = mapOf(
-                            "prefix" to Data.prefix,
+                            "prefix" to Core.prefix,
                         )
                     )
                 )
@@ -92,7 +94,7 @@ class GlobalMuteHandler {
                         "command.globalmute.disable",
                         player.uniqueId,
                         params = mapOf(
-                            "prefix" to Data.prefix,
+                            "prefix" to Core.prefix,
                         )
                     )
                 )
@@ -103,14 +105,14 @@ class GlobalMuteHandler {
             Logger.info(LanguageHandler.getMessage(
                 "command.globalmute.enable",
                 params = mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                 )
             ))
         } else {
             Logger.info(LanguageHandler.getMessage(
                 "command.globalmute.disable",
                 params = mapOf(
-                    "prefix" to Data.prefix,
+                    "prefix" to Core.prefix,
                 )
             ))
         }
@@ -128,7 +130,7 @@ class GlobalMuteHandler {
                     "command.globalmute.already",
                     sender,
                     params = mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                     )
                 )
             )
@@ -142,17 +144,17 @@ class GlobalMuteHandler {
      */
     fun playerChatEvent(e: AsyncChatEvent) {
         if (globalMute) {
-            if (e.player.hasPermission("yvtils.bypass.globalmute")) {
+            if (e.player.hasPermission(Permissions.BYPASS_GLOBAL_MUTE.permission.name)) {
                 return
             }
 
             e.isCancelled = true
             e.player.sendMessage(
                 LanguageHandler.getMessage(
-                    "globalmute.try_to_write",
+                    LangStrings.GLOBALMUTE_TRY_TO_WRITE,
                     e.player.uniqueId,
                     params = mapOf(
-                        "prefix" to Data.prefix,
+                        "prefix" to Core.prefix,
                     )
                 )
             )

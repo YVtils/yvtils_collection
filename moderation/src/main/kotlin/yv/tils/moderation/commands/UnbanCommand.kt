@@ -20,11 +20,11 @@ import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.greedyStringArgument
 import org.bukkit.OfflinePlayer
 import yv.tils.common.other.AsyncActionAnnounce
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.moderation.logic.UnbanLogic
-import yv.tils.utils.data.Data
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.modules.Core
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.CompletableFuture
 
@@ -39,7 +39,7 @@ class UnbanCommand {
                 CompletableFuture.supplyAsync {
                     val announceTask = AsyncActionAnnounce.announceSuggestion(info.sender)
 
-                    val bannedPlayers: MutableSet<OfflinePlayer> = Data.instance.server.bannedPlayers
+                    val bannedPlayers: MutableSet<OfflinePlayer> = Core.instance.server.bannedPlayers
                     val bannedPlayersNames: MutableList<String> = mutableListOf()
 
                     for (player in bannedPlayers) {
@@ -71,7 +71,7 @@ class UnbanCommand {
                         announceTask.cancel()
                         AsyncActionAnnounce.announcePlayerError(sender)
                         Logger.error("Failed to fetch player profiles for the command")
-                        Logger.debug("Error details", throwable, DEBUGLEVEL.DETAILED)
+                        Logger.debug("Error details", DEBUG_LEVEL.DETAILED, throwable)
                         null
                     }
                 }

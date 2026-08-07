@@ -5,84 +5,71 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.server.configs
 
-import yv.tils.config.files.YMLFileUtils
-import yv.tils.config.data.ConfigEntry
-import yv.tils.config.data.EntryType
+import yv.tils.configv2.files.ConfigFormat
+import yv.tils.configv2.files.ObjectMapperFileUtils
 import yv.tils.utils.logger.Logger
 
 class ConfigFile {
     companion object {
+        /** The single source of truth. */
+        var state: ServerConfigState = ServerConfigState()
+
+        /**
+         * Flattened `"a.b.c" -> value` view derived from [state], re-synced on every
+         * [loadConfig]/[registerStrings] call - kept around purely so the module's existing
+         * `ConfigFile.get("motd.enabled")`-style call sites keep working unchanged on top of
+         * the new nested data class.
+         */
         val config: MutableMap<String, Any> = mutableMapOf()
 
-        fun get(key: String): Any? {
-            return config[key]
+        fun get(key: String): Any? = config[key]
+
+        /**
+         * Updates a single known runtime-toggleable setting and persists it. Only
+         * `"maintenance.enabled"` is ever actually set at runtime today (see
+         * `MaintenanceHandler`) - unrecognized keys are logged and ignored rather than
+         * silently accepted, since (unlike the old generic `ConfigEntry` map) there's no
+         * arbitrary string-keyed backing store to fall back to anymore.
+         */
+        fun set(key: String, value: Any) {
+            when (key) {
+                "maintenance.enabled" -> state = state.copy(maintenance = state.maintenance.copy(enabled = value as Boolean))
+                else -> {
+                    Logger.debug("ConfigFile.set: unknown key '$key', ignoring")
+                    return
+                }
+            }
+
+            syncDerivedView()
+            ConfigFile().registerStrings()
         }
 
-        fun set(key: String, value: Any) {
-            config[key] = value
-            ConfigFile().registerStrings(config)
+        private fun syncDerivedView() {
+            config.clear()
+            config.putAll(ObjectMapperFileUtils.flatten(state, ConfigFormat.YAML))
         }
     }
 
     private val filePath = "/server/config.yml"
 
     fun loadConfig() {
-    val file = YMLFileUtils.loadYAMLFile(filePath)
-
-        for (key in file.content.getKeys(true)) {
-            val value = file.content.get(key)
-
-            Logger.debug("Loading config key: $key -> $value")
-            config[key] = value as Any
-        }
+        state = ObjectMapperFileUtils.load(filePath, ServerConfigState(), format = ConfigFormat.YAML)
+        registerStrings()
+        syncDerivedView()
     }
 
-    fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
-        val entries = mutableListOf<ConfigEntry>()
+    fun registerStrings() {
+        ObjectMapperFileUtils.save(filePath, state, format = ConfigFormat.YAML)
+    }
 
-        if (content.isEmpty()) {
-            entries.add(ConfigEntry("documentation", EntryType.STRING, null, "https://docs.yvtils.net/server/config.yml", "Documentation URL"))
-            entries.add(ConfigEntry("motd.enabled", EntryType.BOOLEAN, null, true, "Enable MOTD"))
-            entries.add(ConfigEntry("info.maxPlayers", EntryType.INT, null, 0, "Max players override"))
-            entries.add(ConfigEntry("motd.entries.top", EntryType.LIST, null, listOf(
-                "Welcome to the server!",
-                "This server is running YVtils v1.0.0",
-                "Server version: <version>",
-                "Online players: <onlinePlayers>",
-                "Max players: <maxPlayers>",
-                "Date: <date>",
-            ), "Top MOTD entries"))
-            entries.add(ConfigEntry("motd.entries.bottom", EntryType.LIST, null, listOf(
-                "Have fun!",
-                "Enjoy your stay!",
-                "See you next time!",
-            ), "Bottom MOTD entries"))
-            entries.add(ConfigEntry("hoverMOTD.enabled", EntryType.BOOLEAN, null, true, "Enable hover MOTD"))
-            entries.add(ConfigEntry("hoverMOTD.entries", EntryType.LIST, null, listOf("a","b","c","d","e","f","g","h","i","j"), "Hover entries"))
-            entries.add(ConfigEntry("maintenance.enabled", EntryType.BOOLEAN, null, false, "Maintenance mode"))
-        } else {
-            for ((k, v) in content) {
-                val type = when (v) {
-                    is Boolean -> EntryType.BOOLEAN
-                    is Int -> EntryType.INT
-                    is Double -> EntryType.DOUBLE
-                    is List<*> -> EntryType.LIST
-                    is Map<*, *> -> EntryType.MAP
-                    is String -> EntryType.STRING
-                    else -> EntryType.UNKNOWN
-                }
-                entries.add(ConfigEntry(k, type, null, v, null))
-            }
-        }
-
-        val ymlFile = YMLFileUtils.makeYAMLFileFromEntries(filePath, entries)
-        yv.tils.config.files.FileUtils.saveFile(filePath, ymlFile)
+    /** Called by [yv.tils.gui.logic.DataClassConfigGui]'s saver after an in-game edit. */
+    fun applyState(newState: ServerConfigState) {
+        state = newState
+        syncDerivedView()
+        registerStrings()
     }
 }

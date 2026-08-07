@@ -17,7 +17,7 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.MemberCachePolicy
 import org.apache.logging.log4j.LogManager
-import yv.tils.config.language.LanguageHandler
+import yv.tils.configv2.language.LanguageHandler
 import yv.tils.discord.DiscordYVtils
 import yv.tils.discord.actions.buttons.JDAButtonsListener
 import yv.tils.discord.actions.commands.JDACommandsListener

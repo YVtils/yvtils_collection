@@ -18,11 +18,12 @@ import yv.tils.message.commands.ReplyCommand
 import yv.tils.message.language.RegisterStrings
 import yv.tils.message.listeners.PlayerQuit
 import yv.tils.message.logic.MessageHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 
-class MessageYVtils : Data.YVtilsModule {
+class MessageYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "message",
             "1.0.0",
             "Message module for YVtils",
@@ -36,7 +37,7 @@ class MessageYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
 
         unregisterCommands()
 
@@ -65,7 +66,7 @@ class MessageYVtils : Data.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(PlayerQuit(), plugin)

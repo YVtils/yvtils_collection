@@ -14,8 +14,8 @@ package yv.tils.essentials.commands.handler
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.configv2.language.LanguageHandler
+import yv.tils.utils.modules.Core
 
 class PingHandler {
     fun ping(player: Player, sender: CommandSender = player) {
@@ -26,7 +26,7 @@ class PingHandler {
                 LanguageHandler.getMessage(
                     "command.ping.other",
                     sender,
-                    params = mapOf("prefix" to Data.prefix, "player" to player.name, "ping" to ping.toString())
+                    params = mapOf("prefix" to Core.prefix, "player" to player.name, "ping" to ping.toString())
                 )
             )
         } else {
@@ -34,7 +34,7 @@ class PingHandler {
                 LanguageHandler.getMessage(
                     "command.ping.self",
                     sender,
-                    params = mapOf("prefix" to Data.prefix, "ping" to ping.toString())
+                    params = mapOf("prefix" to Core.prefix, "ping" to ping.toString())
                 )
             )
         }

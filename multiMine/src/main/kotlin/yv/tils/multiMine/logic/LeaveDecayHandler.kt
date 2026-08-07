@@ -22,7 +22,7 @@ import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.utils.BlockUtils
 import yv.tils.multiMine.utils.BlockUtils.Companion.processFinishedMap
 import yv.tils.multiMine.utils.ToolUtils.Companion.toolBroke
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.util.*
 import java.util.function.Consumer
@@ -135,7 +135,7 @@ class LeaveDecayHandler {
         var idleScans = 0
         val maxIdleScans = 3 // allow a few rescans to let server update leaf distances after log breaks
 
-        Bukkit.getScheduler().runTaskTimer(Data.instance, Consumer { task ->
+        Bukkit.getScheduler().runTaskTimer(Core.instance, Consumer { task ->
             if (queue.isEmpty()) {
                 val added = seedScan()
                 if (added == 0) {
