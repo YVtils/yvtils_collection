@@ -5,80 +5,48 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.regions.configs
 
-import yv.tils.configv2.data.ConfigEntry
-import yv.tils.configv2.data.ConfigEntryFileUtils
-import yv.tils.configv2.data.EntryType
 import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ConfigurateFileUtils
-import yv.tils.regions.data.*
-import yv.tils.utils.logger.Logger
+import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.regions.data.Flag
+import yv.tils.regions.data.FlagType
 
 class ConfigFile {
     companion object {
+        /** The single source of truth. */
+        var state: RegionsConfigState = RegionsConfigState()
+
+        /**
+         * Flattened `"a.b.c" -> value` view derived from [state], re-synced on every
+         * [loadConfig]/[registerStrings] call - kept around purely so the module's existing
+         * `ConfigFile.getValueAsString("settings.region.max.size")`-style call sites keep
+         * working unchanged on top of the new nested data class.
+         */
         val config: MutableMap<String, Any> = mutableMapOf()
 
-        fun getValue(key: String): Any? {
-            return config[key]
-        }
+        fun getValue(key: String): Any? = config[key]
+        fun getValueAsString(key: String): String? = config[key]?.toString()
+        fun getValueAsInt(key: String): Int? = config[key]?.toString()?.toIntOrNull()
+        fun getValueAsBoolean(key: String): Boolean? = config[key]?.toString()?.toBoolean()
 
-        fun getValueAsString(key: String): String? {
-            return config[key]?.toString()
-        }
-
-        fun getValueAsInt(key: String): Int? {
-            return config[key]?.toString()?.toIntOrNull()
-        }
-
-        fun getValueAsBoolean(key: String): Boolean? {
-            return config[key]?.toString()?.toBoolean()
-        }
-
+        /**
+         * Effective per-flag value (global boolean, role-based minimum role name, or the
+         * flag's own default if it isn't configured at all), checked in the same
+         * global -> role-based -> locked-global -> locked-role-based -> default priority
+         * order the original dotted-key lookup used.
+         */
         fun getFlags(): MutableMap<Flag, Any> {
             val flags: MutableMap<Flag, Any> = mutableMapOf()
 
-            val globalFlagsBaseKey = "flags.global"
-            val roleFlagsBaseKey = "flags.role_based"
-            val lockedGlobalFlagsKey = "flags.locked.global"
-            val lockedRoleFlagsKey = "flags.locked.role_based"
-
             for (flag in Flag.entries) {
-                // Try getting the flag from global flags
-                val globalFlag = config["$globalFlagsBaseKey.${flag.name}"] as? Boolean
-                if (globalFlag != null) {
-                    flags[flag] = globalFlag
-                    continue
-                }
-
-                // Try getting the flag from role-based flags
-                val roleFlag = config["$roleFlagsBaseKey.${flag.name}"] as? String
-                if (roleFlag != null) {
-                    flags[flag] = roleFlag
-                    continue
-                }
-
-                // Try getting the flag from locked global flags
-                val lockedGlobalFlag = config["$lockedGlobalFlagsKey.${flag.name}"] as? Boolean
-                if (lockedGlobalFlag != null) {
-                    flags[flag] = lockedGlobalFlag
-                    continue
-                }
-
-                // Try getting the flag from locked role-based flags
-                val lockedRoleFlag = config["$lockedRoleFlagsKey.${flag.name}"] as? String
-                if (lockedRoleFlag != null) {
-                    flags[flag] = lockedRoleFlag
-                    continue
-                }
-
-                // If the flag is not found in any of the above, set it to default and locked
-                flags[flag] = flag.defaultValue
+                flags[flag] = state.flags.global[flag]
+                    ?: state.flags.role_based[flag]
+                    ?: state.flags.locked.global[flag]
+                    ?: state.flags.locked.role_based[flag]
+                    ?: flag.defaultValue
             }
 
             return flags
@@ -87,104 +55,41 @@ class ConfigFile {
         fun getFlagTypes(): MutableMap<Flag, FlagType> {
             val flags: MutableMap<Flag, FlagType> = mutableMapOf()
 
-            val globalFlagsBaseKey = "flags.global"
-            val roleFlagsBaseKey = "flags.role_based"
-            val lockedGlobalFlagsKey = "flags.locked.global"
-            val lockedRoleFlagsKey = "flags.locked.role_based"
-
             for (flag in Flag.entries) {
-                // Try getting the flag from global flags
-                val globalFlag = config["$globalFlagsBaseKey.${flag.name}"] as? Boolean
-                if (globalFlag != null) {
-                    flags[flag] = FlagType.GLOBAL
-                    continue
+                flags[flag] = when {
+                    state.flags.global.containsKey(flag) -> FlagType.GLOBAL
+                    state.flags.role_based.containsKey(flag) -> FlagType.ROLE_BASED
+                    state.flags.locked.global.containsKey(flag) -> FlagType.LOCKED_GLOBAL
+                    state.flags.locked.role_based.containsKey(flag) -> FlagType.LOCKED_ROLE_BASED
+                    else -> flag.defaultGroup
                 }
-
-                // Try getting the flag from role-based flags
-                val roleFlag = config["$roleFlagsBaseKey.${flag.name}"] as? String
-                if (roleFlag != null) {
-                    flags[flag] = FlagType.ROLE_BASED
-                    continue
-                }
-
-                // Try getting the flag from locked global flags
-                val lockedGlobalFlag = config["$lockedGlobalFlagsKey.${flag.name}"] as? Boolean
-                if (lockedGlobalFlag != null) {
-                    flags[flag] = FlagType.LOCKED_GLOBAL
-                    continue
-                }
-
-                // Try getting the flag from locked role-based flags
-                val lockedRoleFlag = config["$lockedRoleFlagsKey.${flag.name}"] as? String
-                if (lockedRoleFlag != null) {
-                    flags[flag] = FlagType.LOCKED_ROLE_BASED
-                    continue
-                }
-
-                // If the flag is not found in any of the above, set it to default and locked
-                flags[flag] = flag.defaultGroup
             }
 
             return flags
+        }
 
+        private fun syncDerivedView() {
+            config.clear()
+            config.putAll(ObjectMapperFileUtils.flatten(state, ConfigFormat.YAML))
         }
     }
 
     private val filePath = "/regions/config.yml"
 
     fun loadConfig() {
-        val file = ConfigurateFileUtils.load(filePath, ConfigFormat.YAML)
-        val flattened = ConfigurateFileUtils.flattenToMap(file.node)
-
-        for ((key, value) in flattened) {
-            Logger.debug("Loading config key: $key -> $value")
-            config[key] = value
-        }
+        state = ObjectMapperFileUtils.load(filePath, RegionsConfigState(), format = ConfigFormat.YAML)
+        registerStrings()
+        syncDerivedView()
     }
 
-    fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
-        val entries = mutableListOf<ConfigEntry>()
-
-        if (content.isEmpty()) {
-            entries.add(ConfigEntry("documentation", EntryType.STRING, null, "https://docs.yvtils.net/modules/regions/config.yml", "Documentation URL"))
-        } else {
-            for ((k, v) in content) {
-                val type = when (v) {
-                    is Boolean -> EntryType.BOOLEAN
-                    is Int -> EntryType.INT
-                    is Double -> EntryType.DOUBLE
-                    is List<*> -> EntryType.LIST
-                    is Map<*, *> -> EntryType.MAP
-                    is String -> EntryType.STRING
-                    else -> EntryType.UNKNOWN
-                }
-                entries.add(ConfigEntry(k, type, null, v, null))
-            }
-        }
-
-        // flags and settings defaults
-        entries.add(ConfigEntry("settings.player.max.own", EntryType.INT, null, 5, "Max owned regions per player"))
-        entries.add(ConfigEntry("settings.player.max.member", EntryType.INT, null, -1, "Max member regions per player"))
-        entries.add(ConfigEntry("settings.region.max.size", EntryType.INT, null, 1000, "Max region size"))
-        entries.add(ConfigEntry("settings.region.min.size", EntryType.INT, null, 1, "Min region size"))
-        entries.add(ConfigEntry("settings.region.max.members", EntryType.INT, null, -1, "Max members per region"))
-
-        entries.add(ConfigEntry("flags.locked.global", EntryType.MAP, null, mutableMapOf<String, Boolean>(), "Locked global flags"))
-        entries.add(ConfigEntry("flags.locked.role_based", EntryType.MAP, null, mutableMapOf<String, String>(), "Locked role-based flags"))
-
-        entries.add(ConfigEntry("flags.global.${Flag.PVP.name}", EntryType.BOOLEAN, null, Flag.PVP.defaultValue, "Global PVP flag"))
-
-        entries.add(ConfigEntry("flags.role_based.${Flag.PLACE.name}", EntryType.STRING, null, parseIDToName(Flag.PLACE.defaultValue as Int), "Role-based PLACE flag"))
-        entries.add(ConfigEntry("flags.role_based.${Flag.DESTROY.name}", EntryType.STRING, null, parseIDToName(Flag.DESTROY.defaultValue as Int), "Role-based DESTROY flag"))
-        entries.add(ConfigEntry("flags.role_based.${Flag.CONTAINER.name}", EntryType.STRING, null, parseIDToName(Flag.CONTAINER.defaultValue as Int), "Role-based CONTAINER flag"))
-        entries.add(ConfigEntry("flags.role_based.${Flag.INTERACT.name}", EntryType.STRING, null, parseIDToName(Flag.INTERACT.defaultValue as Int), "Role-based INTERACT flag"))
-        entries.add(ConfigEntry("flags.role_based.${Flag.TELEPORT.name}", EntryType.STRING, null, parseIDToName(Flag.TELEPORT.defaultValue as Int), "Role-based TELEPORT flag"))
-
-        val ymlFile = ConfigEntryFileUtils.buildConfigFile(filePath, entries, ConfigFormat.YAML)
-        ConfigurateFileUtils.save(ymlFile)
+    fun registerStrings() {
+        ObjectMapperFileUtils.save(filePath, state, format = ConfigFormat.YAML)
     }
 
-    private fun parseIDToName(id: Int): String {
-        return RegionRoles.fromID(id).name
+    /** Called by [yv.tils.gui.logic.DataClassConfigGui]'s saver after an in-game edit. */
+    fun applyState(newState: RegionsConfigState) {
+        state = newState
+        syncDerivedView()
+        registerStrings()
     }
 }

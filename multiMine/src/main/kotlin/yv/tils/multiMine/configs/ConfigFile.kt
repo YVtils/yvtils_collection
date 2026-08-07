@@ -5,42 +5,32 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.multiMine.configs
 
 import org.bukkit.Material
-import org.bukkit.Tag
-import yv.tils.configv2.data.ConfigEntry
-import yv.tils.configv2.data.ConfigEntryFileUtils
-import yv.tils.configv2.data.EntryType
-import yv.tils.configv2.files.ConfigFile as ConfigurateConfigFile
 import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.ObjectMapperFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
-// TODO: Think about splitting block list and config file into separate files
 class ConfigFile {
     companion object {
         private const val FILE_PATH = "/multiMine/config.yml"
 
+        /** The single source of truth - edited directly by [yv.tils.gui.logic.DataClassConfigGui]. */
+        var state: MultiMineConfigState = MultiMineConfigState()
+
+        /**
+         * Flattened, read-only-by-convention views derived from [state], kept around purely
+         * for the rest of the module's existing `ConfigFile.config["key"]`/`ConfigFile.blockList`
+         * call sites - re-synced on every [loadConfig]/[registerStrings]/[updateBlockList] call.
+         */
         val config: MutableMap<String, Any> = mutableMapOf()
         var blockList: MutableList<Material> = mutableListOf()
-        val configNew: MutableList<ConfigEntry> = mutableListOf()
-        private val configIndex: MutableMap<String, ConfigEntry> = mutableMapOf()
 
-        fun getConfigEntry(key: String): ConfigEntry? = configIndex[key]
-
-        fun get(key: String): Any? {
-            val e = getConfigEntry(key)
-            return e?.value ?: e?.defaultValue ?: config[key]
-        }
-
+        fun get(key: String): Any? = config[key]
         fun getString(key: String): String? = get(key)?.toString()
         fun getInt(key: String): Int? = (get(key) as? Number)?.toInt()
         fun getBoolean(key: String): Boolean? = when (val v = get(key)) {
@@ -48,204 +38,57 @@ class ConfigFile {
             is String -> v.toBoolean()
             else -> null
         }
-    }
 
-    fun updateBlockList(blocks: MutableList<Material>) {
-        blockList = blocks
+        private fun syncDerivedViews() {
+            config.clear()
+            config["documentation"] = state.documentation
+            config["defaultState"] = state.defaultState
+            config["animationTime"] = state.animationTime
+            config["cooldownTime"] = state.cooldownTime
+            config["breakLimit"] = state.breakLimit
+            config["leaveDecay"] = state.leaveDecay
+            config["matchBlockTypeOnly"] = state.matchBlockTypeOnly
+            config["canToolsBreak"] = state.canToolsBreak
+            config["blocks"] = state.blocks
 
-        config["blocks"] = blocks.map { it.name }
-        // keep ConfigEntry list in sync
-        val existing = getConfigEntry("blocks")
-        if (existing != null) {
-            existing.value = blocks.map { it.name }
-        } else {
-            val entry = ConfigEntry("blocks", EntryType.LIST, blocks.map { it.name }, createTemplateBlocks(), "Block list")
-            configNew.add(entry)
-            configIndex[entry.key] = entry
+            blockList = state.blocks.mapNotNull { name ->
+                Material.getMaterial(name) ?: run {
+                    Logger.error("Trying to load a block that does not exist: $name")
+                    null
+                }
+            }.toMutableList()
         }
-
-        CoroutineHandler.launchTask(
-            suspend { registerStrings(config) },
-            null,
-            isOnce = true,
-        )
     }
 
     fun loadConfig() {
-        val file = ConfigurateFileUtils.load(FILE_PATH, ConfigFormat.YAML)
-
-        // populate legacy config map
-        val flattened = ConfigurateFileUtils.flattenToMap(file.node)
-        config.putAll(flattened)
-
-        // ensure configNew contains base entries and then load values into them
-        ensureBaseEntries()
-        // load values into entries and populate index
-        ConfigEntryFileUtils.loadFromNode(file.node, configNew)
-        for (entry in configNew) {
-            configIndex[entry.key] = entry
-            val vv = entry.value ?: entry.defaultValue
-            if (vv != null) config[entry.key] = vv
-        }
-
-        loadBlockList(file)
+        // Reads whatever's on disk, falling back to each field's own Kotlin default for
+        // anything missing (e.g. a field added to MultiMineConfigState after config.yml was
+        // first created). Re-persisting straight after is safe (not destructive) precisely
+        // because `state` already reflects disk-plus-new-defaults at this point.
+        state = ObjectMapperFileUtils.load(FILE_PATH, MultiMineConfigState(), format = ConfigFormat.YAML)
+        registerStrings()
+        syncDerivedViews()
     }
 
-    private fun loadBlockList(file: ConfigurateConfigFile) {
-        val blocks = file.node.node("blocks").getList(String::class.java) ?: emptyList()
-        blocks.forEach {
-            try {
-                blockList.add(Material.getMaterial(it)!!)
-            } catch (e: NullPointerException) {
-                Logger.error("Trying to load a block that does not exist: $it")
-                Logger.debug("Error details: ${e.message}", DEBUG_LEVEL.EXTRA)
-            }
-        }
+    fun registerStrings() {
+        ObjectMapperFileUtils.save(FILE_PATH, state, format = ConfigFormat.YAML)
     }
 
-    fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
-        Logger.debug("ConfigFile.registerStrings called with ${content.size} entries", DEBUG_LEVEL.DETAILED)
-
-        // Always start from base default entries
-        ensureBaseEntries()
-
-        // If a map is provided, set entry.value from it
-        if (content.isNotEmpty()) {
-            for (entry in configNew) {
-                if (content.containsKey(entry.key)) {
-                    Logger.debug("Updating entry ${entry.key} from ${entry.value} to ${content[entry.key]}",DEBUG_LEVEL.VERBOSE)
-                    entry.value = content[entry.key]
-                }
-            }
-        }
-
-        // sync index and legacy map
-        syncEntriesToMap()
-
-        Logger.debug("ConfigFile.registerStrings: about to create YAML file with ${configNew.size} entries", DEBUG_LEVEL.DETAILED)
-        val ymlFile = ConfigEntryFileUtils.buildConfigFile(FILE_PATH, configNew, ConfigFormat.YAML)
-        Logger.debug("ConfigFile.registerStrings: about to update file on disk", DEBUG_LEVEL.DETAILED)
-        // Use update() with overwriteExisting = true so GUI edits overwrite existing keys
-        ConfigurateFileUtils.update(ymlFile, overwriteExisting = true)
-        Logger.debug("ConfigFile.registerStrings: file update complete", DEBUG_LEVEL.DETAILED)
+    /** Called by [yv.tils.gui.logic.DataClassConfigGui]'s saver after an in-game edit. */
+    fun applyState(newState: MultiMineConfigState) {
+        state = newState
+        syncDerivedViews()
+        registerStrings()
     }
 
-    private fun syncEntriesToMap() {
-        configIndex.clear()
-        for (entry in configNew) {
-            configIndex[entry.key] = entry
-            val vv = entry.value ?: entry.defaultValue
-            if (vv != null) config[entry.key] = vv
-        }
-    }
+    fun updateBlockList(blocks: MutableList<Material>) {
+        state = state.copy(blocks = blocks.map { it.name })
+        syncDerivedViews()
 
-    private fun ensureBaseEntries() {
-        if (configNew.isNotEmpty()) return
-
-        configNew.add(ConfigEntry(
-            "documentation",
-            EntryType.STRING,
+        CoroutineHandler.launchTask(
+            suspend { registerStrings() },
             null,
-            "https://docs.yvtils.net/multiMine/config.yml",
-            "Documentation URL"
-        ))
-        configNew.add(ConfigEntry(
-            "defaultState",
-            EntryType.BOOLEAN,
-            null,
-            true,
-            "Set the default state of multiMine for new players",
-            dynamicInvItem = { if (it.value as? Boolean == true) Material.LIME_DYE else Material.RED_DYE }
-        ))
-        configNew.add(ConfigEntry(
-            "animationTime",
-            EntryType.INT,
-            null,
-            3,
-            "Set the animation time in ticks",
-            Material.CLOCK
-        ))
-        configNew.add(ConfigEntry(
-            "cooldownTime",
-            EntryType.INT,
-            null,
-            3,
-            "Set the cooldown time in ticks",
-            Material.SNOWBALL
-        ))
-        configNew.add(ConfigEntry(
-            "breakLimit",
-            EntryType.INT,
-            null,
-            250,
-            "Set the maximum number of blocks that can be broken in one go",
-            Material.DIAMOND_PICKAXE
-        ))
-        configNew.add(ConfigEntry(
-            "leaveDecay",
-            EntryType.BOOLEAN,
-            null,
-            true,
-            "Set whether leaves should decay when trees are cut",
-            dynamicInvItem = { if (it.value as? Boolean == true) Material.OAK_LEAVES else Material.NETHER_WART_BLOCK }
-        ))
-        configNew.add(ConfigEntry(
-            "matchBlockTypeOnly",
-            EntryType.BOOLEAN,
-            null,
-            true,
-            "Set whether only blocks of the same type should be broken",
-            dynamicInvItem = { if (it.value as? Boolean == true) Material.HOPPER else Material.RED_DYE }
-        ))
-        configNew.add(ConfigEntry(
-            "canToolsBreak",
-            EntryType.BOOLEAN,
-            null,
-            true,
-            "Set whether the used tool can break or not when using multiMine",
-            dynamicInvItem = { if (it.value as? Boolean == true) Material.ANVIL else Material.RED_DYE }
-        ))
-        configNew.add(ConfigEntry(
-            "blocks",
-            EntryType.LIST,
-            null,
-            createTemplateBlocks(),
-            "Modify the list of blocks that can be broken using multiMine",
-            Material.BUNDLE
-        ))
-
-        // populate index for fast lookups
-        for (entry in configNew) configIndex[entry.key] = entry
-    }
-
-    // TODO: Test if list gets updated with version updates
-    private fun createTemplateBlocks(): List<String> {
-        val blocks = Tag.LOGS.values.toMutableList()
-
-        val ores = listOf(
-            Material.COAL_ORE,
-            Material.IRON_ORE,
-            Material.GOLD_ORE,
-            Material.DIAMOND_ORE,
-            Material.EMERALD_ORE,
-            Material.LAPIS_ORE,
-            Material.REDSTONE_ORE,
-            Material.COPPER_ORE,
-            Material.DEEPSLATE_COAL_ORE,
-            Material.DEEPSLATE_IRON_ORE,
-            Material.DEEPSLATE_GOLD_ORE,
-            Material.DEEPSLATE_DIAMOND_ORE,
-            Material.DEEPSLATE_EMERALD_ORE,
-            Material.DEEPSLATE_LAPIS_ORE,
-            Material.DEEPSLATE_REDSTONE_ORE,
-            Material.DEEPSLATE_COPPER_ORE,
-            Material.NETHER_QUARTZ_ORE,
-            Material.NETHER_GOLD_ORE,
-            Material.ANCIENT_DEBRIS,
-            Material.GLOWSTONE,
+            isOnce = true,
         )
-        blocks.addAll(ores)
-
-        return blocks.map { it.name }
     }
 }

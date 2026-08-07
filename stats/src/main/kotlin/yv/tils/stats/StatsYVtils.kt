@@ -18,6 +18,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.entity.Player
 import yv.tils.stats.configs.ConfigFile
+import yv.tils.stats.configs.ManageGUI
 import yv.tils.stats.data.StatType
 import yv.tils.stats.language.RegisterStrings
 import yv.tils.stats.logic.StatsPusher
@@ -56,7 +57,8 @@ class StatsYVtils : Module.YVtilsModule {
             "1.0.0-beta.1",
             "Stats module for YVtils",
             "YVtils",
-            "https://docs.yvtils.net/stats/"
+            "https://docs.yvtils.net/stats/",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
 
         private var pushTaskId: String? = null
@@ -273,7 +275,6 @@ class StatsYVtils : Module.YVtilsModule {
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
-        ConfigFile().registerStrings()
     }
 
     override fun enablePlugin() {

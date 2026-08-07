@@ -232,6 +232,22 @@ class RegisterStrings {
                 FileTypes.DE to "<red>Klicke zum Deaktivieren"
             )
         )
+
+        registerNewString(
+            LangStrings.YVTILS_CONFIG_GUI_TITLE,
+            mapOf(
+                FileTypes.EN to "Configs",
+                FileTypes.DE to "Konfigurationen"
+            )
+        )
+
+        registerNewString(
+            LangStrings.YVTILS_CONFIG_GUI_LORE_OPEN,
+            mapOf(
+                FileTypes.EN to "<gray>Left-Click: <white>Open config",
+                FileTypes.DE to "<gray>Linksklick: <white>Konfiguration öffnen"
+            )
+        )
     }
 
     private fun registerNewString(langKey: LangStrings, translations: Map<FileTypes, String>) {
@@ -273,4 +289,6 @@ enum class LangStrings(val key: String) {
     YVTILS_MODULES_LORE_TOGGLE("yvtils.modules.lore.toggle"),
     YVTILS_MODULES_TOGGLE_ENABLE("yvtils.modules.toggle.enable"),
     YVTILS_MODULES_TOGGLE_DISABLE("yvtils.modules.toggle.disable"),
+    YVTILS_CONFIG_GUI_TITLE("yvtils.config.gui.title"),
+    YVTILS_CONFIG_GUI_LORE_OPEN("yvtils.config.gui.lore.open"),
 }

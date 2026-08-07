@@ -13,6 +13,7 @@
 package yv.tils.server
 
 import yv.tils.server.configs.ConfigFile
+import yv.tils.server.configs.ManageGUI
 import yv.tils.server.language.RegisterStrings
 import yv.tils.server.listeners.*
 import yv.tils.server.maintenance.MaintenanceCMD
@@ -27,13 +28,13 @@ class ServerYVtils : Module.YVtilsModule {
             "1.0.0",
             "Server module for YVtils",
             "YVtils",
-            "https://docs.yvtils.net/server/"
+            "https://docs.yvtils.net/server/",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
-        ConfigFile().registerStrings()
     }
 
     override fun enablePlugin() {

@@ -22,20 +22,25 @@ dependencies {
     compileOnly(project(":common"))
     compileOnly(project(":config-v2"))
     compileOnly(project(":utils"))
+    // gui-v2 (and its InvUI dependency) is merged into the same embedded runtime bundle
+    // below for the same reason - see core/build.gradle.kts's comment on this same line.
+    compileOnly(project(":gui-v2"))
 }
 
 val moduleVersion = project.version.toString()
 
-// Embeds `common`'s shadowJar output (utils+config-v2+common+CommandAPI+
-// coroutines+serialization, all bundled together) as a plugin resource, so
+// Embeds `common`'s + `gui-v2`'s shadowJar outputs (utils+config-v2+common+CommandAPI+
+// coroutines+serialization+InvUI, all merged together) as a plugin resource, so
 // DynamicModuleLoader can extract it and add it via JarLibrary at runtime.
 val embeddedResourcesDir = layout.buildDirectory.dir("generated/embeddedResources")
 
-val embedRuntime by tasks.registering(Copy::class) {
-    dependsOn(":common:shadowJar")
-    from(project(":common").tasks.named("shadowJar"))
-    into(embeddedResourcesDir.map { it.dir("embedded") })
-    rename { "yvtils-runtime.jar" }
+val embedRuntime by tasks.registering(Jar::class) {
+    dependsOn(":common:shadowJar", ":gui-v2:shadowJar")
+    from(zipTree(project(":common").tasks.named("shadowJar", Jar::class).flatMap { it.archiveFile }))
+    from(zipTree(project(":gui-v2").tasks.named("shadowJar", Jar::class).flatMap { it.archiveFile }))
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    destinationDirectory.set(embeddedResourcesDir.map { it.dir("embedded") })
+    archiveFileName.set("yvtils-runtime.jar")
 }
 
 sourceSets {

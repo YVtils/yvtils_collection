@@ -77,22 +77,6 @@ object YVtilsModulesGui {
     /** Module-columns visible on screen at once. */
     private const val COLUMNS = 7
 
-    /**
-     * Identity icons per module, shown on the info item instead of a generic
-     * material. Modules without a mapping fall back to [fallbackMaterial].
-     */
-    private val MODULE_ICONS: Map<String, Heads> = mapOf(
-        "discord" to Heads.DISCORD_LOGO,
-        "multiMine" to Heads.PICKAXE,
-        "essentials" to Heads.TOOLBOX,
-        "sit" to Heads.OAK_STOOL,
-        "status" to Heads.HEART_RED,
-        "message" to Heads.ENVELOPE,
-        "moderation" to Heads.SHIELD,
-        "stats" to Heads.CHART,
-        "server" to Heads.SERVER_RACK,
-    )
-
     fun open(player: Player) {
         InvUIBootstrap.ensure()
 
@@ -240,24 +224,15 @@ object YVtilsModulesGui {
         }
 
         val displayName = "<${Colors.MAIN.color}>$name"
-        val head = MODULE_ICONS[name]
+        val head = ModuleIcons.ICONS[name]
 
         val builder = if (head != null) {
             ItemBuilder(HeadUtils.createCustomHead(head, displayName))
         } else {
-            ItemBuilder(fallbackMaterial(name)).setName(displayName)
+            ItemBuilder(ModuleIcons.fallbackMaterial(name)).setName(displayName)
         }
 
         return builder.addLoreLines(*loreLines.toTypedArray())
-    }
-
-    /**
-     * Material used for the info item when [MODULE_ICONS] has no dedicated
-     * identity head for a module.
-     */
-    private fun fallbackMaterial(name: String): Material = when (name) {
-        "regions" -> Material.FILLED_MAP
-        else -> Material.PAPER
     }
 
     // ---------------------------------------------------------------------

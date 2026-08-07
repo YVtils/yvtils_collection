@@ -21,6 +21,7 @@ import yv.tils.multiMine.data.PermissionsData
 import yv.tils.multiMine.language.RegisterStrings
 import yv.tils.multiMine.listeners.BlockBreak
 import yv.tils.multiMine.listeners.PlayerJoin
+import yv.tils.multiMine.logic.ManageGUI
 import yv.tils.multiMine.utils.CooldownUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.modules.Core
@@ -33,14 +34,13 @@ class MultiMineYVtils : Module.YVtilsModule {
             "2.0.0",
             "MultiMine module for YVtils",
             "YVtils",
-            "https://docs.yvtils.net/multiMine/"
+            "https://docs.yvtils.net/multiMine/",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
-        ConfigFile().registerStrings()
-        SaveFile().registerStrings()
     }
 
     override fun enablePlugin() {

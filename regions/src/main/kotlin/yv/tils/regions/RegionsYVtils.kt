@@ -28,15 +28,13 @@ class RegionsYVtils : Module.YVtilsModule {
             "1.0.0-beta.2",
             "Regions module for YVtils",
             "YVtils",
-            "https://docs.yvtils.net/regions/"
+            "https://docs.yvtils.net/regions/",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
-        ConfigFile().registerStrings()
-        PlayerSaveFile().registerStrings()
-        RegionSaveFile().registerStrings()
     }
 
     override fun enablePlugin() {

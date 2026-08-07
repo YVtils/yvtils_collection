@@ -26,4 +26,10 @@ dependencies {
     api("org.spongepowered:configurate-core:4.2.0")
     api("org.spongepowered:configurate-yaml:4.2.0")
     api("org.spongepowered:configurate-gson:4.2.0")
+    // Adds `dataClassFieldDiscoverer()` (org.spongepowered.configurate.kotlin),
+    // letting Configurate's ObjectMapper read/write Kotlin `data class`
+    // instances directly - used by ObjectMapperFileUtils so state/save
+    // classes only need their field list updated in one place (the data
+    // class itself) instead of hand-written per-field node reads/writes.
+    api("org.spongepowered:configurate-extra-kotlin:4.2.0")
 }

@@ -12,7 +12,6 @@
 
 package yv.tils.regions.data
 
-import kotlinx.serialization.Serializable
 import org.bukkit.*
 import org.bukkit.entity.Player
 import yv.tils.regions.configs.PlayerSaveFile
@@ -241,7 +240,6 @@ class RegionManager {
         val regions = mutableMapOf<UUID, RegionData>()
     }
 
-    @Serializable
     data class RegionData (
         val id: String,
         val name: String,

@@ -20,4 +20,8 @@ dependencies {
     compileOnly(project(":utils"))
     compileOnly(project(":config-v2"))
     compileOnly(project(":common"))
+    // DataClassConfigGui reflects over data class properties/annotations directly (not just
+    // through config-v2's inlined ObjectMapperFileUtils calls), so it needs its own
+    // kotlin-reflect on the compile classpath.
+    compileOnly(kotlin("reflect"))
 }

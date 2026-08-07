@@ -32,14 +32,12 @@ class DiscordYVtils : Module.YVtilsModule {
             "Discord integration for YVtils",
             "YVtils",
             "",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
-        ConfigFile().registerStrings()
-        SaveFile().registerStrings()
-        StatsSyncSaveFile().registerStrings()
     }
 
     override fun enablePlugin() {

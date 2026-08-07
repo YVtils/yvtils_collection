@@ -15,6 +15,7 @@ package yv.tils.status
 import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.status.commands.StatusCommand
 import yv.tils.status.configs.ConfigFile
+import yv.tils.status.configs.ManageGUI
 import yv.tils.status.configs.SaveFile
 import yv.tils.status.language.RegisterStrings
 import yv.tils.status.listeners.PlayerJoin
@@ -29,14 +30,13 @@ class StatusYVtils : Module.YVtilsModule {
             "26.08.01",
             "Status module for YVtils",
             "YVtils",
-            "https://docs.yvtils.net/status/"
+            "https://docs.yvtils.net/status/",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
-        ConfigFile().registerStrings()
-        SaveFile().registerStrings()
     }
 
     override fun enablePlugin() {

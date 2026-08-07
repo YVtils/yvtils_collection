@@ -15,17 +15,14 @@ package yv.tils.essentials.commands.handler
 import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerPortalEvent
 import yv.tils.configv2.language.LanguageHandler
+import yv.tils.essentials.config.StatesFile
 import yv.tils.essentials.language.LangStrings
+import yv.tils.essentials.permissions.Permissions
 import yv.tils.utils.logger.Logger
 
 class DimensionHandler {
-    companion object {
-        val deniedDimensionTravel = mutableListOf<World>()
-    }
-
     fun setDimensionState(sender: CommandSender, world: World, state: Boolean?) {
         val currentState = getDimensionState(world)
 
@@ -45,31 +42,15 @@ class DimensionHandler {
             return
         }
 
-        if (state) {
-            if (deniedDimensionTravel.contains(world)) {
-                deniedDimensionTravel.remove(world)
+        StatesFile().updateDimensionState(world.name, state)
 
-                sender.sendMessage(
-                    LanguageHandler.getMessage(
-                        LangStrings.COMMAND_DIMENSION_ENABLED,
-                        sender,
-                        mapOf("dimension" to world.name)
-                    )
-                )
-            }
-        } else {
-            if (!deniedDimensionTravel.contains(world)) {
-                deniedDimensionTravel.add(world)
-
-                sender.sendMessage(
-                    LanguageHandler.getMessage(
-                        LangStrings.COMMAND_DIMENSION_DISABLED,
-                        sender,
-                        mapOf("dimension" to world.name)
-                    )
-                )
-            }
-        }
+        sender.sendMessage(
+            LanguageHandler.getMessage(
+                if (state) LangStrings.COMMAND_DIMENSION_ENABLED else LangStrings.COMMAND_DIMENSION_DISABLED,
+                sender,
+                mapOf("dimension" to world.name)
+            )
+        )
 
         if (sender is Player) {
             Logger.info("Player ${sender.name} set dimension travel for world ${world.name} to ${if (state) "enabled" else "disabled"}.")
@@ -106,6 +87,7 @@ class DimensionHandler {
         val toWorld = e.to.world ?: return
 
         if (fromWorld == toWorld) return
+        if (player.hasPermission(Permissions.BYPASS_DIMENSION_BLOCK.permission.name)) return
 
         if (!getDimensionState(toWorld)) {
             e.isCancelled = true
@@ -125,10 +107,6 @@ class DimensionHandler {
      * @return `true` if dimension travel is allowed for the specified world, `false` if it is denied
      */
     fun getDimensionState(world: World): Boolean {
-        return !deniedDimensionTravel.contains(world)
-    }
-
-    fun loadDimensionStates() {
-        // TODO: Implement logic
+        return StatesFile.state.dimensions[world.name] ?: true
     }
 }

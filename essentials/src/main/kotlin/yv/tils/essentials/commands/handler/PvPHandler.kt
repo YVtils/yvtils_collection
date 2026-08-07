@@ -15,10 +15,10 @@ package yv.tils.essentials.commands.handler
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.EntityDamageEvent
 import yv.tils.configv2.language.LanguageHandler
-import yv.tils.essentials.config.ConfigFile
+import yv.tils.essentials.config.StatesFile
 import yv.tils.essentials.language.LangStrings
+import yv.tils.essentials.permissions.Permissions
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.server.ServerUtils
 
@@ -67,10 +67,10 @@ class PvPHandler {
     }
 
     fun onDamage(e: EntityDamageByEntityEvent) {
-        // TODO: Add bypass perm
         if (getPvPState()) return
 
         if (e.entity is Player && e.damager is Player) {
+            if (e.damager.hasPermission(Permissions.BYPASS_PVP_DISABLED.permission.name)) return
             e.isCancelled = true
             e.damager.sendActionBar(
                 LanguageHandler.getMessage(
@@ -91,10 +91,10 @@ class PvPHandler {
     }
 
     fun loadPvPState() {
-        ConfigFile.getBoolean("pvpState")?.let { setPvPState(it) }
+        setPvPState(StatesFile.state.pvpState)
     }
 
     fun savePvPState(state: Boolean) {
-        ConfigFile.set("pvpState", state)
+        StatesFile().updatePvPState(state)
     }
 }

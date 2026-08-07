@@ -5,20 +5,13 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.stats.configs
 
-import yv.tils.configv2.data.ConfigEntry
-import yv.tils.configv2.data.ConfigEntryFileUtils
-import yv.tils.configv2.data.EntryType
 import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.configv2.files.ObjectMapperFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 
 /**
@@ -34,17 +27,18 @@ import yv.tils.utils.logger.Logger
  */
 class ConfigFile {
     companion object {
+        /** The single source of truth. */
+        var state: StatsConfigState = StatsConfigState()
+
+        /**
+         * Flattened `"a.b.c" -> value` view derived from [state], re-synced on every
+         * [loadConfig]/[registerStrings] call - kept around purely so the module's existing
+         * `ConfigFile.getString("metadata.server_name")`-style call sites keep working
+         * unchanged on top of the new nested data class.
+         */
         val config: MutableMap<String, Any> = mutableMapOf()
-        val configNew: MutableList<ConfigEntry> = mutableListOf()
-        private val configIndex: MutableMap<String, ConfigEntry> = mutableMapOf()
 
-        fun getConfigEntry(key: String): ConfigEntry? = configIndex[key]
-
-        fun get(key: String): Any? {
-            val e = getConfigEntry(key)
-            return e?.value ?: e?.defaultValue ?: config[key]
-        }
-
+        fun get(key: String): Any? = config[key]
         fun getString(key: String): String? = get(key)?.toString()
         fun getInt(key: String): Int? = (get(key) as? Number)?.toInt()
         fun getLong(key: String): Long? = (get(key) as? Number)?.toLong()
@@ -57,144 +51,51 @@ class ConfigFile {
         /**
          * Check if opt-in is required (user hasn't made a decision yet).
          */
-        fun needsOptInPrompt(): Boolean {
-            // If opt_in is null or missing, we need to prompt
-            val value = config["opt_in"]
-            return value == null
-        }
+        fun needsOptInPrompt(): Boolean = state.opt_in == null
 
         /**
          * Check if the user has opted in to stats collection.
          */
-        fun isOptedIn(): Boolean {
-            return getBoolean("opt_in") ?: false
-        }
+        fun isOptedIn(): Boolean = state.opt_in ?: false
 
         /**
          * Persist the opt-in decision.
          */
         fun markOptIn(decision: Boolean) {
-            config["opt_in"] = decision
-            val existing = getConfigEntry("opt_in")
-            if (existing != null) {
-                existing.value = decision
-            }
+            state = state.copy(opt_in = decision)
+            syncDerivedView()
 
             CoroutineHandler.launchTask(
-                suspend { ConfigFile().registerStrings(config) },
+                suspend { ConfigFile().registerStrings() },
                 null,
                 isOnce = true,
             )
 
             Logger.info("[Stats] Opt-in decision recorded: $decision")
         }
+
+        private fun syncDerivedView() {
+            config.clear()
+            config.putAll(ObjectMapperFileUtils.flatten(state, ConfigFormat.YAML))
+        }
     }
+
+    private val filePath = "/stats/config.yml"
 
     fun loadConfig() {
-        val file = ConfigurateFileUtils.load("/stats/config.yml", ConfigFormat.YAML)
-
-        // Populate legacy config map
-        val flattened = ConfigurateFileUtils.flattenToMap(file.node)
-        config.putAll(flattened)
-
-        // Ensure configNew contains base entries and then load values into them
-        ensureBaseEntries()
-
-        // Load values into entries and populate index
-        ConfigEntryFileUtils.loadFromNode(file.node, configNew)
-        for (entry in configNew) {
-            configIndex[entry.key] = entry
-            val vv = entry.value ?: entry.defaultValue
-            if (vv != null) config[entry.key] = vv
-        }
+        state = ObjectMapperFileUtils.load(filePath, StatsConfigState(), format = ConfigFormat.YAML)
+        registerStrings()
+        syncDerivedView()
     }
 
-    fun registerStrings(content: MutableMap<String, Any> = mutableMapOf()) {
-        Logger.debug("ConfigFile.registerStrings called with ${content.size} entries", DEBUG_LEVEL.DETAILED)
-        
-        // Always start from base default entries
-        ensureBaseEntries()
-
-        // If a map is provided, set entry.value from it
-        if (content.isNotEmpty()) {
-            for (entry in configNew) {
-                if (content.containsKey(entry.key)) {
-                    Logger.debug("Updating entry ${entry.key} from ${entry.value} to ${content[entry.key]}", DEBUG_LEVEL.VERBOSE)
-                    entry.value = content[entry.key]
-                }
-            }
-        }
-
-        // Sync index and legacy map
-        syncEntriesToMap()
-
-        Logger.debug("ConfigFile.registerStrings: about to create YAML file with ${configNew.size} entries", DEBUG_LEVEL.DETAILED)
-        val ymlFile = ConfigEntryFileUtils.buildConfigFile("/stats/config.yml", configNew, ConfigFormat.YAML)
-        Logger.debug("ConfigFile.registerStrings: about to update file on disk", DEBUG_LEVEL.DETAILED)
-        ConfigurateFileUtils.update(ymlFile, overwriteExisting = true)
-        Logger.debug("ConfigFile.registerStrings: file update complete", DEBUG_LEVEL.DETAILED)
+    fun registerStrings() {
+        ObjectMapperFileUtils.save(filePath, state, format = ConfigFormat.YAML)
     }
 
-    private fun syncEntriesToMap() {
-        configIndex.clear()
-        for (entry in configNew) {
-            configIndex[entry.key] = entry
-            val vv = entry.value ?: entry.defaultValue
-            if (vv != null) config[entry.key] = vv
-        }
-    }
-
-    private fun ensureBaseEntries() {
-        if (configNew.isNotEmpty()) return
-
-        configNew.add(ConfigEntry(
-            "documentation",
-            EntryType.STRING,
-            null,
-            "https://docs.yvtils.net/stats/config.yml",
-            "Documentation URL"
-        ))
-
-        // Note: opt_in starts as null (unset) - not false
-        // This allows us to detect if the user hasn't made a decision yet
-        configNew.add(ConfigEntry(
-            "opt_in",
-            EntryType.BOOLEAN,
-            null,
-            true, // No default - must be explicitly set
-            "Whether you have opted in to anonymous stats collection. Set to true to enable, false to disable. Stats are sent to api.yvtils.net/stats"
-        ))
-
-        configNew.add(ConfigEntry(
-            "metadata.server_name",
-            EntryType.STRING,
-            null,
-            "",
-            "Optional human-readable name for the server shown in developer stats."
-        ))
-
-        configNew.add(ConfigEntry(
-            "metadata.collect_player_count",
-            EntryType.BOOLEAN,
-            null,
-            true,
-            "Whether to include current player count in exported stats."
-        ))
-
-        configNew.add(ConfigEntry(
-            "max_list_size",
-            EntryType.INT,
-            null,
-            1000,
-            "Maximum size for list-type stats to prevent memory issues."
-        ))
-
-        configNew.add(ConfigEntry(
-            "max_stats_count",
-            EntryType.INT,
-            null,
-            10000,
-            "Maximum number of stats to prevent high cardinality issues."
-        ))
+    /** Called by [yv.tils.gui.logic.DataClassConfigGui]'s saver after an in-game edit. */
+    fun applyState(newState: StatsConfigState) {
+        state = newState
+        syncDerivedView()
+        registerStrings()
     }
 }

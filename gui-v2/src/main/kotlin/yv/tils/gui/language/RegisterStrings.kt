@@ -91,6 +91,12 @@ object RegisterStrings {
         )
 
         register(
+            "action.gui.lore.controls.nested",
+            FileTypes.EN to "<gray>Left-Click: <white>Open",
+            FileTypes.DE to "<gray>Linksklick: <white>Öffnen"
+        )
+
+        register(
             "action.gui.lore.list.remove",
             FileTypes.EN to "<gray>Right-Click: <red>Remove",
             FileTypes.DE to "<gray>Rechtsklick: <red>Entfernen"

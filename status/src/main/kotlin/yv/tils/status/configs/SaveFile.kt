@@ -5,18 +5,12 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.status.configs
 
-import kotlinx.serialization.Serializable
-import yv.tils.configv2.files.ConfigurateFileUtils
-import yv.tils.configv2.files.JsonFileUtils
+import yv.tils.configv2.files.ObjectMapperFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.logger.Logger
 import java.util.*
 
 class SaveFile {
@@ -27,34 +21,19 @@ class SaveFile {
     private val filePath = "/status/save.json"
 
     fun loadConfig() {
-        val file = runCatching { JsonFileUtils.loadJsonFile(filePath) }.getOrNull() ?: return
-        val saveListNode = file.node.node("saves")
+        val loaded = ObjectMapperFileUtils.loadList<StatusSave>(filePath)
 
-        if (saveListNode.virtual() || !saveListNode.isList()) {
-            Logger.debug("No saves found in the save file.")
+        if (loaded.isEmpty()) {
+            registerStrings()
             return
         }
 
-        for (saveNode in saveListNode.childrenList()) {
-            Logger.debug("Loading save: ${saveNode.raw()}")
-
-            val uuid = saveNode.node("uuid").string ?: continue
-            val content = saveNode.node("content").string ?: continue
-
-            saves[UUID.fromString(uuid)] = StatusSave(uuid, content)
-        }
+        saves.clear()
+        loaded.forEach { saves[UUID.fromString(it.uuid)] = it }
     }
 
     fun registerStrings(saveList: MutableList<StatusSave> = mutableListOf()) {
-        val saveWrapper = mapOf(
-            "saves" to saveList.map { mapOf("uuid" to it.uuid, "content" to it.content) }
-        )
-
-        val jsonFile = JsonFileUtils.makeJsonFile(filePath, saveWrapper)
-        // Matches the original's `FileUtils.updateFile(path, jsonFile)` (no
-        // explicit overwrite flag, i.e. `overwriteExisting = false`) - merge
-        // with whatever's already on disk rather than fully replacing it.
-        ConfigurateFileUtils.update(jsonFile, overwriteExisting = false)
+        ObjectMapperFileUtils.saveList(filePath, saveList)
     }
 
     fun updatePlayerSetting(uuid: UUID, content: String) {
@@ -71,8 +50,7 @@ class SaveFile {
         )
     }
 
-    @Serializable
-    data class StatusSave (
+    data class StatusSave(
         val uuid: String,
         var content: String,
     )

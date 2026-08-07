@@ -37,7 +37,6 @@ class YV_SMPYVtils : Data.YVtilsModule {
 
     override fun onLoad() {
         LanguageProvider.registerEnumStrings<LangStrings>()
-        ConfigFile().registerStrings()
     }
 
     override fun enablePlugin() {

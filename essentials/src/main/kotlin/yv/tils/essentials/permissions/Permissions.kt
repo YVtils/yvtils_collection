@@ -14,8 +14,6 @@ package yv.tils.essentials.permissions
 
 import yv.tils.common.permissions.PermissionManager
 import yv.tils.essentials.EssentialYVtils
-import kotlin.collections.forEach
-import kotlin.collections.plus
 
 class PermissionsData {
     companion object {
@@ -25,7 +23,7 @@ class PermissionsData {
             get() = PermissionManager.YVtilsPermission(
                 "${permissionBase}.*",
                 "Wildcard permission for all ${EssentialYVtils.MODULE.name} permissions",
-                default = true,
+                default = false,
                 children = getPermissionsForWildcard()
             )
 
@@ -55,6 +53,22 @@ enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
         PermissionManager.YVtilsPermission(
             "${PermissionsData.permissionBase}.bypass.globalmute",
             "Bypass the global mute",
+            default = false
+        )
+    ),
+
+    BYPASS_DIMENSION_BLOCK(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.bypass.dimension.block",
+            "Bypass dimension travel block",
+            default = false
+        )
+    ),
+
+    BYPASS_PVP_DISABLED(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.bypass.pvp.disabled",
+            "Bypass disabled pvp",
             default = false
         )
     ),

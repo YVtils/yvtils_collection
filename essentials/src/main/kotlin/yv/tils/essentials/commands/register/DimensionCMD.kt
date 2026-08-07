@@ -19,11 +19,11 @@ import yv.tils.essentials.permissions.Permissions
 
 class DimensionCMD {
     val command = commandTree("dimension") {
-        withPermission(Permissions.COMMAND_PVP.permission.name)
-        withUsage("dimension <world> [state]")
+        withPermission(Permissions.COMMAND_DIMENSION.permission.name)
+        withUsage("dimension <world> [<newState>|state]")
 
         worldArgument("world", false) {
-            booleanArgument("newState",false) {
+            booleanArgument("newState", false) {
                 anyExecutor { sender, args ->
                     val world = args["world"] as World
                     val state = args["newState"] as Boolean?
@@ -31,7 +31,7 @@ class DimensionCMD {
                 }
             }
 
-            literalArgument("state", false) {
+            literalArgument("state", true) {
                 anyExecutor { sender, args ->
                     val world = args["world"] as World
                     DimensionHandler().checkDimensionState(sender, world)

@@ -16,7 +16,9 @@ import yv.tils.common.permissions.PermissionManager
 import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.moderation.commands.*
 import yv.tils.moderation.configs.ConfigFile
+import yv.tils.moderation.configs.ManageGUI
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
+import yv.tils.moderation.configs.saveFile.WarnSaveFile
 import yv.tils.moderation.data.PermissionsData
 import yv.tils.moderation.language.RegisterStrings
 import yv.tils.moderation.listeners.AsyncChat
@@ -33,14 +35,13 @@ class ModerationYVtils : Module.YVtilsModule {
             "1.0.0-beta.1",
             "Moderation module for YVtils",
             "YVtils",
-            "https://docs.yvtils.net/moderation/"
+            "https://docs.yvtils.net/moderation/",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
     }
 
     override fun onLoad() {
         RegisterStrings().registerStrings()
-        ConfigFile().registerStrings()
-        MuteSaveFile().registerStrings()
     }
 
     override fun enablePlugin() {
@@ -111,5 +112,6 @@ class ModerationYVtils : Module.YVtilsModule {
     private fun loadConfigs() {
         ConfigFile().loadConfig()
         MuteSaveFile().loadConfig()
+        WarnSaveFile().loadConfig()
     }
 }

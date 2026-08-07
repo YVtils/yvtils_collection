@@ -5,17 +5,12 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.moderation.configs.saveFile
 
-import yv.tils.configv2.files.ConfigurateFileUtils
-import yv.tils.configv2.files.JsonFileUtils
+import yv.tils.configv2.files.ObjectMapperFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.logger.Logger
 import yv.tils.utils.player.PlayerUtils
 import java.util.*
 
@@ -24,68 +19,22 @@ class MuteSaveFile {
         val saves = mutableMapOf<UUID, MuteSave>()
     }
 
-    //  {
-    //      saves: [
-    //          {
-    //              "uuid": <uuid>,
-    //              "reason": <reason>,
-    //              "muted": <muted>,
-    //              "expires": <timestamp>,
-    //              "modAction": {
-    //                  "uuid": <modUUID>,
-    //                  "timestamp": <timestamp>
-    //              }
-    //      ]
-    //  }
+    private val filePath = "/moderation/mutedPlayers.json"
 
     fun loadConfig() {
-        val file = runCatching { JsonFileUtils.loadJsonFile("/moderation/mutedPlayers.json") }.getOrNull() ?: return
-        val saveListNode = file.node.node("saves")
+        val loaded = ObjectMapperFileUtils.loadList<MuteSave>(filePath)
 
-        if (saveListNode.virtual() || !saveListNode.isList()) {
-            Logger.debug("No saves found in the save file.")
+        if (loaded.isEmpty()) {
+            registerStrings()
             return
         }
 
-        for (saveNode in saveListNode.childrenList()) {
-            Logger.debug("Loading save: ${saveNode.raw()}")
-
-            val uuid = saveNode.node("uuid").string ?: continue
-            val reason = saveNode.node("reason").string ?: continue
-            val muted = saveNode.node("muted").get(Boolean::class.javaObjectType) ?: continue
-            val expires = saveNode.node("expires").string ?: continue
-
-            val modActionNode = saveNode.node("modAction")
-            if (modActionNode.virtual()) continue
-            val modUUID = modActionNode.node("uuid").string ?: continue
-            val timestamp = modActionNode.node("timestamp").string ?: continue
-
-            val modAction = ModAction(
-                modUUID,
-                timestamp
-            )
-
-            saves[UUID.fromString(uuid)] = MuteSave(uuid, reason, muted, expires, modAction)
-        }
+        saves.clear()
+        loaded.forEach { saves[UUID.fromString(it.uuid)] = it }
     }
 
     fun registerStrings(saveList: MutableList<MuteSave> = mutableListOf()) {
-        val saveWrapper = mapOf(
-            "saves" to saveList.map {
-                mapOf(
-                    "uuid" to it.uuid,
-                    "reason" to it.reason,
-                    "muted" to it.muted,
-                    "expires" to it.expires,
-                    "modAction" to mapOf(
-                        "uuid" to it.modAction.uuid,
-                        "timestamp" to it.modAction.timestamp,
-                    ),
-                )
-            }
-        )
-        val jsonFile = JsonFileUtils.makeJsonFile("/moderation/mutedPlayers.json", saveWrapper)
-        ConfigurateFileUtils.update(jsonFile, overwriteExisting = true)
+        ObjectMapperFileUtils.saveList(filePath, saveList)
     }
 
     fun mutePlayer(uuid: UUID, reason: String, muted: Boolean, modAction: ModAction, expires: String = "null") {

@@ -17,13 +17,14 @@ import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.literalArgument
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import yv.tils.common.permissions.Permissions
+import yv.tils.core.commands.gui.YVtilsConfigGui
 import yv.tils.core.commands.gui.YVtilsModulesGui
 import yv.tils.core.commands.handler.YVtilsHandler
 
 class YVtilsCommand {
     val command = commandTree("yvtils") {
         withPermission(Permissions.YVTILS_MANAGE_COMMAND.permission.name)
-        withUsage("yvtils <modules/info>")
+        withUsage("yvtils <modules/config/info>")
 
         literalArgument("info", false) {
             anyExecutor { sender, _ ->
@@ -34,6 +35,12 @@ class YVtilsCommand {
         literalArgument("modules", false) {
             playerExecutor { player, _ ->
                 YVtilsModulesGui.open(player)
+            }
+        }
+
+        literalArgument("config", false) {
+            playerExecutor { player, _ ->
+                YVtilsConfigGui.open(player)
             }
         }
     }
