@@ -12,6 +12,7 @@
 
 package yv.tils.common
 
+import yv.tils.common.config.ConfigFile
 import yv.tils.common.language.RegisterStrings
 import yv.tils.utils.modules.Module
 
@@ -22,7 +23,7 @@ class CommonYVtils : Module.YVtilsModule {
             "26.08.01",
             "Common module for YVtils",
             "YVtils",
-            "https://docs.yvtils.net/common/"
+            "https://docs.yvtils.net/common/",
         )
     }
 
@@ -31,6 +32,8 @@ class CommonYVtils : Module.YVtilsModule {
     }
 
     override fun enablePlugin() {
+        ConfigFile().loadConfig()
+
         RegisterStrings().registerStrings()
 
         Module.addModule(MODULE)

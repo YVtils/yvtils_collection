@@ -41,7 +41,7 @@ import java.sql.Timestamp
  *
  * Supports both `.json` ([ConfigFormat.JSON], the default - matches every existing
  * `SaveFile`) and `.yml` ([ConfigFormat.YAML] - for GUI-editable `config.yml`s once paired
- * with `gui-v2`'s annotation-driven config GUI).
+ * with `gui`'s annotation-driven config GUI).
  */
 class ObjectMapperFileUtils {
     companion object {

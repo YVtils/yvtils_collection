@@ -81,7 +81,8 @@ val publishableModules = setOf(
     "message",
     "moderation",
     "stats",
-    "gui-v2",
+    "gui-26.1",
+    "gui-26.2",
 )
 
 /*
@@ -95,7 +96,6 @@ val publishableModules = setOf(
  * classloader tier. See `DynamicModuleLoader` for the full explanation.
  */
 val dynamicCoreModules = setOf(
-    "test-core",
     "core"
 )
 
@@ -103,6 +103,31 @@ val dynamicCoreModules = setOf(
 // MavenLibraryResolver) instead of shading CommandAPI/coroutines/serialization
 // directly into their own jar.
 val usesSharedRuntimeTier = publishableModules + dynamicCoreModules
+
+/*
+ * Per-module Paper API target overrides.
+ *
+ * Every subproject compiles against the same Paper API version by default
+ * (see `defaultPaperApiVersion`/`paperDevBundle(...)` below) - `gui-<version>`
+ * modules are the deliberate exception: InvUI (which they wrap) dropped
+ * multi-version support starting with v2, so each InvUI release only targets
+ * ONE specific Minecraft version. A `gui-<version>` module's InvUI dependency
+ * (see its own `build.gradle.kts`) and its Paper API compile target must
+ * therefore always be bumped together.
+ *
+ * `core` resolves the right `gui-<version>` artifact at actual server
+ * runtime instead of embedding one fixed copy at build time - see
+ * `DynamicModuleRegistry.GUI_ARTIFACTS` and `DynamicModuleLoader` for the
+ * runtime-selection counterpart to this compile-time mapping.
+ *
+ * Add an entry here (and a matching `gui-<version>` module + registry entry)
+ * whenever InvUI publishes support for a new Minecraft version - e.g. once
+ * InvUI supports `26.3`.
+ */
+val defaultPaperApiVersion = "26.1.2"
+val paperApiVersionOverrides = mapOf(
+    "gui-26.2" to "26.2",
+)
 
 subprojects {
     apply {
@@ -124,8 +149,10 @@ subprojects {
     val runtimeDependencyScope = if (name in usesSharedRuntimeTier) "compileOnly" else "implementation"
 
     dependencies {
-        // Paper API dependency
-        the<PaperweightUserDependenciesExtension>().paperDevBundle("26.1.2.build.+")
+        // Paper API dependency - see `paperApiVersionOverrides` above for why
+        // this is per-module rather than a single hardcoded call.
+        val paperApiVersion = paperApiVersionOverrides[name] ?: defaultPaperApiVersion
+        the<PaperweightUserDependenciesExtension>().paperDevBundle("$paperApiVersion.build.+")
 
         // CommandAPI dependencies
         add(runtimeDependencyScope, "dev.jorel:commandapi-paper-shade:$commandAPIVersion")

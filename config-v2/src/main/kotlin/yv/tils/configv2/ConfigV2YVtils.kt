@@ -21,7 +21,7 @@ import yv.tils.utils.modules.Module
  * Covers the same three areas as the original `config` module:
  * - `yv.tils.configv2.files` - YAML/JSON file loading, saving, and merging.
  * - `yv.tils.configv2.data` - the [yv.tils.configv2.data.ConfigEntry] schema
- *   used by the in-game config GUI (`ConfigGui` in `gui-v2`), plus
+ *   used by the in-game config GUI (`ConfigGui` in `gui`), plus
  *   [yv.tils.configv2.data.EntryBackedConfig], a reusable replacement for
  *   the `entries`/`configIndex`/`get*`/`registerStrings`/`loadConfig`
  *   boilerplate duplicated across feature modules' `configs/ConfigFile.kt`.

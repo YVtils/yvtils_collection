@@ -9,7 +9,11 @@
 
 package yv.tils.common.config
 
+import org.bukkit.Material
+import yv.tils.configv2.data.annotations.BooleanIcon
 import yv.tils.configv2.data.annotations.ConfigDescription
+import yv.tils.configv2.data.annotations.ConfigIcon
+import yv.tils.configv2.data.annotations.DefaultValue
 import yv.tils.configv2.data.annotations.NotGuiEditable
 
 /**
@@ -23,33 +27,52 @@ data class RootConfigState(
     val documentation: String = "https://docs.yvtils.net/config.yml",
 
     @ConfigDescription("Default language")
+    @DefaultValue("en")
+    @ConfigIcon(Material.WRITABLE_BOOK)
     var language: String = "en",
 
     @ConfigDescription("Server IP")
+    @DefaultValue("smp.net")
+    @ConfigIcon(Material.COMPASS)
     var serverIP: String = "smp.net",
 
     @ConfigDescription("Server port")
+    @DefaultValue("-1")
+    @ConfigIcon(Material.REDSTONE)
     var serverPort: Int = -1,
 
     @ConfigDescription("Timezone")
+    @DefaultValue("default")
+    @ConfigIcon(Material.CLOCK)
     var timezone: String = "default",
 
+    @ConfigIcon(Material.RECOVERY_COMPASS)
     var updateCheck: UpdateCheck = UpdateCheck(),
+
+    @ConfigIcon(Material.COMMAND_BLOCK)
     var debug: Debug = Debug(),
 ) {
     data class UpdateCheck(
         @ConfigDescription("Update check enabled")
+        @DefaultValue("true")
+        @BooleanIcon(whenTrue = Material.LIME_DYE, whenFalse = Material.RED_DYE)
         var enabled: Boolean = true,
 
         @ConfigDescription("Send updates to ops")
+        @DefaultValue("true")
+        @BooleanIcon(whenTrue = Material.LIME_DYE, whenFalse = Material.RED_DYE)
         var sendToOps: Boolean = true,
     )
 
     data class Debug(
         @ConfigDescription("Debug active")
+        @DefaultValue("false")
+        @BooleanIcon(whenTrue = Material.LIME_DYE, whenFalse = Material.RED_DYE)
         var active: Boolean = false,
 
         @ConfigDescription("Debug level")
+        @DefaultValue("3")
+        @ConfigIcon(Material.HOPPER)
         var level: Int = 3,
     )
 }

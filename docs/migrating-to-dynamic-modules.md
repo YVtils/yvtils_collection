@@ -62,7 +62,7 @@ If you only remember one thing from this document, remember that.
 | Component | Status |
 |---|---|
 | `utils`, `config`, `common` | Not published individually. Bundled together via `common`'s own `shadowJar` output and embedded as a `JarLibrary` resource by migrated cores. No change needed to these modules themselves. |
-| `discord`, `regions`, `multiMine`, `essentials`, `sit`, `status`, `server`, `message`, `moderation`, `gui-v2`, `migration`, `stats` | **Gradle-level migration done.** All 12 are in `publishableModules` in the root `build.gradle.kts`, have `compileOnly` on `utils`/`config`/`common`, and get CommandAPI/coroutines/serialization as `compileOnly` automatically. `sit` has been round-tripped through a real publish+fetch+enable test. The other 11 have not been individually verified yet - do that before relying on them. |
+| `discord`, `regions`, `multiMine`, `essentials`, `sit`, `status`, `server`, `message`, `moderation`, `gui-26.1`, `gui-26.2`, `migration`, `stats` | **Gradle-level migration done.** All are in `publishableModules` in the root `build.gradle.kts`, have `compileOnly` on `utils`/`config`/`common`, and get CommandAPI/coroutines/serialization as `compileOnly` automatically. `sit` has been round-tripped through a real publish+fetch+enable test. `gui-<version>` modules are a special case, resolved unconditionally by `core` based on the running server's Minecraft version rather than through `modules.yml` - see `DynamicModuleRegistry.GUI_ARTIFACTS`. The others have not been individually verified yet - do that before relying on them. |
 | `test-core` | **Fully migrated.** Reference implementation - has the `PluginLoader`, the embedded runtime bundle, and dynamic module discovery wired up end-to-end. |
 | `core`, `discord-core`, `regions-core`, `multiMine-core` | **Not migrated yet.** Still shade every module directly (old pattern). This is the main remaining work - see [Part 2](#part-2---migrating-a-corelauncher). |
 
@@ -89,25 +89,40 @@ dependencies {
 ```
 
 If your module depends on **another feature module** that is itself
-dynamically fetched (e.g. `multiMine` depends on `gui-v2`), keep that as a real
-`implementation` dependency - it needs to show up in the published POM as a
-proper transitive Maven dependency so it gets fetched automatically:
+dynamically fetched, keep that as a real `implementation` dependency - it
+needs to show up in the published POM as a proper transitive Maven dependency
+so it gets fetched automatically:
 
 ```kotlin
 dependencies {
     compileOnly(project(":utils"))
     compileOnly(project(":config"))
     compileOnly(project(":common"))
-    implementation(project(":gui")) // gui is itself published - keep this real
+    implementation(project(":some-other-published-module")) // keep this real
 }
 ```
 
-Third-party runtime dependencies (e.g. `discord`'s JDA dependency, `gui-v2`'s
-InvUI dependency) also stay as normal `implementation` - you do **not** need
-to make Reposilite aware of them or proxy their host. `DynamicModuleLoader`
-adds a small, fixed list of well-known upstream repositories (Maven Central,
-PaperMC, xenondevs - see `THIRD_PARTY_REPOSITORIES` in
-`DynamicModuleLoader.kt`) as fallbacks on every module's resolver, so
+**`gui` is a deliberate exception to the above** - every feature module that
+uses GUI types declares it as `compileOnly(project(":gui-26.1"))` instead
+(never `implementation`), and it must NOT show up in your module's published
+POM at all. `core` resolves exactly one `gui-<version>` artifact itself,
+unconditionally, matching the running server's actual Minecraft version (see
+`DynamicModuleRegistry.GUI_ARTIFACTS` and `DynamicModuleLoader.addGuiModule`
+in `core`) - InvUI (which `gui` wraps) dropped multi-version support in v2, so
+each Minecraft version needs a matching `gui-<version>` build, and it keeps
+classloader-sensitive global static state that must only ever be resolved
+once per server. If every module that uses GUI types also declared it as a
+real transitive dependency, it would get pulled in and re-resolved once per
+module, each with its own separate copy of that state.
+
+Third-party runtime dependencies (e.g. `discord`'s JDA dependency, `gui`'s
+InvUI dependency) also stay as normal `implementation`/`api` on the module
+that actually needs them directly (`gui-26.1`/`gui-26.2` themselves, for
+InvUI) - you do **not** need to make Reposilite aware of them or proxy their
+host. `DynamicModuleLoader` adds a small, fixed list of well-known upstream
+repositories (Maven Central, PaperMC, xenondevs - see
+`THIRD_PARTY_REPOSITORIES` in `DynamicModuleLoader.kt`) as fallbacks on every
+module's resolver, so
 transitive third-party dependencies resolve directly from their real host
 instead of requiring Reposilite to mirror it. If your module pulls in a
 dependency from some other host not already in that list, add it there.
@@ -393,11 +408,13 @@ The whole "publish + checksum" dance is automated by one root-level task:
    let it generate the default on first boot - it lists every known module
    with `true`/`false` - then edit + restart).
 
-Remember a module's dependencies on *other* feature modules (e.g. `multiMine`
-depends on `gui-v2`) are real Maven dependencies - `publishAllModulesLocally`
-covers this automatically since it publishes everything, but if you're only
-publishing a single module by hand, publish its dependencies too or you'll
-just trade one `ArtifactNotFoundException` for another.
+Remember a module's dependencies on *other* feature modules are real Maven
+dependencies - `publishAllModulesLocally` covers this automatically since it
+publishes everything, but if you're only publishing a single module by hand,
+publish its dependencies too or you'll just trade one
+`ArtifactNotFoundException` for another. (`gui-26.1`/`gui-26.2` are the
+exception - `core` resolves those itself, unconditionally; see the note on
+`gui` in [Part 1](#part-1---migrating-a-feature-module).)
 
 If you don't want to bother with checksums at all while rapidly iterating,
 set `YVTILS_DEV_SKIP_CHECKSUMS=true` alongside `REPOSILITE_URL` - this is an

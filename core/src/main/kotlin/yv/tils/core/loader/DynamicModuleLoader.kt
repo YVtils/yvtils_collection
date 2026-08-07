@@ -12,6 +12,7 @@
 
 package yv.tils.core.loader
 
+import io.papermc.paper.ServerBuildInfo
 import io.papermc.paper.plugin.loader.PluginClasspathBuilder
 import io.papermc.paper.plugin.loader.PluginLoader
 import io.papermc.paper.plugin.loader.library.impl.JarLibrary
@@ -29,23 +30,29 @@ import java.nio.file.StandardCopyOption
  *
  * 1. Always adds the embedded "runtime bundle" (`utils`+`config`+`common`+
  *    CommandAPI+coroutines+serialization, built from `common`'s own shadowJar
- *    and embedded as a plugin resource - see `test-core/build.gradle.kts`) via
+ *    and embedded as a plugin resource - see `core/build.gradle.kts`) via
  *    a local [JarLibrary]. No network access is required for this; it's always
  *    bundled inside this plugin's own jar.
- * 2. Reads `modules.yml` from the shared `plugins/yvtils` data directory
+ * 2. Always resolves exactly one `gui-<version>` artifact - whichever one
+ *    matches the running server's actual Minecraft version (see
+ *    [DynamicModuleRegistry.GUI_ARTIFACTS], [addGuiModule]) - via its own
+ *    [MavenLibraryResolver]. Unlike every other module, this doesn't depend
+ *    on `modules.yml`: there's nothing to toggle, every server needs exactly
+ *    one matching `gui` build.
+ * 3. Reads `modules.yml` from the shared `plugins/yvtils` data directory
  *    (see [ModuleConfig.sharedDataDirectory] - shared across every installed
  *    core, not this specific plugin's own data folder) and fetches each
  *    enabled feature module from the configured Maven repository (Reposilite)
  *    via [MavenLibraryResolver]. Each module's resolver is also given a small,
  *    fixed set of well-known third-party repositories ([THIRD_PARTY_REPOSITORIES])
  *    as fallbacks, so transitive third-party dependencies (e.g. `discord`'s JDA,
- *    `gui-v2`'s InvUI) resolve directly instead of depending on Reposilite being
+ *    `gui`'s InvUI) resolve directly instead of depending on Reposilite being
  *    configured as a proxy/mirror for every upstream host a module might need.
  *
- * Each feature module is registered as its OWN `MavenLibraryResolver` instance
- * (rather than one shared resolver with multiple dependencies added to it), so
- * that a failure resolving one module does not prevent the others from being
- * added to the classpath.
+ * Each feature module (and the `gui` artifact) is registered as its OWN
+ * `MavenLibraryResolver` instance (rather than one shared resolver with
+ * multiple dependencies added to it), so that a failure resolving one module
+ * does not prevent the others from being added to the classpath.
  *
  * IMPORTANT (see Paper's `PluginLoader` docs): this class is loaded through a
  * separate/isolated classloader from the actual plugin instance. Any static
@@ -63,9 +70,10 @@ import java.nio.file.StandardCopyOption
  * feature modules need to resolve `Module.YVtilsModule` (and everything else in
  * utils/config/common), and the only way for that to work is for both to live
  * in the same shared classloader tier. The same reasoning applies to anything
- * with global/static init state (e.g. CommandAPI's `.onLoad()`) - it must be
- * resolved in exactly one place, not once in the main jar and once more
- * transitively via a fetched module's own POM.
+ * with global/static init state (e.g. CommandAPI's `.onLoad()`, or InvUI's own
+ * `PacketListener` singleton - see [addGuiModule]) - it must be resolved in
+ * exactly one place, not once in the main jar and once more transitively via a
+ * fetched module's own POM.
  */
 class DynamicModuleLoader : PluginLoader {
     companion object {
@@ -102,7 +110,7 @@ class DynamicModuleLoader : PluginLoader {
         /**
          * Well-known upstream repositories for *third-party* (non-YVtils) transitive
          * dependencies that feature modules may declare (e.g. `discord`'s JDA, or
-         * `gui-v2`'s InvUI). These are added as fallbacks alongside the Reposilite
+         * `gui`'s InvUI). These are added as fallbacks alongside the Reposilite
          * registry on every module's resolver, so resolution does NOT depend on
          * Reposilite being configured as a proxy/mirror for every possible upstream
          * host a module might need - each resolver can reach these repositories
@@ -134,6 +142,7 @@ class DynamicModuleLoader : PluginLoader {
 
         Files.createDirectories(sharedDirectory)
         addEmbeddedRuntimeBundle(classpathBuilder, sharedDirectory)
+        addGuiModule(classpathBuilder, repositoryUrl, skipChecksums)
 
         val enabledModules = ModuleConfig.readEnabledModules(sharedDirectory)
         logger.info("[DynamicModuleLoader] Shared data directory: $sharedDirectory")
@@ -155,26 +164,7 @@ class DynamicModuleLoader : PluginLoader {
                 continue
             }
 
-            val resolver = MavenLibraryResolver()
-
-            val repositoryBuilder = RemoteRepository.Builder("yvtils-registry", "default", repositoryUrl)
-            if (skipChecksums) {
-                repositoryBuilder.setPolicy(
-                    RepositoryPolicy(
-                        true,
-                        RepositoryPolicy.UPDATE_POLICY_ALWAYS,
-                        RepositoryPolicy.CHECKSUM_POLICY_IGNORE
-                    )
-                )
-            }
-            resolver.addRepository(repositoryBuilder.build())
-
-            // Fallbacks for third-party transitive dependencies (JDA, InvUI, ...) -
-            // see THIRD_PARTY_REPOSITORIES for why this is needed in addition to
-            // the registry above.
-            THIRD_PARTY_REPOSITORIES.forEach { (id, url) ->
-                resolver.addRepository(RemoteRepository.Builder(id, "default", url).build())
-            }
+            val resolver = newModuleResolver(repositoryUrl, skipChecksums)
 
             resolver.addDependency(
                 Dependency(
@@ -189,6 +179,88 @@ class DynamicModuleLoader : PluginLoader {
                         "(${DynamicModuleRegistry.GROUP_ID}:${artifact.artifactId}:${artifact.version}) for resolution."
             )
         }
+    }
+
+    /**
+     * Resolves and adds exactly one `gui-<version>` artifact, matching the
+     * running server's actual Minecraft version, via its own
+     * [MavenLibraryResolver].
+     *
+     * Unlike every other module, `gui` cannot use one fixed artifactId: it
+     * wraps InvUI, which dropped multi-version support starting with v2 -
+     * each InvUI release only targets ONE specific Minecraft version. Baking
+     * one fixed `gui-<version>` build into this plugin's own jar at compile
+     * time (like this project used to do) would mean a whole separate plugin
+     * release per supported Minecraft version. Resolving it here instead,
+     * against [io.papermc.paper.ServerBuildInfo]'s actual runtime version,
+     * means one published `core` build works across every Minecraft version
+     * that has a matching entry in [DynamicModuleRegistry.GUI_ARTIFACTS].
+     *
+     * This is always resolved unconditionally (not driven by `modules.yml`,
+     * unlike the loop in [classloader]) - there's nothing to toggle, every
+     * server needs exactly one matching `gui` build for other modules'
+     * config/management GUIs to work at all.
+     */
+    private fun addGuiModule(classpathBuilder: PluginClasspathBuilder, repositoryUrl: String, skipChecksums: Boolean) {
+        val logger = classpathBuilder.context.logger
+        val minecraftVersionId = ServerBuildInfo.buildInfo().minecraftVersionId()
+        val minorVersion = DynamicModuleRegistry.minecraftMinorVersion(minecraftVersionId)
+
+        if (!DynamicModuleRegistry.GUI_ARTIFACTS.containsKey(minorVersion)) {
+            logger.warn(
+                "[DynamicModuleLoader] No 'gui' artifact registered for Minecraft $minecraftVersionId " +
+                        "(minor version '$minorVersion') - falling back to the " +
+                        "${DynamicModuleRegistry.GUI_FALLBACK_MINECRAFT_VERSION} build. GUI-dependent " +
+                        "features may not work correctly. Add a 'gui-$minorVersion' entry to " +
+                        "DynamicModuleRegistry.GUI_ARTIFACTS once InvUI publishes support for this version."
+            )
+        }
+
+        val artifact = DynamicModuleRegistry.guiArtifactFor(minecraftVersionId)
+        val resolver = newModuleResolver(repositoryUrl, skipChecksums)
+
+        resolver.addDependency(
+            Dependency(
+                DefaultArtifact("${DynamicModuleRegistry.GROUP_ID}:${artifact.artifactId}:${artifact.version}"),
+                null
+            )
+        )
+
+        classpathBuilder.addLibrary(resolver)
+        logger.info(
+            "[DynamicModuleLoader] Queued gui module for Minecraft $minecraftVersionId " +
+                    "(${DynamicModuleRegistry.GROUP_ID}:${artifact.artifactId}:${artifact.version}) for resolution."
+        )
+    }
+
+    /**
+     * Builds a fresh [MavenLibraryResolver] pointed at the configured
+     * Reposilite registry plus [THIRD_PARTY_REPOSITORIES], shared by every
+     * per-module resolver ([classloader]'s loop and [addGuiModule]).
+     */
+    private fun newModuleResolver(repositoryUrl: String, skipChecksums: Boolean): MavenLibraryResolver {
+        val resolver = MavenLibraryResolver()
+
+        val repositoryBuilder = RemoteRepository.Builder("yvtils-registry", "default", repositoryUrl)
+        if (skipChecksums) {
+            repositoryBuilder.setPolicy(
+                RepositoryPolicy(
+                    true,
+                    RepositoryPolicy.UPDATE_POLICY_ALWAYS,
+                    RepositoryPolicy.CHECKSUM_POLICY_IGNORE
+                )
+            )
+        }
+        resolver.addRepository(repositoryBuilder.build())
+
+        // Fallbacks for third-party transitive dependencies (JDA, InvUI, ...) -
+        // see THIRD_PARTY_REPOSITORIES for why this is needed in addition to
+        // the registry above.
+        THIRD_PARTY_REPOSITORIES.forEach { (id, url) ->
+            resolver.addRepository(RemoteRepository.Builder(id, "default", url).build())
+        }
+
+        return resolver
     }
 
     /**

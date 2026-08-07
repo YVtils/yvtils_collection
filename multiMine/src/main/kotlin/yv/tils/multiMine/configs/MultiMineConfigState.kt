@@ -20,7 +20,7 @@ import yv.tils.configv2.data.annotations.NotGuiEditable
 
 /**
  * multiMine's `config.yml`, as a plain `data class` persisted via `ObjectMapperFileUtils`
- * and edited via `gui-v2`'s `DataClassConfigGui` (see `ManageGUI`) - replaces the old
+ * and edited via `gui`'s `DataClassConfigGui` (see `ManageGUI`) - replaces the old
  * `ConfigEntry`-list-built-by-hand version of this file.
  */
 data class MultiMineConfigState(

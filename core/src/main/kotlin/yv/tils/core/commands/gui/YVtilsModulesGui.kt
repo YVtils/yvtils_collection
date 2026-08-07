@@ -46,9 +46,12 @@ import java.nio.file.Path
  * togglable - they are always loaded by every core - and are therefore not
  * listed here. Only entries from [DynamicModuleRegistry.KNOWN_MODULES] are
  * shown, excluding any marked [DynamicModuleRegistry.ModuleArtifact.hidden]
- * (e.g. `gui-v2`, `migration`) - those are excluded from the dynamic-module
- * system entirely (see [ModuleConfig.readEnabledModules]), not just from
- * this GUI, and cannot be enabled through `modules.yml` either.
+ * (e.g. `migration`) - those are excluded from the dynamic-module system
+ * entirely (see [ModuleConfig.readEnabledModules]), not just from this GUI,
+ * and cannot be enabled through `modules.yml` either. The `gui` module isn't
+ * a [DynamicModuleRegistry.KNOWN_MODULES] entry at all (see
+ * [DynamicModuleRegistry.GUI_ARTIFACTS]), so it's not listed for the same
+ * reason - not because it's marked hidden.
  *
  * Layout: a grid of [COLUMNS] module-columns, each with its info item
  * (identity icon, description, version/author, current status) directly

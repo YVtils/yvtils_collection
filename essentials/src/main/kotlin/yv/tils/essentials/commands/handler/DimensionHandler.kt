@@ -80,8 +80,6 @@ class DimensionHandler {
     }
 
     fun onTravelAttempt(e: PlayerPortalEvent) {
-        // TODO: Add bypass perm
-
         val player = e.player
         val fromWorld = e.from.world
         val toWorld = e.to.world ?: return

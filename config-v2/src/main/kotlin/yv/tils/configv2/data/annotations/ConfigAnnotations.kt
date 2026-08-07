@@ -15,7 +15,7 @@ package yv.tils.configv2.data.annotations
 import org.bukkit.Material
 
 /**
- * GUI-facing metadata for a `data class` field, read reflectively by `gui-v2`'s
+ * GUI-facing metadata for a `data class` field, read reflectively by `gui`'s
  * `DataClassConfigGui` (and ignored entirely by [yv.tils.configv2.files.ObjectMapperFileUtils],
  * which only cares about the field's name/type/value).
  *

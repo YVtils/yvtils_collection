@@ -14,9 +14,10 @@ dependencies {
     compileOnly(project(":config-v2"))
     compileOnly(project(":utils"))
     compileOnly(project(":common"))
-    // Provided at compile time only, resolved exactly once via the embedded runtime bundle
-    // (see core/build.gradle.kts) - NOT shaded into this module's own published artifact,
-    // since InvUI (gui-v2's dependency) keeps classloader-sensitive global state that must
-    // not be duplicated across separately-resolved copies of this module.
-    compileOnly(project(":gui-v2"))
+    // Compile-time only, to reference GUI types - NOT shaded into this module's own
+    // published artifact. The actual gui-<version> build used at runtime is resolved
+    // dynamically by core's DynamicModuleLoader, matching the running server's Minecraft
+    // version (InvUI, which `gui` wraps, dropped multi-version support in v2 - see
+    // DynamicModuleRegistry.GUI_ARTIFACTS for the full explanation).
+    compileOnly(project(":gui-26.1"))
 }

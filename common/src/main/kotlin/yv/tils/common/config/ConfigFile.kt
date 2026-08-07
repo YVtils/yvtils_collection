@@ -12,14 +12,6 @@ package yv.tils.common.config
 import yv.tils.configv2.files.ConfigFormat
 import yv.tils.configv2.files.ObjectMapperFileUtils
 
-/**
- * Note (pre-existing, not introduced by this migration): nothing currently calls
- * [loadConfig]/[registerStrings] from any module's `onLoad()`/`enablePlugin()` - every call
- * site (`PlayerJoin`, `PluginVersion`) only ever observes [state]'s in-memory defaults,
- * exactly as before this migration. See [yv.tils.configv2.GeneralConfig]'s own note for a
- * near-identical, previously-flagged case - left disconnected here too rather than silently
- * wiring it into some arbitrary module's lifecycle as part of an unrelated migration.
- */
 class ConfigFile {
     companion object {
         /** The single source of truth. */
@@ -54,5 +46,12 @@ class ConfigFile {
 
     fun registerStrings() {
         ObjectMapperFileUtils.save(filePath, state, format = ConfigFormat.YAML)
+    }
+
+    /** Called by [yv.tils.gui.logic.DataClassConfigGui]'s saver after an in-game edit. */
+    fun applyState(newState: RootConfigState) {
+        state = newState
+        syncDerivedView()
+        registerStrings()
     }
 }

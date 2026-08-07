@@ -72,7 +72,7 @@ not shaded into your module's own jar. See
 in the migration guide for why this matters - getting this wrong is the #1
 way to break a module once it's fetched dynamically.
 
-If your module needs another module that's itself published (e.g. `gui`),
+If your module needs another module that's itself published (e.g. `regions`),
 that's a real `implementation` dependency instead:
 
 ```kotlin
@@ -80,9 +80,18 @@ dependencies {
     compileOnly(project(":utils"))
     compileOnly(project(":config"))
     compileOnly(project(":common"))
-    implementation(project(":gui"))
+    implementation(project(":regions"))
 }
 ```
+
+**`gui` is a deliberate exception** - if your module uses GUI types (`Gui`,
+`Item`, `Window`, `DataClassConfigGui`, ...), declare `compileOnly(project(":gui-26.1"))`
+instead, never `implementation`. `core` resolves exactly one `gui-<version>`
+build itself, unconditionally, matching the running server's actual Minecraft
+version - see [`DynamicModuleRegistry.GUI_ARTIFACTS`](../core/src/main/kotlin/yv/tils/core/loader/DynamicModuleRegistry.kt)
+for why (short version: InvUI, which `gui` wraps, dropped multi-version
+support in v2 and keeps classloader-sensitive global state that must only
+ever be resolved once per server).
 
 Third-party libraries (JDA for `discord`, etc.) are also normal
 `implementation` dependencies.
@@ -338,9 +347,8 @@ to make it fetchable:
 1. Add its Gradle project name to `publishableModules` in the root
    `build.gradle.kts`.
 2. Add an entry to
-   [`DynamicModuleRegistry.KNOWN_MODULES`](../test-core/src/main/kotlin/yv/tils/core/loader/DynamicModuleRegistry.kt)
-   (or whichever core's copy you're targeting) mapping the module name to its
-   artifactId, version, and entry-point class.
+   [`DynamicModuleRegistry.KNOWN_MODULES`](../core/src/main/kotlin/yv/tils/core/loader/DynamicModuleRegistry.kt)
+   mapping the module name to its artifactId, version, and entry-point class.
 3. Publish it (`./gradlew :your-module:publish`, needs Reposilite credentials
    - see `.env.example`).
 4. Sanity-check the generated POM doesn't list `utils`/`config`/`common`/
@@ -356,7 +364,7 @@ in the migration guide - in short:
 ```bash
 ./gradlew publishAllModulesLocally
 jwebserver -p 8095 -d "$HOME/.m2/repository"
-REPOSILITE_URL="http://127.0.0.1:8095/" ./gradlew :test-core:runServer
+REPOSILITE_URL="http://127.0.0.1:8095/" ./gradlew :core:runServer
 ```
 
 Then enable your module in the generated `modules.yml` and restart. Check the

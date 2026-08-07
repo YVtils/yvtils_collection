@@ -44,16 +44,11 @@ object DynamicModuleRegistry {
          * entirely, instead of being a normal togglable module.
          *
          * Used for modules that aren't meaningful for a server admin to
-         * toggle on/off directly:
-         * - `gui-v2` is a shared library other modules depend on, not an
-         *   independently useful feature (see the class docs on
-         *   `yv.tils.gui.core.InvUIBootstrap` for why its own lifecycle
-         *   toggle is largely meaningless) - and for `core` specifically,
-         *   it's already bundled directly via a Gradle `implementation`
-         *   dependency, so it doesn't need to be dynamically fetched here
-         *   at all.
-         * - `migration` is an internal, one-off data-migration tool, not a
-         *   persistent feature toggle.
+         * toggle on/off directly - e.g. `migration` is an internal, one-off
+         * data-migration tool, not a persistent feature toggle.
+         *
+         * (The `gui` module used to be listed here too, but it isn't a normal
+         * [KNOWN_MODULES] entry at all anymore - see [GUI_ARTIFACTS].)
          *
          * Hidden modules are excluded from [ModuleConfig.readEnabledModules]'s
          * result unconditionally - not shown/toggle-able in the in-game GUI,
@@ -108,11 +103,6 @@ object DynamicModuleRegistry {
             "moderation", "26.08.01", "yv.tils.moderation.ModerationYVtils",
             "Moderation tools such as mutes and punishment logging."
         ),
-        "gui-v2" to ModuleArtifact(
-            "gui-v2", "26.08.01", "yv.tils.gui.GUIYVtils",
-            "GUI module for YVtils, powered by InvUI.",
-            hidden = true,
-        ),
         "migration" to ModuleArtifact(
             "migration", "26.08.01", "yv.tils.migration.MigrationYVtils",
             "Migration tools for moving data between YVtils versions.",
@@ -123,4 +113,79 @@ object DynamicModuleRegistry {
             "Player and server statistics tracking."
         ),
     )
+
+    /**
+     * The `gui` module is deliberately NOT a normal [KNOWN_MODULES] entry.
+     *
+     * Every other module is published under a single, fixed artifactId - one
+     * Maven coordinate always works, regardless of which Minecraft version
+     * the server is actually running, because those modules only touch
+     * stable Paper API. `gui` is the one exception: it wraps InvUI, which
+     * dropped multi-version support starting with v2 (each InvUI release
+     * only targets ONE specific Minecraft version - see
+     * https://github.com/NichtStudioCode/InvUI's compatibility table).
+     * Resolving the wrong `gui-<version>` artifact for the running server
+     * would load an InvUI build that doesn't match its internals.
+     *
+     * This maps a Minecraft *minor* version (e.g. `"26.1"`, `"26.2"` - see
+     * [minecraftMinorVersion]) to the `gui-<version>` artifact that was built
+     * against a matching InvUI release. [DynamicModuleLoader] looks up the
+     * running server's actual Minecraft version at plugin-load time (via
+     * `io.papermc.paper.ServerBuildInfo`) and resolves only that one entry,
+     * unconditionally (like `migration`/formerly `gui-v2`, it's never listed
+     * in `modules.yml` or toggle-able - there's nothing to toggle, every
+     * server needs exactly one matching `gui` build).
+     *
+     * To add support for a new Minecraft version once InvUI publishes a
+     * matching release (e.g. `26.3`):
+     * 1. Create a `gui-26.3` Gradle module (copy `gui-26.2/build.gradle.kts`,
+     *    point its `sourceSets.main.kotlin` at `gui-26.1`'s sources, pin the
+     *    new InvUI version).
+     * 2. Add `"gui-26.3"` to `publishableModules` in the root
+     *    `build.gradle.kts`, and a `"gui-26.3" to "26.3"` entry to
+     *    `paperApiVersionOverrides` there too.
+     * 3. Add a `"26.3" to ModuleArtifact("gui-26.3", ...)` entry below.
+     * 4. Publish it (`./gradlew :gui-26.3:publish`).
+     */
+    val GUI_ARTIFACTS: Map<String, ModuleArtifact> = mapOf(
+        "26.1" to ModuleArtifact(
+            "gui-26.1", "26.08.01", "yv.tils.gui.GUIYVtils",
+            "GUI module for YVtils (Minecraft 26.1.x, InvUI 2.1.x)."
+        ),
+        "26.2" to ModuleArtifact(
+            "gui-26.2", "26.08.01", "yv.tils.gui.GUIYVtils",
+            "GUI module for YVtils (Minecraft 26.2.x, InvUI 2.3.x)."
+        ),
+    )
+
+    /** The `gui` entry used when the running server's Minecraft version has no exact match in
+     * [GUI_ARTIFACTS] (e.g. a not-yet-added future version). Picking a mismatched InvUI build is
+     * risky (see [GUI_ARTIFACTS]'s docs), but picking none at all means every module that opens a
+     * GUI (config editors, `/yvtils modules`, ...) silently fails instead - falling back to the
+     * newest known entry is the better default until that new version gets its own real entry. */
+    val GUI_FALLBACK_MINECRAFT_VERSION = "26.2"
+
+    /**
+     * Extracts the `major.minor` part of a Minecraft version id as returned by
+     * `io.papermc.paper.ServerBuildInfo.buildInfo().minecraftVersionId()`
+     * (e.g. `"26.1.2"` -> `"26.1"`, `"26.2"` -> `"26.2"`), for looking up
+     * [GUI_ARTIFACTS]. Patch releases within the same minor version (e.g. a
+     * hypothetical `26.1.3`) are assumed to stay compatible with the same
+     * InvUI release as `26.1.2`, matching InvUI's own compatibility table.
+     */
+    fun minecraftMinorVersion(minecraftVersionId: String): String {
+        val parts = minecraftVersionId.split(".")
+        return if (parts.size >= 2) "${parts[0]}.${parts[1]}" else minecraftVersionId
+    }
+
+    /**
+     * Resolves the `gui` [ModuleArtifact] to use for a given Minecraft
+     * version id, falling back to [GUI_FALLBACK_MINECRAFT_VERSION] (with the
+     * caller expected to log a warning) if there's no exact match yet.
+     */
+    fun guiArtifactFor(minecraftVersionId: String): ModuleArtifact {
+        val minorVersion = minecraftMinorVersion(minecraftVersionId)
+        return GUI_ARTIFACTS[minorVersion]
+            ?: GUI_ARTIFACTS.getValue(GUI_FALLBACK_MINECRAFT_VERSION)
+    }
 }

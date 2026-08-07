@@ -21,11 +21,13 @@ import yv.tils.configv2.ConfigV2YVtils
 import yv.tils.core.commands.register.YVtilsCommand
 import yv.tils.core.loader.DynamicModuleDriver
 import yv.tils.core.loader.ModuleConfig
+import yv.tils.gui.logic.CommonConfigGui
 import yv.tils.utils.UtilsYVtils
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
+import java.util.function.Consumer
 
 class YVtils : JavaPlugin() {
     companion object {
@@ -126,6 +128,15 @@ class YVtils : JavaPlugin() {
         } catch (e: Exception) {
             Logger.error("Error during YVtils startup: ${e.message}")
             e.printStackTrace()
+        }
+
+        // `common` can't register its own `configGuiOpener` (doing so would need a
+        // `common` -> `gui` dependency, but `gui` already depends on `common` - see
+        // `CommonConfigGui`'s KDoc), so `core` - which already embeds/resolves both - patches
+        // it in here instead, right after `common` has registered itself via `Module.addModule`.
+        Module.getModule("common")?.let { commonModule ->
+            Module.removeModule(commonModule)
+            Module.addModule(commonModule.copy(configGuiOpener = Consumer { player -> CommonConfigGui.open(player) }))
         }
 
         YVtilsCommand()

@@ -32,6 +32,7 @@ object ModuleIcons {
     /** Material used when [ICONS] has no dedicated identity head for a module. */
     fun fallbackMaterial(name: String): Material = when (name) {
         "regions" -> Material.FILLED_MAP
+        "common" -> Material.COMMAND_BLOCK
         else -> Material.PAPER
     }
 }

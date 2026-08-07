@@ -41,7 +41,7 @@ import yv.tils.configv2.files.ConfigFormat
  * }
  * ```
  *
- * A GUI `saver` callback (see `ConfigGui.open` in `gui-v2`) can call
+ * A GUI `saver` callback (see `ConfigGui.open` in `gui`) can call
  * [persist] directly after mutating entries returned by [entries] in place
  * - it always fully overwrites the on-disk value for every registered
  * entry by default, so in-game edits win over whatever was previously on

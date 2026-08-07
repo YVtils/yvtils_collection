@@ -30,7 +30,7 @@ import yv.tils.utils.modules.Module
 /**
  * InvUI-powered GUI for `/yvtils config`, listing every currently-active module that
  * registered a [Module.YVtilsModuleData.configGuiOpener] and opening that module's own
- * (`gui-v2`-backed, usually `DataClassConfigGui`) config editor on click.
+ * (`gui`-backed, usually `DataClassConfigGui`) config editor on click.
  *
  * `core` has no compile-time dependency on any feature module (they're resolved and
  * instantiated dynamically at runtime - see `DynamicModuleDriver`), so this can't hold a

@@ -78,7 +78,7 @@ class Module {
          * shared bootstrap classloader, so it can safely cross that boundary; Kotlin still
          * SAM-converts a lambda literal into one automatically at each module's own
          * `MODULE` declaration site (typically `{ player -> ManageGUI().openGUI(player) }`,
-         * delegating to a `gui-v2`-backed `DataClassConfigGui.open(...)` call).
+         * delegating to a `gui`-backed `DataClassConfigGui.open(...)` call).
          *
          * This indirection (a per-module opener registered on [YVtilsModuleData] itself) is
          * what lets `core`'s `/yvtils config` list and open every active module's config GUI

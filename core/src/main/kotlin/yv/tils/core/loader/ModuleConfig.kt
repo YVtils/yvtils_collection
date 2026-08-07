@@ -88,7 +88,7 @@ object ModuleConfig {
      * want on.
      *
      * Modules marked [DynamicModuleRegistry.ModuleArtifact.hidden] (e.g.
-     * `gui-v2`, `migration`) are always EXCLUDED from the returned set,
+     * `migration`) are always EXCLUDED from the returned set,
      * regardless of what's in the file - even if an admin hand-edits the
      * file to add e.g. `migration: true`, that line is ignored. This is
      * deliberately "always excluded", not "always force-enabled": this
@@ -187,8 +187,11 @@ object ModuleConfig {
         val header = """
             |# YVtils dynamic module configuration.
             |# Set each module to true or false, then restart the server for changes to take effect.
-            |# Note: some internal modules (e.g. gui-v2, migration) are intentionally not
-            |# listed here and cannot be enabled through this file.
+            |# Note: some internal modules (e.g. migration) are intentionally not
+            |# listed here and cannot be enabled through this file. The `gui` module isn't
+            |# listed either, but for a different reason - it isn't a togglable feature at
+            |# all; `core` always resolves exactly one `gui-<version>` build matching the
+            |# server's Minecraft version (see DynamicModuleRegistry.GUI_ARTIFACTS).
             |
             """.trimMargin()
 
