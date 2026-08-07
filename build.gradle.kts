@@ -21,6 +21,26 @@ plugins {
     id("com.gradleup.shadow") version "9.4.1" apply false
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.21" apply false
     id("xyz.jpenilla.run-paper") version "3.0.2" apply false
+    id("org.cyclonedx.bom") version "2.3.1"
+}
+
+/*
+ * Aggregate CycloneDX SBOM (Software Bill of Materials) generation for the
+ * whole monorepo - produces a single bom.json covering every subproject's
+ * resolved dependencies, used by the `sbom.yml` workflow to upload to a
+ * self-hosted OWASP Dependency-Track instance on every merge to `main`.
+ *
+ * Per-module SBOMs are intentionally NOT generated: Dependency-Track projects
+ * are tracked at the monorepo level (one "project" per push), matching how
+ * modules are versioned/released together rather than independently audited.
+ */
+tasks.cyclonedxBom {
+    setIncludeConfigs(listOf("runtimeClasspath", "compileClasspath"))
+    setProjectType("application")
+    setSchemaVersion("1.5")
+    setDestination(project.file("build/reports"))
+    setOutputName("bom")
+    setOutputFormat("json")
 }
 
 allprojects {
