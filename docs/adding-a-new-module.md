@@ -37,7 +37,35 @@ independent and someone might reasonably want it without the others.
 
 ## Step 1 - Create the Gradle module
 
-Create the folder and a minimal `build.gradle.kts`:
+**Fast path:** `./scripts/new-module.sh` walks you through creating a module
+interactively - module name, description, whether it's hidden/internal, and
+whether it needs a `commands/`/`listeners/` package - then scaffolds all of
+it automatically: the module folder, `build.gradle.kts`, the entry-point
+class, config (a `@ConfigDescription`-annotated data class + `ConfigFile` +
+an in-game config GUI wired up via `configGuiOpener`), translations
+(`RegisterStrings`), permissions (an enum + generated wildcard), a fillable
+`README.md`, the `settings.gradle.kts` include, the `publishableModules`
+entry, and the `DynamicModuleRegistry.KNOWN_MODULES` entry (steps 1, 2-3,
+5-7, 9 below, in one go). Any answer can instead be supplied up front (module
+name and description positionally, the rest via `--hidden`/`--public`,
+`--with-commands`/`--no-commands`, `--with-listeners`/`--no-listeners`,
+`--yes` to accept every remaining default without asking) - only whatever's
+still undecided afterward gets prompted for, e.g.:
+
+```bash
+./scripts/new-module.sh                                                     # fully interactive
+./scripts/new-module.sh waypoint-v2 "Second waypoint system, experimental." # prompts for the rest
+./scripts/new-module.sh internal-tool "One-off internal tool." --hidden --no-commands --no-listeners # fully scripted
+```
+
+Run `./scripts/new-module.sh --help` for the full option reference.
+
+Everything the script generates is a starting point, not a finished feature -
+the rest of this guide still explains the conventions behind each generated
+file so you know what to flesh out (real config fields, real translations,
+real permissions, the actual feature logic).
+
+To do it by hand instead, create the folder and a minimal `build.gradle.kts`:
 
 ```
 your-module/
@@ -339,6 +367,9 @@ Plain Bukkit `Listener` implementations, registered in
 (see Step 3). Nothing special here compared to a normal Paper plugin.
 
 ## Step 9 - Wire it into the dynamic module system
+
+If you used `./scripts/new-module.sh`, steps 1-2 below are already done for
+you - skip to step 3.
 
 Once the module builds and behaves correctly, follow
 [**Part 1 of the migration guide**](./migrating-to-dynamic-modules.md#part-1---migrating-a-feature-module)

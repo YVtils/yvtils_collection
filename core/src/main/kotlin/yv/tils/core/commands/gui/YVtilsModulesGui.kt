@@ -48,8 +48,11 @@ import java.nio.file.Path
  * shown, excluding any marked [DynamicModuleRegistry.ModuleArtifact.hidden]
  * (e.g. `migration`) - those are excluded from the dynamic-module system
  * entirely (see [ModuleConfig.readEnabledModules]), not just from this GUI,
- * and cannot be enabled through `modules.yml` either. The `gui` module isn't
- * a [DynamicModuleRegistry.KNOWN_MODULES] entry at all (see
+ * and cannot be enabled through `modules.yml` either - as well as any marked
+ * [DynamicModuleRegistry.ModuleArtifact.manual], which are opt-in modules
+ * intentionally not advertised here but still enable-able by hand-adding them
+ * to `modules.yml`. The `gui` module isn't a
+ * [DynamicModuleRegistry.KNOWN_MODULES] entry at all (see
  * [DynamicModuleRegistry.GUI_ARTIFACTS]), so it's not listed for the same
  * reason - not because it's marked hidden.
  *
@@ -137,7 +140,7 @@ object YVtilsModulesGui {
      */
     private fun buildContentItems(player: Player, state: State): List<Item> {
         val names = DynamicModuleRegistry.KNOWN_MODULES
-            .filterValues { !it.hidden }
+            .filterValues { !it.hidden && !it.manual }
             .keys
             .sorted()
 

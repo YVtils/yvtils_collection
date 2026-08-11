@@ -28,7 +28,7 @@ class DiscordYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "discord",
-            "4.0.0",
+            Module.readVersion(DiscordYVtils::class.java, "discord"),
             "Discord integration for YVtils",
             "YVtils",
             "",

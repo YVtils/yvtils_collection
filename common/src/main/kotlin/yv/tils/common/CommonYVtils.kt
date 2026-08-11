@@ -20,7 +20,7 @@ class CommonYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "common",
-            "26.08.01",
+            Module.readVersion(CommonYVtils::class.java, "common"),
             "Common module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/common/",

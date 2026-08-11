@@ -31,7 +31,7 @@ class MigrationYVtils: Module.YVtilsModule {
         val MODULE =
             Module.YVtilsModuleData(
                 name = "migration",
-                version = "1.0.0",
+                version = Module.readVersion(MigrationYVtils::class.java, "migration"),
                 description = "Migration module for YVtils",
                 author = "YVtils",
             )

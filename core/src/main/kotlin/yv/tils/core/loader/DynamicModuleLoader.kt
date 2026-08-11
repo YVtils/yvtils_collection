@@ -133,6 +133,7 @@ class DynamicModuleLoader : PluginLoader {
             "xenondevs" to "https://repo.xenondevs.xyz/releases",
             "maxhenkel" to "https://maven.maxhenkel.de/repository/public",
             "lavalink" to "https://maven.lavalink.dev/releases",
+            "enginehub" to "https://maven.enginehub.org/repo",
         )
     }
 
@@ -163,6 +164,14 @@ class DynamicModuleLoader : PluginLoader {
 
             if (artifact == null) {
                 logger.warn("[DynamicModuleLoader] Unknown module '$moduleName', skipping.")
+                continue
+            }
+
+            if (artifact.static) {
+                // Shaded into this launcher's own main jar - there's nothing to
+                // resolve over the network. DynamicModuleDriver still instantiates
+                // it from the main jar. See DynamicModuleRegistry.ModuleArtifact.static.
+                logger.info("[DynamicModuleLoader] Module '$moduleName' is statically bundled - not resolved from the registry.")
                 continue
             }
 

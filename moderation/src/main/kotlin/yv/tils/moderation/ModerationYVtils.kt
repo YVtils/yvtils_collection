@@ -32,7 +32,7 @@ class ModerationYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "moderation",
-            "1.0.0-beta.1",
+            Module.readVersion(ModerationYVtils::class.java, "moderation"),
             "Moderation module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/moderation/",

@@ -13,11 +13,44 @@
 package yv.tils.utils.modules
 
 import org.bukkit.entity.Player
+import java.util.Properties
 import java.util.function.Consumer
 
 class Module {
     companion object {
         private val loadedModules = ArrayList<YVtilsModuleData>()
+
+        /**
+         * Reads a module's own version out of a generated
+         * `module-version-<moduleName>.properties` resource, instead of a hardcoded
+         * string literal in each module's `XxxYVtils.kt`.
+         *
+         * That resource doesn't exist anywhere in source control - it's generated
+         * entirely by the root `build.gradle.kts`'s `generateModuleVersionResource`
+         * task (one per subproject), which writes `version=<project.version>` using
+         * that module's own `build.gradle.kts` `version = "..."` line. THAT line is
+         * therefore the ONLY place a module's version needs to be edited; nothing
+         * else needs to be kept in sync by hand, and no module has to commit its own
+         * version-resource file.
+         *
+         * [moduleName] must match the calling module's own Gradle project name
+         * exactly (e.g. `"regions-v2"`, `"gui-26.1"`) - that's what
+         * `generateModuleVersionResource` names the generated file after, since
+         * (unlike a package path) it's something Gradle already knows for every
+         * subproject with zero extra bookkeeping, and it's unique across the whole
+         * build. Looked up via [clazz]'s own classloader so this resolves against
+         * that specific module's own jar/classpath entry.
+         */
+        fun readVersion(clazz: Class<*>, moduleName: String): String {
+            val stream = clazz.classLoader.getResourceAsStream("module-version-$moduleName.properties")
+                ?: return "unknown"
+
+            return stream.use {
+                val properties = Properties()
+                properties.load(it)
+                properties.getProperty("version", "unknown")
+            }
+        }
 
         fun addModule(module: YVtilsModuleData) {
             loadedModules.add(module)

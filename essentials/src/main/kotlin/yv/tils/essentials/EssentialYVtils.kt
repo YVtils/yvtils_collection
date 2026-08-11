@@ -27,7 +27,7 @@ class EssentialYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "essentials",
-            "26.08.01",
+            Module.readVersion(EssentialYVtils::class.java, "essentials"),
             "Essentials module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/essentials/"

@@ -13,3 +13,6 @@ dependencies:
     voicechat:
       load: BEFORE
       required: false
+    worldguard:
+      load: BEFORE
+      required: false

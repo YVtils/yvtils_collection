@@ -54,7 +54,7 @@ class StatsYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "stats",
-            "1.0.0-beta.1",
+            Module.readVersion(StatsYVtils::class.java, "stats"),
             "Stats module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/stats/",

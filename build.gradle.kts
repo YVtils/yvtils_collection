@@ -14,6 +14,8 @@ import io.papermc.paperweight.userdev.PaperweightUserDependenciesExtension
 import org.cyclonedx.Version
 import org.cyclonedx.gradle.CyclonedxDirectTask
 import org.cyclonedx.model.Component
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.WriteProperties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -71,8 +73,32 @@ allprojects {
         maven("https://maven.maxhenkel.de/repository/public")
         maven("https://maven.lavalink.dev/releases")
         maven("https://jitpack.io")
+        maven {
+            name = "enginehub"
+            url = uri("https://maven.enginehub.org/repo/")
+        }
     }
 }
+
+/*
+ * Single source of truth for every module's own version: one file
+ * (`gradle/module-versions.properties`), one `<projectName>=<version>` line
+ * per module - see that file for the full explanation. A module NOT listed
+ * there just keeps `allprojects`'s default version above.
+ *
+ * This is the ONLY place a module's version needs to change - no module's
+ * own `build.gradle.kts` sets `version` anymore, and `Module.readVersion(...)`
+ * (see `utils`) / `generateModuleVersionResource` below both key off
+ * `project.version`, whatever set it.
+ */
+val moduleVersions = java.util.Properties().apply {
+    rootProject.file("gradle/module-versions.properties").inputStream().use { load(it) }
+}
+
+subprojects {
+    moduleVersions.getProperty(name)?.let { version = it }
+}
+
 
 /*
  * Feature modules that are published as standalone Maven artifacts to the
@@ -105,7 +131,30 @@ val publishableModules = setOf(
     "stats",
     "gui-26.1",
     "gui-26.2",
-    "yv-smp"
+    "yv-smp",
+)
+
+/*
+ * Feature modules that are NOT fetched dynamically at runtime but shaded
+ * directly into a launcher's own main jar (via a normal `implementation`
+ * dependency - see `core/build.gradle.kts`).
+ *
+ * A module belongs here when it must run in the launcher's *main* plugin
+ * classloader rather than the isolated "library tier" every dynamically-fetched
+ * module lives in - typically because it references another Bukkit plugin's
+ * API directly (declared via `paper-plugin.yml` `dependencies`), which the
+ * library tier cannot see (`regions-v2` -> WorldGuard). These stay togglable
+ * via `modules.yml` (they remain in `DynamicModuleRegistry.KNOWN_MODULES`,
+ * flagged `static = true`) but are never published to / resolved from the
+ * Maven registry.
+ *
+ * Like `publishableModules`, they MUST still rely on the shared runtime tier
+ * for CommandAPI/coroutines/serialization/utils/config/common (kept
+ * `compileOnly` via `usesSharedRuntimeTier` below), so those aren't shaded a
+ * second time into the launcher's main jar alongside the runtime bundle.
+ */
+val staticBundledModules = setOf(
+    "regions-v2",
 )
 
 /*
@@ -125,7 +174,7 @@ val dynamicCoreModules = setOf(
 // Modules that must rely on the shared runtime tier (embedded JarLibrary +
 // MavenLibraryResolver) instead of shading CommandAPI/coroutines/serialization
 // directly into their own jar.
-val usesSharedRuntimeTier = publishableModules + dynamicCoreModules
+val usesSharedRuntimeTier = publishableModules + dynamicCoreModules + staticBundledModules
 
 /*
  * Per-module Paper API target overrides.
@@ -190,6 +239,45 @@ subprojects {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_25)
         }
+    }
+
+    /*
+     * Centralizes every module's runtime version into a single place: its own
+     * `build.gradle.kts` `version = "..."` line (see `allprojects` above for the
+     * fallback default) - AND generates the resource that exposes it at runtime
+     * entirely from here, so no module needs to commit its own
+     * `module-version.properties` file.
+     *
+     * The generated file is named after this subproject's own Gradle project
+     * name (`module-version-<project.name>.properties`, e.g.
+     * `module-version-regions-v2.properties`) rather than being nested under a
+     * per-module package path - that's what makes this fully generic: unlike a
+     * package path (which differs per module and isn't derivable from the
+     * Gradle project name alone, e.g. `gui-26.1`'s package is `yv.tils.gui`),
+     * `project.name` is something Gradle already knows for every subproject
+     * with zero extra bookkeeping, and it's unique across the whole build, so
+     * two modules' generated resources can never collide even if their classes
+     * end up sharing a classloader tier at runtime (see `DynamicModuleLoader`).
+     *
+     * Each module's `XxxYVtils.kt` reads this back via
+     * `Module.readVersion(XxxYVtils::class.java, "<project.name>")` - see
+     * `utils`'s `Module.kt` - instead of a hardcoded version string literal.
+     *
+     * `core` doesn't need this: it already gets the same treatment for free via
+     * its `paper-plugin.yml`'s own `version: ${version}` (expanded by Paper's
+     * plugin descriptor processing) and reads it back via `pluginMeta.version`.
+     */
+    val generateModuleVersionResource = tasks.register<WriteProperties>("generateModuleVersionResource") {
+        destinationFile.set(layout.buildDirectory.file("generated/moduleVersion/module-version-${project.name}.properties"))
+        property("version", project.version.toString())
+    }
+
+    the<SourceSetContainer>().named("main") {
+        resources.srcDir(layout.buildDirectory.dir("generated/moduleVersion"))
+    }
+
+    tasks.named("processResources") {
+        dependsOn(generateModuleVersionResource)
     }
 
     tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {

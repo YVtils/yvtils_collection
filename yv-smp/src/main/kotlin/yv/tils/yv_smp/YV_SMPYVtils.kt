@@ -31,7 +31,7 @@ class YV_SMPYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "yv_smp",
-            "10.0.0-dev.1",
+            Module.readVersion(YV_SMPYVtils::class.java, "yv-smp"),
             "YV SMP module for YVtils",
             "YVtils",
         )

@@ -27,7 +27,7 @@ class StatusYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "status",
-            "26.08.01",
+            Module.readVersion(StatusYVtils::class.java, "status"),
             "Status module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/status/",

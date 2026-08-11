@@ -100,6 +100,12 @@ object ModuleConfig {
      * registry), which previously hard-crashed plugin loading entirely for
      * `migration`. Hidden modules are internal/not meant to be toggled by an
      * admin through this generic mechanism at all - not "always on".
+     *
+     * Modules marked [DynamicModuleRegistry.ModuleArtifact.manual] are the
+     * middle ground: like hidden ones they're never written to the generated
+     * file (nor shown in the GUI), but - unlike hidden ones - a hand-added
+     * `true` line IS honored, and is preserved on subsequent rewrites (see
+     * [buildDefaultFile]).
      */
     fun readEnabledModules(
         dataDirectory: Path,
@@ -107,11 +113,10 @@ object ModuleConfig {
         defaultEnabledModules: Set<String> = emptySet(),
     ): List<String> {
         val file = dataDirectory.resolve(FILE_NAME)
-        val configurableModules = knownModules.filterNot(::isHidden)
 
         if (!Files.exists(file)) {
             Files.createDirectories(dataDirectory)
-            Files.writeString(file, buildDefaultFile(configurableModules, defaultEnabledModules))
+            Files.writeString(file, buildDefaultFile(listableModules(knownModules), defaultEnabledModules))
         }
 
         return parse(Files.readAllLines(file))
@@ -144,7 +149,7 @@ object ModuleConfig {
 
         Files.writeString(
             dataDirectory.resolve(FILE_NAME),
-            buildDefaultFile(knownModules.filterNot(::isHidden), enabledModules)
+            buildDefaultFile(listableModules(knownModules), enabledModules)
         )
     }
 
@@ -183,7 +188,27 @@ object ModuleConfig {
     private fun isHidden(moduleName: String): Boolean =
         DynamicModuleRegistry.KNOWN_MODULES[moduleName]?.hidden == true
 
-    private fun buildDefaultFile(knownModules: Collection<String>, defaultEnabledModules: Set<String>): String {
+    /**
+     * Whether [moduleName] is marked
+     * [DynamicModuleRegistry.ModuleArtifact.manual] in
+     * [DynamicModuleRegistry.KNOWN_MODULES] - i.e. not written to
+     * `modules.yml`/shown in the GUI automatically, but still honored if an
+     * admin hand-adds it with `true` (see [readEnabledModules]). [isHidden]
+     * takes precedence over this. Unknown module names are never manual.
+     */
+    private fun isManual(moduleName: String): Boolean =
+        DynamicModuleRegistry.KNOWN_MODULES[moduleName]?.manual == true
+
+    /**
+     * Modules that appear in the auto-generated `modules.yml` and the in-game
+     * toggle GUI: everything in [knownModules] except [isHidden] ones (never
+     * listed nor honored) and [isManual] ones (not listed, but honored when
+     * hand-added - see [readEnabledModules]/[buildDefaultFile]).
+     */
+    private fun listableModules(knownModules: Collection<String>): List<String> =
+        knownModules.filterNot { isHidden(it) || isManual(it) }
+
+    private fun buildDefaultFile(listableModules: Collection<String>, enabledModules: Set<String>): String {
         val header = """
             |# YVtils dynamic module configuration.
             |# Set each module to true or false, then restart the server for changes to take effect.
@@ -192,11 +217,20 @@ object ModuleConfig {
             |# listed either, but for a different reason - it isn't a togglable feature at
             |# all; `core` always resolves exactly one `gui-<version>` build matching the
             |# server's Minecraft version (see DynamicModuleRegistry.GUI_ARTIFACTS).
+            |#
+            |# Some optional modules are not listed here automatically - you can still enable
+            |# one by adding its name below by hand with `true` (see the YVtils docs for the
+            |# list of available optional modules).
             |
             """.trimMargin()
 
-        val entries = knownModules.joinToString("\n") { name ->
-            "$name: ${defaultEnabledModules.contains(name)}"
+        // Manual (opt-in) modules aren't listed by default, but once an admin has enabled one
+        // by hand we keep it in the file so a GUI-driven rewrite doesn't silently drop it.
+        val manualEnabled = enabledModules.filter { isManual(it) && !isHidden(it) }
+        val names = (listableModules + manualEnabled).distinct()
+
+        val entries = names.joinToString("\n") { name ->
+            "$name: ${enabledModules.contains(name)}"
         }
 
         return "$header$entries\n"

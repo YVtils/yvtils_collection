@@ -25,7 +25,7 @@ class RegionsYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "regions",
-            "1.0.0-beta.2",
+            Module.readVersion(RegionsYVtils::class.java, "regions"),
             "Regions module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/regions/",

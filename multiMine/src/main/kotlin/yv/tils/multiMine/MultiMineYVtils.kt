@@ -31,7 +31,7 @@ class MultiMineYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "multiMine",
-            "2.0.0",
+            Module.readVersion(MultiMineYVtils::class.java, "multiMine"),
             "MultiMine module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/multiMine/",

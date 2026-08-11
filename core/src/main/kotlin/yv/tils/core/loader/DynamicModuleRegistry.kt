@@ -23,7 +23,9 @@ package yv.tils.core.loader
  * (e.g. `essentials` -> `EssentialYVtils`, `gui` -> `GUIYVtils`).
  *
  * Versioning is independent per module (not tied to the launcher's own
- * version) - bump the `version` here when a module gets a new release.
+ * version) - each entry's `version` is looked up via [versionOf] from the
+ * repo-wide `gradle/module-versions.properties` (see that file), so bumping a
+ * module's version here just means bumping it there - not editing this file.
  */
 object DynamicModuleRegistry {
     data class ModuleArtifact(
@@ -62,60 +64,123 @@ object DynamicModuleRegistry {
          * artifact isn't actually published (e.g. a throwaway dev registry).
          */
         val hidden: Boolean = false,
+        /**
+         * Whether this module is shaded directly into the launcher's own main
+         * jar instead of being fetched dynamically from the Maven registry
+         * (see `staticBundledModules` in the root `build.gradle.kts`).
+         *
+         * Static modules stay fully togglable through `modules.yml`/the
+         * in-game GUI (they're still normal [KNOWN_MODULES] entries), but:
+         * - [DynamicModuleLoader] skips them entirely - there is no artifact
+         *   to resolve over the network; their classes are already present in
+         *   the main jar.
+         * - [DynamicModuleDriver] still instantiates them by
+         *   [entryPointClass], which resolves fine because `Class.forName`
+         *   from the launcher's own classloader sees the main jar.
+         *
+         * Used for modules that must run in the launcher's *main* plugin
+         * classloader rather than the isolated library tier - e.g. `regions-v2`
+         * references WorldGuard's API directly, which only the main classloader
+         * can see (via `paper-plugin.yml` `dependencies`).
+         *
+         * Unlike [hidden], the [version] here is unused (nothing is ever
+         * Maven-resolved for a static module), but a valid entry must still
+         * exist in `gradle/module-versions.properties` since [versionOf] is
+         * evaluated eagerly when this map is built.
+         */
+        val static: Boolean = false,
+        /**
+         * Whether this module is a manual, opt-in module: excluded from the
+         * auto-generated `modules.yml` and the in-game toggle GUI (like
+         * [hidden]) - but, unlike [hidden], still honored if an admin adds it
+         * to `modules.yml` by hand with `true`.
+         *
+         * Use this for modules that shouldn't be advertised to every admin
+         * (niche/experimental/situational) yet are perfectly valid to enable
+         * deliberately. Once manually enabled, the entry is preserved across
+         * GUI-driven rewrites of `modules.yml` (see [ModuleConfig]) instead of
+         * being silently dropped when another module is toggled.
+         *
+         * [hidden] takes precedence: a module marked both is treated as
+         * hidden (never honored, even if hand-added).
+         */
+        val manual: Boolean = false,
     )
 
     const val GROUP_ID = "yv.yvtils"
 
+    /**
+     * Looks up a module's current version out of [GeneratedModuleVersions] (itself
+     * generated straight from the repo-wide `gradle/module-versions.properties` by
+     * `core/build.gradle.kts`'s `generateModuleVersionsKotlin` task), keyed by
+     * [moduleName] - which must match that module's own Gradle project name exactly
+     * (e.g. `"discord"`, `"gui-26.1"`, `"yv-smp"`).
+     *
+     * Fails fast (rather than falling back to some stale default) if a module is
+     * missing an entry there: [KNOWN_MODULES]/[GUI_ARTIFACTS] use this to build the
+     * exact Maven coordinate resolved at runtime, so a wrong/missing version here
+     * would either fail to resolve or silently fetch an unintended artifact.
+     */
+    private fun versionOf(moduleName: String): String =
+        GeneratedModuleVersions.VERSIONS[moduleName]
+            ?: error("No version found for module '$moduleName' in gradle/module-versions.properties")
+
     val KNOWN_MODULES = mapOf(
         "discord" to ModuleArtifact(
-            "discord", "26.08.01", "yv.tils.discord.DiscordYVtils",
+            "discord", versionOf("discord"), "yv.tils.discord.DiscordYVtils",
             "Discord integration: chat bridging, webhooks and linked accounts."
         ),
         "regions" to ModuleArtifact(
-            "regions", "26.08.01", "yv.tils.regions.RegionsYVtils",
+            "regions", versionOf("regions"), "yv.tils.regions.RegionsYVtils",
             "Land claiming and protected regions."
         ),
         "multiMine" to ModuleArtifact(
-            "multiMine", "26.08.01", "yv.tils.multiMine.MultiMineYVtils",
+            "multiMine", versionOf("multiMine"), "yv.tils.multiMine.MultiMineYVtils",
             "Lets multiple players break the same block together."
         ),
         "essentials" to ModuleArtifact(
-            "essentials", "26.08.01", "yv.tils.essentials.EssentialYVtils",
+            "essentials", versionOf("essentials"), "yv.tils.essentials.EssentialYVtils",
             "Core quality-of-life commands (home, spawn, gamemode, etc.)."
         ),
         "sit" to ModuleArtifact(
-            "sit", "26.08.01", "yv.tils.sit.SitYVtils",
+            "sit", versionOf("sit"), "yv.tils.sit.SitYVtils",
             "Lets players sit on stairs and slabs."
         ),
         "status" to ModuleArtifact(
-            "status", "26.08.01", "yv.tils.status.StatusYVtils",
+            "status", versionOf("status"), "yv.tils.status.StatusYVtils",
             "Player status effects and vanity status displays."
         ),
         "server" to ModuleArtifact(
-            "server", "26.08.01", "yv.tils.server.ServerYVtils",
+            "server", versionOf("server"), "yv.tils.server.ServerYVtils",
             "Server utility and administration commands."
         ),
         "message" to ModuleArtifact(
-            "message", "26.08.01", "yv.tils.message.MessageYVtils",
+            "message", versionOf("message"), "yv.tils.message.MessageYVtils",
             "Private messaging between players (/msg, /reply)."
         ),
         "moderation" to ModuleArtifact(
-            "moderation", "26.08.01", "yv.tils.moderation.ModerationYVtils",
+            "moderation", versionOf("moderation"), "yv.tils.moderation.ModerationYVtils",
             "Moderation tools such as mutes and punishment logging."
         ),
         "migration" to ModuleArtifact(
-            "migration", "26.08.01", "yv.tils.migration.MigrationYVtils",
+            "migration", versionOf("migration"), "yv.tils.migration.MigrationYVtils",
             "Migration tools for moving data between YVtils versions.",
             hidden = true,
         ),
         "stats" to ModuleArtifact(
-            "stats", "26.08.01", "yv.tils.stats.StatsYVtils",
+            "stats", versionOf("stats"), "yv.tils.stats.StatsYVtils",
             "Player and server statistics tracking."
         ),
         "yv-smp" to ModuleArtifact(
-            "yv-smp", "10.0.0-dev.2", "yv.tils.yv_smp.YV_SMPYVtils",
+            "yv-smp", versionOf("yv-smp"), "yv.tils.yv_smp.YV_SMPYVtils",
             "YV SMP module for YVtils",
-        )
+            manual = true,
+        ),
+        "regions-v2" to ModuleArtifact(
+            "regions-v2", versionOf("regions-v2"), "yv.tils.regionsv2.RegionsV2YVtils",
+            "Regions V2 provides survival features to claim and protect areas with flags based on the widely used worldguard plugin",
+            static = true,
+        ),
     )
 
     /**
@@ -153,11 +218,11 @@ object DynamicModuleRegistry {
      */
     val GUI_ARTIFACTS: Map<String, ModuleArtifact> = mapOf(
         "26.1" to ModuleArtifact(
-            "gui-26.1", "26.08.01", "yv.tils.gui.GUIYVtils",
+            "gui-26.1", versionOf("gui-26.1"), "yv.tils.gui.GUIYVtils",
             "GUI module for YVtils (Minecraft 26.1.x, InvUI 2.1.x)."
         ),
         "26.2" to ModuleArtifact(
-            "gui-26.2", "26.08.01", "yv.tils.gui.GUIYVtils",
+            "gui-26.2", versionOf("gui-26.2"), "yv.tils.gui.GUIYVtils",
             "GUI module for YVtils (Minecraft 26.2.x, InvUI 2.3.x)."
         ),
     )

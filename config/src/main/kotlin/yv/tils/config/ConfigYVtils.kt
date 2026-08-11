@@ -19,7 +19,7 @@ class ConfigYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "config",
-            "26.08.01",
+            Module.readVersion(ConfigYVtils::class.java, "config"),
             "YVtils Config Module",
             "YVtils",
             "https://docs.yvtils.net/config/"

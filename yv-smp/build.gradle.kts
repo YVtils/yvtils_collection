@@ -10,8 +10,6 @@
  * the YVtils Brand Protection Clause.
  */
 
-version = "10.0.0-dev.2"
-
 val opus4jVersion = "2.1.3"
 val lavaplayerVersion = "2.2.7"
 val lavalinkYoutubeVersion = "1.17.0"

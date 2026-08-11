@@ -39,7 +39,7 @@ class GUIYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "gui",
-            "1.0.0",
+            Module.readVersion(GUIYVtils::class.java, "gui-26.1"),
             "GUI module for YVtils, powered by InvUI",
             "YVtils",
             "https://docs.yvtils.net/gui/"

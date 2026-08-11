@@ -25,7 +25,7 @@ class ServerYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "server",
-            "1.0.0",
+            Module.readVersion(ServerYVtils::class.java, "server"),
             "Server module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/server/",

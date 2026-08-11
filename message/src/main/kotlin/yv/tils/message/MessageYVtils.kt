@@ -25,7 +25,7 @@ class MessageYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "message",
-            "1.0.0",
+            Module.readVersion(MessageYVtils::class.java, "message"),
             "Message module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/message/"

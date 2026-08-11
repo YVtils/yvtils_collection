@@ -19,7 +19,7 @@ class UtilsYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "utils",
-            "26.08.01",
+            Module.readVersion(UtilsYVtils::class.java, "utils"),
             "Utils module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/utils/"

@@ -22,7 +22,7 @@ class SitYVtils : Module.YVtilsModule {
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "sit",
-            "1.0.0",
+            Module.readVersion(SitYVtils::class.java, "sit"),
             "Sit module for YVtils",
             "YVtils",
             "https://docs.yvtils.net/sit/"
