@@ -14,10 +14,11 @@ package yv.tils.yv_smp
 
 import yv.tils.common.permissions.PermissionManager
 import yv.tils.configv2.language.LanguageProvider
+import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
 import yv.tils.yv_smp.commands.MusicCommand
-import yv.tils.yv_smp.commands.StartCommand
+import yv.tils.yv_smp.commands.YVSmpCommand
 import yv.tils.yv_smp.configs.ConfigFile
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.listeners.PlayerQuitListener
@@ -43,6 +44,9 @@ class YV_SMPYVtils : Module.YVtilsModule {
     override fun enablePlugin() {
         Module.addModule(MODULE)
 
+        // Must run in enablePlugin() (not onLoad()) - see InvUIBootstrap's KDoc for why.
+        InvUIBootstrap.ensure()
+
         registerCommands()
         registerListeners()
         registerCoroutines()
@@ -64,7 +68,7 @@ class YV_SMPYVtils : Module.YVtilsModule {
     }
 
     private fun registerCommands() {
-        StartCommand()
+        YVSmpCommand()
         MusicCommand()
     }
 

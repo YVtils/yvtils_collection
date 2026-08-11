@@ -27,6 +27,8 @@ data class YVSMPConfigState(
     val documentation: String = "https://docs.yvtils.net/yv_smp/config.yml",
 
     var music: Music = Music(),
+
+    var start: Start = Start(),
 ) {
     data class Music(
         @ConfigDescription("Enable or disable the music system (requires Simple Voice Chat)")
@@ -46,5 +48,19 @@ data class YVSMPConfigState(
 
         @ConfigDescription("Allow players to override master volume with their own volume settings (future feature)")
         var allow_player_override: Boolean = false,
+    )
+
+    data class Start(
+        @ConfigDescription(
+            "Seconds to broadcast a countdown warning to all online players before /yvsmp start " +
+                "actually teleports them into spectator mode and begins the cinematic sequence. " +
+                "Set to 0 to skip the warmup and start immediately. Default: 10"
+        )
+        var warmup_seconds: Long = 10,
+
+        @ConfigDescription(
+            "Minimum number of online players required to run /yvsmp start. Default: 1"
+        )
+        var min_players: Int = 1,
     )
 }

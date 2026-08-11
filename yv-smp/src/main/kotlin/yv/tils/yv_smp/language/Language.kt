@@ -264,6 +264,396 @@ enum class LangStrings(override val key: String, override val translations: Map<
             FileTypes.EN to "<green>SMP is starting...</green>",
             FileTypes.DE to "<green>SMP wird gestartet...</green>",
         )
-    )
+    ),
+    START_ALREADY_RUNNING(
+        "command.start.already-running",
+        mapOf(
+            FileTypes.EN to "<red>The SMP start sequence is already running!</red>",
+            FileTypes.DE to "<red>Die SMP-Startsequenz läuft bereits!</red>",
+        )
+    ),
+    START_NO_PLAYERS(
+        "command.start.no-players",
+        mapOf(
+            FileTypes.EN to "<red>Cannot start - no players are online.</red>",
+            FileTypes.DE to "<red>Start nicht möglich - es sind keine Spieler online.</red>",
+        )
+    ),
+    START_STOP_SUCCESS(
+        "command.start.stop.success",
+        mapOf(
+            FileTypes.EN to "<green>The SMP start sequence has been aborted.</green>",
+            FileTypes.DE to "<green>Die SMP-Startsequenz wurde abgebrochen.</green>",
+        )
+    ),
+    START_STOP_NOT_RUNNING(
+        "command.start.stop.not-running",
+        mapOf(
+            FileTypes.EN to "<yellow>There is no start sequence currently running.</yellow>",
+            FileTypes.DE to "<yellow>Es läuft derzeit keine Startsequenz.</yellow>",
+        )
+    ),
+    START_NOT_ENOUGH_PLAYERS(
+        "command.start.not-enough-players",
+        mapOf(
+            FileTypes.EN to "<red>Cannot start - need at least <required> player(s) online" +
+                " (currently <online>).</red>",
+            FileTypes.DE to "<red>Start nicht möglich - es werden mindestens <required> Spieler benötigt" +
+                " (aktuell <online>).</red>",
+        )
+    ),
+    START_WARMUP_TITLE(
+        "command.start.warmup.title",
+        mapOf(
+            FileTypes.EN to "<gradient:#ffaa00:#ff5500><bold><seconds></bold></gradient>",
+            FileTypes.DE to "<gradient:#ffaa00:#ff5500><bold><seconds></bold></gradient>",
+        )
+    ),
+    START_WARMUP_SUBTITLE(
+        "command.start.warmup.subtitle",
+        mapOf(
+            FileTypes.EN to "<yellow>Get ready - the SMP is starting!</yellow>",
+            FileTypes.DE to "<yellow>Mach dich bereit - das SMP startet!</yellow>",
+        )
+    ),
+
+    // Setup Command
+    SETUP_BORDER_SUCCESS(
+        "command.setup.border.success",
+        mapOf(
+            FileTypes.EN to "<green>World border set to <yellow><size></yellow> blocks" +
+                " (transition: <yellow><time></yellow>s).</green>",
+            FileTypes.DE to "<green>Weltgrenze auf <yellow><size></yellow> Blöcke gesetzt" +
+                " (Übergang: <yellow><time></yellow>s).</green>",
+        )
+    ),
+    SETUP_BORDERCENTER_SUCCESS(
+        "command.setup.bordercenter.success",
+        mapOf(
+            FileTypes.EN to "<green>World border center set to <yellow><x>, <z></yellow>.</green>",
+            FileTypes.DE to "<green>Zentrum der Weltgrenze auf <yellow><x>, <z></yellow> gesetzt.</green>",
+        )
+    ),
+    SETUP_SPAWN_SUCCESS(
+        "command.setup.spawn.success",
+        mapOf(
+            FileTypes.EN to "<green>World spawn set to your current location.</green>",
+            FileTypes.DE to "<green>Weltspawn auf deinen aktuellen Standort gesetzt.</green>",
+        )
+    ),
+    SETUP_RESCAN_SUCCESS(
+        "command.setup.rescan.success",
+        mapOf(
+            FileTypes.EN to "<green>Island edge cache cleared - it will be rescanned on next use.</green>",
+            FileTypes.DE to "<green>Insel-Rand-Cache geleert - wird beim nächsten Gebrauch neu gescannt.</green>",
+        )
+    ),
+    SETUP_ALL_SUCCESS(
+        "command.setup.all.success",
+        mapOf(
+            FileTypes.EN to "<green>SMP setup complete: border reset, spawn recentered, island cache cleared.</green>",
+            FileTypes.DE to "<green>SMP-Setup abgeschlossen: Grenze zurückgesetzt, Spawn neu zentriert," +
+                " Insel-Cache geleert.</green>",
+        )
+    ),
+    SETUP_STATUS_TITLE(
+        "command.setup.status.title",
+        mapOf(
+            FileTypes.EN to "<gold>YV SMP Setup Status</gold>",
+            FileTypes.DE to "<gold>YV SMP Setup-Status</gold>",
+        )
+    ),
+    SETUP_STATUS_BORDER(
+        "command.setup.status.border",
+        mapOf(
+            FileTypes.EN to "<gray>- Border (<world>): <status></gray>",
+            FileTypes.DE to "<gray>- Grenze (<world>): <status></gray>",
+        )
+    ),
+    SETUP_STATUS_SPAWN(
+        "command.setup.status.spawn",
+        mapOf(
+            FileTypes.EN to "<gray>- Spawn (<world>): <x>, <y>, <z></gray>",
+            FileTypes.DE to "<gray>- Spawn (<world>): <x>, <y>, <z></gray>",
+        )
+    ),
+    SETUP_STATUS_RUNNING(
+        "command.setup.status.running",
+        mapOf(
+            FileTypes.EN to "<gray>- Start sequence running: <status></gray>",
+            FileTypes.DE to "<gray>- Startsequenz läuft: <status></gray>",
+        )
+    ),
+    SETUP_PLAYER_ONLY(
+        "command.setup.player-only",
+        mapOf(
+            FileTypes.EN to "<red>This command can only be used by a player.</red>",
+            FileTypes.DE to "<red>Dieser Befehl kann nur von einem Spieler verwendet werden.</red>",
+        )
+    ),
+
+    // GUI - shared
+    GUI_NO_PERMISSION(
+        "gui.yvsmp.no-permission",
+        mapOf(
+            FileTypes.EN to "<red>You don't have permission to do that.</red>",
+            FileTypes.DE to "<red>Du hast keine Berechtigung dafür.</red>",
+        )
+    ),
+    GUI_ITEM_CLOSE_NAME(
+        "gui.yvsmp.item.close.name",
+        mapOf(
+            FileTypes.EN to "<red>Close</red>",
+            FileTypes.DE to "<red>Schließen</red>",
+        )
+    ),
+    GUI_CONFIRM_NO_NAME(
+        "gui.yvsmp.confirm.no",
+        mapOf(
+            FileTypes.EN to "<red><bold>Cancel</bold></red>",
+            FileTypes.DE to "<red><bold>Abbrechen</bold></red>",
+        )
+    ),
+
+    // GUI - main menu
+    GUI_TITLE_MAIN(
+        "gui.yvsmp.main.title",
+        mapOf(
+            FileTypes.EN to "<gold><bold>YV SMP Control</bold></gold>",
+            FileTypes.DE to "<gold><bold>YV SMP Steuerung</bold></gold>",
+        )
+    ),
+    GUI_ITEM_START_NAME(
+        "gui.yvsmp.item.start.name",
+        mapOf(
+            FileTypes.EN to "<green><bold>Start SMP</bold></green>",
+            FileTypes.DE to "<green><bold>SMP Starten</bold></green>",
+        )
+    ),
+    GUI_ITEM_START_LORE(
+        "gui.yvsmp.item.start.lore",
+        mapOf(
+            FileTypes.EN to "<gray>Click to begin the cinematic start sequence.</gray>",
+            FileTypes.DE to "<gray>Klicke, um die Startsequenz zu beginnen.</gray>",
+        )
+    ),
+    GUI_ITEM_START_RUNNING_LORE(
+        "gui.yvsmp.item.start.running",
+        mapOf(
+            FileTypes.EN to "<yellow>A start sequence is already running!</yellow>",
+            FileTypes.DE to "<yellow>Es läuft bereits eine Startsequenz!</yellow>",
+        )
+    ),
+    GUI_ITEM_STOP_NAME(
+        "gui.yvsmp.item.stop.name",
+        mapOf(
+            FileTypes.EN to "<red><bold>Stop Sequence</bold></red>",
+            FileTypes.DE to "<red><bold>Sequenz Stoppen</bold></red>",
+        )
+    ),
+    GUI_ITEM_STOP_LORE(
+        "gui.yvsmp.item.stop.lore",
+        mapOf(
+            FileTypes.EN to "<gray>Click to abort the running start sequence.</gray>",
+            FileTypes.DE to "<gray>Klicke, um die laufende Startsequenz abzubrechen.</gray>",
+        )
+    ),
+    GUI_ITEM_STOP_IDLE_LORE(
+        "gui.yvsmp.item.stop.idle",
+        mapOf(
+            FileTypes.EN to "<gray>No sequence is currently running.</gray>",
+            FileTypes.DE to "<gray>Es läuft derzeit keine Sequenz.</gray>",
+        )
+    ),
+    GUI_ITEM_SETUP_NAME(
+        "gui.yvsmp.item.setup.name",
+        mapOf(
+            FileTypes.EN to "<aqua><bold>Setup</bold></aqua>",
+            FileTypes.DE to "<aqua><bold>Setup</bold></aqua>",
+        )
+    ),
+    GUI_ITEM_SETUP_LORE(
+        "gui.yvsmp.item.setup.lore",
+        mapOf(
+            FileTypes.EN to "<gray>Configure the world border, spawn and more.</gray>",
+            FileTypes.DE to "<gray>Konfiguriere Weltgrenze, Spawn und mehr.</gray>",
+        )
+    ),
+    GUI_ITEM_STATUS_NAME(
+        "gui.yvsmp.item.status.name",
+        mapOf(
+            FileTypes.EN to "<gold>Status</gold>",
+            FileTypes.DE to "<gold>Status</gold>",
+        )
+    ),
+    GUI_STATUS_LORE_PLAYERS(
+        "gui.yvsmp.item.status.players",
+        mapOf(
+            FileTypes.EN to "<gray>Online: <white><count></white></gray>",
+            FileTypes.DE to "<gray>Online: <white><count></white></gray>",
+        )
+    ),
+    GUI_STATUS_LORE_RUNNING(
+        "gui.yvsmp.item.status.running",
+        mapOf(
+            FileTypes.EN to "<gray>Running: <status></gray>",
+            FileTypes.DE to "<gray>Läuft: <status></gray>",
+        )
+    ),
+    GUI_STATUS_LORE_BORDER(
+        "gui.yvsmp.item.status.border",
+        mapOf(
+            FileTypes.EN to "<gray>Border: <white><status></white></gray>",
+            FileTypes.DE to "<gray>Grenze: <white><status></white></gray>",
+        )
+    ),
+    GUI_STATUS_LORE_SPAWN(
+        "gui.yvsmp.item.status.spawn",
+        mapOf(
+            FileTypes.EN to "<gray>Spawn: <white><x>, <y>, <z></white></gray>",
+            FileTypes.DE to "<gray>Spawn: <white><x>, <y>, <z></white></gray>",
+        )
+    ),
+
+    // GUI - confirm start
+    GUI_TITLE_CONFIRM_START(
+        "gui.yvsmp.confirm-start.title",
+        mapOf(
+            FileTypes.EN to "<red><bold>Confirm Start</bold></red>",
+            FileTypes.DE to "<red><bold>Start Bestätigen</bold></red>",
+        )
+    ),
+    GUI_CONFIRM_START_WARNING_1(
+        "gui.yvsmp.confirm-start.warning1",
+        mapOf(
+            FileTypes.EN to "<yellow>This will teleport all <white><count></white> online player(s)</yellow>",
+            FileTypes.DE to "<yellow>Dies teleportiert alle <white><count></white> Online-Spieler</yellow>",
+        )
+    ),
+    GUI_CONFIRM_START_WARNING_2(
+        "gui.yvsmp.confirm-start.warning2",
+        mapOf(
+            FileTypes.EN to "<yellow>into spectator mode and clear their inventories!</yellow>",
+            FileTypes.DE to "<yellow>in den Zuschauermodus und leert ihr Inventar!</yellow>",
+        )
+    ),
+
+    // GUI - setup menu
+    GUI_TITLE_SETUP(
+        "gui.yvsmp.setup.title",
+        mapOf(
+            FileTypes.EN to "<aqua><bold>YV SMP Setup</bold></aqua>",
+            FileTypes.DE to "<aqua><bold>YV SMP Setup</bold></aqua>",
+        )
+    ),
+    GUI_ITEM_BORDER_SIZE_NAME(
+        "gui.yvsmp.item.border-size.name",
+        mapOf(
+            FileTypes.EN to "<aqua>Border Size</aqua>",
+            FileTypes.DE to "<aqua>Grenzgröße</aqua>",
+        )
+    ),
+    GUI_ITEM_BORDER_SIZE_LORE(
+        "gui.yvsmp.item.border-size.lore",
+        mapOf(
+            FileTypes.EN to "<gray>Current: <white><size></white> blocks</gray>",
+            FileTypes.DE to "<gray>Aktuell: <white><size></white> Blöcke</gray>",
+        )
+    ),
+    GUI_ITEM_BORDERCENTER_NAME(
+        "gui.yvsmp.item.bordercenter.name",
+        mapOf(
+            FileTypes.EN to "<aqua>Border Center</aqua>",
+            FileTypes.DE to "<aqua>Grenzzentrum</aqua>",
+        )
+    ),
+    GUI_ITEM_BORDERCENTER_LORE(
+        "gui.yvsmp.item.bordercenter.lore",
+        mapOf(
+            FileTypes.EN to "<gray>Click to center the border on your location.</gray>",
+            FileTypes.DE to "<gray>Klicke, um die Grenze auf deinen Standort zu zentrieren.</gray>",
+        )
+    ),
+    GUI_ITEM_SPAWN_NAME(
+        "gui.yvsmp.item.spawn.name",
+        mapOf(
+            FileTypes.EN to "<aqua>World Spawn</aqua>",
+            FileTypes.DE to "<aqua>Weltspawn</aqua>",
+        )
+    ),
+    GUI_ITEM_SPAWN_LORE(
+        "gui.yvsmp.item.spawn.lore",
+        mapOf(
+            FileTypes.EN to "<gray>Click to set spawn to your location.</gray>",
+            FileTypes.DE to "<gray>Klicke, um den Spawn auf deinen Standort zu setzen.</gray>",
+        )
+    ),
+    GUI_ITEM_RESCAN_NAME(
+        "gui.yvsmp.item.rescan.name",
+        mapOf(
+            FileTypes.EN to "<aqua>Rescan Island</aqua>",
+            FileTypes.DE to "<aqua>Insel Neu Scannen</aqua>",
+        )
+    ),
+    GUI_ITEM_RESCAN_LORE(
+        "gui.yvsmp.item.rescan.lore",
+        mapOf(
+            FileTypes.EN to "<gray>Click to clear the cached island edge scan.</gray>",
+            FileTypes.DE to "<gray>Klicke, um den Insel-Rand-Cache zu leeren.</gray>",
+        )
+    ),
+    GUI_ITEM_SETUP_ALL_NAME(
+        "gui.yvsmp.item.setup-all.name",
+        mapOf(
+            FileTypes.EN to "<red>Reset Everything</red>",
+            FileTypes.DE to "<red>Alles Zurücksetzen</red>",
+        )
+    ),
+    GUI_ITEM_SETUP_ALL_LORE(
+        "gui.yvsmp.item.setup-all.lore",
+        mapOf(
+            FileTypes.EN to "<gray>Click to reset the border & island cache.</gray>",
+            FileTypes.DE to "<gray>Klicke, um Grenze & Insel-Cache zurückzusetzen.</gray>",
+        )
+    ),
+
+    // GUI - confirm setup-all
+    GUI_TITLE_CONFIRM_SETUP_ALL(
+        "gui.yvsmp.confirm-setup-all.title",
+        mapOf(
+            FileTypes.EN to "<red><bold>Confirm Reset</bold></red>",
+            FileTypes.DE to "<red><bold>Zurücksetzen Bestätigen</bold></red>",
+        )
+    ),
+    GUI_CONFIRM_SETUP_ALL_WARNING_1(
+        "gui.yvsmp.confirm-setup-all.warning1",
+        mapOf(
+            FileTypes.EN to "<yellow>This resets the world border to a default size</yellow>",
+            FileTypes.DE to "<yellow>Dies setzt die Weltgrenze auf eine Standardgröße zurück</yellow>",
+        )
+    ),
+    GUI_CONFIRM_SETUP_ALL_WARNING_2(
+        "gui.yvsmp.confirm-setup-all.warning2",
+        mapOf(
+            FileTypes.EN to "<yellow>centered on spawn, and clears the island scan cache.</yellow>",
+            FileTypes.DE to "<yellow>zentriert auf Spawn, und leert den Insel-Scan-Cache.</yellow>",
+        )
+    ),
+
+    // GUI - border size editor (anvil)
+    GUI_TITLE_BORDER_EDITOR(
+        "gui.yvsmp.border-editor.title",
+        mapOf(
+            FileTypes.EN to "<gold>Set Border Size</gold>",
+            FileTypes.DE to "<gold>Grenzgröße Setzen</gold>",
+        )
+    ),
+    GUI_BORDER_EDITOR_INVALID(
+        "gui.yvsmp.border-editor.invalid",
+        mapOf(
+            FileTypes.EN to "<red>Please enter a valid number greater than 0.</red>",
+            FileTypes.DE to "<red>Bitte gib eine gültige Zahl größer als 0 ein.</red>",
+        )
+    ),
      ;
 }

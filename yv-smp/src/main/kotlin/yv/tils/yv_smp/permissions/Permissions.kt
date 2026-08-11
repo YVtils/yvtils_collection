@@ -54,7 +54,70 @@ enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
     COMMAND_START(
         PermissionManager.YVtilsPermission(
             "${PermissionsData.permissionBase}.command.start",
-            "Allows the use of the /start command",
+            "Allows the use of the /yvsmp start command",
+            default = false
+        )
+    ),
+    COMMAND_START_STOP(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.start.stop",
+            "Allows aborting a running /yvsmp start sequence",
+            default = false
+        )
+    ),
+    COMMAND_SETUP(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.setup",
+            "Allows the use of the /yvsmp setup command",
+            default = false
+        )
+    ),
+    COMMAND_SETUP_BORDER(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.setup.border",
+            "Allows setting the world border size",
+            default = false
+        )
+    ),
+    COMMAND_SETUP_BORDERCENTER(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.setup.bordercenter",
+            "Allows setting the world border center",
+            default = false
+        )
+    ),
+    COMMAND_SETUP_SPAWN(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.setup.spawn",
+            "Allows setting the world spawn location",
+            default = false
+        )
+    ),
+    COMMAND_SETUP_RESCAN(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.setup.rescan",
+            "Allows clearing the cached island edge scan",
+            default = false
+        )
+    ),
+    COMMAND_SETUP_ALL(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.setup.all",
+            "Allows running the full SMP setup routine",
+            default = false
+        )
+    ),
+    COMMAND_SETUP_STATUS(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.setup.status",
+            "Allows viewing the current SMP setup status",
+            default = false
+        )
+    ),
+    COMMAND_GUI(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.gui",
+            "Allows opening the /yvsmp GUI control menu",
             default = false
         )
     ),
