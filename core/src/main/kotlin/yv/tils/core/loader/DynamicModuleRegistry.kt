@@ -112,6 +112,10 @@ object DynamicModuleRegistry {
             "stats", "26.08.01", "yv.tils.stats.StatsYVtils",
             "Player and server statistics tracking."
         ),
+        "yv-smp" to ModuleArtifact(
+            "yv-smp", "10.0.0-dev.2", "yv.tils.yv_smp.YV_SMPYVtils",
+            "YV SMP module for YVtils",
+        )
     )
 
     /**

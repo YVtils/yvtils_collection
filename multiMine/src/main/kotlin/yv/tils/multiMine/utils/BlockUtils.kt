@@ -12,16 +12,18 @@
 
 package yv.tils.multiMine.utils
 
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.logic.LeaveDecayHandler
 import yv.tils.multiMine.utils.ToolUtils.Companion.toolBroke
-import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.modules.Core
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.concurrent.atomics.AtomicInt
@@ -79,7 +81,10 @@ class BlockUtils {
 
         // Check break limit BEFORE attempting to break
         if (brokenMap[player.uniqueId]!!.load() >= breakLimit) {
-            Logger.debug("Break limit reached for ${player.name}: ${brokenMap[player.uniqueId]}/$breakLimit",DEBUG_LEVEL.DETAILED)
+            Logger.debug(
+                "Break limit reached for ${player.name}: ${brokenMap[player.uniqueId]}/$breakLimit",
+                DEBUG_LEVEL.DETAILED
+            )
             return false
         }
 
@@ -97,7 +102,10 @@ class BlockUtils {
             }
 
             brokenMap[player.uniqueId]?.incrementAndFetch()
-            Logger.debug("Block broken by ${player.name}. Count: ${brokenMap[player.uniqueId]}/$breakLimit",DEBUG_LEVEL.DETAILED)
+            Logger.debug(
+                "Block broken by ${player.name}. Count: ${brokenMap[player.uniqueId]}/$breakLimit",
+                DEBUG_LEVEL.DETAILED
+            )
 
             block.breakNaturally(item, true, true)
             return true
@@ -188,19 +196,6 @@ class BlockUtils {
                                 } catch (e: NullPointerException) {
                                     Logger.warn("Error during recursive block registration: ${e.message}")
                                     Logger.debug("Error: ${e.stackTraceToString()}", 2)
-
-                                    // TODO: Look into this error -> Maybe this is fixed now?
-                                    // [17:06:53 WARN]: [YVtils] Task #798115 for YVtils-MultiMine v2.0.0-beta.1 generated an exception
-                                    //java.lang.NullPointerException: null
-                                    //        at YVtils-MM_v2.0.0-beta.1.jar/yv.tils.multiMine.utils.BlockUtils.registerBlocks$lambda$1(BlockUtils.kt:166) ~[YVtils-MM_v2.0.0-beta.1.jar:?]
-                                    //        at org.bukkit.craftbukkit.scheduler.CraftTask.run(CraftTask.java:78) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                    //        at org.bukkit.craftbukkit.scheduler.CraftScheduler.mainThreadHeartbeat(CraftScheduler.java:474) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                    //        at net.minecraft.server.MinecraftServer.tickChildren(MinecraftServer.java:1771) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                    //        at net.minecraft.server.MinecraftServer.tickServer(MinecraftServer.java:1645) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                    //        at net.minecraft.server.dedicated.DedicatedServer.tickServer(DedicatedServer.java:467) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                    //        at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1365) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                    //        at net.minecraft.server.MinecraftServer.lambda$spin$2(MinecraftServer.java:388) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                    //        at java.base/java.lang.Thread.run(Thread.java:1583) ~[?:?]
                                 }
                             }
                         } finally {

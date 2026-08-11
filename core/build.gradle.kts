@@ -14,15 +14,6 @@ dependencies {
     compileOnly(project(":common"))
     compileOnly(project(":config-v2"))
     compileOnly(project(":utils"))
-    // Compile-time only, to reference GUI types (`Gui`, `Item`, `Window`, ...) and
-    // `GUIYVtils`/`DynamicModuleRegistry.GUI_ARTIFACTS`'s entry-point class name.
-    // NOT shaded/embedded into this jar - unlike `common`, the actual `gui-<version>`
-    // build used at runtime is resolved dynamically by `DynamicModuleLoader`, matching
-    // whichever Minecraft version the server is actually running (InvUI, which `gui`
-    // wraps, dropped multi-version support in v2 - see `DynamicModuleRegistry.GUI_ARTIFACTS`
-    // for the full explanation). `gui-26.1` is used here purely as the reference variant
-    // for compile-time symbol resolution; its InvUI API is expected to stay
-    // source-compatible with every other `gui-<version>` module.
     compileOnly(project(":gui-26.1"))
 }
 
@@ -51,6 +42,10 @@ tasks.named("processResources") {
 tasks {
     runServer {
         minecraftVersion("26.1.2")
+
+        downloadPlugins {
+            modrinth("simple-voice-chat", "bukkit-2.6.20")
+        }
     }
 
     shadowJar {

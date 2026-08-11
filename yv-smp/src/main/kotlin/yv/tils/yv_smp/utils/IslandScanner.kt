@@ -12,15 +12,10 @@
 
 package yv.tils.yv_smp.utils
 
-import org.bukkit.Bukkit
-import org.bukkit.HeightMap
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.Particle
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.entity.Player
-import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.modules.Core
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -85,8 +80,8 @@ object IslandScanner {
         for (step in 0 until angleSteps) {
 
             val angle = (2.0 * PI * step) / angleSteps
-            val dirX  = cos(angle)
-            val dirZ  = sin(angle)
+            val dirX = cos(angle)
+            val dirZ = sin(angle)
 
             var edgeBx = Int.MIN_VALUE
             var edgeBz = Int.MIN_VALUE
@@ -109,8 +104,10 @@ object IslandScanner {
         }
 
         val result = edgeMap.values.toList()
-        Logger.info("IslandScanner: scanned ${angleSteps} rays → ${result.size} unique edge blocks " +
-                "(center=${cx},${cz}  islandSurfaceY=${centerSurfaceY}  radius=${scanRadius})")
+        Logger.info(
+            "IslandScanner: scanned ${angleSteps} rays → ${result.size} unique edge blocks " +
+                    "(center=${cx},${cz}  islandSurfaceY=${centerSurfaceY}  radius=${scanRadius})"
+        )
         cache[key] = result
         return result
     }
@@ -149,10 +146,10 @@ object IslandScanner {
         // Layer 0 — GLOW exactly on the cliff-top face (stored Y already = topY + 0.5)
         // Layer 1 — END_ROD / chosen particle 0.6 higher so it floats above the block
         val glowLayer = edgePoints
-        val rodLayer  = edgePoints.map { it.clone().add(0.0, 0.6, 0.0) }
+        val rodLayer = edgePoints.map { it.clone().add(0.0, 0.6, 0.0) }
 
         val taskHolder = IntArray(1)
-        taskHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, {
+        taskHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, {
             glowLayer.forEach { loc ->
                 players.forEach { p ->
                     p.spawnParticle(Particle.GLOW, loc, 1, 0.0, 0.0, 0.0, 0.0)
@@ -165,7 +162,7 @@ object IslandScanner {
             }
         }, 0L, repeatInterval)
 
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             Bukkit.getScheduler().cancelTask(taskHolder[0])
         }, duration)
     }
@@ -188,7 +185,7 @@ object IslandScanner {
         if (edgePoints.isEmpty()) return
 
         for (h in 0 until pulseHeight.toInt()) {
-            Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                 edgePoints.forEach { base ->
                     val loc = base.clone().add(0.0, h.toDouble(), 0.0)
                     players.forEach { p -> p.spawnParticle(particle, loc, 2, 0.1, 0.0, 0.1, 0.0) }
@@ -234,28 +231,30 @@ object IslandScanner {
             Logger.info("    edge @ ${it.blockX}, ${it.blockY}, ${it.blockZ}")
         }
 
-        val greenDust  = Particle.DustOptions(org.bukkit.Color.fromRGB(0,   220,  60), 1.0f)
-        val redDust    = Particle.DustOptions(org.bukkit.Color.fromRGB(255,  30,  30), 1.0f)
-        val yellowDust = Particle.DustOptions(org.bukkit.Color.fromRGB(255, 220,   0), 1.8f)
+        val greenDust = Particle.DustOptions(org.bukkit.Color.fromRGB(0, 220, 60), 1.0f)
+        val redDust = Particle.DustOptions(org.bukkit.Color.fromRGB(255, 30, 30), 1.0f)
+        val yellowDust = Particle.DustOptions(org.bukkit.Color.fromRGB(255, 220, 0), 1.8f)
 
         data class Dot(val x: Double, val y: Double, val z: Double, val dust: Particle.DustOptions)
+
         val dots = mutableListOf<Dot>()
 
         for (step in 0 until angleSteps) {
             val angle = (2.0 * PI * step) / angleSteps
-            val dirX  = cos(angle)
-            val dirZ  = sin(angle)
+            val dirX = cos(angle)
+            val dirZ = sin(angle)
 
             var edgeBx = Int.MIN_VALUE
             var edgeBz = Int.MIN_VALUE
             var hitLand = false
 
             data class Column(val bx: Int, val bz: Int, val topY: Double)
+
             val columns = mutableListOf<Column>()
 
             for (dist in 1..scanRadius) {
-                val bx   = (cx + dist * dirX).roundToInt()
-                val bz   = (cz + dist * dirZ).roundToInt()
+                val bx = (cx + dist * dirX).roundToInt()
+                val bz = (cz + dist * dirZ).roundToInt()
                 val topY = world.getHighestBlockYAt(bx, bz, HeightMap.WORLD_SURFACE).toDouble()
 
                 if (isLand(world, bx, bz, centerSurfaceY, verticalTolerance)) {
@@ -271,21 +270,25 @@ object IslandScanner {
             // Paint all land columns: yellow if it is the outermost (= stored edge), green otherwise.
             columns.forEach { col ->
                 val isEdge = col.bx == edgeBx && col.bz == edgeBz
-                dots.add(Dot(col.bx + 0.5, col.topY + 1.3, col.bz + 0.5,
-                    if (isEdge) yellowDust else greenDust))
+                dots.add(
+                    Dot(
+                        col.bx + 0.5, col.topY + 1.3, col.bz + 0.5,
+                        if (isEdge) yellowDust else greenDust
+                    )
+                )
             }
 
             // Red dot one block beyond the outermost land block in ray direction,
             // so it's clear where each ray stopped finding land.
-            val nextBx   = (cx + (scanRadius + 1) * dirX).roundToInt().let { edgeBx + (dirX.roundToInt()) }
-            val nextBz   = (cz + (scanRadius + 1) * dirZ).roundToInt().let { edgeBz + (dirZ.roundToInt()) }
+            val nextBx = (cx + (scanRadius + 1) * dirX).roundToInt().let { edgeBx + (dirX.roundToInt()) }
+            val nextBz = (cz + (scanRadius + 1) * dirZ).roundToInt().let { edgeBz + (dirZ.roundToInt()) }
             val nextTopY = world.getHighestBlockYAt(nextBx, nextBz, HeightMap.WORLD_SURFACE).toDouble()
             dots.add(Dot(nextBx + 0.5, nextTopY + 1.3, nextBz + 0.5, redDust))
         }
 
         // ── Repeating paint task (30 s) ───────────────────────────────────────
         val paintTask = IntArray(1)
-        paintTask[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, {
+        paintTask[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, {
             dots.forEach { d ->
                 player.spawnParticle(Particle.DUST, d.x, d.y, d.z, 1, 0.0, 0.0, 0.0, 0.0, d.dust)
             }
@@ -293,14 +296,14 @@ object IslandScanner {
 
         // ── Repeating END_ROD outline (30 s) ──────────────────────────────────
         val outlineTask = IntArray(1)
-        outlineTask[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, {
+        outlineTask[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, {
             edgePoints.forEach { loc ->
                 player.spawnParticle(Particle.END_ROD, loc, 1, 0.0, 0.0, 0.0, 0.0)
             }
         }, 0L, 2L)
 
         // Cancel both after 30 s
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             Bukkit.getScheduler().cancelTask(paintTask[0])
             Bukkit.getScheduler().cancelTask(outlineTask[0])
             val mm = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
@@ -309,11 +312,17 @@ object IslandScanner {
 
         // ── Chat summary ──────────────────────────────────────────────────────
         val mm = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
-        player.sendMessage(mm.deserialize(
-            "<yellow>[Scanner] Rays: $angleSteps | Edges: <white>${edgePoints.size}</white> | Center: <white>$cx,$cz</white>"))
-        player.sendMessage(mm.deserialize(
-            "<aqua>[Scanner] Center surface block: <white>" +
-            world.getBlockAt(cx, world.getHighestBlockYAt(cx, cz, HeightMap.WORLD_SURFACE), cz).type))
+        player.sendMessage(
+            mm.deserialize(
+                "<yellow>[Scanner] Rays: $angleSteps | Edges: <white>${edgePoints.size}</white> | Center: <white>$cx,$cz</white>"
+            )
+        )
+        player.sendMessage(
+            mm.deserialize(
+                "<aqua>[Scanner] Center surface block: <white>" +
+                        world.getBlockAt(cx, world.getHighestBlockYAt(cx, cz, HeightMap.WORLD_SURFACE), cz).type
+            )
+        )
 
         if (edgePoints.isEmpty()) {
             player.sendMessage(mm.deserialize("<red>[Scanner] No edges found — is the center on the island?"))
@@ -344,7 +353,7 @@ object IslandScanner {
         centerSurfaceY: Int,
         verticalTolerance: Int,
     ): Boolean {
-        val y     = world.getHighestBlockYAt(bx, bz, HeightMap.WORLD_SURFACE)
+        val y = world.getHighestBlockYAt(bx, bz, HeightMap.WORLD_SURFACE)
         // Reject anything that sits more than [verticalTolerance] blocks below
         // the island surface — that is ground level, not the island.
         if (y < centerSurfaceY - verticalTolerance) return false

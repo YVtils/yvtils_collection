@@ -11,6 +11,9 @@
  */
 
 import io.papermc.paperweight.userdev.PaperweightUserDependenciesExtension
+import org.cyclonedx.Version
+import org.cyclonedx.gradle.CyclonedxDirectTask
+import org.cyclonedx.model.Component
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -22,7 +25,7 @@ plugins {
     id("com.gradleup.shadow") version "9.6.1" apply false
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.21" apply false
     id("xyz.jpenilla.run-paper") version "3.0.2" apply false
-    id("org.cyclonedx.bom") version "2.4.1"
+    id("org.cyclonedx.bom") version "3.4.0"
 }
 
 /*
@@ -35,13 +38,12 @@ plugins {
  * are tracked at the monorepo level (one "project" per push), matching how
  * modules are versioned/released together rather than independently audited.
  */
-tasks.cyclonedxBom {
-    setIncludeConfigs(listOf("runtimeClasspath", "compileClasspath"))
-    setProjectType("application")
-    setSchemaVersion("1.5")
-    setDestination(project.file("build/reports"))
-    setOutputName("bom")
-    setOutputFormat("json")
+tasks.named<CyclonedxDirectTask>("cyclonedxDirectBom") {
+    includeConfigs = listOf("runtimeClasspath", "compileClasspath")
+    projectType = Component.Type.APPLICATION
+    schemaVersion = Version.VERSION_16
+
+    jsonOutput = file("build/reports/bom.json")
 }
 
 allprojects {
@@ -103,6 +105,7 @@ val publishableModules = setOf(
     "stats",
     "gui-26.1",
     "gui-26.2",
+    "yv-smp"
 )
 
 /*
@@ -227,10 +230,19 @@ subprojects {
                 create<MavenPublication>("maven") {
                     groupId = "yv.yvtils"
                     artifactId = project.name
-                    version = project.version.toString()
 
                     from(components["java"])
                 }
+            }
+        }
+
+        // `version` is read lazily via `afterEvaluate` since this `subprojects{}` block
+        // runs eagerly - i.e. BEFORE this module's own build.gradle.kts is evaluated.
+        // Setting `version` directly above would capture the root project's default
+        // version (set in `allprojects` further up) instead of a module's own override.
+        afterEvaluate {
+            the<PublishingExtension>().publications.named<MavenPublication>("maven") {
+                version = project.version.toString()
             }
         }
     }

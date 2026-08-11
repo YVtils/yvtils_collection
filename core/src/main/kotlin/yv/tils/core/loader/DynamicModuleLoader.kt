@@ -131,6 +131,8 @@ class DynamicModuleLoader : PluginLoader {
             "maven-snapshots" to "https://s01.oss.sonatype.org/content/repositories/snapshots/",
             "papermc" to "https://repo.papermc.io/repository/maven-public/",
             "xenondevs" to "https://repo.xenondevs.xyz/releases",
+            "maxhenkel" to "https://maven.maxhenkel.de/repository/public",
+            "lavalink" to "https://maven.lavalink.dev/releases",
         )
     }
 

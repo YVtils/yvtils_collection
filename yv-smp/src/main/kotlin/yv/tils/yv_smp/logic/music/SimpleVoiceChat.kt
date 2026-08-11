@@ -12,23 +12,30 @@
 
 package yv.tils.yv_smp.logic.music
 
-import de.maxhenkel.voicechat.api.VoicechatApi
-import de.maxhenkel.voicechat.api.VoicechatPlugin
-import de.maxhenkel.voicechat.api.events.EventRegistration
-import de.maxhenkel.voicechat.api.events.VoicechatServerStartedEvent
 import yv.tils.utils.logger.Logger
+import yv.tils.yv_smp.logic.music.svc.VoicechatBridge
 
-class SimpleVoiceChat : VoicechatPlugin {
+/**
+ * Bridges YVtils into Simple Voice Chat.
+ *
+ * IMPORTANT: this class deliberately does NOT implement
+ * `de.maxhenkel.voicechat.api.VoicechatPlugin` (nor reference any other
+ * voicechat-api type) - see [VoicechatBridge] for why any such static
+ * reference would throw `NoClassDefFoundError` at runtime regardless of
+ * whether Simple Voice Chat is installed. [VoicechatBridge.createPluginProxy]
+ * builds the actual `VoicechatPlugin` instance via a dynamic [java.lang.reflect.Proxy]
+ * (loaded through voicechat's own classloader) that delegates to this class.
+ */
+class SimpleVoiceChat : VoicechatBridge.PluginHandler {
     companion object {
-        var svcAPI: VoicechatApi? = null
+        /** The voicechat `VoicechatApi`/`VoicechatServerApi` instance, kept as `Any` - see class doc. */
+        var svcAPI: Any? = null
         const val AUDIO_CATEGORY = "yvtils"  // Volume category for VoiceMod UI
     }
 
-    override fun getPluginId(): String {
-        return "yvtils"
-    }
+    override fun pluginId(): String = "yvtils"
 
-    override fun initialize(api: VoicechatApi) {
+    override fun onInitialize(api: Any) {
         svcAPI = api
         Logger.info("SVC API initialized successfully.")
 
@@ -36,25 +43,25 @@ class SimpleVoiceChat : VoicechatPlugin {
         SVCManager.initializeMusicHandler()
     }
 
-    override fun registerEvents(registration: EventRegistration) {
-        registration.registerEvent(VoicechatServerStartedEvent::class.java, this::onServerStarted)
-    }
-
     /**
      * Called when the voice chat server starts.
      * Registers the audio volume category so it appears in VoiceMod UI.
      */
-    private fun onServerStarted(event: VoicechatServerStartedEvent) {
+    override fun onServerStarted(event: Any) {
         val icon = createIcon()
+        val api = VoicechatBridge.getVoicechatFromEvent(event)
 
-        val volumeCategory = event.voicechat.volumeCategoryBuilder()
-            .setId(AUDIO_CATEGORY)
-            .setName("YVtils")
-            .setDescription("Control volume for custom music played by YVtils plugins")
-            .setIcon(icon)
-            .build()
+        var builder = VoicechatBridge.volumeCategoryBuilder(api)
+        builder = VoicechatBridge.builderSetId(builder, AUDIO_CATEGORY)
+        builder = VoicechatBridge.builderSetName(builder, "YVtils")
+        builder = VoicechatBridge.builderSetDescription(
+            builder,
+            "Control volume for custom music played by YVtils plugins"
+        )
+        builder = VoicechatBridge.builderSetIcon(builder, icon)
+        val volumeCategory = VoicechatBridge.builderBuild(builder)
 
-        event.voicechat.registerVolumeCategory(volumeCategory)
+        VoicechatBridge.registerVolumeCategory(api, volumeCategory)
 
         Logger.info("Registered VoiceMod volume category: $AUDIO_CATEGORY")
     }

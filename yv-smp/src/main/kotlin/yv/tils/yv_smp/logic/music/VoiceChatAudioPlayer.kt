@@ -24,12 +24,10 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason
 import de.maxhenkel.opus4j.OpusDecoder
 import de.maxhenkel.opus4j.OpusEncoder
-import de.maxhenkel.voicechat.api.VoicechatServerApi
-import de.maxhenkel.voicechat.api.audiochannel.StaticAudioChannel
 import dev.lavalink.youtube.YoutubeAudioSourceManager
 import org.bukkit.entity.Player
-import yv.tils.utils.data.Data
 import yv.tils.utils.logger.Logger
+import yv.tils.yv_smp.logic.music.svc.VoicechatBridge
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.Executors
@@ -41,13 +39,18 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Audio player that uses LavaPlayer for streaming audio via Simple Voice Chat.
  * Handles audio encoding/decoding and playback for a specific player.
+ *
+ * NOTE: the voicechat server API/audio channel are kept as `Any` rather than
+ * `VoicechatServerApi`/`StaticAudioChannel` - see
+ * [yv.tils.yv_smp.logic.music.svc.VoicechatBridge] for why this module can
+ * never reference voicechat-api types directly.
  */
 class VoiceChatAudioPlayer(
     private val player: Player,
-    serverApi: VoicechatServerApi,
+    serverApi: Any,
     private val config: AudioConfig
 ) {
-    
+
     companion object {
         // Shared audio player manager for all instances
         private val AUDIO_PLAYER_MANAGER: AudioPlayerManager = DefaultAudioPlayerManager().apply {
@@ -56,7 +59,7 @@ class VoiceChatAudioPlayer(
             AudioSourceManagers.registerRemoteSources(this, YoutubeAudioSourceManager::class.java)
             AudioSourceManagers.registerLocalSource(this)
         }
-        
+
         // Shared executor for all fade operations and audio processing
         private val AUDIO_EXECUTOR: ScheduledExecutorService = Executors.newScheduledThreadPool(
             4,
@@ -77,7 +80,7 @@ class VoiceChatAudioPlayer(
             }
             return output
         }
-        
+
         fun shortToByte(input: ShortArray): ByteArray {
             val bb = ByteBuffer.allocate(input.size * 2)
             for (value in input) {
@@ -101,10 +104,10 @@ class VoiceChatAudioPlayer(
             }
         }
     }
-    
+
     private val lavaPlayer: AudioPlayer = AUDIO_PLAYER_MANAGER.createPlayer()
     private val audioQueue = ArrayDeque<ByteArray>()
-    private var channel: StaticAudioChannel? = null
+    private var channel: Any? = null
     private var decoder: OpusDecoder? = null
     private var encoder: OpusEncoder? = null
     private var audioTask: ScheduledFuture<*>? = null
@@ -121,17 +124,20 @@ class VoiceChatAudioPlayer(
                 frameSize = FRAME_SIZE
             }
             encoder = OpusEncoder(SAMPLE_RATE, CHANNELS, OpusEncoder.Application.AUDIO)
-            
+
             // Get player's voice chat connection
-            val connection = serverApi.getConnectionOf(player.uniqueId)
+            val connection = VoicechatBridge.getConnectionOf(serverApi, player.uniqueId)
             if (connection != null) {
                 // Create StaticAudioChannel for this specific player
-                channel = serverApi.createStaticAudioChannel(UUID.randomUUID())
-                channel?.addTarget(connection)
-                channel?.category = SimpleVoiceChat.AUDIO_CATEGORY
+                val newChannel = VoicechatBridge.createStaticAudioChannel(serverApi, UUID.randomUUID())
+                if (newChannel != null) {
+                    VoicechatBridge.addTarget(newChannel, connection)
+                    VoicechatBridge.setCategory(newChannel, SimpleVoiceChat.AUDIO_CATEGORY)
+                    channel = newChannel
+                }
 
                 Logger.info("Created audio channel for ${player.name}")
-                
+
                 // Set up LavaPlayer event listener
                 lavaPlayer.addListener(object : AudioEventAdapter() {
                     override fun onTrackEnd(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {
@@ -155,7 +161,7 @@ class VoiceChatAudioPlayer(
                         }
                     }
                 })
-                
+
                 // Apply volume and pitch from config
                 lavaPlayer.volume = (config.volume * 100).toInt()
 
@@ -169,13 +175,13 @@ class VoiceChatAudioPlayer(
             } else {
                 Logger.warn("Player ${player.name} does not have voice chat installed or enabled")
             }
-            
+
         } catch (e: Exception) {
             Logger.error("Failed to initialize VoiceChat audio player for ${player.name}: ${e.message}")
             cleanup()
         }
     }
-    
+
     /**
      * Loads and plays audio from a URL.
      *
@@ -199,7 +205,7 @@ class VoiceChatAudioPlayer(
                 running.set(true)
                 onLoaded?.invoke()
             }
-            
+
             override fun playlistLoaded(playlist: AudioPlaylist) {
                 val track = playlist.selectedTrack ?: playlist.tracks.firstOrNull()
                 if (track != null) {
@@ -211,19 +217,19 @@ class VoiceChatAudioPlayer(
                     Logger.warn("Playlist loaded but no tracks available for ${player.name}")
                 }
             }
-            
+
             override fun noMatches() {
                 Logger.warn("No matches found for audio: $audioUrl for ${player.name}")
                 cleanup()
             }
-            
+
             override fun loadFailed(exception: FriendlyException) {
                 Logger.warn("Failed to load audio for ${player.name}: ${exception.message}")
                 cleanup()
             }
         })
     }
-    
+
     /**
      * Processes a single audio frame - decode Opus from LavaPlayer, encode for Voice Chat.
      */
@@ -251,13 +257,13 @@ class VoiceChatAudioPlayer(
             // Send queued audio to the player's channel
             if (audioQueue.isNotEmpty()) {
                 val data = audioQueue.poll()
-                channel?.send(data)
+                channel?.let { VoicechatBridge.send(it, data) }
             }
         } catch (e: Exception) {
             Logger.warn("Error processing audio frame for ${player.name}: ${e.message}")
         }
     }
-    
+
     /**
      * Fades out the audio over the specified duration, then stops playback.
      * 
@@ -268,21 +274,21 @@ class VoiceChatAudioPlayer(
             stop()
             return
         }
-        
+
         val startVolume = volumeMultiplier
         val startTime = System.currentTimeMillis()
 
         Logger.info("Starting fade-out for ${player.name} over ${durationMs}ms")
-        
+
         // Create a scheduled task for fade-out
         fadeTask = AUDIO_EXECUTOR.scheduleAtFixedRate({
             try {
                 val elapsed = System.currentTimeMillis() - startTime
                 val progress = (elapsed.toFloat() / durationMs).coerceIn(0f, 1f)
-                
+
                 // Linear fade-out: reduce volume from startVolume to 0
                 volumeMultiplier = startVolume * (1f - progress)
-                
+
                 if (progress >= 1f) {
                     // Fade-out complete, stop the audio
                     fadeTask?.cancel(false)
@@ -295,7 +301,7 @@ class VoiceChatAudioPlayer(
             }
         }, 0, 50, TimeUnit.MILLISECONDS) // Update every 50ms for smooth fade
     }
-    
+
     /**
      * Stops audio playback immediately and cleans up resources.
      */
@@ -324,7 +330,7 @@ class VoiceChatAudioPlayer(
         lavaPlayer.stopTrack()
         lavaPlayer.destroy()
         audioQueue.clear()
-        
+
         // Close codecs
         try {
             decoder?.close()
@@ -332,13 +338,13 @@ class VoiceChatAudioPlayer(
         } catch (e: Exception) {
             Logger.warn("Error closing codec for ${player.name}: ${e.message}")
         }
-        
+
         decoder = null
         encoder = null
         channel = null
         volumeMultiplier = config.volume
     }
-    
+
     /**
      * Checks if audio is currently playing.
      */

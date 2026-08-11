@@ -5,18 +5,16 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.multiMine.configs
 
 import org.bukkit.Material
 import org.bukkit.Tag
-import yv.tils.configv2.data.annotations.BooleanIcon
-import yv.tils.configv2.data.annotations.ConfigDescription
-import yv.tils.configv2.data.annotations.ConfigIcon
-import yv.tils.configv2.data.annotations.DefaultValue
-import yv.tils.configv2.data.annotations.MaterialNameList
-import yv.tils.configv2.data.annotations.NotGuiEditable
+import yv.tils.configv2.data.annotations.*
 
 /**
  * multiMine's `config.yml`, as a plain `data class` persisted via `ObjectMapperFileUtils`
@@ -69,7 +67,6 @@ data class MultiMineConfigState(
     var blocks: List<String> = createTemplateBlocks(),
 )
 
-// TODO: Test if list gets updated with version updates
 private fun createTemplateBlocks(): List<String> {
     val blocks = Tag.LOGS.values.toMutableList()
 

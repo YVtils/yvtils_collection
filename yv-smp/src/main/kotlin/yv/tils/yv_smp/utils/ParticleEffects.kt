@@ -16,10 +16,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Particle
 import org.bukkit.entity.Player
-import yv.tils.utils.data.Data
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
+import yv.tils.utils.modules.Core
 
 class ParticleEffects {
     companion object {
@@ -28,39 +25,39 @@ class ParticleEffects {
         // Each glyph is 5 rows of 3 booleans (true = filled pixel).
         private val GLYPHS = mapOf(
             '3' to arrayOf(
-                booleanArrayOf(true,  true,  true),
+                booleanArrayOf(true, true, true),
                 booleanArrayOf(false, false, true),
-                booleanArrayOf(true,  true,  true),
+                booleanArrayOf(true, true, true),
                 booleanArrayOf(false, false, true),
-                booleanArrayOf(true,  true,  true),
+                booleanArrayOf(true, true, true),
             ),
             '2' to arrayOf(
-                booleanArrayOf(true,  true,  true),
+                booleanArrayOf(true, true, true),
                 booleanArrayOf(false, false, true),
-                booleanArrayOf(true,  true,  true),
-                booleanArrayOf(true,  false, false),
-                booleanArrayOf(true,  true,  true),
+                booleanArrayOf(true, true, true),
+                booleanArrayOf(true, false, false),
+                booleanArrayOf(true, true, true),
             ),
             '1' to arrayOf(
-                booleanArrayOf(false, true,  false),
-                booleanArrayOf(true,  true,  false),
-                booleanArrayOf(false, true,  false),
-                booleanArrayOf(false, true,  false),
-                booleanArrayOf(true,  true,  true),
+                booleanArrayOf(false, true, false),
+                booleanArrayOf(true, true, false),
+                booleanArrayOf(false, true, false),
+                booleanArrayOf(false, true, false),
+                booleanArrayOf(true, true, true),
             ),
             'G' to arrayOf(
-                booleanArrayOf(true,  true,  true),
-                booleanArrayOf(true,  false, false),
-                booleanArrayOf(true,  false, true),
-                booleanArrayOf(true,  false, true),
-                booleanArrayOf(true,  true,  true),
+                booleanArrayOf(true, true, true),
+                booleanArrayOf(true, false, false),
+                booleanArrayOf(true, false, true),
+                booleanArrayOf(true, false, true),
+                booleanArrayOf(true, true, true),
             ),
             'O' to arrayOf(
-                booleanArrayOf(true,  true,  true),
-                booleanArrayOf(true,  false, true),
-                booleanArrayOf(true,  false, true),
-                booleanArrayOf(true,  false, true),
-                booleanArrayOf(true,  true,  true),
+                booleanArrayOf(true, true, true),
+                booleanArrayOf(true, false, true),
+                booleanArrayOf(true, false, true),
+                booleanArrayOf(true, false, true),
+                booleanArrayOf(true, true, true),
             ),
         )
 
@@ -100,12 +97,12 @@ class ParticleEffects {
                 }
             }
             val taskHolder = IntArray(1)
-            taskHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, Runnable {
+            taskHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, Runnable {
                 positions.forEach { (px, py, pz) ->
                     players.forEach { p -> p.spawnParticle(Particle.DUST, px, py, pz, 1, 0.0, 0.0, 0.0, 0.0, dust) }
                 }
             }, 0L, repeatEvery)
-            Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                 Bukkit.getScheduler().cancelTask(taskHolder[0])
             }, displayTicks)
         }
@@ -134,42 +131,52 @@ class ParticleEffects {
             val step = digitShowTicks + digitGapTicks
 
             // ── 3 ──
-            Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-                particleGlyph(players, center, '3',
+            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                particleGlyph(
+                    players, center, '3',
                     color = Color.fromRGB(255, 180, 0),
                     baseHeight = baseHeight, scale = scale,
-                    displayTicks = digitShowTicks)
+                    displayTicks = digitShowTicks
+                )
             }, startDelay)
 
             // ── 2 ──
-            Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-                particleGlyph(players, center, '2',
+            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                particleGlyph(
+                    players, center, '2',
                     color = Color.fromRGB(255, 90, 0),
                     baseHeight = baseHeight, scale = scale,
-                    displayTicks = digitShowTicks)
+                    displayTicks = digitShowTicks
+                )
             }, startDelay + step)
 
             // ── 1 ──
-            Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-                particleGlyph(players, center, '1',
+            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                particleGlyph(
+                    players, center, '1',
                     color = Color.fromRGB(255, 20, 20),
                     baseHeight = baseHeight, scale = scale,
-                    displayTicks = digitShowTicks)
+                    displayTicks = digitShowTicks
+                )
             }, startDelay + step * 2)
 
             // ── GO — two letters side by side ──
             val goGap = 4.0 * scale   // horizontal gap between G and O
-            Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-                particleGlyph(players, center, 'G',
+            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                particleGlyph(
+                    players, center, 'G',
                     color = Color.fromRGB(0, 255, 80),
                     baseHeight = baseHeight, scale = scale,
                     displayTicks = digitShowTicks,
-                    xOffset = -goGap * 0.5)
-                particleGlyph(players, center, 'O',
+                    xOffset = -goGap * 0.5
+                )
+                particleGlyph(
+                    players, center, 'O',
                     color = Color.fromRGB(0, 255, 80),
                     baseHeight = baseHeight, scale = scale,
                     displayTicks = digitShowTicks,
-                    xOffset = goGap * 0.5)
+                    xOffset = goGap * 0.5
+                )
             }, startDelay + step * 3)
         }
 
@@ -182,7 +189,7 @@ class ParticleEffects {
         ) {
             val world = center.world ?: return
             runCatching {
-                val taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, {
+                val taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, {
                     repeat(30) {
                         val ox = (Math.random() - 0.5) * areaRadius * 2
                         val oz = (Math.random() - 0.5) * areaRadius * 2
@@ -190,8 +197,10 @@ class ParticleEffects {
                         val pz = center.z + oz
                         // Use actual surface Y at the rain drop position so rain
                         // always starts above the island, not from spawn Y.
-                        val surfaceY = world.getHighestBlockYAt(px.toInt(), pz.toInt(),
-                            org.bukkit.HeightMap.WORLD_SURFACE).toDouble()
+                        val surfaceY = world.getHighestBlockYAt(
+                            px.toInt(), pz.toInt(),
+                            org.bukkit.HeightMap.WORLD_SURFACE
+                        ).toDouble()
                         val py = surfaceY + 8.0 + Math.random() * 4
                         players.forEach { player ->
                             player.spawnParticle(particle, px, py, pz, 1, 0.0, -0.5, 0.0, 0.0)
@@ -199,7 +208,7 @@ class ParticleEffects {
                     }
                 }, 0L, 1L)
 
-                Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+                Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                     Bukkit.getScheduler().cancelTask(taskId)
                 }, duration)
             }
@@ -225,7 +234,7 @@ class ParticleEffects {
             if (edges.isEmpty()) return
             val upper = edges.map { it.clone().add(0.0, stackHeight, 0.0) }
             val taskHolder = IntArray(1)
-            taskHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, {
+            taskHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, {
                 edges.forEach { loc ->
                     players.forEach { p -> p.spawnParticle(particleA, loc, 1, 0.0, 0.0, 0.0, 0.0) }
                 }
@@ -233,7 +242,7 @@ class ParticleEffects {
                     players.forEach { p -> p.spawnParticle(particleB, loc, 1, 0.0, 0.0, 0.0, 0.0) }
                 }
             }, 0L, repeatInterval)
-            Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                 Bukkit.getScheduler().cancelTask(taskHolder[0])
             }, duration)
         }
@@ -252,7 +261,7 @@ class ParticleEffects {
         ) {
             if (edges.isEmpty()) return
             for (h in 0 until riseHeight) {
-                Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+                Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                     edges.forEach { base ->
                         val loc = base.clone().add(0.0, h.toDouble(), 0.0)
                         players.forEach { p -> p.spawnParticle(particle, loc, count, 0.1, 0.05, 0.1, 0.0) }
@@ -283,7 +292,7 @@ class ParticleEffects {
                 val startTick = wave * waveDelay
                 for (step in 0..steps) {
                     val t = step.toDouble() / steps          // 0.0 (edge) → 1.0 (center)
-                    Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+                    Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                         edges.forEach { edge ->
                             // Lerp only X/Z — Y stays at the island surface so the
                             // wave travels horizontally and never dives underground.
@@ -296,6 +305,7 @@ class ParticleEffects {
                 }
             }
         }
+
         /**
          * Launches successive shockwave rings that start at the island edge
          * and travel **outward** away from [center].
@@ -319,7 +329,7 @@ class ParticleEffects {
                 val startTick = wave * waveDelay
                 for (step in 0..steps) {
                     val t = step.toDouble() / steps
-                    Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+                    Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                         edges.forEach { edge ->
                             val dx = edge.x - center.x
                             val dz = edge.z - center.z
@@ -356,6 +366,7 @@ class ParticleEffects {
             if (edges.isEmpty()) return
             // Pre-compute the outward unit direction per edge so we don't repeat it every tick
             data class EdgeDir(val loc: org.bukkit.Location, val ndx: Double, val ndz: Double)
+
             val dirs = edges.map { edge ->
                 val dx = edge.x - center.x
                 val dz = edge.z - center.z
@@ -365,7 +376,7 @@ class ParticleEffects {
             for (wave in 0 until waves) {
                 val startTick = wave * waveDelay
                 for (step in 1..travelBlocks) {
-                    Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+                    Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                         dirs.forEach { (edge, ndx, ndz) ->
                             val x = edge.x + ndx * step
                             val z = edge.z + ndz * step
@@ -401,7 +412,17 @@ class ParticleEffects {
                 players.forEach { pl ->
                     pl.spawnParticle(particle, edge.x, edge.y + 1.0, edge.z, count, 0.1, 0.2, 0.1, 0.0)
                     // second burst half a block outward already
-                    pl.spawnParticle(particle, edge.x + vx * 2, edge.y + 1.0, edge.z + vz * 2, count, 0.0, 0.15, 0.0, 0.0)
+                    pl.spawnParticle(
+                        particle,
+                        edge.x + vx * 2,
+                        edge.y + 1.0,
+                        edge.z + vz * 2,
+                        count,
+                        0.0,
+                        0.15,
+                        0.0,
+                        0.0
+                    )
                 }
             }
         }

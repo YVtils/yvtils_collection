@@ -17,12 +17,9 @@ import org.bukkit.Location
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
-import yv.tils.utils.data.Data
-import kotlin.math.PI
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
+import yv.tils.utils.modules.Core
+import yv.tils.yv_smp.utils.CinematicCamera.INTERPOLATION_INTERVAL
+import kotlin.math.*
 
 /**
  * Smooth cinematic camera system for the start sequence.
@@ -50,7 +47,7 @@ object CinematicCamera {
     private const val INTERPOLATION_INTERVAL = 2
 
     private val cameraEntities = mutableMapOf<java.util.UUID, ItemDisplay>()
-    private val activeTasks    = mutableListOf<Int>()
+    private val activeTasks = mutableListOf<Int>()
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -63,8 +60,10 @@ object CinematicCamera {
         durationTicks: Long = 140L,
         angularSpeedPerTick: Double = 0.012,
     ) {
-        val surfaceY = center.world?.getHighestBlockYAt(center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE)?.toDouble() ?: center.y
+        val surfaceY = center.world?.getHighestBlockYAt(
+            center.blockX, center.blockZ,
+            org.bukkit.HeightMap.WORLD_SURFACE
+        )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
             val startAngle = (2 * PI * index) / players.size
@@ -82,13 +81,24 @@ object CinematicCamera {
         durationTicks: Long = 200L,
         angularSpeedPerTick: Double = 0.008,
     ) {
-        val surfaceY = center.world?.getHighestBlockYAt(center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE)?.toDouble() ?: center.y
+        val surfaceY = center.world?.getHighestBlockYAt(
+            center.blockX, center.blockZ,
+            org.bukkit.HeightMap.WORLD_SURFACE
+        )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
             val startAngle = (2 * PI * index) / players.size
             mountCamera(player, orbitPosition(sc, orbitRadius, height, startAngle, steepPitch = true))
-            driveOrbit(player, sc, orbitRadius, height, startAngle, angularSpeedPerTick, durationTicks, steepPitch = true)
+            driveOrbit(
+                player,
+                sc,
+                orbitRadius,
+                height,
+                startAngle,
+                angularSpeedPerTick,
+                durationTicks,
+                steepPitch = true
+            )
         }
     }
 
@@ -101,8 +111,10 @@ object CinematicCamera {
         height: Double = 20.0,
         durationTicks: Long = 200L,
     ) {
-        val surfaceY = center.world?.getHighestBlockYAt(center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE)?.toDouble() ?: center.y
+        val surfaceY = center.world?.getHighestBlockYAt(
+            center.blockX, center.blockZ,
+            org.bukkit.HeightMap.WORLD_SURFACE
+        )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
             val startAngle = (2 * PI * index) / players.size
@@ -126,8 +138,10 @@ object CinematicCamera {
         angularSpeedPerTick: Double = 0.006,
     ) {
         // Heights are above the actual island surface, not the raw spawn Y
-        val surfaceY = center.world?.getHighestBlockYAt(center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE)?.toDouble() ?: center.y
+        val surfaceY = center.world?.getHighestBlockYAt(
+            center.blockX, center.blockZ,
+            org.bukkit.HeightMap.WORLD_SURFACE
+        )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
             val startAngle = (2 * PI * index) / players.size
@@ -149,8 +163,10 @@ object CinematicCamera {
         durationTicks: Long = 200L,
         angularSpeedPerTick: Double = 0.006,
     ) {
-        val surfaceY = center.world?.getHighestBlockYAt(center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE)?.toDouble() ?: center.y
+        val surfaceY = center.world?.getHighestBlockYAt(
+            center.blockX, center.blockZ,
+            org.bukkit.HeightMap.WORLD_SURFACE
+        )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
             val startAngle = (2 * PI * index) / players.size
@@ -176,8 +192,10 @@ object CinematicCamera {
         swingHalfAngle: Double = PI / 3.0,
         swingPeriod: Long = 80L,
     ) {
-        val surfaceY = center.world?.getHighestBlockYAt(center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE)?.toDouble() ?: center.y
+        val surfaceY = center.world?.getHighestBlockYAt(
+            center.blockX, center.blockZ,
+            org.bukkit.HeightMap.WORLD_SURFACE
+        )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
             val baseAngle = (2 * PI * index) / players.size
@@ -209,8 +227,8 @@ object CinematicCamera {
 
         players.forEach { player ->
             val startLoc = center.clone().apply {
-                y     = center.y + startHeight
-                yaw   = 0f
+                y = center.y + startHeight
+                yaw = 0f
                 pitch = 75f
             }
             mountCamera(player, startLoc)
@@ -218,11 +236,11 @@ object CinematicCamera {
             val taskIdHolder = IntArray(1)
             var elapsed = 0L
 
-            taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, Runnable {
+            taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, Runnable {
                 elapsed += INTERPOLATION_INTERVAL
 
-                val t       = (elapsed.toDouble() / durationTicks).coerceAtMost(1.0)
-                val eased   = t * t * (3.0 - 2.0 * t)          // smoothstep
+                val t = (elapsed.toDouble() / durationTicks).coerceAtMost(1.0)
+                val eased = t * t * (3.0 - 2.0 * t)          // smoothstep
                 val targetY = startLoc.y - (startHeight - 2.0) * eased
 
                 val display = cameraEntities[player.uniqueId] ?: run {
@@ -271,14 +289,14 @@ object CinematicCamera {
         dismountCamera(player)
 
         val display = startLoc.world!!.spawnEntity(startLoc, EntityType.ITEM_DISPLAY) as ItemDisplay
-        display.isInvisible     = true
-        display.isInvulnerable  = true
-        display.isSilent        = true
-        display.isPersistent    = false
+        display.isInvisible = true
+        display.isInvulnerable = true
+        display.isSilent = true
+        display.isPersistent = false
         // Interpolation duration matches the update interval so each segment
         // blends seamlessly into the next with no gap or snap.
         display.interpolationDuration = INTERPOLATION_INTERVAL
-        display.teleportDuration      = INTERPOLATION_INTERVAL
+        display.teleportDuration = INTERPOLATION_INTERVAL
 
         player.spectatorTarget = display
         cameraEntities[player.uniqueId] = display
@@ -313,10 +331,10 @@ object CinematicCamera {
         steepPitch: Boolean = false,
     ) {
         val taskIdHolder = IntArray(1)
-        var angle   = startAngle
+        var angle = startAngle
         var elapsed = 0L
 
-        taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, Runnable {
+        taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, Runnable {
             elapsed += INTERPOLATION_INTERVAL
             if (elapsed > durationTicks) {
                 Bukkit.getScheduler().cancelTask(taskIdHolder[0])
@@ -345,7 +363,7 @@ object CinematicCamera {
         val taskIdHolder = IntArray(1)
         var elapsed = 0L
 
-        taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, Runnable {
+        taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, Runnable {
             elapsed += INTERPOLATION_INTERVAL
             if (elapsed > durationTicks) {
                 Bukkit.getScheduler().cancelTask(taskIdHolder[0])
@@ -353,12 +371,12 @@ object CinematicCamera {
                 return@Runnable
             }
 
-            val progress  = elapsed.toDouble() / durationTicks
-            val radius    = startRadius - (startRadius - endRadius) * progress
-            val angle     = startAngle + progress * PI * 0.5
+            val progress = elapsed.toDouble() / durationTicks
+            val radius = startRadius - (startRadius - endRadius) * progress
+            val angle = startAngle + progress * PI * 0.5
             val curHeight = height - progress * 8.0
-            val target    = orbitPosition(center, radius, curHeight, angle)
-            val display   = cameraEntities[player.uniqueId] ?: return@Runnable
+            val target = orbitPosition(center, radius, curHeight, angle)
+            val display = cameraEntities[player.uniqueId] ?: return@Runnable
             smoothMove(display, target)
         }, 0L, INTERPOLATION_INTERVAL.toLong())
 
@@ -377,18 +395,18 @@ object CinematicCamera {
         durationTicks: Long,
     ) {
         val taskIdHolder = IntArray(1)
-        var angle   = startAngle
+        var angle = startAngle
         var elapsed = 0L
 
-        taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, Runnable {
+        taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, Runnable {
             elapsed += INTERPOLATION_INTERVAL
             if (elapsed > durationTicks) {
                 Bukkit.getScheduler().cancelTask(taskIdHolder[0])
                 activeTasks.remove(taskIdHolder[0])
                 return@Runnable
             }
-            val t      = elapsed.toDouble() / durationTicks
-            val eased  = t * t * (3.0 - 2.0 * t)   // smoothstep
+            val t = elapsed.toDouble() / durationTicks
+            val eased = t * t * (3.0 - 2.0 * t)   // smoothstep
             val height = startHeight + (endHeight - startHeight) * eased
             angle += speed * INTERPOLATION_INTERVAL
             // Use steep pitch when high, flatten out as we approach end height
@@ -415,15 +433,15 @@ object CinematicCamera {
         val taskIdHolder = IntArray(1)
         var elapsed = 0L
 
-        taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Data.instance, Runnable {
+        taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, Runnable {
             elapsed += INTERPOLATION_INTERVAL
             if (elapsed > durationTicks) {
                 Bukkit.getScheduler().cancelTask(taskIdHolder[0])
                 activeTasks.remove(taskIdHolder[0])
                 return@Runnable
             }
-            val swing  = sin(2.0 * PI * elapsed.toDouble() / period) * halfAngle
-            val angle  = baseAngle + swing
+            val swing = sin(2.0 * PI * elapsed.toDouble() / period) * halfAngle
+            val angle = baseAngle + swing
             val target = orbitPosition(center, radius, height, angle)
             val display = cameraEntities[player.uniqueId] ?: return@Runnable
             smoothMove(display, target)
@@ -444,9 +462,9 @@ object CinematicCamera {
         val z = center.z + radius * sin(angle)
         val y = center.y + height
 
-        val dx   = center.x - x
-        val dz   = center.z - z
-        val yaw  = Math.toDegrees(atan2(-dx, dz)).toFloat()
+        val dx = center.x - x
+        val dz = center.z - z
+        val yaw = Math.toDegrees(atan2(-dx, dz)).toFloat()
         val dist = sqrt(dx * dx + dz * dz)
 
         // Always look at the island surface (center.y) rather than center.y+height/2.

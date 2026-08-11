@@ -14,7 +14,8 @@ package yv.tils.yv_smp
 
 import yv.tils.common.permissions.PermissionManager
 import yv.tils.configv2.language.LanguageProvider
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
 import yv.tils.yv_smp.commands.MusicCommand
 import yv.tils.yv_smp.commands.StartCommand
 import yv.tils.yv_smp.configs.ConfigFile
@@ -25,9 +26,9 @@ import yv.tils.yv_smp.logic.music.SVCManager
 import yv.tils.yv_smp.logic.music.VoiceChatAudioPlayer
 import yv.tils.yv_smp.permissions.PermissionsData
 
-class YV_SMPYVtils : Data.YVtilsModule {
+class YV_SMPYVtils : Module.YVtilsModule {
     companion object {
-        val MODULE = Data.YVtilsModuleData(
+        val MODULE = Module.YVtilsModuleData(
             "yv_smp",
             "10.0.0-dev.1",
             "YV SMP module for YVtils",
@@ -40,7 +41,7 @@ class YV_SMPYVtils : Data.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Data.addModule(MODULE)
+        Module.addModule(MODULE)
 
         registerCommands()
         registerListeners()
@@ -68,7 +69,7 @@ class YV_SMPYVtils : Data.YVtilsModule {
     }
 
     private fun registerListeners() {
-        val plugin = Data.instance
+        val plugin = Core.instance
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(PlayerQuitListener(), plugin)

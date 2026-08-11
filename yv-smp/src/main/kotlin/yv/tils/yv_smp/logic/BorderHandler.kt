@@ -12,9 +12,9 @@
 
 package yv.tils.yv_smp.logic
 
-import yv.tils.utils.data.Data
-import yv.tils.utils.logger.DEBUGLEVEL
+import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.modules.Core
 
 class BorderHandler {
     /**
@@ -24,9 +24,9 @@ class BorderHandler {
      * @param time The time in seconds for the border to transition to the new size.
      */
     fun changeBorderSize(size: Double, time: Long = 0) {
-        Data.instance.server.worlds.forEach { world ->
-            world.worldBorder.setSize(size, time)
+        Core.instance.server.worlds.forEach { world ->
+            world.worldBorder.changeSize(size, time)
         }
-        Logger.debug("Changed world border size to $size with a transition time of $time seconds.", DEBUGLEVEL.BASIC)
+        Logger.debug("Changed world border size to $size with a transition time of $time seconds.", DEBUG_LEVEL.BASIC)
     }
 }

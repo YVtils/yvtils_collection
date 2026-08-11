@@ -15,7 +15,7 @@ package yv.tils.yv_smp.logic
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 import yv.tils.configv2.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.utils.player.PlayerUtils
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.logic.music.MusicAPI
@@ -30,7 +30,7 @@ class StartLogic {
             player.stopAllSounds()
             savedGameModes[player.uniqueId] = player.gameMode
             player.gameMode = GameMode.SPECTATOR
-            players.forEach { other -> if (other != player) player.hidePlayer(Data.instance, other) }
+            players.forEach { other -> if (other != player) player.hidePlayer(Core.instance, other) }
         }
 
         MusicAPI.broadcastUrl(

@@ -14,7 +14,7 @@ package yv.tils.yv_smp.logic.start
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 
 class PhaseHandler {
     companion object {
@@ -24,14 +24,14 @@ class PhaseHandler {
 
         fun triggerNextPhase(players: List<Player>) {
             currentPhase = when (currentPhase) {
-                Phase.NONE        -> Phase.PREPARATION
+                Phase.NONE -> Phase.PREPARATION
                 Phase.PREPARATION -> Phase.HEAL
-                Phase.HEAL        -> Phase.ITEM_CLEAR
-                Phase.ITEM_CLEAR  -> Phase.DEATH_VISUAL
+                Phase.HEAL -> Phase.ITEM_CLEAR
+                Phase.ITEM_CLEAR -> Phase.DEATH_VISUAL
                 Phase.DEATH_VISUAL -> Phase.BORDER
-                Phase.BORDER      -> Phase.FINAL
-                Phase.FINAL       -> Phase.FINAL_TWO
-                Phase.FINAL_TWO   -> Phase.NONE
+                Phase.BORDER -> Phase.FINAL
+                Phase.FINAL -> Phase.FINAL_TWO
+                Phase.FINAL_TWO -> Phase.NONE
             }
 
             if (currentPhase == Phase.NONE) return
@@ -57,13 +57,13 @@ class PhaseHandler {
         }
 
         fun registerActions() {
-            actions[Phase.PREPARATION]  = listOf { players -> PreparationPhase().onPhaseStart(players) }
-            actions[Phase.HEAL]         = listOf { players -> HealPhase().onPhaseStart(players) }
-            actions[Phase.ITEM_CLEAR]   = listOf { players -> ItemClearPhase().onPhaseStart(players) }
+            actions[Phase.PREPARATION] = listOf { players -> PreparationPhase().onPhaseStart(players) }
+            actions[Phase.HEAL] = listOf { players -> HealPhase().onPhaseStart(players) }
+            actions[Phase.ITEM_CLEAR] = listOf { players -> ItemClearPhase().onPhaseStart(players) }
             actions[Phase.DEATH_VISUAL] = listOf { players -> DeathVisualizerPhase().onPhaseStart(players) }
-            actions[Phase.BORDER]       = listOf { players -> BorderPhase().onPhaseStart(players) }
-            actions[Phase.FINAL]        = listOf { players -> FinalPhase().onPhaseStart(players) }
-            actions[Phase.FINAL_TWO]    = listOf { players -> FinalPhasePartTwo().onPhaseStart(players) }
+            actions[Phase.BORDER] = listOf { players -> BorderPhase().onPhaseStart(players) }
+            actions[Phase.FINAL] = listOf { players -> FinalPhase().onPhaseStart(players) }
+            actions[Phase.FINAL_TWO] = listOf { players -> FinalPhasePartTwo().onPhaseStart(players) }
         }
     }
 }
@@ -105,7 +105,7 @@ interface PhasePlugin {
      * @param players The list of players currently in the game.
      */
     fun onPhaseEnd(players: List<Player>) {
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             PhaseHandler.triggerNextPhase(players)
         }, getPhaseDuration())
     }

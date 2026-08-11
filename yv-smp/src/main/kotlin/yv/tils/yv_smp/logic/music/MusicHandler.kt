@@ -12,8 +12,6 @@
 
 package yv.tils.yv_smp.logic.music
 
-import de.maxhenkel.voicechat.api.VoicechatApi
-import de.maxhenkel.voicechat.api.VoicechatServerApi
 import org.bukkit.entity.Player
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.player.PlayerUtils
@@ -23,16 +21,20 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Central music handler for managing audio playback across players.
  * This is a singleton that manages all active audio players.
+ *
+ * NOTE: the voicechat API instance is kept as `Any` rather than
+ * `VoicechatApi`/`VoicechatServerApi` - see [yv.tils.yv_smp.logic.music.svc.VoicechatBridge]
+ * for why this module can never reference voicechat-api types directly.
  */
 object MusicHandler {
     private val activePlayers = ConcurrentHashMap<UUID, VoiceChatAudioPlayer>()
-    private var voicechatApi: VoicechatApi? = null
+    private var voicechatApi: Any? = null
 
     /**
      * Initialize the music handler with the VoiceChat API.
      * Should be called once during plugin initialization.
      */
-    fun initialize(api: VoicechatApi?) {
+    fun initialize(api: Any?) {
         voicechatApi = api
         if (api != null) {
             Logger.info("MusicHandler initialized with VoiceChat API")
@@ -65,7 +67,7 @@ object MusicHandler {
      * Play audio for a specific player.
      */
     fun playAudio(player: Player, config: AudioConfig) {
-        val serverApi = voicechatApi as? VoicechatServerApi
+        val serverApi = voicechatApi
         if (serverApi == null) {
             Logger.warn("Cannot play audio for ${player.name}: VoiceChat API not available")
             return
@@ -150,7 +152,7 @@ object MusicHandler {
     /**
      * Internal method to play audio via Simple Voice Chat API using LavaPlayer.
      */
-    private fun playViaVoiceChat(player: Player, serverApi: VoicechatServerApi, config: AudioConfig) {
+    private fun playViaVoiceChat(player: Player, serverApi: Any, config: AudioConfig) {
         // Stop any existing player for this player
         activePlayers[player.uniqueId]?.stop()
 

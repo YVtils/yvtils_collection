@@ -20,8 +20,8 @@ import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import yv.tils.configv2.language.LanguageHandler
-import yv.tils.utils.data.Data
 import yv.tils.utils.message.MessageUtils
+import yv.tils.utils.modules.Core
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.utils.CinematicCamera
 import yv.tils.yv_smp.utils.IslandScanner
@@ -44,15 +44,15 @@ class DeathVisualizerPhase : PhasePlugin {
         // ── Camera: pendulum — eerie oscillating sweep, never a full revolution ─
         players.forEach { it.gameMode = org.bukkit.GameMode.SPECTATOR }
         CinematicCamera.pendulum(
-            players        = players,
-            center         = spawnLoc,
-            orbitRadius    = 38.0,
-            height         = 14.0,
-            durationTicks  = 255L,
+            players = players,
+            center = spawnLoc,
+            orbitRadius = 38.0,
+            height = 14.0,
+            durationTicks = 255L,
             swingHalfAngle = kotlin.math.PI / 2.5,
-            swingPeriod    = 90L,
+            swingPeriod = 90L,
         )
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             CinematicCamera.stopAll()
         }, 256L)
 
@@ -66,62 +66,85 @@ class DeathVisualizerPhase : PhasePlugin {
         // ── Scan island edge (cached) ─────────────────────────────────────────
         val edges = IslandScanner.scan(spawnLoc)
         val islandRadius = if (edges.isNotEmpty()) edges.maxOf { e ->
-            val dx = e.x - spawnLoc.x; val dz = e.z - spawnLoc.z
+            val dx = e.x - spawnLoc.x;
+            val dz = e.z - spawnLoc.z
             kotlin.math.sqrt(dx * dx + dz * dz)
         } else 30.0
 
         // ── 1. Dark soul edge glow — cliff wreathed in soul flame ────────────
-        edgeGlow(players, edges,
+        edgeGlow(
+            players, edges,
             particleA = Particle.SOUL, particleB = Particle.SOUL_FIRE_FLAME,
-            stackHeight = 0.8, duration = 250L)
+            stackHeight = 0.8, duration = 250L
+        )
 
         // ── 2. Soul flame pillars erupt from every edge block (t=8) ──────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             edgePillarRise(players, edges, Particle.SOUL_FIRE_FLAME, riseHeight = 40, count = 2)
         }, 8L)
 
         // ── 3. Sculk soul pillars follow, shorter (t=25) ─────────────────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             edgePillarRise(players, edges, Particle.SCULK_SOUL, riseHeight = 28, count = 2)
         }, 25L)
 
         // ── 4. WARPED_SPORE pillars at mid-phase (t=60) ───────────────────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             edgePillarRise(players, edges, Particle.WARPED_SPORE, riseHeight = 22, count = 2)
         }, 60L)
 
         // ── 5. Soul shockwave converges inward — death closing in (t=12) ─────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-            edgeShockwaveInward(players, edges, spawnLoc,
-                Pair(Particle.SOUL, Particle.SMOKE), waves = 4, waveDelay = 16L, steps = 22)
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            edgeShockwaveInward(
+                players, edges, spawnLoc,
+                Pair(Particle.SOUL, Particle.SMOKE), waves = 4, waveDelay = 16L, steps = 22
+            )
         }, 12L)
 
         // ── 6. Second sculk pulse (t=45) ─────────────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-            edgeShockwaveInward(players, edges, spawnLoc,
-                Pair(Particle.SCULK_SOUL, Particle.LARGE_SMOKE), waves = 3, waveDelay = 20L, steps = 24)
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            edgeShockwaveInward(
+                players, edges, spawnLoc,
+                Pair(Particle.SCULK_SOUL, Particle.LARGE_SMOKE), waves = 3, waveDelay = 20L, steps = 24
+            )
         }, 45L)
 
         // ── 7. Third dark pulse — squid ink (t=120) ───────────────────────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-            edgeShockwaveInward(players, edges, spawnLoc,
-                Pair(Particle.SQUID_INK, Particle.ASH), waves = 2, waveDelay = 18L, steps = 20)
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            edgeShockwaveInward(
+                players, edges, spawnLoc,
+                Pair(Particle.SQUID_INK, Particle.ASH), waves = 2, waveDelay = 18L, steps = 20
+            )
         }, 120L)
 
         // ── 8. Haunting rain — ash, smoke, obsidian tears ─────────────────────
         islandRain(players, spawnLoc, Particle.ASH, areaRadius = islandRadius, duration = 240L)
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             islandRain(players, spawnLoc, Particle.SMOKE, areaRadius = islandRadius * 0.73, duration = 160L)
         }, 20L)
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-            islandRain(players, spawnLoc, Particle.DRIPPING_OBSIDIAN_TEAR, areaRadius = islandRadius * 0.5, duration = 120L)
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            islandRain(
+                players,
+                spawnLoc,
+                Particle.DRIPPING_OBSIDIAN_TEAR,
+                areaRadius = islandRadius * 0.5,
+                duration = 120L
+            )
         }, 50L)
 
         // ── 9. Central soul burst (t=55) ─────────────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             players.forEach { player ->
                 player.spawnParticle(Particle.SMOKE, spawnLoc.clone().add(0.0, 1.0, 0.0), 100, 4.0, 2.0, 4.0, 0.08)
-                player.spawnParticle(Particle.SOUL_FIRE_FLAME, spawnLoc.clone().add(0.0, 0.5, 0.0), 80, 3.5, 2.5, 3.5, 0.05)
+                player.spawnParticle(
+                    Particle.SOUL_FIRE_FLAME,
+                    spawnLoc.clone().add(0.0, 0.5, 0.0),
+                    80,
+                    3.5,
+                    2.5,
+                    3.5,
+                    0.05
+                )
                 player.spawnParticle(Particle.LARGE_SMOKE, spawnLoc.clone().add(0.0, 0.5, 0.0), 60, 3.0, 1.5, 3.0, 0.03)
                 player.spawnParticle(Particle.SQUID_INK, spawnLoc.clone().add(0.0, 1.0, 0.0), 40, 2.5, 1.5, 2.5, 0.05)
                 player.playSound(player.location, Sound.PARTICLE_SOUL_ESCAPE, 0.8f, 0.4f)
@@ -153,8 +176,8 @@ class DeathVisualizerPhase : PhasePlugin {
 
         // TODO: Test if this if statement is actually needed, or if the unregister calls can just be made without checking for null first
 //        if (scoreboard.getObjective("deaths") != null || scoreboard.getObjective("deaths_two") != null) {
-            scoreboard.getObjective("deaths")?.unregister()
-            scoreboard.getObjective("deaths_two")?.unregister()
+        scoreboard.getObjective("deaths")?.unregister()
+        scoreboard.getObjective("deaths_two")?.unregister()
 //        }
 
         scoreboard.registerNewObjective("deaths", Criteria.DEATH_COUNT, MessageUtils.convert("<red>☠"))

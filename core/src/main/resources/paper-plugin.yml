@@ -8,3 +8,8 @@ website: 'https://yvtils.net/yvtils/'
 prefix: YVtils
 contributors:
   - Lyv (LyvricYV)
+dependencies:
+  server:
+    voicechat:
+      load: BEFORE
+      required: false

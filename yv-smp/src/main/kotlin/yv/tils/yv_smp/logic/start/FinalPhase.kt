@@ -18,7 +18,7 @@ import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import yv.tils.configv2.language.LanguageHandler
-import yv.tils.utils.data.Data
+import yv.tils.utils.modules.Core
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.utils.CinematicCamera
 import yv.tils.yv_smp.utils.IslandScanner
@@ -41,15 +41,15 @@ class FinalPhase : PhasePlugin {
         // ── Camera: rising orbit — camera ascends as tension builds to peak ───
         players.forEach { it.gameMode = org.bukkit.GameMode.SPECTATOR }
         CinematicCamera.orbitRising(
-            players             = players,
-            center              = spawnLoc,
-            orbitRadius         = 34.0,
-            startHeight         = 8.0,
-            endHeight           = 60.0,
-            durationTicks       = 275L,
+            players = players,
+            center = spawnLoc,
+            orbitRadius = 34.0,
+            startHeight = 8.0,
+            endHeight = 60.0,
+            durationTicks = 275L,
             angularSpeedPerTick = 0.008,
         )
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             CinematicCamera.stopAll()
         }, 276L)
 
@@ -63,66 +63,89 @@ class FinalPhase : PhasePlugin {
         // ── Scan island edge (cached) ─────────────────────────────────────────
         val edges = IslandScanner.scan(spawnLoc)
         val islandRadius = if (edges.isNotEmpty()) edges.maxOf { e ->
-            val dx = e.x - spawnLoc.x; val dz = e.z - spawnLoc.z
+            val dx = e.x - spawnLoc.x;
+            val dz = e.z - spawnLoc.z
             kotlin.math.sqrt(dx * dx + dz * dz)
         } else 28.0
 
         // ── 1. Hellfire edge glow — cliff ablaze ──────────────────────────────
-        edgeGlow(players, edges,
+        edgeGlow(
+            players, edges,
             particleA = Particle.FLAME, particleB = Particle.LAVA,
-            stackHeight = 0.8, duration = 270L)
+            stackHeight = 0.8, duration = 270L
+        )
 
         // ── 2. Flame pillars erupt from every edge block (t=5) ───────────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             edgePillarRise(players, edges, Particle.FLAME, riseHeight = 45, count = 2)
         }, 5L)
 
         // ── 3. Enchanted hit pillars follow (t=30) ────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             edgePillarRise(players, edges, Particle.ENCHANTED_HIT, riseHeight = 35, count = 2)
         }, 30L)
 
         // ── 4. Crit pillars, tallest wave (t=55) ─────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             edgePillarRise(players, edges, Particle.CRIT, riseHeight = 55, count = 2)
         }, 55L)
 
         // ── 5. MAGMA pillar wave (t=80) — hellfire fully erupts ───────────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             edgePillarRise(players, edges, Particle.LAVA, riseHeight = 25, count = 3)
         }, 80L)
 
         // ── 6. Accelerating inward shockwaves ────────────────────────────────
         for (i in 0..7) {
-            Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-                edgeShockwaveInward(players, edges, spawnLoc,
+            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                edgeShockwaveInward(
+                    players, edges, spawnLoc,
                     Pair(Particle.ENCHANTED_HIT, Particle.CRIT),
-                    waves = 1, waveDelay = 10L, steps = 16 + i)
+                    waves = 1, waveDelay = 10L, steps = 16 + i
+                )
             }, i * 6L)
         }
 
         // ── 7. CAMPFIRE_COSY_SMOKE inward — dark suffocation (t=100) ─────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
-            edgeShockwaveInward(players, edges, spawnLoc,
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            edgeShockwaveInward(
+                players, edges, spawnLoc,
                 Pair(Particle.CAMPFIRE_COSY_SMOKE, Particle.FLAME),
-                waves = 3, waveDelay = 14L, steps = 18)
+                waves = 3, waveDelay = 14L, steps = 18
+            )
         }, 100L)
 
         // ── 8. Lava/flame interior rain with dripping layer ───────────────────
         islandRain(players, spawnLoc, Particle.LAVA, areaRadius = islandRadius, duration = 260L)
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             islandRain(players, spawnLoc, Particle.FLAME, areaRadius = islandRadius * 0.71, duration = 200L)
         }, 20L)
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             islandRain(players, spawnLoc, Particle.DRIPPING_LAVA, areaRadius = islandRadius * 0.5, duration = 150L)
         }, 40L)
 
         // ── 9. Climactic central burst (t=75) ────────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Data.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             players.forEach { player ->
-                player.spawnParticle(Particle.EXPLOSION_EMITTER, spawnLoc.clone().add(0.0, 1.0, 0.0), 5, 2.0, 0.0, 2.0, 0.0)
+                player.spawnParticle(
+                    Particle.EXPLOSION_EMITTER,
+                    spawnLoc.clone().add(0.0, 1.0, 0.0),
+                    5,
+                    2.0,
+                    0.0,
+                    2.0,
+                    0.0
+                )
                 player.spawnParticle(Particle.FLAME, spawnLoc.clone().add(0.0, 1.0, 0.0), 200, 5.0, 3.0, 5.0, 0.3)
-                player.spawnParticle(Particle.ENCHANTED_HIT, spawnLoc.clone().add(0.0, 2.0, 0.0), 150, 4.0, 4.0, 4.0, 0.2)
+                player.spawnParticle(
+                    Particle.ENCHANTED_HIT,
+                    spawnLoc.clone().add(0.0, 2.0, 0.0),
+                    150,
+                    4.0,
+                    4.0,
+                    4.0,
+                    0.2
+                )
                 player.spawnParticle(Particle.LAVA, spawnLoc.clone().add(0.0, 1.5, 0.0), 100, 3.5, 2.5, 3.5, 0.0)
                 player.spawnParticle(Particle.CRIT, spawnLoc.clone().add(0.0, 2.5, 0.0), 80, 3.0, 3.0, 3.0, 0.25)
                 player.playSound(player.location, Sound.ENTITY_ENDER_DRAGON_DEATH, 0.7f, 1.3f)

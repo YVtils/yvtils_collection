@@ -10,16 +10,17 @@ This repository combines all the yvtils minecraft plugins in one place, for easi
   [docs/migrating-to-dynamic-modules.md](./docs/migrating-to-dynamic-modules.md).
 
 ## Plugins included in this collection
+
 - YVtils-SMP **(IN MIGRATION PROCESS)**
 - YVtils-Discord ([Modrinth](https://modrinth.com/plugin/yvtils_dc))
-  - [Core](https://github.com/YVtils/yvtils_collection/tree/main/discord-core)
-  - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/discord)
+    - [Core](https://github.com/YVtils/yvtils_collection/tree/main/discord-core)
+    - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/discord)
 - YVtils-MultiMine ([Modrinth](https://modrinth.com/plugin/yvtils_mm))
-  - [Core](https://github.com/YVtils/yvtils_collection/tree/main/multiMine-core)
-  - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/multiMine)
+    - [Core](https://github.com/YVtils/yvtils_collection/tree/main/multiMine-core)
+    - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/multiMine)
 - YVtils-Regions ([Modrinth](https://modrinth.com/plugin/yvtils_rg)) **(IN RECODE PROCESS)**
-  - [Core](https://github.com/YVtils/yvtils_collection/tree/main/regions-core)
-  - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/regions)
+    - [Core](https://github.com/YVtils/yvtils_collection/tree/main/regions-core)
+    - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/regions)
 - YVtils-YV_SMP **(IN MIGRATION PROCESS)**
 
 ---
@@ -92,14 +93,14 @@ This repository combines all the yvtils minecraft plugins in one place, for easi
 
 - Chat Sync
 
-  ![Chat Sync](./readme-assets/Discord_ChatSync.png)
+  ![Chat Sync](.github/assets/Discord_ChatSync.png)
 - Minecraft Server Stats
 
-  ![Minecraft Server Stats](./readme-assets/Discord_DescStats.png)
-  ![Minecraft Server Stats](./readme-assets/Discord_ChannelStats.png)
+  ![Minecraft Server Stats](.github/assets/Discord_DescStats.png)
+  ![Minecraft Server Stats](.github/assets/Discord_ChannelStats.png)
 - Console Sync
 
-  ![Console Sync](./readme-assets/Discord_ConsoleSync.png)
+  ![Console Sync](.github/assets/Discord_ConsoleSync.png)
 - Whitelist with Discord
 
 ## Status Module
@@ -110,7 +111,7 @@ This repository combines all the yvtils minecraft plugins in one place, for easi
 
 Let players set a status before their name.
 
-![Status](./readme-assets/Status.png)
+![Status](.github/assets/Status.png)
 
 ## Sit Module
 
@@ -118,7 +119,7 @@ Let players set a status before their name.
 
 Let players sit down everywhere.
 
-![Sit](./readme-assets/Sit.png)
+![Sit](.github/assets/Sit.png)
 
 ## Extended Vanish Module
 
@@ -130,7 +131,7 @@ Let players sit down everywhere.
 - Layer System
     - Higher Layer Players can see Lower Layer Players, but not vice versa.
 
-![Vanish](./readme-assets/Vanish.png)
+![Vanish](.github/assets/Vanish.png)
 
 ## Moderation Module
 
@@ -149,21 +150,21 @@ Let players sit down everywhere.
 - Let players craft custom items
     - Invisible Item Frames
 
-      ![Invisible Item Frame](./readme-assets/Fusion_INVISFRAME.png)
+      ![Invisible Item Frame](.github/assets/Fusion_INVISFRAME.png)
 
     - Light Blocks
 
-      ![Light Block](./readme-assets/Fusion_LIGHTBLOCK.png)
+      ![Light Block](.github/assets/Fusion_LIGHTBLOCK.png)
 
     - Custom Player Heads
 
-      ![Custom Player Head](./readme-assets/Fusion_CUSTOMHEAD.png)
+      ![Custom Player Head](.github/assets/Fusion_CUSTOMHEAD.png)
 
 - Manage existing or create new fusions
 
-  ![FusionCreate](./readme-assets/Fusion_Create.png)
+  ![FusionCreate](.github/assets/Fusion_Create.png)
 
-![Fusion](./readme-assets/FusionInv.png)
+![Fusion](.github/assets/FusionInv.png)
 
 ## MultiMine Module (VeinMiner & Timber)
 
@@ -175,19 +176,19 @@ Let players sit down everywhere.
 - MultiMine Blocks
 - Add/Remove multiple blocks at once with a container in your hand
 
-![MultiMine](./readme-assets/MultiMine.gif)
-![MultiMine](./readme-assets/MultiMine2.gif)
+![MultiMine](.github/assets/MultiMine.gif)
+![MultiMine](.github/assets/MultiMine2.gif)
 
 ## Server Module
 
 - Maintenance Mode
 - Custom MOTD
 
-  ![Custom MOTD](./readme-assets/ServerList.png)
+  ![Custom MOTD](.github/assets/ServerList.png)
 - Fake Max Player Count
 - Customizable Player Info Text
 
-  ![Custom Player Info Text](./readme-assets/ServerInfo.png)
+  ![Custom Player Info Text](.github/assets/ServerInfo.png)
 
 ## Waypoints Module
 
@@ -199,26 +200,27 @@ Let players sit down everywhere.
     - Unlisted - Only you can see it, but others can navigate to it
 - Navigate to waypoints
 
-![Waypoints](./readme-assets/Waypoint.png)
+![Waypoints](.github/assets/Waypoint.png)
 
 ## Other Features
 
 - Anti Too Expensive
     - Bypasses the "Too Expensive" Enchantment Limit
 
-  ![Anti Too Expensive](./readme-assets/AntiTooExpensive.png)
+  ![Anti Too Expensive](.github/assets/AntiTooExpensive.png)
 
 - MSG System
     - `/msg <player> <message>`
     - `/r <message>`
 
-  ![MSG System](./readme-assets/MSG.png)
+  ![MSG System](.github/assets/MSG.png)
 
 - Spawn Elytra
 
-![Spawn Elytra](./readme-assets/SpawnElytra.png)
+![Spawn Elytra](.github/assets/SpawnElytra.png)
 
 # Commands
+
 - Fly Command `/fly [player]`
 - Heal Command `/heal [player]`
 - Speed Command `/speed <speed> [player]`
