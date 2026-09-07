@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinMonorepoVersion = "2.3.20"
+    val kotlinMonorepoVersion = "2.4.20"
 
     kotlin("jvm") version kotlinMonorepoVersion apply false
     kotlin("plugin.serialization") version kotlinMonorepoVersion apply false
