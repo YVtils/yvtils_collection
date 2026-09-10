@@ -39,7 +39,7 @@ jobs:
         run: ./gradlew cyclonedxBom --no-daemon
 
       - name: Upload SBOM to Dependency-Track
-        uses: DependencyTrack/gh-upload-sbom@v4.1
+        uses: DependencyTrack/gh-upload-sbom@v4.2
         with:
           serverHostname: ${{ secrets.DTRACK_HOSTNAME }}
           protocol: https
