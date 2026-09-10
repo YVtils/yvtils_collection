@@ -67,7 +67,7 @@ subprojects {
 
     dependencies {
         // Paper API dependency
-        add("paperweightDevelopmentBundle", "io.papermc.paper:dev-bundle:1.21.1-R0.1-SNAPSHOT")
+        add("paperweightDevelopmentBundle", "io.papermc.paper:dev-bundle:26.2.build.123-stable")
 
         // CommandAPI dependencies
         add("implementation", "dev.jorel:commandapi-paper-shade:$commandAPIVersion")
