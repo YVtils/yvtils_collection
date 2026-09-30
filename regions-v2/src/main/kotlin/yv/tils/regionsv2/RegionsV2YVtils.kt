@@ -12,6 +12,7 @@
 
 package yv.tils.regionsv2
 
+import com.sk89q.worldguard.WorldGuard
 import yv.tils.common.permissions.PermissionManager
 import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.regionsv2.commands.RegionsV2Command
@@ -20,6 +21,9 @@ import yv.tils.regionsv2.configs.ManageGUI
 import yv.tils.regionsv2.data.PermissionsData
 import yv.tils.regionsv2.language.RegisterStrings
 import yv.tils.regionsv2.listeners.RegionsV2Join
+import yv.tils.regionsv2.logic.ClaimSelection
+import yv.tils.regionsv2.logic.ClaimService
+import yv.tils.regionsv2.logic.ClaimFlags
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
@@ -41,36 +45,59 @@ class RegionsV2YVtils : Module.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        // regions-v2 is built entirely on top of WorldGuard - without it there's
-        // nothing to enable. This module is shaded into core's main jar (see
-        // staticBundledModules), so it references WorldGuard's API directly; that
-        // only resolves at runtime when WorldGuard is actually installed and
-        // enabled, so guard here and stay disabled otherwise.
+        // regions-v2 is built entirely on top of WorldGuard - without it there's nothing to enable.
         val worldguardPlugin = Core.instance.server.pluginManager.getPlugin("WorldGuard")
         if (worldguardPlugin == null || !worldguardPlugin.isEnabled) {
             Logger.warn("regions-v2 is enabled but WorldGuard is not installed/enabled - the module stays disabled.")
             return
         }
 
+        // This module is bundled into core's main jar, whose WorldGuard dependency shares
+        // the live plugin's classes. Verify API access before registering module features.
+        try {
+            WorldGuard.getInstance().platform.regionContainer
+        } catch (e: Throwable) {
+            Logger.error(
+                "regions-v2 could not hook into the WorldGuard API (incompatible/mismatched version?) - " +
+                        "the module stays disabled.",
+                e
+            )
+            return
+        }
+
         InvUIBootstrap.ensure()
+        loadConfigs()
+        if (!ConfigFile.state.enabled) return
+        yv.tils.regionsv2.data.ClaimMetadata.load()
+        Core.instance.server.worlds.forEach(ClaimService::upgradeNames)
+        Core.instance.server.worlds.forEach(ClaimService::refreshMetadata)
+        Core.instance.server.worlds.filter {
+            WorldGuard.getInstance().platform.regionContainer.get(
+                com.sk89q.worldedit.bukkit.BukkitAdapter.adapt(
+                    it
+                )
+            ) != null
+        }
+            .forEach(ClaimFlags::catchUp)
 
         Module.addModule(MODULE)
 
+        registerPermissions()
         registerCommands()
         registerListeners()
-        registerPermissions()
-        loadConfigs()
+        yv.tils.regionsv2.logic.ClaimOccupancy.start()
 
         Logger.info("regions-v2 hooked into WorldGuard successfully.")
     }
 
     override fun onLateEnablePlugin() {
-        // Runs after every module's enablePlugin() has completed - use this
-        // if your module needs to react to another module that might not be
-        // ready yet during enablePlugin().
+        // Runs after every module's enablePlugin() has completed - use this if this module ever
+        // needs to react to another module that might not be ready yet during enablePlugin().
     }
 
     override fun disablePlugin() {
+        ClaimSelection.shutdown()
+        yv.tils.regionsv2.logic.ClaimOccupancy.shutdown()
         Module.removeModule(MODULE)
     }
 

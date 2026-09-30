@@ -28,4 +28,10 @@ dependencies {
     // provides Guava"), and declaring a separate version here (e.g. the latest
     // release) conflicts with those strict constraints and fails resolution.
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:$worldguardVersion")
+    testImplementation("com.sk89q.worldguard:worldguard-core:$worldguardVersion")
+    testImplementation(project(":config-v2"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+tasks.test { useJUnitPlatform() }

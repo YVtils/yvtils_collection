@@ -49,11 +49,25 @@ class PermissionsData {
 }
 
 enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
-    EXAMPLE(
+    CLAIM(
         PermissionManager.YVtilsPermission(
-            "${PermissionsData.permissionBase}.example",
-            "Allows using the regions-v2 example command",
+            "${PermissionsData.permissionBase}.claim",
+            "Create survival claims",
             default = true
+        )
+    ),
+    MANAGE(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.manage",
+            "Open claim management",
+            default = true
+        )
+    ),
+    ADMIN(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.admin",
+            "Manage all claims and server flag policy",
+            default = false
         )
     ),
     WORLDGUARD(

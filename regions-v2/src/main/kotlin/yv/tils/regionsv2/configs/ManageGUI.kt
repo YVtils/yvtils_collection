@@ -13,15 +13,11 @@
 package yv.tils.regionsv2.configs
 
 import org.bukkit.entity.Player
-import yv.tils.gui.logic.DataClassConfigGui
+import yv.tils.regionsv2.logic.ClaimService
 
 class ManageGUI {
     fun openGUI(sender: Player) {
-        DataClassConfigGui.open(
-            sender,
-            "RegionsV2 Config",
-            ConfigFile.state,
-            saver = { updated -> ConfigFile().applyState(updated) }
-        )
+        if (!ClaimService.admin(sender)) return
+        yv.tils.regionsv2.gui.ClaimsGui.configuration(sender)
     }
 }

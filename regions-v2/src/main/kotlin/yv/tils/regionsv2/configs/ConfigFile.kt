@@ -14,6 +14,9 @@ package yv.tils.regionsv2.configs
 
 import yv.tils.configv2.files.ConfigFormat
 import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.regionsv2.logic.ClaimFlags
+import org.bukkit.Bukkit
+import yv.tils.regionsv2.language.LangStrings
 
 class ConfigFile {
     companion object {
@@ -47,8 +50,40 @@ class ConfigFile {
 
     /** Called by [yv.tils.gui.logic.DataClassConfigGui]'s saver after an in-game edit. */
     fun applyState(newState: RegionsV2ConfigState) {
-        state = newState
-        syncDerivedView()
-        registerStrings()
+        check(
+            listOf(
+                newState.maxClaimsPerWorld,
+                newState.maxClaimsTotal,
+                newState.maxMembersPerClaim,
+                newState.maxMembershipsPerPlayer,
+                newState.maxClaimSide
+            ).all { it == -1 || it >= 0 } &&
+                    (newState.maxClaimVolume == -1L || newState.maxClaimVolume >= 1) && newState.minClaimArea >= 1) {
+            LangStrings.INVALID_LIMITS.key
+        }
+        val previous = state
+        val changed = ClaimFlags.changed(previous, newState)
+        val revision = if (changed.isEmpty()) previous.policyRevision else previous.policyRevision + 1
+        val updated = newState.copy(
+            policyRevision = revision,
+            policyChanges = if (changed.isEmpty()) previous.policyChanges else previous.policyChanges + (revision.toString() to changed.map { it.name }),
+            appliedWorldRevisions = if (changed.isEmpty()) newState.appliedWorldRevisions else previous.appliedWorldRevisions +
+                    Bukkit.getWorlds().associate { it.uid.toString() to revision }
+        )
+        val rollback = ClaimFlags.propagate(previous, updated)
+        state = updated
+        try {
+            registerStrings()
+            syncDerivedView()
+        } catch (e: Exception) {
+            state = previous
+            try {
+                rollback()
+            } catch (restore: Exception) {
+                e.addSuppressed(restore)
+            }
+            syncDerivedView()
+            throw IllegalStateException(LangStrings.CONFIG_SAVE_FAILED.key, e)
+        }
     }
 }

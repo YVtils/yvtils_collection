@@ -140,7 +140,7 @@ object YVtilsModulesGui {
      */
     private fun buildContentItems(player: Player, state: State): List<Item> {
         val names = DynamicModuleRegistry.KNOWN_MODULES
-            .filterValues { !it.hidden && !it.manual }
+            .filterValues { !it.isHidden && !it.isManual }
             .keys
             .sorted()
 

@@ -19,9 +19,9 @@ dependencies {
     compileOnly(project(":gui-26.1"))
 
     // Statically bundled into this launcher's main jar (NOT dynamically fetched)
-    // so it runs in the main plugin classloader and can see WorldGuard directly
-    // via `paper-plugin.yml` `dependencies` - the isolated library tier every
-    // dynamically-fetched module lives in cannot. Still togglable via
+    // so its direct WorldGuard API calls resolve through the main plugin classloader's
+    // `paper-plugin.yml` dependency with `join-classpath: true`, rather than the
+    // isolated library tier used by dynamically fetched modules. Still togglable via
     // `modules.yml` (see DynamicModuleRegistry `static = true`). See
     // `staticBundledModules` in the root build.gradle.kts.
     implementation(project(":regions-v2"))
@@ -40,7 +40,7 @@ val embedRuntime = tasks.register<Jar>("embedRuntime") {
 }
 
 /*
- * Generates `GeneratedModuleVersions.kt` straight from the repo-wide
+ * Generates `GeneratedModuleVersions.java` straight from the repo-wide
  * `gradle/module-versions.properties` (see that file and the root
  * `build.gradle.kts`'s `moduleVersions`), so `DynamicModuleRegistry`'s
  * `KNOWN_MODULES`/`GUI_ARTIFACTS` entries don't need their own hand-typed
@@ -48,9 +48,14 @@ val embedRuntime = tasks.register<Jar>("embedRuntime") {
  * module's version, in one place, feeds both this registry AND that
  * module's own generated `module-version-<name>.properties` resource
  * (`Module.readVersion(...)` in `utils`) from the exact same source file.
+ *
+ * Emitted as Java (not Kotlin) because it is consumed by the Java loader
+ * classes (`DynamicModuleRegistry`/`ModuleConfig`/`DynamicModuleLoader`), which
+ * must stay free of any Kotlin dependency - see those classes' Javadoc and the
+ * shadowJar Kotlin exclusion below.
  */
 val moduleVersionsFile = rootProject.file("gradle/module-versions.properties")
-val generatedModuleVersionsDir = layout.buildDirectory.dir("generated/moduleVersions/kotlin")
+val generatedModuleVersionsDir = layout.buildDirectory.dir("generated/moduleVersions/java")
 
 val generateModuleVersionsKotlin = tasks.register("generateModuleVersionsKotlin") {
     inputs.file(moduleVersionsFile)
@@ -64,12 +69,12 @@ val generateModuleVersionsKotlin = tasks.register("generateModuleVersionsKotlin"
         val entries = properties.entries
             .map { (key, value) -> key.toString() to value.toString() }
             .sortedBy { it.first }
-            .joinToString(",\n") { (name, version) -> "        \"$name\" to \"$version\"" }
+            .joinToString("\n") { (name, version) -> "        modules.put(\"$name\", \"$version\");" }
 
         val packageDir = generatedModuleVersionsDir.get().asFile.resolve("yv/tils/core/loader")
         packageDir.mkdirs()
 
-        packageDir.resolve("GeneratedModuleVersions.kt").writeText(
+        packageDir.resolve("GeneratedModuleVersions.java").writeText(
             """
             |/*
             | * GENERATED FILE - do not edit by hand.
@@ -79,12 +84,23 @@ val generateModuleVersionsKotlin = tasks.register("generateModuleVersionsKotlin"
             | * that properties file instead, then rebuild.
             | */
             |
-            |package yv.tils.core.loader
+            |package yv.tils.core.loader;
             |
-            |internal object GeneratedModuleVersions {
-            |    val VERSIONS: Map<String, String> = mapOf(
+            |import java.util.Collections;
+            |import java.util.LinkedHashMap;
+            |import java.util.Map;
+            |
+            |final class GeneratedModuleVersions {
+            |    private GeneratedModuleVersions() {
+            |    }
+            |
+            |    static final Map<String, String> VERSIONS = build();
+            |
+            |    private static Map<String, String> build() {
+            |        LinkedHashMap<String, String> modules = new LinkedHashMap<>();
             |$entries
-            |    )
+            |        return Collections.unmodifiableMap(modules);
+            |    }
             |}
             |
             """.trimMargin()
@@ -95,12 +111,16 @@ val generateModuleVersionsKotlin = tasks.register("generateModuleVersionsKotlin"
 sourceSets {
     main {
         resources.srcDir(embeddedResourcesDir)
-        kotlin.srcDir(generatedModuleVersionsDir)
+        java.srcDir(generatedModuleVersionsDir)
     }
 }
 
 tasks.named("processResources") {
     dependsOn(embedRuntime)
+}
+
+tasks.named("compileJava") {
+    dependsOn(generateModuleVersionsKotlin)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
@@ -123,6 +143,18 @@ tasks {
         archiveVersion.set(moduleVersion)
         archiveClassifier.set("")
         archiveFileName.set("YVtils_v${moduleVersion}.jar")
+
+        // Do NOT bundle the Kotlin stdlib into the main jar: it's provided at runtime by the shared
+        // runtime bundle (the library tier - see DynamicModuleLoader). A second copy here makes
+        // main-jar Kotlin classes (e.g. the statically-bundled regions-v2's config data classes)
+        // collide with the library tier when reflected by library-tier code (Configurate /
+        // kotlin-reflect) -> LinkageError: loader constraint violation on
+        // kotlin.jvm.internal.DefaultConstructorMarker. This is only safe because the PluginLoader
+        // bootstrap classes (DynamicModuleLoader/ModuleConfig/DynamicModuleRegistry/
+        // GeneratedModuleVersions) are pure Java and need no Kotlin at that stage.
+        dependencies {
+            exclude(dependency("org.jetbrains.kotlin:.*:.*"))
+        }
 
         manifest {
             attributes["Main-Class"] = "yv.tils.core.YVtils"

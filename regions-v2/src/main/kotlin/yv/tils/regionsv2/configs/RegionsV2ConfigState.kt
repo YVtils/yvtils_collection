@@ -28,4 +28,61 @@ data class RegionsV2ConfigState(
 
     @ConfigDescription("Whether regions-v2 is enabled")
     var enabled: Boolean = true,
+    @ConfigDescription("Maximum claims owned per world")
+    var maxClaimsPerWorld: Int = 5,
+    @ConfigDescription("Maximum owned claims across all worlds (-1 unlimited)")
+    var maxClaimsTotal: Int = 5,
+    @ConfigDescription("Minimum horizontal claim area in blocks")
+    var minClaimArea: Long = 1,
+    @ConfigDescription("Maximum members per claim (-1 unlimited)")
+    var maxMembersPerClaim: Int = -1,
+    @ConfigDescription("Maximum member claims per player across all worlds (-1 unlimited)")
+    var maxMembershipsPerPlayer: Int = -1,
+    @ConfigDescription("Show welcome and goodbye action bars")
+    var actionBarTransitions: Boolean = true,
+    @ConfigDescription("Maximum blocks in a full-height claim")
+    var maxClaimVolume: Long = 30000000,
+    @ConfigDescription("Maximum horizontal length of each claim side")
+    var maxClaimSide: Int = 256,
+    @ConfigDescription("Require survival mode to create claims")
+    var survivalOnly: Boolean = true,
+    @ConfigDescription("Worlds in which claiming is disabled")
+    var disabledWorlds: List<String> = emptyList(),
+    @NotGuiEditable
+    @ConfigDescription("Legacy role-flag list; use the admin flag policy menu")
+    var enabledRoleFlags: List<String> = listOf(
+        "block-break",
+        "block-place",
+        "chest-access",
+        "use",
+        "interact",
+        "damage-animals",
+        "entry"
+    ),
+    @NotGuiEditable
+    @ConfigDescription("Legacy global-flag list; use the admin flag policy menu")
+    var enabledGlobalFlags: List<String> = listOf(
+        "pvp",
+        "tnt",
+        "creeper-explosion",
+        "other-explosion",
+        "fire-spread",
+        "mob-spawning"
+    ),
+    @NotGuiEditable
+    @ConfigDescription("Per-flag policy; edit through the admin flags menu")
+    var flagPolicies: Map<String, FlagPolicy> = emptyMap(),
+    @NotGuiEditable
+    var policyRevision: Int = 0,
+    @NotGuiEditable
+    var policyChanges: Map<String, List<String>> = emptyMap(),
+    @NotGuiEditable
+    var appliedWorldRevisions: Map<String, Int> = emptyMap(),
+)
+
+data class FlagPolicy(
+    var enabled: Boolean = false,
+    var roleBased: Boolean = false,
+    /** WorldGuard-marshalled values encoded as YAML; empty means unset. */
+    var defaults: Map<String, String> = emptyMap(),
 )

@@ -2,9 +2,9 @@ name: YVtils-Collection
 version: ${version}
 main: yv.tils.core.YVtils
 loader: yv.tils.core.loader.DynamicModuleLoader
-api-version: '26.1'
+api-version: "26.1"
 author: YVtils
-website: 'https://yvtils.net/yvtils/'
+website: "https://yvtils.net/yvtils/"
 prefix: YVtils
 contributors:
   - Lyv (LyvricYV)
@@ -13,6 +13,7 @@ dependencies:
     voicechat:
       load: BEFORE
       required: false
-    worldguard:
+    WorldGuard:
       load: BEFORE
       required: false
+      join-classpath: true
