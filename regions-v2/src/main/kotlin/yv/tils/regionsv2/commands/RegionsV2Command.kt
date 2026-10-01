@@ -27,7 +27,8 @@ class RegionsV2Command {
 
     private fun completed(sender: CommandSender) = RegionText.send(sender, COMPLETED.message())
 
-    val command = commandTree("regionsv2") {
+    val command = commandTree("region") {
+        withAliases("regionsv2")
         withPermission(Permissions.MANAGE.permission.name)
         anyExecutor { sender, _ ->
             if (sender is Player) ClaimsGui.open(sender) else
@@ -59,6 +60,14 @@ class RegionsV2Command {
                 player,
                 SELECTION_CLEARED.message()
             )
+            }
+        }
+        literalArgument("cost") {
+            playerExecutor { player, _ ->
+                RegionText.action(player) {
+                    val bounds = ClaimSelection.bounds(player)
+                    RegionText.send(player, COST.message("cost" to ClaimCurrency.quote(player, bounds)))
+                }
             }
         }
         literalArgument("create") {
@@ -318,6 +327,7 @@ class RegionsV2Command {
                     }
 
                     "message" -> stringArgument("type") {
+                        withPermission(Permissions.ADMIN.permission.name)
                         replaceSuggestions(ArgumentSuggestions.strings("welcome", "goodbye"))
                         greedyStringArgument("text") {
                             anyExecutor { sender, args ->

@@ -1,7 +1,6 @@
 package yv.tils.regionsv2.logic
 
 import com.sk89q.worldguard.protection.flags.StateFlag
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -9,8 +8,44 @@ import yv.tils.regionsv2.language.*
 import yv.tils.regionsv2.language.LangStrings.*
 import yv.tils.utils.message.MessageUtils
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 object ClaimInformation {
+    private val timestampFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm z", java.util.Locale.ROOT)
+        .withZone(ZoneId.systemDefault())
+
+    fun formattedTimestamp(created: Long): String = timestampFormat.format(Instant.ofEpochMilli(created))
+
+    private fun names(ids: Collection<UUID>) =
+        ids.joinToString(", ") { Bukkit.getOfflinePlayer(it).name ?: it.toString() }.ifEmpty { "—" }
+
+    fun basic(claim: Claim): List<RegionMessage> = listOf(
+        INFO_OWNERS.message("owners" to names(claim.region.owners.uniqueIds)),
+        INFO_CREATED.message("created" to formattedTimestamp(claim.metadata.created))
+    )
+
+    fun location(claim: Claim): List<RegionMessage> {
+        val bounds = ClaimBounds(claim.world, claim.region.minimumPoint, claim.region.maximumPoint)
+        return listOf(
+            INFO_WORLD.message("world" to claim.world.name),
+            INFO_SIZE.message("x" to bounds.sides[0], "z" to bounds.sides[2]),
+            INFO_CORNERS.message("corners" to "${bounds.min.x()}, ${bounds.min.z()} → ${bounds.max.x()}, ${bounds.max.z()}")
+        )
+    }
+
+    fun flagMessages(sender: CommandSender, claim: Claim, role: ClaimRole?): List<RegionMessage> =
+        ClaimService.target(claim, role).flags.entries
+            .filter { !ClaimFlags.locked(it.key) && ClaimFlags.policy(it.key).roleBased == (role != null) }
+            .sortedBy { it.key.name }
+            .map { (flag, value) -> FLAG_SUMMARY.message("flag" to flag.name, "value" to valueName(sender, value)) }
+
+    fun sendSummary(sender: CommandSender, claim: Claim) {
+        (listOf(INFO_NAME.message("region" to claim.name)) + basic(claim) + location(claim))
+            .forEach { RegionText.send(sender, it) }
+    }
+
     fun valueName(sender: CommandSender, value: Any?): String {
         val string = when (value) {
             null -> UNSET; true -> YES; false -> NO; StateFlag.State.ALLOW -> ALLOW; StateFlag.State.DENY -> DENY; else -> null
@@ -28,9 +63,6 @@ object ClaimInformation {
 
     fun messages(sender: CommandSender, claim: Claim): List<RegionMessage> {
         val r = claim.region
-        fun names(ids: Collection<java.util.UUID>) =
-            ids.joinToString(", ") { Bukkit.getOfflinePlayer(it).name ?: it.toString() }.ifEmpty { "—" }
-
         val result = mutableListOf(
             INFO_NAME.message("region" to claim.name),
             INFO_UUID.message("uuid" to claim.uuid),
@@ -40,7 +72,7 @@ object ClaimInformation {
                 "area" to (r.maximumPoint.x().toLong() - r.minimumPoint.x() + 1) * (r.maximumPoint.z()
                     .toLong() - r.minimumPoint.z() + 1)
             ),
-            INFO_CREATED.message("created" to Instant.ofEpochMilli(claim.metadata.created)),
+            INFO_CREATED.message("created" to formattedTimestamp(claim.metadata.created)),
             INFO_OWNERS.message("owners" to names(r.owners.uniqueIds)),
             INFO_MEMBERS.message("members" to names(r.members.uniqueIds)),
             INFO_PLAYERS.message("count" to ClaimOccupancy.playersIn(claim.uuid).size)
@@ -62,9 +94,6 @@ object ClaimInformation {
         }
         return result
     }
-
-    fun lines(sender: CommandSender, claim: Claim): List<Component> =
-        messages(sender, claim).map { it.component(sender) }
 
     fun send(sender: CommandSender, claim: Claim) {
         messages(sender, claim).forEach { RegionText.send(sender, it) }

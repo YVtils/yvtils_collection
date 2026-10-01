@@ -12,6 +12,8 @@ data class ClaimRecord(
     val members: List<String> = emptyList(),
     val welcome: String = "",
     val goodbye: String = "",
+    /** Null grandfathers the existing footprint at the current configured price. */
+    val currencyCredit: Long? = null,
 )
 
 data class ClaimMetadataState(val claims: Map<String, ClaimRecord> = emptyMap())

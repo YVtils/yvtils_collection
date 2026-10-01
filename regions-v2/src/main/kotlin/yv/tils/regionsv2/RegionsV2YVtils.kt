@@ -96,6 +96,7 @@ class RegionsV2YVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
+        yv.tils.regionsv2.commands.RegionAlias.shutdown()
         ClaimSelection.shutdown()
         yv.tils.regionsv2.logic.ClaimOccupancy.shutdown()
         Module.removeModule(MODULE)
@@ -103,6 +104,7 @@ class RegionsV2YVtils : Module.YVtilsModule {
 
     private fun registerCommands() {
         RegionsV2Command()
+        yv.tils.regionsv2.commands.RegionAlias.register()
     }
 
     private fun registerListeners() {

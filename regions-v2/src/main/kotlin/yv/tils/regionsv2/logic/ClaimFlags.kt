@@ -126,6 +126,20 @@ object ClaimFlags {
         for (flag in all().filterNot(::locked)) reset(claim, flag, config)
     }
 
+    fun restoreDefaults(sender: CommandSender, claim: Claim) {
+        ClaimService.requireOwner(sender, claim)
+        val snapshots = listOf(null, ClaimRole.OWNER, ClaimRole.MEMBER)
+            .associate { ClaimService.target(claim, it).let { region -> region to region.flags.toMap() } }
+        try {
+            applyDefaults(claim, ConfigFile.state)
+            ClaimService.manager(claim.world).saveChanges()
+        } catch (e: Exception) {
+            snapshots.forEach { (region, flags) -> region.flags = flags }
+            runCatching { ClaimService.manager(claim.world).saveChanges() }
+            throw RegionFailure(FLAG_SAVE_FAILED, cause = e)
+        }
+    }
+
     fun set(player: CommandSender, claim: Claim, flag: Flag<*>, role: ClaimRole?, value: Any?) {
         ClaimService.requireOwner(player, claim)
         check(enabled(flag, role)) { FLAG_CHANGED.key }

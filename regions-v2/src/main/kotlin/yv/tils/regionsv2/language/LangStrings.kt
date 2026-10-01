@@ -16,18 +16,22 @@ enum class LangStrings(override val key: String, val english: String, val german
     CONFIRM("action.gui.nav.confirm", "Confirm", "Bestätigen"),
     INPUT("action.regionsv2.gui.input", "Enter a value", "Wert eingeben"),
     CLAIMS("action.regionsv2.gui.claims", "Your claims", "Deine Gebiete"),
-    CREATE("action.regionsv2.gui.create", "Create a claim", "Gebiet erstellen"),
+    MAIN_MENU("action.regionsv2.gui.main", "Regions", "Gebiete"),
+    FLAGS_TAB("action.regionsv2.gui.tabs.flags", "Flags", "Flags"),
+    SETTINGS_TAB("action.regionsv2.gui.tabs.settings", "Settings", "Einstellungen"),
+    ACTIVE_TAB("action.regionsv2.gui.tabs.active.lore", "Current page", "Aktuelle Seite"),
+    CREATE("action.regionsv2.gui.create.title", "Create a claim", "Gebiet erstellen"),
     CREATE_LORE(
         "action.regionsv2.gui.create.lore",
         "Select two corners, preview and name your claim.<newline>Protects the entire world height.",
         "Zwei Ecken wählen, Vorschau anzeigen und benennen.<newline>Schützt die gesamte Welthöhe."
     ),
     SERVER("action.regionsv2.gui.server", "Server controls", "Serververwaltung"),
-    INSPECT("action.regionsv2.gui.inspect", "Inspect current region", "Aktuelles Gebiet ansehen"),
+    INSPECT("action.regionsv2.gui.inspect", "Current region (chat)", "Aktuelles Gebiet (Chat)"),
     PREVIEW("action.regionsv2.gui.preview", "Preview boundary", "Grenze anzeigen"),
     CLEAR("action.regionsv2.gui.clear", "Clear selection", "Auswahl löschen"),
     NAME_INPUT("action.regionsv2.gui.name", "Claim name", "Gebietsname"),
-    CORNER("action.regionsv2.gui.corner", "Set position <position>", "Position <position> setzen"),
+    CORNER("action.regionsv2.gui.corner.title", "Set position <position>", "Position <position> setzen"),
     CORNER_LORE(
         "action.regionsv2.gui.corner.lore",
         "<position><newline>Click to use your current X/Z position.",
@@ -40,13 +44,65 @@ enum class LangStrings(override val key: String, val english: String, val german
         "World: <world><newline>Size: <x> × <z><newline>Full height: <height> blocks",
         "Welt: <world><newline>Größe: <x> × <z><newline>Gesamthöhe: <height> Blöcke"
     ),
-    CLAIM("action.regionsv2.gui.claim", "Claim: <region>", "Gebiet: <region>"),
+    CLAIM("action.regionsv2.gui.claim.title", "Claim: <region>", "Gebiet: <region>"),
     CLAIM_LORE(
         "action.regionsv2.gui.claim.lore",
-        "World: <world><newline>Role: <role>",
-        "Welt: <world><newline>Rolle: <role>"
+        "World: <world><newline>Role: <role><newline>Size: <x> × <z> blocks",
+        "Welt: <world><newline>Rolle: <role><newline>Größe: <x> × <z> Blöcke"
     ),
     INFORMATION("action.regionsv2.gui.information", "Information", "Informationen"),
+    BASIC_INFO("action.regionsv2.gui.basicInfo", "Basic information", "Grundinformationen"),
+    LOCATION_INFO("action.regionsv2.gui.locationInfo", "Location and boundary", "Lage und Grenze"),
+    HIGHLIGHT_LORE(
+        "action.regionsv2.gui.highlight.lore",
+        "Click to highlight the boundary.",
+        "Klicken, um die Grenze anzuzeigen."
+    ),
+    NO_FLAGS("action.regionsv2.gui.noFlags", "No explicit flags set", "Keine Flags ausdrücklich gesetzt"),
+    FLAG_SUMMARY("action.regionsv2.gui.flagSummary.lore", "<flag>: <value>", "<flag>: <value>"),
+    EDIT_FLAGS_LORE(
+        "action.regionsv2.gui.editFlags.lore",
+        "Click to edit this group's flags.",
+        "Klicken, um die Flags dieser Gruppe zu bearbeiten."
+    ),
+    OVERVIEW("action.regionsv2.gui.overview.title", "Overview", "Übersicht"),
+    OVERVIEW_LORE(
+        "action.regionsv2.gui.overview.lore",
+        "Claims shown: <count><newline>World: <world>",
+        "Angezeigte Gebiete: <count><newline>Welt: <world>"
+    ),
+    EMPTY_CLAIMS("action.regionsv2.gui.empty", "No claims yet", "Noch keine Gebiete"),
+    PAGE("action.regionsv2.gui.page", "Page <page> / <pages>", "Seite <page> / <pages>"),
+    RESTORE_DEFAULTS(
+        "action.regionsv2.gui.defaults.title",
+        "Restore server flag defaults",
+        "Server-Flag-Standard wiederherstellen"
+    ),
+    RESTORE_LORE(
+        "action.regionsv2.gui.defaults.lore",
+        "Replaces all custom flags in this claim.<newline>Owners and members are preserved.",
+        "Ersetzt alle eigenen Flags dieses Gebiets.<newline>Besitzer und Mitglieder bleiben erhalten."
+    ),
+    GEOMETRY("action.regionsv2.gui.geometry", "Name and boundaries", "Name und Grenzen"),
+    MESSAGES("action.regionsv2.gui.messages", "Transition messages", "Übergangsnachrichten"),
+    CURRENCY("action.regionsv2.gui.config.currency", "Diamond pricing", "Diamantpreise"),
+    FREE_CHUNKS(
+        "action.regionsv2.gui.config.freeChunks",
+        "Free size (chunks per side)",
+        "Kostenlose Größe (Chunks pro Seite)"
+    ),
+    DIAMONDS_PER_CHUNK("action.regionsv2.gui.config.diamonds", "Diamonds per size tier", "Diamanten pro Größenstufe"),
+    COST("regionsv2.currency.cost", "Cost: <cost> diamonds", "Kosten: <cost> Diamanten"),
+    COST_LORE(
+        "action.regionsv2.gui.cost.lore",
+        "Cost: <cost> diamonds<newline>Payment uses diamonds in your inventory.<newline>No refunds for shrinking or deleting.",
+        "Kosten: <cost> Diamanten<newline>Bezahlung mit Diamanten aus deinem Inventar.<newline>Keine Erstattung bei Verkleinerung oder Löschung."
+    ),
+    INSUFFICIENT_CURRENCY(
+        "regionsv2.error.currency",
+        "You need <cost> diamonds; your inventory contains <available>.",
+        "Du benötigst <cost> Diamanten; dein Inventar enthält <available>."
+    ),
     PEOPLE("action.regionsv2.gui.people", "Owners and members", "Besitzer und Mitglieder"),
     ADD_PLAYER("action.regionsv2.gui.player.add", "Add player", "Spieler hinzufügen"),
     PLAYER_INPUT("action.regionsv2.gui.player.input", "Player name / UUID", "Spielername / UUID"),
@@ -78,7 +134,7 @@ enum class LangStrings(override val key: String, val english: String, val german
     NO("regionsv2.value.no", "No", "Nein"),
     ALLOW("regionsv2.value.allow", "Allow", "Erlauben"),
     DENY("regionsv2.value.deny", "Deny", "Verweigern"),
-    DELETE("action.regionsv2.gui.delete", "Delete claim", "Gebiet löschen"),
+    DELETE("action.regionsv2.gui.delete.title", "Delete claim", "Gebiet löschen"),
     DELETE_CONFIRM("action.regionsv2.gui.delete.confirm", "Delete <region>?", "<region> löschen?"),
     DELETE_LORE(
         "action.regionsv2.gui.delete.lore",
@@ -86,13 +142,13 @@ enum class LangStrings(override val key: String, val english: String, val german
         "Entfernt den Schutz dauerhaft."
     ),
     RENAME("action.regionsv2.gui.rename", "Rename claim", "Gebiet umbenennen"),
-    RESIZE("action.regionsv2.gui.resize", "Resize claim", "Gebiet anpassen"),
+    RESIZE("action.regionsv2.gui.resize.title", "Resize claim", "Gebiet anpassen"),
     RESIZE_LORE(
         "action.regionsv2.gui.resize.lore",
         "Uses your pos1/pos2 selection.",
         "Verwendet deine pos1/pos2-Auswahl."
     ),
-    MERGE("action.regionsv2.gui.merge", "Merge claims", "Gebiete zusammenführen"),
+    MERGE("action.regionsv2.gui.merge.title", "Merge claims", "Gebiete zusammenführen"),
     MERGE_INPUT("action.regionsv2.gui.merge.input", "Other claim UUID / name", "UUID / Name des anderen Gebiets"),
     MERGE_LORE(
         "action.regionsv2.gui.merge.lore",
@@ -106,7 +162,7 @@ enum class LangStrings(override val key: String, val english: String, val german
         "Use {region} and {player}.<newline>unset restores the translated default.",
         "Verwende {region} und {player}.<newline>unset stellt den übersetzten Standard wieder her."
     ),
-    CONFIG("action.regionsv2.gui.config", "Region configuration", "Gebietskonfiguration"),
+    CONFIG("action.regionsv2.gui.config.title", "Region configuration", "Gebietskonfiguration"),
     MIN_AREA("action.regionsv2.gui.config.minArea", "Minimum area", "Mindestfläche"),
     MAX_TOTAL("action.regionsv2.gui.config.maxTotal", "Owned claims (all worlds)", "Eigene Gebiete (alle Welten)"),
     MAX_WORLD("action.regionsv2.gui.config.maxWorld", "Owned claims (per world)", "Eigene Gebiete (pro Welt)"),
@@ -126,14 +182,14 @@ enum class LangStrings(override val key: String, val english: String, val german
     ENABLED("action.regionsv2.gui.config.enabled", "Enabled", "Aktiviert"),
     SURVIVAL("action.regionsv2.gui.config.survival", "Survival only", "Nur Überlebensmodus"),
     TRANSITIONS("action.regionsv2.gui.config.transitions", "Action-bar transitions", "Aktionsleisten-Übergänge"),
-    DISABLED_WORLDS("action.regionsv2.gui.config.disabledWorlds", "Disabled worlds", "Deaktivierte Welten"),
+    DISABLED_WORLDS("action.regionsv2.gui.config.disabledWorlds.title", "Disabled worlds", "Deaktivierte Welten"),
     WORLDS_LORE(
         "action.regionsv2.gui.config.worlds.lore",
         "<worlds><newline>Comma-separated world names",
         "<worlds><newline>Weltnamen durch Kommas trennen"
     ),
     POLICIES("action.regionsv2.gui.policies", "WorldGuard flag policies", "WorldGuard-Flag-Richtlinien"),
-    POLICY("action.regionsv2.gui.policy", "Policy: <flag>", "Richtlinie: <flag>"),
+    POLICY("action.regionsv2.gui.policy.title", "Policy: <flag>", "Richtlinie: <flag>"),
     POLICY_LORE(
         "action.regionsv2.gui.policy.lore",
         "Type: <type><newline>Owner editing: <enabled><newline>Scope: <scope>",
@@ -151,13 +207,18 @@ enum class LangStrings(override val key: String, val english: String, val german
         "Changing this resets all claims to server defaults.",
         "Änderungen setzen alle Gebiete auf Serverstandard zurück."
     ),
-    DEFAULT("action.regionsv2.gui.policy.default", "<role> default", "Standard für <role>"),
+    DEFAULT("action.regionsv2.gui.policy.default.title", "<role> default", "Standard für <role>"),
+    DEFAULT_SUMMARY(
+        "action.regionsv2.gui.policy.default.lore",
+        "<role> default: <value>",
+        "Standard für <role>: <value>"
+    ),
     CLEAR_DEFAULT("action.regionsv2.gui.policy.clearDefault", "Unset <role> default", "Standard für <role> entfernen"),
     DEFAULT_INPUT("action.regionsv2.gui.policy.input", "Default: <flag>", "Standard: <flag>"),
     HELP(
         "command.regionsv2.help",
-        "<prefix> <gray>/regionsv2 info|list|delete|role|flag|resize|merge|rename|message|createat",
-        "<prefix> <gray>/regionsv2 info|list|delete|role|flag|resize|merge|rename|message|createat"
+        "<prefix> <gray>/region pos1|pos2|preview|cost|create|info|list|delete|role|flag|resize|merge|rename|message|createat",
+        "<prefix> <gray>/region pos1|pos2|preview|cost|create|info|list|delete|role|flag|resize|merge|rename|message|createat"
     ),
     COMPLETED(
         "command.regionsv2.completed",
@@ -211,6 +272,7 @@ enum class LangStrings(override val key: String, val english: String, val german
     INFO_WORLD("regionsv2.info.world", "World: <world>", "Welt: <world>"),
     INFO_CORNERS("regionsv2.info.corners", "Corners: <corners>", "Ecken: <corners>"),
     INFO_AREA("regionsv2.info.area", "Area: <area> blocks", "Fläche: <area> Blöcke"),
+    INFO_SIZE("regionsv2.info.size", "Size: <x> × <z> blocks", "Größe: <x> × <z> Blöcke"),
     INFO_CREATED("regionsv2.info.created", "Created: <created>", "Erstellt: <created>"),
     INFO_OWNERS("regionsv2.info.owners", "Owners: <owners>", "Besitzer: <owners>"),
     INFO_MEMBERS("regionsv2.info.members", "Members: <members>", "Mitglieder: <members>"),
@@ -395,18 +457,18 @@ enum class LangStrings(override val key: String, val english: String, val german
     ),
     SELECT_FIRST(
         "regionsv2.error.pos1",
-        "Select the first corner with /regionsv2 pos1.",
-        "Wähle die erste Ecke mit /regionsv2 pos1."
+        "Select the first corner with /region pos1.",
+        "Wähle die erste Ecke mit /region pos1."
     ),
     SELECT_SECOND(
         "regionsv2.error.pos2",
-        "Select the second corner with /regionsv2 pos2.",
-        "Wähle die zweite Ecke mit /regionsv2 pos2."
+        "Select the second corner with /region pos2.",
+        "Wähle die zweite Ecke mit /region pos2."
     ),
     SELECT_CORNERS(
         "regionsv2.error.corners",
-        "Use /regionsv2 pos1 and pos2 first.",
-        "Verwende zuerst /regionsv2 pos1 und pos2."
+        "Use /region pos1 and pos2 first.",
+        "Verwende zuerst /region pos1 und pos2."
     ),
     PREVIEW_WORLD(
         "regionsv2.error.previewWorld",
@@ -439,8 +501,8 @@ enum class LangStrings(override val key: String, val english: String, val german
     ),
     INVALID_LIMITS(
         "regionsv2.error.limits",
-        "Limits must be non-negative or -1 (unlimited); minimum area must be positive.",
-        "Grenzen müssen nicht negativ oder -1 (unbegrenzt) sein; die Mindestfläche muss positiv sein."
+        "Maximum limits must be non-negative or -1 (unlimited); minimum area must be positive and pricing settings non-negative.",
+        "Maximalgrenzen müssen nicht negativ oder -1 (unbegrenzt) sein; Mindestfläche positiv und Preiseinstellungen nicht negativ."
     );
 
     override val translations: Map<FileTypes, String>

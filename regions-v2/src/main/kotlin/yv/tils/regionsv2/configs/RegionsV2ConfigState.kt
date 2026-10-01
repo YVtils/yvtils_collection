@@ -40,6 +40,12 @@ data class RegionsV2ConfigState(
     var maxMembershipsPerPlayer: Int = -1,
     @ConfigDescription("Show welcome and goodbye action bars")
     var actionBarTransitions: Boolean = true,
+    @ConfigDescription("Charge diamonds for claims larger than the free size")
+    var currencyEnabled: Boolean = true,
+    @ConfigDescription("Free maximum footprint side in chunks (16 blocks each)")
+    var freeClaimChunks: Int = 2,
+    @ConfigDescription("Diamonds per additional chunk of the longest footprint side (non-negative)")
+    var diamondsPerChunk: Int = 1,
     @ConfigDescription("Maximum blocks in a full-height claim")
     var maxClaimVolume: Long = 30000000,
     @ConfigDescription("Maximum horizontal length of each claim side")

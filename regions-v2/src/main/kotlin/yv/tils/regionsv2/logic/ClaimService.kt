@@ -166,19 +166,24 @@ object ClaimService {
             ClaimPolicies.create(region, ClaimRole.OWNER),
             ClaimPolicies.create(region, ClaimRole.MEMBER)
         )
-        regions.forEach(manager::addRegion)
-        try {
-            ClaimFlags.applyDefaults(claim, ConfigFile.state)
-            manager.saveChanges()
-            ClaimMetadata.put(
-                record(
-                    claim,
-                    ClaimRecord(uuid.toString(), bounds.world.uid.toString(), name, System.currentTimeMillis())
+        ClaimCurrency.pay(sender, ClaimCurrency.quote(sender, bounds)) {
+            regions.forEach(manager::addRegion)
+            try {
+                ClaimFlags.applyDefaults(claim, ConfigFile.state)
+                manager.saveChanges()
+                ClaimMetadata.put(
+                    record(
+                        claim,
+                        ClaimRecord(
+                            uuid.toString(), bounds.world.uid.toString(), name, System.currentTimeMillis(),
+                            currencyCredit = ClaimCurrency.price(bounds)
+                        )
+                    )
                 )
-            )
-        } catch (e: Exception) {
-            regions.forEach { manager.removeRegion(it.id) }; runCatching { manager.saveChanges() }
-            throw IllegalStateException(CREATE_SAVE_FAILED.key, e)
+            } catch (e: Exception) {
+                regions.forEach { manager.removeRegion(it.id) }; runCatching { manager.saveChanges() }
+                throw IllegalStateException(CREATE_SAVE_FAILED.key, e)
+            }
         }
         return claim
     }
@@ -252,13 +257,17 @@ object ClaimService {
             }
         }
         val manager = manager(claim.world)
-        try {
-            replacements.forEach(manager::addRegion); manager.saveChanges()
-        } catch (e: Exception) {
-            originals.forEach(manager::addRegion); runCatching { manager.saveChanges() }; throw IllegalStateException(
-                RESIZE_FAILED.key,
-                e
-            )
+        val credit = ClaimCurrency.credit(claim)
+        ClaimCurrency.pay(sender, ClaimCurrency.quote(sender, bounds, credit)) {
+            try {
+                replacements.forEach(manager::addRegion); manager.saveChanges()
+                ClaimMetadata.put(claim.metadata.copy(currencyCredit = maxOf(credit, ClaimCurrency.price(bounds))))
+            } catch (e: Exception) {
+                originals.forEach(manager::addRegion); runCatching { manager.saveChanges() }; throw IllegalStateException(
+                    RESIZE_FAILED.key,
+                    e
+                )
+            }
         }
         return Claim(claim.world, replacements.first())
     }
@@ -286,14 +295,26 @@ object ClaimService {
         validate(bounds, originals.map { it.id }.toSet())
         val replacements = originals.take(3)
             .map { old -> ProtectedCuboidRegion(old.id, bounds.min, bounds.max).apply { copyFrom(old); parent = null } }
-        try {
-            originals.forEach { manager.removeRegion(it.id) }; replacements.forEach(manager::addRegion)
-            manager.saveChanges(); ClaimMetadata.remove(other.uuid)
-        } catch (e: Exception) {
-            originals.forEach(manager::addRegion); runCatching { manager.saveChanges() }; throw IllegalStateException(
-                MERGE_FAILED.key,
-                e
-            )
+        val credit = Math.addExact(ClaimCurrency.credit(keep), ClaimCurrency.credit(other))
+        ClaimCurrency.pay(sender, ClaimCurrency.quote(sender, bounds, credit)) {
+            try {
+                originals.forEach { manager.removeRegion(it.id) }; replacements.forEach(manager::addRegion)
+                manager.saveChanges()
+                ClaimMetadata.save(
+                    (ClaimMetadata.state.claims - other.uuid.toString()) +
+                            (keep.uuid.toString() to keep.metadata.copy(
+                                currencyCredit = maxOf(
+                                    credit,
+                                    ClaimCurrency.price(bounds)
+                                )
+                            ))
+                )
+            } catch (e: Exception) {
+                originals.forEach(manager::addRegion); runCatching { manager.saveChanges() }; throw IllegalStateException(
+                    MERGE_FAILED.key,
+                    e
+                )
+            }
         }
         return Claim(keep.world, replacements.first())
     }
@@ -305,6 +326,7 @@ object ClaimService {
     }
 
     fun messages(sender: CommandSender, claim: Claim, welcome: Boolean, text: String) {
+        check(admin(sender)) { ADMIN_REQUIRED.key }
         requireOwner(
             sender,
             claim

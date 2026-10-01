@@ -16,7 +16,7 @@ import yv.tils.configv2.language.LanguageProvider
 
 class RegisterStrings : LanguageProvider.RegisterStrings {
     override fun registerStrings() {
-        LangStrings.entries.filterNot { it.key.startsWith("action.gui.") }.forEach { string ->
+        LangStrings.entries.forEach { string ->
             LanguageProvider.registerString(string)
         }
     }

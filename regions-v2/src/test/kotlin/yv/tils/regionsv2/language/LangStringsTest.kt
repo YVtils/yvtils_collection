@@ -5,6 +5,14 @@ import org.junit.jupiter.api.Test
 
 class LangStringsTest {
     @Test
+    fun `translation keys are leaves and cannot overwrite nested YAML keys`() {
+        val keys = LangStrings.entries.map { it.key }
+        for (key in keys) {
+            assertFalse(keys.any { it.startsWith("$key.") }, "Translation is both a value and a YAML parent: $key")
+        }
+    }
+
+    @Test
     fun `language keys are descriptive unique and both languages have matching placeholders`() {
         val entries = LangStrings.entries
         assertEquals(entries.size, entries.map { it.key }.toSet().size)
