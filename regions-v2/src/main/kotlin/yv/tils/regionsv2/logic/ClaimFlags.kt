@@ -81,7 +81,9 @@ object ClaimFlags {
         if (input.equals("unset", true)) return null
         try {
             return typed(flag).parseInput(
-                FlagContext.create().setSender(if(player is Player) WorldGuardPlugin.inst().wrapPlayer(player) else BukkitAdapter.adapt(player)).setInput(input).build()
+                FlagContext.create().setSender(
+                    if (player is Player) WorldGuardPlugin.inst().wrapPlayer(player) else BukkitAdapter.adapt(player)
+                ).setInput(input).build()
             )
         } catch (e: com.sk89q.worldguard.protection.flags.InvalidFlagFormat) {
             throw RegionFailure(INVALID_FLAG, cause = e)
@@ -127,13 +129,17 @@ object ClaimFlags {
     }
 
     fun restoreDefaults(sender: CommandSender, claim: Claim) {
+        yv.tils.regionsv2.data.Permissions.FLAGS_RESET.require(sender)
         ClaimService.requireOwner(sender, claim)
         val snapshots = listOf(null, ClaimRole.OWNER, ClaimRole.MEMBER)
             .associate { ClaimService.target(claim, it).let { region -> region to region.flags.toMap() } }
+        var subzoneRollback: (() -> Unit)? = null
         try {
             applyDefaults(claim, ConfigFile.state)
+            subzoneRollback = ClaimSubzones.sync(claim)
             ClaimService.manager(claim.world).saveChanges()
         } catch (e: Exception) {
+            subzoneRollback?.invoke()
             snapshots.forEach { (region, flags) -> region.flags = flags }
             runCatching { ClaimService.manager(claim.world).saveChanges() }
             throw RegionFailure(FLAG_SAVE_FAILED, cause = e)
@@ -141,14 +147,18 @@ object ClaimFlags {
     }
 
     fun set(player: CommandSender, claim: Claim, flag: Flag<*>, role: ClaimRole?, value: Any?) {
+        yv.tils.regionsv2.data.Permissions.FLAGS_EDIT.require(player)
         ClaimService.requireOwner(player, claim)
         check(enabled(flag, role)) { FLAG_CHANGED.key }
         val target = ClaimService.target(claim, role)
         val before = target.flags.toMap()
         write(claim, flag, role, value)
+        var subzoneRollback: (() -> Unit)? = null
         try {
+            subzoneRollback = ClaimSubzones.sync(claim)
             ClaimService.manager(claim.world).saveChanges()
         } catch (e: Exception) {
+            subzoneRollback?.invoke()
             target.flags = before
             throw RegionFailure(FLAG_SAVE_FAILED, cause = e)
         }
@@ -173,15 +183,18 @@ object ClaimFlags {
         val manager = ClaimService.manager(world)
         val snapshots =
             mutableListOf<Pair<com.sk89q.worldguard.protection.regions.ProtectedRegion, Map<Flag<*>, Any>>>()
+        val subzoneRollbacks = mutableListOf<() -> Unit>()
         try {
             for (claim in ClaimService.claims(world)) {
                 listOf(null, ClaimRole.OWNER, ClaimRole.MEMBER).map { ClaimService.target(claim, it) }
                     .forEach { snapshots += it to it.flags.toMap() }
                 flags.forEach { reset(claim, it, config) }
+                subzoneRollbacks += ClaimSubzones.sync(claim, config = config)
             }
             manager.saveChanges()
             ConfigFile().applyState(config.copy(appliedWorldRevisions = config.appliedWorldRevisions + (world.uid.toString() to config.policyRevision)))
         } catch (e: Exception) {
+            subzoneRollbacks.asReversed().forEach { it() }
             snapshots.forEach { (region, values) -> region.flags = values }
             throw RegionFailure(POLICY_SAVE_FAILED, cause = e)
         }
@@ -190,11 +203,14 @@ object ClaimFlags {
     /** Resets every affected claim; rolls back WorldGuard and configuration on failure. */
     fun propagate(before: RegionsV2ConfigState, after: RegionsV2ConfigState): () -> Unit {
         val changed = changed(before, after)
-        if (changed.isEmpty()) return {}
+        val openChanged = before.allowOpenSubzones != after.allowOpenSubzones
+        if (changed.isEmpty() && !openChanged) return {}
         val snapshots =
             mutableListOf<Pair<com.sk89q.worldguard.protection.regions.ProtectedRegion, Map<Flag<*>, Any>>>()
         val managers = mutableSetOf<com.sk89q.worldguard.protection.managers.RegionManager>()
+        val subzoneRollbacks = mutableListOf<() -> Unit>()
         val rollback = {
+            subzoneRollbacks.asReversed().forEach { it() }
             snapshots.forEach { (region, flags) -> region.flags = flags }
             managers.forEach { it.saveChanges() }
         }
@@ -208,6 +224,7 @@ object ClaimFlags {
                     targets.forEach { snapshots += it to it.flags.toMap() }
                     managers += manager
                     changed.forEach { reset(claim, it, after) }
+                    subzoneRollbacks += ClaimSubzones.sync(claim, config = after)
                 }
             }
             managers.forEach { it.saveChanges() }

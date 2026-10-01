@@ -56,10 +56,10 @@ class ConfigFile {
                 newState.maxClaimsTotal,
                 newState.maxMembersPerClaim,
                 newState.maxMembershipsPerPlayer,
-                newState.maxClaimSide
+                newState.maxClaimSide, newState.maxSubzonesPerClaim
             ).all { it == -1 || it >= 0 } &&
-                     (newState.maxClaimVolume == -1L || newState.maxClaimVolume >= 1) && newState.minClaimArea >= 1 &&
-                     newState.freeClaimChunks >= 0 && newState.diamondsPerChunk >= 0) {
+                    (newState.maxClaimVolume == -1L || newState.maxClaimVolume >= 1) && newState.minClaimArea >= 1 &&
+                    newState.freeClaimChunks >= 0 && newState.diamondsPerChunk >= 0 && newState.clusterDistanceBlocks >= 0) {
             LangStrings.INVALID_LIMITS.key
         }
         val previous = state

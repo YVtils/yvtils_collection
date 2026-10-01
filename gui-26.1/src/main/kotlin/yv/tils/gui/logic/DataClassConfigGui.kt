@@ -29,6 +29,8 @@ import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.HeadUtils
 import yv.tils.gui.utils.Heads
+import yv.tils.gui.utils.GuiStyle
+import net.kyori.adventure.text.Component
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
@@ -63,6 +65,28 @@ import kotlin.reflect.full.primaryConstructor
  * flow (harmless to invoke more than once per session - it's always the full current state).
  */
 object DataClassConfigGui {
+    /** Live, runtime-defined fields (e.g. WorldGuard flags) using the actual config editor layout. */
+    fun openItems(player: Player, title: String, items: List<Item>, back: () -> Unit) {
+        InvUIBootstrap.ensure()
+        val backItem = Item.builder()
+            .setItemProvider { HeadUtils.provider(Heads.PREVIOUS_PAGE, player, "action.gui.nav.back") }
+            .addClickHandler { _, _ -> back() }.build()
+        Window.builder().setTitle(MessageUtils.convert("<${Colors.MAIN.color}>$title"))
+            .setUpperGui(editorGui(player, items, backItem)).open(player)
+    }
+
+    private fun editorGui(player: Player, items: List<Item>, back: Item): PagedGui<*> =
+        PagedGui.itemsBuilder().setStructure(
+            "# # # # # # # # #",
+            "# x x x x x x x #",
+            "b # # < # > # # #"
+        ).addIngredient('#', Filler.item())
+            .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+            .addIngredient('b', back)
+            .addIngredient('<', pageButton(player, Heads.PREVIOUS_PAGE, "action.gui.nav.previousPage") { it.page-- })
+            .addIngredient('>', pageButton(player, Heads.NEXT_PAGE, "action.gui.nav.nextPage") { it.page++ })
+            .setContent(items).build()
+
     /**
      * Opens (or re-opens) the config editor GUI for [player].
      *
@@ -75,6 +99,14 @@ object DataClassConfigGui {
         configName: String,
         instance: T,
         saver: ((T) -> Unit)? = null,
+    ) = openWithBack(player, configName, instance, saver)
+
+    fun <T : Any> openWithBack(
+        player: Player,
+        configName: String,
+        instance: T,
+        saver: ((T) -> Unit)? = null,
+        back: (() -> Unit)? = null,
     ) {
         val klass = instance::class
         if (!klass.isData) {
@@ -83,7 +115,7 @@ object DataClassConfigGui {
         }
 
         InvUIBootstrap.ensure()
-        val root = RootState(configName, instance, saver)
+        val root = RootState(configName, instance, saver, back)
         buildLevelWindow(player, root, instance, configName, parent = null).open(player)
     }
 
@@ -92,7 +124,7 @@ object DataClassConfigGui {
     // ---------------------------------------------------------------------
 
     private enum class FieldKind {
-        BOOLEAN, INT, DOUBLE, STRING, STRING_LIST, NESTED, UNKNOWN,
+        BOOLEAN, INT, LONG, DOUBLE, STRING, STRING_LIST, NESTED, UNKNOWN,
     }
 
     private class FieldDescriptor(
@@ -118,6 +150,7 @@ object DataClassConfigGui {
         val configName: String,
         val rootInstance: R,
         val saver: ((R) -> Unit)?,
+        val back: (() -> Unit)?,
     ) {
         var dirty = false
     }
@@ -160,6 +193,7 @@ object DataClassConfigGui {
         return when {
             param.type == typeOf<Boolean>() -> FieldKind.BOOLEAN
             param.type == typeOf<Int>() -> FieldKind.INT
+            param.type == typeOf<Long>() -> FieldKind.LONG
             param.type == typeOf<Double>() -> FieldKind.DOUBLE
             param.type == typeOf<String>() -> FieldKind.STRING
             classifier == List::class &&
@@ -184,19 +218,7 @@ object DataClassConfigGui {
         val screen = Screen(title, instance, discoverFields(instance), parent)
         val items = screen.fields.map { field -> buildFieldItem(player, field, root, screen) }
 
-        val gui = PagedGui.itemsBuilder()
-            .setStructure(
-                "# # # # # # # # #",
-                "# x x x x x x x #",
-                "b # # < # > # # #"
-            )
-            .addIngredient('#', Filler.item())
-            .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
-            .addIngredient('b', backItem(player, screen))
-            .addIngredient('<', pageButton(player, Heads.PREVIOUS_PAGE, "action.gui.nav.previousPage") { it.page-- })
-            .addIngredient('>', pageButton(player, Heads.NEXT_PAGE, "action.gui.nav.nextPage") { it.page++ })
-            .setContent(items)
-            .build()
+        val gui = editorGui(player, items, backItem(player, screen, root.back))
 
         return Window.builder()
             .setTitle(MessageUtils.convert("<${Colors.MAIN.color}>$title"))
@@ -206,12 +228,12 @@ object DataClassConfigGui {
             }
     }
 
-    private fun backItem(player: Player, screen: Screen): Item {
-        val parent = screen.parent ?: return Filler.item()
+    private fun backItem(player: Player, screen: Screen, rootBack: (() -> Unit)?): Item {
+        if (screen.parent == null && rootBack == null) return Filler.item()
 
         return Item.builder()
             .setItemProvider { HeadUtils.provider(Heads.PREVIOUS_PAGE, player, "action.gui.nav.back") }
-            .addClickHandler { _, _ -> parent().open(player) }
+            .addClickHandler { _, _ -> screen.parent?.invoke()?.open(player) ?: rootBack?.invoke() }
             .build()
     }
 
@@ -264,6 +286,17 @@ object DataClassConfigGui {
         root: RootState<R>,
         screen: Screen
     ): Item {
+        if (field.kind == FieldKind.BOOLEAN && field.mutableProperty != null) return ToggleControl.item(
+            provider = { viewer ->
+                buildFieldItemBuilder(
+                    resolveIcon(field, screen.instance),
+                    field,
+                    screen.instance,
+                    viewer
+                )
+            },
+            toggle = { handleFieldClick(player, field, ClickType.LEFT, root, screen) }
+        )
         return Item.builder()
             // Recomputed on every provider invocation (including after `notifyWindows()`),
             // NOT captured once up front - a `BooleanIcon`'s material depends on the field's
@@ -303,7 +336,7 @@ object DataClassConfigGui {
         val defaultLabel = LanguageHandler.getRawMessage("action.gui.lore.default", player)
         val controlsKey = when (field.kind) {
             FieldKind.BOOLEAN -> "action.gui.lore.controls.boolean"
-            FieldKind.INT, FieldKind.DOUBLE -> "action.gui.lore.controls.number"
+            FieldKind.INT, FieldKind.LONG, FieldKind.DOUBLE -> "action.gui.lore.controls.number"
             FieldKind.STRING -> "action.gui.lore.controls.text"
             FieldKind.STRING_LIST -> "action.gui.lore.controls.list"
             FieldKind.NESTED -> "action.gui.lore.controls.nested"
@@ -332,9 +365,7 @@ object DataClassConfigGui {
             add("<dark_gray>————————")
         }
 
-        return ItemBuilder(material)
-            .setName("<${Colors.MAIN.color}>${field.name}")
-            .addLoreLines(*loreLines.toTypedArray())
+        return GuiStyle.field(material, Component.text(field.name), loreLines.map { MessageUtils.convert(it) })
     }
 
     private fun formatValue(value: Any?): String {
@@ -386,7 +417,7 @@ object DataClassConfigGui {
                 root.dirty = true
             }
 
-            FieldKind.INT, FieldKind.DOUBLE -> {
+            FieldKind.INT, FieldKind.LONG, FieldKind.DOUBLE -> {
                 val delta = when (click) {
                     ClickType.LEFT -> 1
                     ClickType.SHIFT_LEFT -> 10
@@ -420,7 +451,12 @@ object DataClassConfigGui {
         when (field.kind) {
             FieldKind.INT -> {
                 val current = (field.get(instance) as? Number)?.toInt() ?: 0
-                field.set(instance, current + delta)
+                field.set(instance, Math.addExact(current, delta))
+            }
+
+            FieldKind.LONG -> {
+                val current = (field.get(instance) as? Number)?.toLong() ?: 0L
+                field.set(instance, Math.addExact(current, delta.toLong()))
             }
 
             FieldKind.DOUBLE -> {
@@ -454,11 +490,12 @@ object DataClassConfigGui {
 
     private fun <R : Any> openTextInput(player: Player, field: FieldDescriptor, root: RootState<R>, screen: Screen) {
         var pending: String = field.get(screen.instance)?.toString() ?: ""
+        val current = pending
 
         val confirmItem = Item.builder()
             .setItemProvider {
                 ItemBuilder(Material.LIME_STAINED_GLASS_PANE)
-                    .setName(LanguageHandler.getMessage("action.gui.nav.confirm", player))
+                    .setName(GuiStyle.title(LanguageHandler.getMessage("action.gui.nav.confirm", player), Colors.GREEN))
             }
             .addClickHandler { _, _ ->
                 field.set(screen.instance, pending)
@@ -470,7 +507,7 @@ object DataClassConfigGui {
         val cancelItem = Item.builder()
             .setItemProvider {
                 ItemBuilder(Material.RED_STAINED_GLASS_PANE)
-                    .setName(LanguageHandler.getMessage("action.gui.nav.cancel", player))
+                    .setName(GuiStyle.title(LanguageHandler.getMessage("action.gui.nav.cancel", player), Colors.RED))
             }
             .addClickHandler { _, _ ->
                 buildLevelWindow(player, root, screen.instance, screen.title, screen.parent).open(player)
@@ -478,8 +515,8 @@ object DataClassConfigGui {
             .build()
 
         val upperGui = Gui.builder()
-            .setStructure("# b c")
-            .addIngredient('#', Filler.item())
+            .setStructure("i b c")
+            .addIngredient('i', GuiStyle.inputPaper(current))
             .addIngredient('b', cancelItem)
             .addIngredient('c', confirmItem)
             .build()
@@ -603,13 +640,11 @@ object DataClassConfigGui {
 
         return Item.builder()
             .setItemProvider {
-                ItemBuilder(material)
-                    .setName("<white>$name")
-                    .addLoreLines(
-                        "<dark_gray>————————",
-                        LanguageHandler.getRawMessage("action.gui.lore.list.remove", player),
-                        "<dark_gray>————————"
+                GuiStyle.field(
+                    material, Component.text(name), listOf(
+                        LanguageHandler.getMessage("action.gui.lore.list.remove", player)
                     )
+                )
             }
             .addClickHandler { _, click ->
                 if (click.clickType() == ClickType.RIGHT || click.clickType() == ClickType.SHIFT_RIGHT) {
@@ -632,7 +667,7 @@ object DataClassConfigGui {
         val confirmItem = Item.builder()
             .setItemProvider {
                 ItemBuilder(Material.LIME_STAINED_GLASS_PANE)
-                    .setName(LanguageHandler.getMessage("action.gui.nav.confirm", player))
+                    .setName(GuiStyle.title(LanguageHandler.getMessage("action.gui.nav.confirm", player), Colors.GREEN))
             }
             .addClickHandler { _, _ ->
                 val name =
@@ -662,7 +697,8 @@ object DataClassConfigGui {
             .build()
 
         val upperGui = Gui.builder()
-            .setStructure("# # c")
+            .setStructure("i # c")
+            .addIngredient('i', GuiStyle.inputPaper(""))
             .addIngredient('#', Filler.item())
             .addIngredient('c', confirmItem)
             .build()

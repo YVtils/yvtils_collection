@@ -42,8 +42,16 @@ object ClaimInformation {
             .map { (flag, value) -> FLAG_SUMMARY.message("flag" to flag.name, "value" to valueName(sender, value)) }
 
     fun sendSummary(sender: CommandSender, claim: Claim) {
-        (listOf(INFO_NAME.message("region" to claim.name)) + basic(claim) + location(claim))
-            .forEach { RegionText.send(sender, it) }
+        yv.tils.regionsv2.data.Permissions.INFO.require(sender)
+        val bounds = ClaimBounds(claim.world, claim.region.minimumPoint, claim.region.maximumPoint)
+        RegionText.send(sender, CURRENT_AREA_SUMMARY.message(
+            "region" to claim.name,
+            "owners" to names(claim.region.owners.uniqueIds),
+            "created" to formattedTimestamp(claim.metadata.created),
+            "world" to claim.world.name,
+            "x" to bounds.sides[0], "z" to bounds.sides[2],
+            "corners" to "${bounds.min.x()}, ${bounds.min.z()} → ${bounds.max.x()}, ${bounds.max.z()}"
+        ))
     }
 
     fun valueName(sender: CommandSender, value: Any?): String {
@@ -96,6 +104,7 @@ object ClaimInformation {
     }
 
     fun send(sender: CommandSender, claim: Claim) {
+        yv.tils.regionsv2.data.Permissions.INFO.require(sender)
         messages(sender, claim).forEach { RegionText.send(sender, it) }
     }
 }

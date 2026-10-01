@@ -38,6 +38,7 @@ class RegionsV2Join : Listener {
                     ) != null
                 )
                     ClaimFlags.catchUp(event.world)
+                yv.tils.regionsv2.logic.ClaimSubzones.refresh(event.world)
             }
         })
     }
@@ -45,6 +46,7 @@ class RegionsV2Join : Listener {
     @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
         ClaimSelection.clear(event.player.uniqueId)
+        yv.tils.regionsv2.logic.SubzoneSelection.clear(event.player.uniqueId)
         yv.tils.regionsv2.logic.ClaimOccupancy.forget(event.player.uniqueId)
     }
 }

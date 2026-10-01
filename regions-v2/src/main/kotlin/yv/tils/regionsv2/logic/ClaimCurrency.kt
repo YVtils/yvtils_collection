@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import yv.tils.regionsv2.configs.ConfigFile
 import yv.tils.regionsv2.language.LangStrings
 import yv.tils.regionsv2.language.RegionFailure
+import java.util.UUID
 
 object ClaimCurrency {
     fun price(bounds: ClaimBounds): Long =
@@ -15,11 +16,43 @@ object ClaimCurrency {
         ClaimBounds(claim.world, claim.region.minimumPoint, claim.region.maximumPoint)
     )
 
-    fun quote(sender: CommandSender, bounds: ClaimBounds, credit: Long = 0): Long =
-        if (!ConfigFile.state.currencyEnabled || ClaimService.admin(sender)) 0 else ClaimPricing.due(
-            price(bounds),
-            credit
+    data class Payment(val due: Long, val resultingCredit: Long)
+
+    fun plan(
+        sender: CommandSender,
+        bounds: ClaimBounds,
+        owners: Set<UUID>,
+        replaced: List<Claim> = emptyList()
+    ): Payment {
+        val excluded = replaced.map { it.uuid }.toSet()
+        val ownCredit = replaced.fold(0L) { total, claim -> Math.addExact(total, credit(claim)) }
+        fun footprint(id: UUID, bounds: ClaimBounds, owners: Set<UUID>, credit: Long) = ClaimClusters.Footprint(
+            id, bounds.world.uid, owners, bounds.min.x(), bounds.min.z(), bounds.max.x(), bounds.max.z(), credit
         )
+
+        val candidate = footprint(replaced.firstOrNull()?.uuid ?: UUID.randomUUID(), bounds, owners, ownCredit)
+        val existing = ClaimService.claims(bounds.world).filter { it.uuid !in excluded }.map { claim ->
+            footprint(
+                claim.uuid, ClaimBounds(claim.world, claim.region.minimumPoint, claim.region.maximumPoint),
+                claim.region.owners.uniqueIds, credit(claim)
+            )
+        }
+        val quote = ClaimClusters.quote(candidate, existing, ConfigFile.state)
+        val exempt = !ConfigFile.state.currencyEnabled || yv.tils.regionsv2.data.Permissions.BYPASS_COST.allowed(sender)
+        // Credit only the newly covered deficit to the changed claim; neighbouring credits remain untouched.
+        return Payment(if (exempt) 0 else quote.due, Math.addExact(ownCredit, quote.due))
+    }
+
+    fun quote(sender: CommandSender, bounds: ClaimBounds): Long {
+        check(sender is Player)
+        return plan(sender, bounds, setOf(sender.uniqueId)).due
+    }
+
+    fun resizeQuote(sender: CommandSender, claim: Claim, bounds: ClaimBounds): Long =
+        plan(sender, bounds, claim.region.owners.uniqueIds, listOf(claim)).due
+
+    fun mergeQuote(sender: CommandSender, keep: Claim, other: Claim, bounds: ClaimBounds): Long =
+        plan(sender, bounds, keep.region.owners.uniqueIds, listOf(keep, other)).due
 
     /** Main-thread transaction: restore the exact storage contents if persistence fails. */
     fun <T> pay(sender: CommandSender, amount: Long, operation: () -> T): T {

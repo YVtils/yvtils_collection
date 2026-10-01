@@ -31,11 +31,20 @@ data class ClaimBounds(val world: World, val min: BlockVector3, val max: BlockVe
 }
 
 object ClaimSelection {
-    private data class Selection(var first: Location? = null, var second: Location? = null)
+    private data class Selection(var first: Location? = null, var second: Location? = null, var name: String = "")
 
     private val selections = mutableMapOf<UUID, Selection>()
     private val previews = mutableMapOf<UUID, BukkitTask>()
+    fun name(player: Player): String = selections[player.uniqueId]?.name.orEmpty()
+
+    fun name(player: Player, name: String) {
+        check(ConfigFile.state.enabled && player.hasPermission(Permissions.CLAIM.permission.name)) { SELECTION_DENIED.key }
+        check(name.isNotBlank() && name.length <= 64 && name.none { it.isISOControl() }) { INVALID_NAME.key }
+        selections.getOrPut(player.uniqueId) { Selection() }.name = name
+    }
+
     fun select(player: Player, first: Boolean) {
+        Permissions.SELECT.require(player)
         check(ConfigFile.state.enabled && player.hasPermission(Permissions.CLAIM.permission.name)) { SELECTION_DENIED.key }
         check(player.location.blockY in player.world.minHeight until player.world.maxHeight) { BUILD_HEIGHT.key }
         val selection = selections.getOrPut(player.uniqueId) { Selection() }
@@ -62,6 +71,7 @@ object ClaimSelection {
     }
 
     fun preview(player: Player, bounds: ClaimBounds = bounds(player)) {
+        Permissions.PREVIEW.require(player)
         check(ConfigFile.state.enabled) { DISABLED.key }
         check(player.world == bounds.world) { PREVIEW_WORLD.key }
         previews.remove(player.uniqueId)?.cancel()

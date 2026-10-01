@@ -85,6 +85,7 @@ class RegionsV2YVtils : Module.YVtilsModule {
         registerPermissions()
         registerCommands()
         registerListeners()
+        Core.instance.server.worlds.forEach(yv.tils.regionsv2.logic.ClaimSubzones::refresh)
         yv.tils.regionsv2.logic.ClaimOccupancy.start()
 
         Logger.info("regions-v2 hooked into WorldGuard successfully.")
@@ -98,6 +99,7 @@ class RegionsV2YVtils : Module.YVtilsModule {
     override fun disablePlugin() {
         yv.tils.regionsv2.commands.RegionAlias.shutdown()
         ClaimSelection.shutdown()
+        yv.tils.regionsv2.logic.SubzoneSelection.shutdown()
         yv.tils.regionsv2.logic.ClaimOccupancy.shutdown()
         Module.removeModule(MODULE)
     }

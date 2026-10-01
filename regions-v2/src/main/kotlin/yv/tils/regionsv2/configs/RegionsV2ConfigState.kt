@@ -42,6 +42,10 @@ data class RegionsV2ConfigState(
     var actionBarTransitions: Boolean = true,
     @ConfigDescription("Charge diamonds for claims larger than the free size")
     var currencyEnabled: Boolean = true,
+    @ConfigDescription("Price nearby claims sharing an owner as one connected cluster")
+    var clusterPricingEnabled: Boolean = true,
+    @ConfigDescription("Maximum empty block gap on each axis to connect claims (0 means touching)")
+    var clusterDistanceBlocks: Int = 16,
     @ConfigDescription("Free maximum footprint side in chunks (16 blocks each)")
     var freeClaimChunks: Int = 2,
     @ConfigDescription("Diamonds per additional chunk of the longest footprint side (non-negative)")
@@ -54,6 +58,10 @@ data class RegionsV2ConfigState(
     var survivalOnly: Boolean = true,
     @ConfigDescription("Worlds in which claiming is disabled")
     var disabledWorlds: List<String> = emptyList(),
+    @ConfigDescription("Maximum 3D subzones per claim (-1 unlimited)")
+    var maxSubzonesPerClaim: Int = 10,
+    @ConfigDescription("Allow owners to open region state protections to everyone inside subzones")
+    var allowOpenSubzones: Boolean = true,
     @NotGuiEditable
     @ConfigDescription("Legacy role-flag list; use the admin flag policy menu")
     var enabledRoleFlags: List<String> = listOf(

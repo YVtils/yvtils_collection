@@ -30,6 +30,8 @@ import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.HeadUtils
 import yv.tils.gui.utils.Heads
+import yv.tils.gui.utils.GuiStyle
+import net.kyori.adventure.text.Component
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
@@ -145,6 +147,13 @@ object ConfigGui {
     // ---------------------------------------------------------------------
 
     private fun buildEntryItem(player: Player, entry: ConfigEntry, state: State): Item {
+        if (entry.type == EntryType.BOOLEAN) return ToggleControl.item(
+            provider = { viewer ->
+                val material = entry.invItem ?: entry.dynamicInvItem?.invoke(entry) ?: Material.PAPER
+                buildEntryItemBuilder(material, entry, viewer)
+            },
+            toggle = { handleEntryClick(player, entry, ClickType.LEFT, state) }
+        )
         val material = entry.invItem ?: entry.dynamicInvItem?.invoke(entry) ?: Material.PAPER
 
         return Item.builder()
@@ -182,9 +191,7 @@ object ConfigGui {
             add("<dark_gray>————————")
         }
 
-        return ItemBuilder(material)
-            .setName("<${Colors.MAIN.color}>${entry.key}")
-            .addLoreLines(*loreLines.toTypedArray())
+        return GuiStyle.field(material, Component.text(entry.key), loreLines.map { MessageUtils.convert(it) })
     }
 
     private fun formatValue(value: Any?, fallback: Any? = null): String {
@@ -266,11 +273,12 @@ object ConfigGui {
 
     private fun openTextInput(player: Player, entry: ConfigEntry, state: State) {
         var pending: String = (entry.value ?: entry.defaultValue)?.toString() ?: ""
+        val current = pending
 
         val confirmItem = Item.builder()
             .setItemProvider {
                 ItemBuilder(Material.LIME_STAINED_GLASS_PANE)
-                    .setName(LanguageHandler.getMessage("action.gui.nav.confirm", player))
+                    .setName(GuiStyle.title(LanguageHandler.getMessage("action.gui.nav.confirm", player), Colors.GREEN))
             }
             .addClickHandler { _, click ->
                 entry.value = pending
@@ -282,7 +290,7 @@ object ConfigGui {
         val cancelItem = Item.builder()
             .setItemProvider {
                 ItemBuilder(Material.RED_STAINED_GLASS_PANE)
-                    .setName(LanguageHandler.getMessage("action.gui.nav.cancel", player))
+                    .setName(GuiStyle.title(LanguageHandler.getMessage("action.gui.nav.cancel", player), Colors.RED))
             }
             .addClickHandler { _, click ->
                 buildWindow(player, state).open(player)
@@ -290,8 +298,8 @@ object ConfigGui {
             .build()
 
         val upperGui = Gui.builder()
-            .setStructure("# b c")
-            .addIngredient('#', Filler.item())
+            .setStructure("i b c")
+            .addIngredient('i', GuiStyle.inputPaper(current))
             .addIngredient('b', cancelItem)
             .addIngredient('c', confirmItem)
             .build()
@@ -392,13 +400,11 @@ object ConfigGui {
 
         return Item.builder()
             .setItemProvider {
-                ItemBuilder(material)
-                    .setName("<white>$name")
-                    .addLoreLines(
-                        "<dark_gray>————————",
-                        LanguageHandler.getRawMessage("action.gui.lore.list.remove", player),
-                        "<dark_gray>————————"
+                GuiStyle.field(
+                    material, Component.text(name), listOf(
+                        LanguageHandler.getMessage("action.gui.lore.list.remove", player)
                     )
+                )
             }
             .addClickHandler { _, click ->
                 if (click.clickType() == ClickType.RIGHT || click.clickType() == ClickType.SHIFT_RIGHT) {
@@ -420,7 +426,7 @@ object ConfigGui {
         val confirmItem = Item.builder()
             .setItemProvider {
                 ItemBuilder(Material.LIME_STAINED_GLASS_PANE)
-                    .setName(LanguageHandler.getMessage("action.gui.nav.confirm", player))
+                    .setName(GuiStyle.title(LanguageHandler.getMessage("action.gui.nav.confirm", player), Colors.GREEN))
             }
             .addClickHandler { _, _ ->
                 val name = pending.trim().uppercase().replace(' ', '_')
@@ -450,7 +456,8 @@ object ConfigGui {
             .build()
 
         val upperGui = Gui.builder()
-            .setStructure("# # c")
+            .setStructure("i # c")
+            .addIngredient('i', GuiStyle.inputPaper(""))
             .addIngredient('#', Filler.item())
             .addIngredient('c', confirmItem)
             .build()

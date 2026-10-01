@@ -17,7 +17,7 @@ import yv.tils.regionsv2.logic.ClaimService
 
 class ManageGUI {
     fun openGUI(sender: Player) {
-        if (!ClaimService.admin(sender)) return
+        if (!yv.tils.regionsv2.data.Permissions.ADMIN_CONFIG.allowed(sender)) return
         yv.tils.regionsv2.gui.ClaimsGui.configuration(sender)
     }
 }

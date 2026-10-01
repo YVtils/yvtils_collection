@@ -179,7 +179,9 @@ object HeadUtils {
      * Builds an [ItemProvider] for a custom head, localized for [player] via [languageKey].
      */
     fun provider(headTexture: Heads, player: Player, languageKey: String): ItemProvider =
-        ItemWrapper(createCustomHead(headTexture, player, languageKey))
+        ItemWrapper(createCustomHead(headTexture, player, languageKey).apply {
+            editMeta { it.displayName(GuiStyle.title(LanguageHandler.getMessage(languageKey, player))) }
+        })
 
     /**
      * Builds an [ItemProvider] for a custom head with a raw (already resolved) [itemName].

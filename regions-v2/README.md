@@ -49,6 +49,12 @@ YVtils directly. WorldGuard still checks permission for each requested operation
 The Create Claim menu sets either corner at your current position, previews the selection,
 accepts a name and asks for creation confirmation. Walk to each corner and reopen the menu
 to select it. Commands remain available. Menus use custom-textured player heads.
+Its fixed 3×9 layout has back at row 1/column 1; corner heads at row 2/columns 2–3;
+name tag at row 2/column 5; spyglass preview at row 2/column 8; confirm/cancel heads
+at row 3/columns 4 and 6. Name is a separate prefilled editor and remains in the
+selection draft while setting corners or previewing. Back preserves the draft;
+Cancel clears both corners/name and returns to the main menu. Confirmation shows
+geometry and diamond cost before creation.
 
 - **Main menu (3×9):** four spaced heads in the middle row for My Regions, Create,
   server settings (admins only), and the current region (closes the menu and sends a
@@ -56,7 +62,11 @@ to select it. Commands remain available. Menus use custom-textured player heads.
 - **My Regions (5×9):** back in the top-left corner; 21 region heads per page in
   columns 2–8 of the three interior rows; previous/page indicator/next centered in
   the bottom row. Claims are sorted with the current world first, and show dimensions,
-  viewer role. Admins see all managed claims.
+  viewer role. Admins also start with only their owned/member claims. A top-right
+  **Other players' regions** filter opens a separate admin-only page for unrelated
+  claims; switching back restores the personal list. Returning from another player's
+  claim keeps the admin in that separate view. An empty personal list shows an explicit
+  plus-head **Create a claim** action.
 - **Region management (5×9):** persistent top-row tabs for Information, Members,
   Flags and Settings, with back in the top-left. Information opens first; the selected
   tab is marked in its lore. Information uses just two summary heads: Basic Info
@@ -81,12 +91,47 @@ existing WorldGuard regions and selections outside the world border are rejected
 
 ## Permissions
 
-- `yvtils.regions-v2.claim` (default: true) - selection and creation
-- `yvtils.regions-v2.manage` (default: true) - commands and management menus
-- `yvtils.regions-v2.admin` (default: false) - all managed claims and server settings;
-  bypasses survival mode, diamond costs and claim-count limits, but not overlap or size checks
-- `yvtils.regions-v2.worldguard` (default: true) - access to the region query
-- `yvtils.regions-v2.*` - wildcard for all of the above
+Permissions are checked in the operation services as well as commands/menus, so a
+hidden GUI action cannot be bypassed through a command. Ownership is still required
+for mutations unless `admin.others` is granted. All nodes below use the prefix
+`yvtils.regions-v2.`; explicit negative action permissions are respected.
+
+| Suffix | Purpose | Default |
+|--------|---------|---------|
+| `claim` | Create a claim | Everyone |
+| `manage` | Base command/management access | Everyone |
+| `claims.select`, `claims.preview` | Select corners / highlight boundaries | Everyone |
+| `claims.info`, `claims.list` | Read information / browse personal claims or public command list | Everyone |
+| `claims.delete`, `claims.rename`, `claims.resize`, `claims.merge` | Independent claim mutations | Everyone |
+| `flags.view`, `flags.edit`, `flags.reset` | Flag overview / editing / full defaults reset | Everyone |
+| `members.view`, `members.edit`, `members.owners` | Member list / member changes / ownership changes | Everyone |
+| `subzones.view`, `subzones.create`, `subzones.delete` | Subzone browsing / creation / deletion | Everyone |
+| `subzones.flags`, `subzones.open` | Local overrides / Open Protection | Everyone |
+| `admin.others` | Browse and manage other players' claims; no cost/limit bypass | Operators |
+| `admin.config`, `admin.policies` | Server settings / flag-policy editor | Operators |
+| `admin.create` | Create for another owner/world, including console createat | Operators |
+| `admin.messages` | Edit transition messages (still needs claim ownership or `admin.others`) | Operators |
+| `bypass.cost`, `bypass.limits`, `bypass.survival` | Independent price, count-limit and game-mode exemptions | Operators |
+| `worldguard` | Native WorldGuard location query | Everyone |
+| `admin` | Backward-compatible bundle granting all action/staff/bypass nodes | Operators |
+
+Grouped wildcards: `claims.*`, `flags.*`, `members.*`, `subzones.*`, `admin.*`,
+`bypass.*`, plus the full `yvtils.regions-v2.*`. The shared permission registrar maps
+non-public defaults to Bukkit **OP**, not universally denied. Geometry, overlaps,
+world borders and server flag policies cannot be bypassed through these nodes.
+
+Example LuckPerms restrictions/delegation:
+
+```text
+/lp group default permission set yvtils.regions-v2.members.owners false
+/lp group default permission set yvtils.regions-v2.subzones.open false
+/lp group moderator permission set yvtils.regions-v2.admin.others true
+/lp group moderator permission set yvtils.regions-v2.claims.delete false
+/lp group builder permission set yvtils.regions-v2.bypass.cost true
+```
+
+Granting `admin.others` does not automatically grant config access or price exemptions.
+Revoking `claim` stops creation; revoking `manage` stops management/service mutations.
 
 ## Config
 
@@ -102,6 +147,8 @@ existing WorldGuard regions and selections outside the world border are rejected
 | `maxMembershipsPerPlayer` | integer     | `-1`                 | Maximum member assignments across all worlds                                        |
 | `actionBarTransitions`    | boolean     | `true`               | Welcome/goodbye action bars                                                         |
 | `currencyEnabled`         | boolean     | `true`               | Charge diamonds for creation and expansion                                          |
+| `clusterPricingEnabled`   | boolean     | `true`               | Price connected nearby claims sharing owners together                               |
+| `clusterDistanceBlocks`   | integer     | `16`                 | Maximum empty block gap on both X/Z axes; 0 connects touching footprints             |
 | `freeClaimChunks`         | integer     | `2`                  | Free maximum footprint side, in 16-block chunks                                     |
 | `diamondsPerChunk`        | integer     | `1`                  | Diamonds per additional longest-side chunk tier                                     |
 | `maxClaimVolume`          | long        | `30000000`           | Maximum full-height block volume; existing configured limits are retained           |
@@ -111,6 +158,8 @@ existing WorldGuard regions and selections outside the world border are rejected
 | `enabledRoleFlags`        | string list | see generated config | Legacy enabled list, superseded by per-flag policy                                  |
 | `enabledGlobalFlags`      | string list | see generated config | Legacy enabled list, superseded by per-flag policy                                  |
 | `flagPolicies`            | map         | `{}`                 | Admin-menu policies: editing enabled, role/global scope, and defaults               |
+| `maxSubzonesPerClaim`      | integer     | `10`                 | Maximum independent 3D subzones per claim (-1 unlimited)                            |
+| `allowOpenSubzones`        | boolean     | `true`               | Allow owners to enable Open Protection inside subzones                             |
 
 `/region admin` → WorldGuard flag policies lists every flag in the live registry,
 including custom flags from other plugins. Open a flag to configure owner editing,
@@ -176,27 +225,109 @@ WorldGuard bypass permissions still apply according to WorldGuard's normal evalu
 
 ## Development notes
 
+### 3D subzones
+
+The redstone **3D subzones** item is at **row 3, column 9** (zero-based slot 26)
+on claim management pages. Owners/admins can create, preview, edit and delete local
+cuboids. Select two X/Y/Z corners at your current position inside the parent claim,
+then name and confirm the subzone. This selection is independent of pos1/pos2 for
+full-height claims. It survives menu navigation and is cleared on disconnect.
+Subzones must fit entirely inside the claim, including Y, and cannot overlap each other.
+They are free and do not affect claim counts, cluster pricing or footprint size.
+
+Normal subzones inherit the parent's current role/global flags and domains. Owners
+may override only admin-enabled editable flags using the existing role-group editor.
+Missing overrides show **Inherited from parent claim**; right-click reset removes the
+override and restores inheritance. Parent flag/role changes rebuild subzone policies.
+Server flag editing/scope policies still apply to local overrides.
+
+**Open Protection** is a confirmed opt-in mode that writes high-priority ALLOW values
+for live-registry StateFlags plus explicit BUILD/PASSTHROUGH allowances for all roles.
+This permits **everyone**, including visitors, to build and perform state-controlled
+actions inside that cuboid. It is not a complete WorldGuard exclusion: boolean/text/
+numeric/custom flag semantics, plugin-wide settings and cross-boundary checks can
+still apply. Include the entire machine and its moving/output blocks in the subzone.
+Disabling the mode restores inherited flags and saved local overrides; overrides
+cannot be edited while open mode is active. Setting `allowOpenSubzones: false`
+removes active open allowances in loaded worlds, and other worlds on load; saved
+mode preferences remain but have no effect until allowed again.
+
+Parent deletion removes all subzone policy regions. Parent resize is rejected if it
+would leave a subzone outside; delete/recreate that subzone first. Merge transfers
+both claims' subzones to the kept claim, subject to the subzone-count limit.
+Subzone metadata/overrides are persisted in each parent record's `subzones` list in
+`claims.json`. WorldGuard stores three higher-priority cuboids per subzone named
+`yv2_<claimUuid>__zone_<subzoneUuid>` plus `__owner`/`__member`. These are excluded
+from claim discovery/counts/occupancy and rebuilt on startup/world load. Saves roll
+back policy replacements if WorldGuard or metadata persistence fails.
+
 ### Diamond pricing
 
 Pricing uses `max(0, ceil(max(width, depth) / 16) - freeClaimChunks) * diamondsPerChunk`.
+With cluster pricing enabled, width/depth describe the bounding rectangle of the
+prospective connected cluster, rather than just the changed claim. Claims connect
+when they are in the same world, share at least one owner UUID, and the empty block
+gap is at most `clusterDistanceBlocks` on each axis. Touching edges/corners have zero
+gap; diagonal neighbours can connect. Connections are transitive, including through
+co-owned claims. Unrelated owners, other worlds and distant claims stay separate.
+The rectangle includes gaps and empty space between claims, but changes no protection
+geometry: names, flags, members and WorldGuard regions remain independent.
+
+For example, creating a free 32×32 claim beside another free 32×32 claim produces a
+64×32 cluster costing 2 diamonds. A third adjacent 32×32 claim produces 96×32 costing
+4 total, so only 2 more diamonds are due. A 16-block gap is included in cluster size;
+a 17-block gap keeps the claims separate with the default configuration.
+Set `clusterPricingEnabled: false` to restore standalone per-claim pricing.
+The distance must be non-negative. Existing claims are not billed on startup:
+checks occur on creation, resize (including moves), merge and owner additions.
+Removing an owner or deleting a claim cannot join clusters and never charges/refunds.
 Dimensions are inclusive block lengths, independent of actual chunk boundaries and
 world height. With defaults, up to 32 × 32 blocks is free, 48 × 48 costs 1 diamond,
 64 × 64 costs 2, and 80 × 80 costs 3. Rectangular claims use their longer side.
 Both settings must be non-negative; setting `currencyEnabled: false` disables charges.
 They are editable through server controls or the shared config editor.
+Server controls use the same `DataClassConfigGui` as other modules: left-click toggles
+booleans; left/right clicks adjust numbers by ±1 and shift-clicks by ±10; disabled
+worlds use the shared add/remove string-list editor. Changes save when the editor
+closes. Editing uses a detached config snapshot, with validation and admin permission
+checks before committing; invalid changes leave the live settings untouched.
 
-Create, resize and merge confirmation menus show the payable amount. Commands apply
+Player flag editing uses the region module's 5×9 head-based editor, with top-left
+back and centered bottom pagination. State/boolean flags use check/cross heads;
+other flags use the custom flag texture. Lore shows current values and controls.
+WorldGuard permissions/parsing still apply, and changes save immediately.
+
+Claim state/boolean flags and admin policy/default toggles use the shared
+`ToggleControl` used by both config GUI implementations. Left-click toggles and
+refreshes the item in place; right-click unsets claim flags or server defaults.
+Changing policy scope rebuilds the policy screen to show the correct role groups.
+Other flag types continue to use WorldGuard's native parser through text input.
+Anvil inputs show paper in the first slot, named with the current editable value;
+rename, message and flag editors prefill their existing values. New values start blank.
+Shared data-class and entry-based config editors use the same paper input behavior.
+Menu items use the shared secondary-color titles and tertiary-color lore; confirmation
+actions are green and cancellation/destructive actions red. Input values are literal
+text, so formatting-like characters are not interpreted as MiniMessage tags.
+
+Create, resize, merge and owner-promotion confirmation menus show the payable amount. Commands apply
 the same pricing; `/region cost` provides a selection quote. Payment uses diamonds in
 the player's main inventory/hotbar, excluding armor and offhand. A failed save restores
 the inventory snapshot along with the region mutation. Admin and console operations
 are free. Shrinking/deleting gives no refund; previously credited size remains available
-on that claim for re-expansion. Merging combines both claims' credits and charges any
-remaining difference, including when combining free claims into a paid size.
+on that claim for re-expansion. The player performing an owner addition pays if that
+addition connects claims into a more expensive cluster; the recipient is not billed.
+Credits are summed once per claim in the prospective cluster. Only the uncovered
+deficit is added to the changed claim's stored credit; neighbour credits stay untouched.
+Moving/removing a claim therefore cannot copy the cluster's credit onto its neighbours.
+Merging transfers both source credits to the kept claim and adds any uncovered deficit.
 
 Existing claims without a stored credit are grandfathered at their current footprint
-price. Successful creation/resize/merge stores the credit in `claims.json`; credits
+price (not the whole cluster). Successful creation/resize/merge/role updates store
+the credit in `claims.json`; credits
 remain diamond amounts if the server later changes tier prices. Free/admin operations
-also credit their resulting size so a later owner is not charged retroactively.
+also credit the uncovered cluster deficit so a later owner is not charged retroactively.
+Existing multi-claim clusters with insufficient combined credit pay the missing
+difference the next time a cluster-growing/owner-adding operation is performed.
 
 The module is statically bundled into core's main plugin JAR and remains selectable
 through `modules.yml`. Core declares an optional `WorldGuard` server dependency with
@@ -228,7 +359,8 @@ failed saves roll back the in-memory mutation and report an error.
 Run `./gradlew :regions-v2:test` for tests against WorldGuard's real flag calculator,
 including all eight independent role combinations for every supported role flag.
 Tests also cover cross-world limits, unlimited/zero settings, membership limits and
-rectangle merge validation and diamond pricing/expansion/merge credits. `ClaimOccupancy.claimOf(player)` and
+rectangle merge validation, diamond pricing and cluster connectivity/credit accounting.
+`ClaimOccupancy.claimOf(player)` and
 `ClaimOccupancy.playersIn(claimUuid)` provide a main-thread live-location API.
 
 ## TODOs
@@ -251,7 +383,7 @@ come from the runtime GUI module's `Heads` catalogue. Individual members use pla
 
 | Role | Icon |
 |------|------|
-| Region / My Regions | Map |
+| Region / My Regions | Filled map |
 | Create / Add | `Heads.PLUS_CHARACTER` |
 | Current region | Spyglass |
 | Information / Basic Info | `Heads.I_CHARACTER` |
@@ -267,10 +399,10 @@ come from the runtime GUI module's `Heads` catalogue. Individual members use pla
 | Reset / unset default | Structure void |
 | Delete | Barrier |
 | Messages | `Heads.ENVELOPE`, admins only (GUI and command) |
-| Currency / limits | `Heads.CHART` (retained; no replacement specified) |
+| Currency / limits | Shared data-class config editor icons |
 | Position 1 / Position 2 | `Heads.NUMBER_1` / `Heads.NUMBER_2` |
 | Back / Previous / Next | Shared `Heads.PREVIOUS_PAGE` / `Heads.NEXT_PAGE` |
 | Confirm / Enabled / Allow | `Heads.CHECK_MARK` |
 | Cancel / Disabled / Deny | `Heads.X_CHARACTER` |
 | Page indicator | `Heads.I_CHARACTER`, only for multiple pages |
-| Text input | Anvil |
+| Text input | Paper named with the current value in the first anvil slot |

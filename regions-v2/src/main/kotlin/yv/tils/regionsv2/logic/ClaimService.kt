@@ -27,7 +27,7 @@ data class Claim(val world: World, val region: ProtectedRegion) {
 object ClaimService {
     const val PREFIX = "yv2_"
     fun admin(sender: CommandSender) = sender is org.bukkit.command.ConsoleCommandSender ||
-            sender is org.bukkit.command.RemoteConsoleCommandSender || sender.hasPermission(Permissions.ADMIN.permission.name)
+            sender is org.bukkit.command.RemoteConsoleCommandSender || Permissions.ADMIN_OTHERS.allowed(sender)
 
     fun manager(world: World): RegionManager = WorldGuard.getInstance().platform.regionContainer
         .get(BukkitAdapter.adapt(world)) ?: error(NO_MANAGER.key)
@@ -74,6 +74,7 @@ object ClaimService {
     }
 
     fun requireOwner(sender: CommandSender, claim: Claim) {
+        Permissions.MANAGE.require(sender)
         check(ConfigFile.state.enabled) { DISABLED.key }
         check(
             admin(sender) || sender is Player && sender.hasPermission(Permissions.MANAGE.permission.name) && role(
@@ -151,11 +152,12 @@ object ClaimService {
 
     fun create(sender: CommandSender, name: String, owner: UUID, bounds: ClaimBounds): Claim {
         check(ConfigFile.state.enabled) { DISABLED.key }
-        check(admin(sender) || sender.hasPermission(Permissions.CLAIM.permission.name)) { CREATE_DENIED.key }
-        check(sender !is Player || admin(sender) || !ConfigFile.state.survivalOnly || sender.gameMode == GameMode.SURVIVAL) { SURVIVAL_REQUIRED.key }
-        check(sender !is Player || sender.world == bounds.world || admin(sender)) { SAME_WORLD.key }
+        Permissions.CLAIM.require(sender)
+        if (sender !is Player || sender.uniqueId != owner || sender.world != bounds.world) Permissions.ADMIN_CREATE.require(sender)
+        check(sender !is Player || Permissions.BYPASS_SURVIVAL.allowed(sender) || !ConfigFile.state.survivalOnly || sender.gameMode == GameMode.SURVIVAL) { SURVIVAL_REQUIRED.key }
+        check(sender !is Player || sender.world == bounds.world || Permissions.ADMIN_CREATE.allowed(sender)) { SAME_WORLD.key }
         check(name.isNotBlank() && name.length <= 64 && name.none { it.isISOControl() }) { INVALID_NAME.key }
-        if (!admin(sender)) ownership(owner, bounds.world)
+        if (!Permissions.BYPASS_LIMITS.allowed(sender)) ownership(owner, bounds.world)
         validate(bounds)
         val uuid = UUID.randomUUID()
         val region = ProtectedCuboidRegion(PREFIX + uuid, bounds.min, bounds.max).apply { owners.addPlayer(owner) }
@@ -166,7 +168,8 @@ object ClaimService {
             ClaimPolicies.create(region, ClaimRole.OWNER),
             ClaimPolicies.create(region, ClaimRole.MEMBER)
         )
-        ClaimCurrency.pay(sender, ClaimCurrency.quote(sender, bounds)) {
+        val payment = ClaimCurrency.plan(sender, bounds, setOf(owner))
+        ClaimCurrency.pay(sender, payment.due) {
             regions.forEach(manager::addRegion)
             try {
                 ClaimFlags.applyDefaults(claim, ConfigFile.state)
@@ -176,7 +179,7 @@ object ClaimService {
                         claim,
                         ClaimRecord(
                             uuid.toString(), bounds.world.uid.toString(), name, System.currentTimeMillis(),
-                            currencyCredit = ClaimCurrency.price(bounds)
+                            currencyCredit = payment.resultingCredit
                         )
                     )
                 )
@@ -191,8 +194,10 @@ object ClaimService {
     fun setRole(sender: CommandSender, claim: Claim, uuid: UUID, role: ClaimRole) {
         requireOwner(sender, claim)
         val previous = role(claim, uuid)
+        if (previous == ClaimRole.OWNER || role == ClaimRole.OWNER) Permissions.OWNERS_EDIT.require(sender)
+        else Permissions.MEMBERS_EDIT.require(sender)
         check(previous != ClaimRole.OWNER || role == ClaimRole.OWNER || claim.region.owners.uniqueIds.size > 1) { LAST_OWNER.key }
-        if (!admin(sender) && role != previous) {
+        if (!Permissions.BYPASS_LIMITS.allowed(sender) && role != previous) {
             if (role == ClaimRole.OWNER) ownership(uuid, claim.world, claim.uuid)
             if (role == ClaimRole.MEMBER) {
                 check(
@@ -214,28 +219,51 @@ object ClaimService {
         }
         val originals = listOf(null, ClaimRole.OWNER, ClaimRole.MEMBER).map { target(claim, it) }
             .associateWith { DefaultDomain(it.owners) to DefaultDomain(it.members) }
-        claim.region.owners.removePlayer(uuid); claim.region.members.removePlayer(uuid)
-        when (role) {
-            ClaimRole.OWNER -> claim.region.owners.addPlayer(uuid); ClaimRole.MEMBER -> claim.region.members.addPlayer(
-            uuid
-        ); else -> Unit
+        val owners = claim.region.owners.uniqueIds.toMutableSet().apply {
+            if (role == ClaimRole.OWNER) add(uuid) else remove(uuid)
         }
-        try {
-            for (r in listOf(ClaimRole.OWNER, ClaimRole.MEMBER)) ClaimPolicies.sync(claim.region, target(claim, r), r)
-            manager(claim.world).saveChanges(); ClaimMetadata.put(record(claim))
-        } catch (e: Exception) {
-            originals.forEach { (region, domains) -> region.owners = domains.first; region.members = domains.second }
-            runCatching { manager(claim.world).saveChanges() }; throw IllegalStateException(
-                ROLE_SAVE_FAILED.key,
-                e
-            )
+        val payment = if (role == ClaimRole.OWNER && previous != ClaimRole.OWNER) ClaimCurrency.plan(
+            sender,
+            ClaimBounds(claim.world, claim.region.minimumPoint, claim.region.maximumPoint),
+            owners,
+            listOf(claim)
+        ) else ClaimCurrency.Payment(0, ClaimCurrency.credit(claim))
+        var subzoneRollback: (() -> Unit)? = null
+        ClaimCurrency.pay(sender, payment.due) {
+            claim.region.owners.removePlayer(uuid); claim.region.members.removePlayer(uuid)
+            when (role) {
+                ClaimRole.OWNER -> claim.region.owners.addPlayer(uuid); ClaimRole.MEMBER -> claim.region.members.addPlayer(
+                uuid
+            ); else -> Unit
+            }
+            try {
+                for (r in listOf(ClaimRole.OWNER, ClaimRole.MEMBER)) ClaimPolicies.sync(
+                    claim.region,
+                    target(claim, r),
+                    r
+                )
+                subzoneRollback = ClaimSubzones.sync(claim)
+                manager(claim.world).saveChanges()
+                ClaimMetadata.put(record(claim).copy(currencyCredit = payment.resultingCredit))
+            } catch (e: Exception) {
+                subzoneRollback?.invoke()
+                originals.forEach { (region, domains) ->
+                    region.owners = domains.first; region.members = domains.second
+                }
+                runCatching { manager(claim.world).saveChanges() }; throw IllegalStateException(
+                    ROLE_SAVE_FAILED.key,
+                    e
+                )
+            }
         }
     }
 
     fun delete(sender: CommandSender, claim: Claim) {
+        Permissions.DELETE.require(sender)
         requireOwner(sender, claim)
         val manager = manager(claim.world)
-        val removed = listOf(null, ClaimRole.OWNER, ClaimRole.MEMBER).map { target(claim, it) }
+        val removed =
+            listOf(null, ClaimRole.OWNER, ClaimRole.MEMBER).map { target(claim, it) } + ClaimSubzones.regions(claim)
         removed.forEach { manager.removeRegion(it.id) }
         try {
             manager.saveChanges(); ClaimMetadata.remove(claim.uuid)
@@ -248,20 +276,29 @@ object ClaimService {
     }
 
     fun resize(sender: CommandSender, claim: Claim, bounds: ClaimBounds): Claim {
+        Permissions.RESIZE.require(sender)
         requireOwner(sender, claim); check(bounds.world == claim.world) { SAME_WORLD.key }
         val originals = listOf(null, ClaimRole.OWNER, ClaimRole.MEMBER).map { target(claim, it) }
-        validate(bounds, originals.map { it.id }.toSet())
+        check(claim.metadata.subzones.all {
+            SubzonePolicies.contained(
+                SubzonePolicies.min(it),
+                SubzonePolicies.max(it),
+                bounds.min,
+                bounds.max
+            )
+        }) { SUBZONE_OUTSIDE.key }
+        validate(bounds, (originals + ClaimSubzones.regions(claim)).map { it.id }.toSet())
         val replacements = originals.map { old ->
             ProtectedCuboidRegion(old.id, bounds.min, bounds.max).apply {
                 copyFrom(old); parent = null
             }
         }
         val manager = manager(claim.world)
-        val credit = ClaimCurrency.credit(claim)
-        ClaimCurrency.pay(sender, ClaimCurrency.quote(sender, bounds, credit)) {
+        val payment = ClaimCurrency.plan(sender, bounds, claim.region.owners.uniqueIds, listOf(claim))
+        ClaimCurrency.pay(sender, payment.due) {
             try {
                 replacements.forEach(manager::addRegion); manager.saveChanges()
-                ClaimMetadata.put(claim.metadata.copy(currencyCredit = maxOf(credit, ClaimCurrency.price(bounds))))
+                ClaimMetadata.put(claim.metadata.copy(currencyCredit = payment.resultingCredit))
             } catch (e: Exception) {
                 originals.forEach(manager::addRegion); runCatching { manager.saveChanges() }; throw IllegalStateException(
                     RESIZE_FAILED.key,
@@ -273,6 +310,7 @@ object ClaimService {
     }
 
     fun merge(sender: CommandSender, keep: Claim, other: Claim): Claim {
+        Permissions.MERGE.require(sender)
         requireOwner(sender, keep); requireOwner(sender, other)
         check(keep.uuid != other.uuid && keep.world == other.world) { MERGE_DISTINCT.key }
         check(keep.region.owners.uniqueIds == other.region.owners.uniqueIds && keep.region.members.uniqueIds == other.region.members.uniqueIds) { MERGE_DOMAINS.key }
@@ -291,25 +329,27 @@ object ClaimService {
         )
         val bounds = ClaimBounds(keep.world, merged.first, merged.second)
         val manager = manager(keep.world)
-        val originals = (roles.map { target(keep, it) } + roles.map { target(other, it) })
+        val originals = (roles.map { target(keep, it) } + roles.map { target(other, it) } +
+                ClaimSubzones.regions(keep) + ClaimSubzones.regions(other))
         validate(bounds, originals.map { it.id }.toSet())
         val replacements = originals.take(3)
             .map { old -> ProtectedCuboidRegion(old.id, bounds.min, bounds.max).apply { copyFrom(old); parent = null } }
-        val credit = Math.addExact(ClaimCurrency.credit(keep), ClaimCurrency.credit(other))
-        ClaimCurrency.pay(sender, ClaimCurrency.quote(sender, bounds, credit)) {
+        val payment = ClaimCurrency.plan(sender, bounds, keep.region.owners.uniqueIds, listOf(keep, other))
+        val zones = keep.metadata.subzones + other.metadata.subzones
+        check(ConfigFile.state.maxSubzonesPerClaim == -1 || zones.size <= ConfigFile.state.maxSubzonesPerClaim) { SUBZONE_LIMIT.key }
+        ClaimCurrency.pay(sender, payment.due) {
             try {
                 originals.forEach { manager.removeRegion(it.id) }; replacements.forEach(manager::addRegion)
+                ClaimSubzones.sync(Claim(keep.world, replacements.first()), zones)
                 manager.saveChanges()
                 ClaimMetadata.save(
                     (ClaimMetadata.state.claims - other.uuid.toString()) +
                             (keep.uuid.toString() to keep.metadata.copy(
-                                currencyCredit = maxOf(
-                                    credit,
-                                    ClaimCurrency.price(bounds)
-                                )
+                                currencyCredit = payment.resultingCredit, subzones = zones
                             ))
                 )
             } catch (e: Exception) {
+                ClaimSubzones.regions(keep).forEach { manager.removeRegion(it.id) }
                 originals.forEach(manager::addRegion); runCatching { manager.saveChanges() }; throw IllegalStateException(
                     MERGE_FAILED.key,
                     e
@@ -320,13 +360,14 @@ object ClaimService {
     }
 
     fun rename(sender: CommandSender, claim: Claim, name: String) {
+        Permissions.RENAME.require(sender)
         requireOwner(sender, claim)
         check(name.isNotBlank() && name.length <= 64 && name.none { it.isISOControl() }) { INVALID_NAME.key }
         ClaimMetadata.put(claim.metadata.copy(name = name))
     }
 
     fun messages(sender: CommandSender, claim: Claim, welcome: Boolean, text: String) {
-        check(admin(sender)) { ADMIN_REQUIRED.key }
+        Permissions.ADMIN_MESSAGES.require(sender)
         requireOwner(
             sender,
             claim

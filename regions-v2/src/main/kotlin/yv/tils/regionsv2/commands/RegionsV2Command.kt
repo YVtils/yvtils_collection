@@ -35,7 +35,7 @@ class RegionsV2Command {
                 RegionText.send(sender, HELP.message())
         }
         for (corner in listOf("pos1", "pos2")) literalArgument(corner) {
-            withPermission(Permissions.CLAIM.permission.name)
+            withPermission(Permissions.SELECT.permission.name)
             playerExecutor { player, _ ->
                 RegionText.action(player) {
                     ClaimSelection.select(
@@ -46,6 +46,7 @@ class RegionsV2Command {
             }
         }
         literalArgument("preview") {
+            withPermission(Permissions.PREVIEW.permission.name)
             playerExecutor { player, _ ->
                 RegionText.action(player) {
                     ClaimSelection.preview(
@@ -108,7 +109,7 @@ class RegionsV2Command {
         }
         // Explicit owner/world makes this suitable for console administration too.
         literalArgument("createat") {
-            withPermission(Permissions.ADMIN.permission.name)
+            withPermission(Permissions.ADMIN_CREATE.permission.name)
             stringArgument("world") {
                 replaceSuggestions(ArgumentSuggestions.strings { Bukkit.getWorlds().map { it.name }.toTypedArray() })
                 stringArgument("owner") {
@@ -129,7 +130,7 @@ class RegionsV2Command {
                                                     args["z2"] as Int
                                                 )
                                                 PlayerProfiles.resolve(sender, args["owner"] as String) { uuid ->
-                                                    check(ClaimService.admin(sender)) { ADMIN_REQUIRED.key }
+                                                    Permissions.ADMIN_CREATE.require(sender)
                                                     ClaimInformation.send(
                                                         sender,
                                                         ClaimService.create(
@@ -151,6 +152,7 @@ class RegionsV2Command {
             }
         }
         literalArgument("info") {
+            withPermission(Permissions.INFO.permission.name)
             anyExecutor { sender, _ ->
                 RegionText.action(sender) {
                     ClaimInformation.send(
@@ -172,6 +174,7 @@ class RegionsV2Command {
             }
         }
         literalArgument("list") {
+            withPermission(Permissions.LIST.permission.name)
             anyExecutor { sender, _ ->
                 RegionText.action(sender) {
                     ClaimService.all().forEach {
@@ -199,6 +202,14 @@ class RegionsV2Command {
         for (operation in listOf("delete", "rename", "resize", "merge", "role", "flag", "message")) literalArgument(
             operation
         ) {
+            when (operation) {
+                "delete" -> withPermission(Permissions.DELETE.permission.name)
+                "rename" -> withPermission(Permissions.RENAME.permission.name)
+                "resize" -> withPermission(Permissions.RESIZE.permission.name)
+                "merge" -> withPermission(Permissions.MERGE.permission.name)
+                "flag" -> withPermission(Permissions.FLAGS_EDIT.permission.name)
+                "message" -> withPermission(Permissions.ADMIN_MESSAGES.permission.name)
+            }
             stringArgument("claim") {
                 replaceSuggestions(ArgumentSuggestions.strings { names(it.sender, true) })
                 when (operation) {
@@ -327,7 +338,7 @@ class RegionsV2Command {
                     }
 
                     "message" -> stringArgument("type") {
-                        withPermission(Permissions.ADMIN.permission.name)
+                        withPermission(Permissions.ADMIN_MESSAGES.permission.name)
                         replaceSuggestions(ArgumentSuggestions.strings("welcome", "goodbye"))
                         greedyStringArgument("text") {
                             anyExecutor { sender, args ->
@@ -349,11 +360,11 @@ class RegionsV2Command {
             }
         }
         literalArgument("admin") {
-            withPermission(Permissions.ADMIN.permission.name); playerExecutor { player, _ ->
-            ClaimsGui.admin(
-                player
-            )
-        }
+            playerExecutor { player, _ ->
+                ClaimsGui.admin(
+                    player
+                )
+            }
         }
         literalArgument("worldguard") {
             withPermission(Permissions.WORLDGUARD.permission.name)

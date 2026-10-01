@@ -4,6 +4,7 @@ package yv.tils.regionsv2.language
 
 import yv.tils.configv2.language.FileTypes
 import yv.tils.configv2.language.LanguageProvider
+import yv.tils.utils.colors.Colors
 
 /** Stable, descriptive keys and named placeholders, following the other modules. */
 enum class LangStrings(override val key: String, val english: String, val german: String) :
@@ -16,7 +17,80 @@ enum class LangStrings(override val key: String, val english: String, val german
     CONFIRM("action.gui.nav.confirm", "Confirm", "Bestätigen"),
     INPUT("action.regionsv2.gui.input", "Enter a value", "Wert eingeben"),
     CLAIMS("action.regionsv2.gui.claims", "Your claims", "Deine Gebiete"),
+    OTHER_CLAIMS("action.regionsv2.gui.otherClaims.title", "Other players' regions", "Gebiete anderer Spieler"),
+    OTHER_CLAIMS_LORE(
+        "action.regionsv2.gui.otherClaims.lore",
+        "Admin view: claims you do not own or belong to.",
+        "Adminansicht: Gebiete ohne deine Besitzer- oder Mitgliedschaft."
+    ),
+    PERSONAL_CLAIMS_LORE(
+        "action.regionsv2.gui.personalClaims.lore",
+        "Show only claims you own or belong to.",
+        "Nur Gebiete mit deiner Besitzer- oder Mitgliedschaft anzeigen."
+    ),
+    NO_OTHER_CLAIMS("action.regionsv2.gui.noOtherClaims", "No other players' regions", "Keine Gebiete anderer Spieler"),
     MAIN_MENU("action.regionsv2.gui.main", "Regions", "Gebiete"),
+    SUBZONES("action.regionsv2.gui.subzones", "3D subzones", "3D-Untergebiete"),
+    SUBZONE_INHERIT("regionsv2.value.inherit", "Inherited from parent claim", "Vom Hauptgebiet geerbt"),
+    SUBZONE_CREATE("action.regionsv2.gui.subzone.create", "Create 3D subzone", "3D-Untergebiet erstellen"),
+    SUBZONE_TITLE("action.regionsv2.gui.subzone.title", "Subzone: <zone>", "Untergebiet: <zone>"),
+    SUBZONE_BOUNDS("action.regionsv2.gui.subzone.bounds.lore", "3D corners: <corners>", "3D-Ecken: <corners>"),
+    SUBZONE_CORNER_LORE(
+        "action.regionsv2.gui.subzone.corner.lore",
+        "<position><newline>Click to use your current X/Y/Z position inside this claim.",
+        "<position><newline>Klicken, um deine aktuelle X/Y/Z-Position in diesem Gebiet zu verwenden."
+    ),
+    SUBZONE_FLAGS_LORE(
+        "action.regionsv2.gui.subzone.flags.lore",
+        "Override this group locally.<newline>Right-click unset restores the parent claim's value.",
+        "Diese Gruppe lokal überschreiben.<newline>Rechtsklick stellt den Wert des Hauptgebiets wieder her."
+    ),
+    SUBZONE_OPEN("action.regionsv2.gui.subzone.open.title", "Open protection", "Schutz öffnen"),
+    SUBZONE_OPEN_LORE(
+        "action.regionsv2.gui.subzone.open.lore",
+        "Allows region state flags and building for EVERYONE here.<newline>Plugin-wide settings and boundary checks may still apply.<newline>Disabling restores inherited flags and your overrides.",
+        "Erlaubt Zustands-Flags und Bauen für ALLE in diesem Bereich.<newline>Pluginweite Einstellungen und Grenzprüfungen gelten ggf. weiterhin.<newline>Deaktivieren stellt geerbte Flags und deine Ausnahmen wieder her."
+    ),
+    SUBZONE_MISSING(
+        "regionsv2.error.subzoneMissing",
+        "Subzone no longer exists. Reopen the menu.",
+        "Untergebiet existiert nicht mehr. Öffne das Menü erneut."
+    ),
+    SUBZONE_OUTSIDE(
+        "regionsv2.error.subzoneOutside",
+        "Every subzone must fit fully inside its parent claim, including height.",
+        "Jedes Untergebiet muss vollständig im Hauptgebiet liegen, einschließlich Höhe."
+    ),
+    SUBZONE_OVERLAP(
+        "regionsv2.error.subzoneOverlap",
+        "Subzones cannot overlap one another.",
+        "Untergebiete dürfen sich nicht überschneiden."
+    ),
+    SUBZONE_LIMIT(
+        "regionsv2.error.subzoneLimit",
+        "Maximum subzones per claim reached.",
+        "Maximale Anzahl an Untergebieten erreicht."
+    ),
+    SUBZONE_SELECT(
+        "regionsv2.error.subzoneSelect",
+        "Select both 3D corners in the subzone creation menu first.",
+        "Wähle zuerst beide 3D-Ecken im Untergebietsmenü."
+    ),
+    SUBZONE_OPEN_DISABLED(
+        "regionsv2.error.subzoneOpenDisabled",
+        "Open-protection subzones are disabled by the server.",
+        "Untergebiete mit offenem Schutz sind serverseitig deaktiviert."
+    ),
+    SUBZONE_OPEN_ACTIVE(
+        "regionsv2.error.subzoneOpenActive",
+        "Disable open protection before editing local flag overrides.",
+        "Deaktiviere den offenen Schutz, bevor du lokale Flag-Ausnahmen bearbeitest."
+    ),
+    SUBZONE_SAVE_FAILED(
+        "regionsv2.error.subzoneSave",
+        "Could not save subzones; the change was rolled back.",
+        "Untergebiete konnten nicht gespeichert werden; Änderung rückgängig gemacht."
+    ),
     FLAGS_TAB("action.regionsv2.gui.tabs.flags", "Flags", "Flags"),
     SETTINGS_TAB("action.regionsv2.gui.tabs.settings", "Settings", "Einstellungen"),
     ACTIVE_TAB("action.regionsv2.gui.tabs.active.lore", "Current page", "Aktuelle Seite"),
@@ -27,7 +101,7 @@ enum class LangStrings(override val key: String, val english: String, val german
         "Zwei Ecken wählen, Vorschau anzeigen und benennen.<newline>Schützt die gesamte Welthöhe."
     ),
     SERVER("action.regionsv2.gui.server", "Server controls", "Serververwaltung"),
-    INSPECT("action.regionsv2.gui.inspect", "Current region (chat)", "Aktuelles Gebiet (Chat)"),
+    INSPECT("action.regionsv2.gui.inspect", "Current region", "Aktuelles Gebiet"),
     PREVIEW("action.regionsv2.gui.preview", "Preview boundary", "Grenze anzeigen"),
     CLEAR("action.regionsv2.gui.clear", "Clear selection", "Auswahl löschen"),
     NAME_INPUT("action.regionsv2.gui.name", "Claim name", "Gebietsname"),
@@ -129,6 +203,10 @@ enum class LangStrings(override val key: String, val english: String, val german
         "Value: <value><newline>Click to edit",
         "Wert: <value><newline>Klicken zum Bearbeiten"
     ),
+    CURRENT_VALUE("action.regionsv2.gui.currentValue.lore", "Value: <value>", "Wert: <value>"),
+    DEFAULT_VALUE("action.regionsv2.gui.defaultValue.lore", "Default: <value>", "Standard: <value>"),
+    EDIT_TEXT_CONTROL("action.regionsv2.gui.textControl.lore", "Left-click: edit text", "Linksklick: Text bearbeiten"),
+    RESET_CONTROL("action.regionsv2.gui.resetControl.lore", "Right-click: unset", "Rechtsklick: entfernen"),
     UNSET("regionsv2.value.unset", "Unset (WorldGuard default)", "Nicht gesetzt (WorldGuard-Standard)"),
     YES("regionsv2.value.yes", "Yes", "Ja"),
     NO("regionsv2.value.no", "No", "Nein"),
@@ -268,6 +346,19 @@ enum class LangStrings(override val key: String, val english: String, val german
     WELCOME_BAR("regionsv2.actionbar.welcome", "<green>Welcome to <region>", "<green>Willkommen in <region>"),
     GOODBYE_BAR("regionsv2.actionbar.goodbye", "<gray>Goodbye from <region>", "<gray>Auf Wiedersehen aus <region>"),
     INFO_NAME("regionsv2.info.name", "Name: <region>", "Name: <region>"),
+    CURRENT_AREA_SUMMARY(
+        "command.regionsv2.currentArea.summary",
+        "<prefix> <white>Current region: <${Colors.SECONDARY.color}><region><newline>" +
+                "  <white>Owners: <${Colors.TERTIARY.color}><owners><newline>" +
+                "  <white>Created: <${Colors.TERTIARY.color}><created><newline>" +
+                "  <white>World: <${Colors.TERTIARY.color}><world> <dark_gray>• <white>Size: <${Colors.TERTIARY.color}><x> × <z> blocks<newline>" +
+                "  <white>Corners: <${Colors.TERTIARY.color}><corners>",
+        "<prefix> <white>Aktuelles Gebiet: <${Colors.SECONDARY.color}><region><newline>" +
+                "  <white>Besitzer: <${Colors.TERTIARY.color}><owners><newline>" +
+                "  <white>Erstellt: <${Colors.TERTIARY.color}><created><newline>" +
+                "  <white>Welt: <${Colors.TERTIARY.color}><world> <dark_gray>• <white>Größe: <${Colors.TERTIARY.color}><x> × <z> Blöcke<newline>" +
+                "  <white>Ecken: <${Colors.TERTIARY.color}><corners>"
+    ),
     INFO_UUID("regionsv2.info.uuid", "ID: <uuid>", "ID: <uuid>"),
     INFO_WORLD("regionsv2.info.world", "World: <world>", "Welt: <world>"),
     INFO_CORNERS("regionsv2.info.corners", "Corners: <corners>", "Ecken: <corners>"),
@@ -287,6 +378,11 @@ enum class LangStrings(override val key: String, val english: String, val german
         "Administratorberechtigung erforderlich."
     ),
     MANAGE_DENIED("regionsv2.error.manage", "You cannot manage claims.", "Du darfst keine Gebiete verwalten."),
+    PERMISSION_DENIED(
+        "regionsv2.error.permission",
+        "You do not have permission for this action (<permission>).",
+        "Du hast keine Berechtigung für diese Aktion (<permission>)."
+    ),
     CREATE_DENIED("regionsv2.error.create", "You cannot create claims.", "Du darfst keine Gebiete erstellen."),
     DISABLED(
         "regionsv2.error.disabled",
