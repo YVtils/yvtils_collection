@@ -5,20 +5,19 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.regions.configs
 
 import org.bukkit.entity.Player
-import yv.tils.gui.logic.DataClassConfigGui
+import yv.tils.regions.logic.ClaimService
 
 class ManageGUI {
     fun openGUI(sender: Player) {
-        DataClassConfigGui.open(
-            sender,
-            "Regions Config",
-            ConfigFile.state,
-            saver = { updated -> ConfigFile().applyState(updated) }
-        )
+        if (!yv.tils.regions.data.Permissions.ADMIN_CONFIG.allowed(sender)) return
+        yv.tils.regions.gui.ClaimsGui.configuration(sender)
     }
 }

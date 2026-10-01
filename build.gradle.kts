@@ -120,7 +120,6 @@ subprojects {
  */
 val publishableModules = setOf(
     "discord",
-    "regions",
     "multiMine",
     "essentials",
     "sit",
@@ -143,7 +142,7 @@ val publishableModules = setOf(
  * classloader rather than the isolated "library tier" every dynamically-fetched
  * module lives in - typically because it references another Bukkit plugin's
  * API directly (declared via `paper-plugin.yml` `dependencies`), which the
- * library tier cannot see (`regions-v2` -> WorldGuard). These stay togglable
+ * library tier cannot see (`regions` -> WorldGuard). These stay togglable
  * via `modules.yml` (they remain in `DynamicModuleRegistry.KNOWN_MODULES`,
  * flagged `static = true`) but are never published to / resolved from the
  * Maven registry.
@@ -154,7 +153,7 @@ val publishableModules = setOf(
  * second time into the launcher's main jar alongside the runtime bundle.
  */
 val staticBundledModules = setOf(
-    "regions-v2",
+    "regions",
 )
 
 /*
@@ -250,7 +249,7 @@ subprojects {
      *
      * The generated file is named after this subproject's own Gradle project
      * name (`module-version-<project.name>.properties`, e.g.
-     * `module-version-regions-v2.properties`) rather than being nested under a
+     * `module-version-regions.properties`) rather than being nested under a
      * per-module package path - that's what makes this fully generic: unlike a
      * package path (which differs per module and isn't derivable from the
      * Gradle project name alone, e.g. `gui-26.1`'s package is `yv.tils.gui`),

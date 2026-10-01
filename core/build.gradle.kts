@@ -24,7 +24,7 @@ dependencies {
     // isolated library tier used by dynamically fetched modules. Still togglable via
     // `modules.yml` (see DynamicModuleRegistry `static = true`). See
     // `staticBundledModules` in the root build.gradle.kts.
-    implementation(project(":regions-v2"))
+    implementation(project(":regions"))
 }
 
 val moduleVersion = project.version.toString()
@@ -146,7 +146,7 @@ tasks {
 
         // Do NOT bundle the Kotlin stdlib into the main jar: it's provided at runtime by the shared
         // runtime bundle (the library tier - see DynamicModuleLoader). A second copy here makes
-        // main-jar Kotlin classes (e.g. the statically-bundled regions-v2's config data classes)
+        // main-jar Kotlin classes (e.g. the statically-bundled regions' config data classes)
         // collide with the library tier when reflected by library-tier code (Configurate /
         // kotlin-reflect) -> LinkageError: loader constraint violation on
         // kotlin.jvm.internal.DefaultConstructorMarker. This is only safe because the PluginLoader

@@ -101,7 +101,7 @@ public final class DynamicModuleRegistry {
          * fetched dynamically. Static modules stay togglable via {@code modules.yml} but are skipped
          * by {@link DynamicModuleLoader} (nothing to resolve) - their classes are already present in
          * the main jar. Used for modules that must run in the main plugin classloader (e.g.
-         * {@code regions-v2}, which references WorldGuard's API directly).
+         * {@code regions}, which references WorldGuard's API directly).
          */
         public boolean isStatic() {
             return staticallyBundled;
@@ -142,7 +142,8 @@ public final class DynamicModuleRegistry {
                 "Discord integration: chat bridging, webhooks and linked accounts."));
         modules.put("regions", new ModuleArtifact(
                 "regions", versionOf("regions"), "yv.tils.regions.RegionsYVtils",
-                "Land claiming and protected regions."));
+                "Survival claims and area protection backed by WorldGuard.",
+                false, true, false));
         modules.put("multiMine", new ModuleArtifact(
                 "multiMine", versionOf("multiMine"), "yv.tils.multiMine.MultiMineYVtils",
                 "Lets multiple players break the same block together."));
@@ -175,10 +176,6 @@ public final class DynamicModuleRegistry {
                 "yv-smp", versionOf("yv-smp"), "yv.tils.yv_smp.YV_SMPYVtils",
                 "YV SMP module for YVtils",
                 false, false, true));
-        modules.put("regions-v2", new ModuleArtifact(
-                "regions-v2", versionOf("regions-v2"), "yv.tils.regionsv2.RegionsV2YVtils",
-                "Regions V2 provides survival features to claim and protect areas with flags based on the widely used worldguard plugin",
-                false, true, false));
         return Collections.unmodifiableMap(modules);
     }
 

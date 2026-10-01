@@ -5,14 +5,18 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.regions.configs
 
+import org.bukkit.Bukkit
 import yv.tils.configv2.files.ConfigFormat
 import yv.tils.configv2.files.ObjectMapperFileUtils
-import yv.tils.regions.data.Flag
-import yv.tils.regions.data.FlagType
+import yv.tils.regions.language.LangStrings
+import yv.tils.regions.logic.ClaimFlags
 
 class ConfigFile {
     companion object {
@@ -21,52 +25,10 @@ class ConfigFile {
 
         /**
          * Flattened `"a.b.c" -> value` view derived from [state], re-synced on every
-         * [loadConfig]/[registerStrings] call - kept around purely so the module's existing
-         * `ConfigFile.getValueAsString("settings.region.max.size")`-style call sites keep
-         * working unchanged on top of the new nested data class.
+         * [loadConfig] call - kept around purely so `ConfigFile.config["key"]`-style call
+         * sites work without needing the full data class shape.
          */
         val config: MutableMap<String, Any> = mutableMapOf()
-
-        fun getValue(key: String): Any? = config[key]
-        fun getValueAsString(key: String): String? = config[key]?.toString()
-        fun getValueAsInt(key: String): Int? = config[key]?.toString()?.toIntOrNull()
-        fun getValueAsBoolean(key: String): Boolean? = config[key]?.toString()?.toBoolean()
-
-        /**
-         * Effective per-flag value (global boolean, role-based minimum role name, or the
-         * flag's own default if it isn't configured at all), checked in the same
-         * global -> role-based -> locked-global -> locked-role-based -> default priority
-         * order the original dotted-key lookup used.
-         */
-        fun getFlags(): MutableMap<Flag, Any> {
-            val flags: MutableMap<Flag, Any> = mutableMapOf()
-
-            for (flag in Flag.entries) {
-                flags[flag] = state.flags.global[flag]
-                    ?: state.flags.role_based[flag]
-                    ?: state.flags.locked.global[flag]
-                    ?: state.flags.locked.role_based[flag]
-                    ?: flag.defaultValue
-            }
-
-            return flags
-        }
-
-        fun getFlagTypes(): MutableMap<Flag, FlagType> {
-            val flags: MutableMap<Flag, FlagType> = mutableMapOf()
-
-            for (flag in Flag.entries) {
-                flags[flag] = when {
-                    state.flags.global.containsKey(flag) -> FlagType.GLOBAL
-                    state.flags.role_based.containsKey(flag) -> FlagType.ROLE_BASED
-                    state.flags.locked.global.containsKey(flag) -> FlagType.LOCKED_GLOBAL
-                    state.flags.locked.role_based.containsKey(flag) -> FlagType.LOCKED_ROLE_BASED
-                    else -> flag.defaultGroup
-                }
-            }
-
-            return flags
-        }
 
         private fun syncDerivedView() {
             config.clear()
@@ -88,8 +50,41 @@ class ConfigFile {
 
     /** Called by [yv.tils.gui.logic.DataClassConfigGui]'s saver after an in-game edit. */
     fun applyState(newState: RegionsConfigState) {
-        state = newState
-        syncDerivedView()
-        registerStrings()
+        check(
+            listOf(
+                newState.maxClaimsPerWorld,
+                newState.maxClaimsTotal,
+                newState.maxMembersPerClaim,
+                newState.maxMembershipsPerPlayer,
+                newState.maxClaimSide, newState.maxSubzonesPerClaim
+            ).all { it == -1 || it >= 0 } &&
+                    (newState.maxClaimVolume == -1L || newState.maxClaimVolume >= 1) && newState.minClaimArea >= 1 &&
+                    newState.freeClaimChunks >= 0 && newState.diamondsPerChunk >= 0 && newState.clusterDistanceBlocks >= 0) {
+            LangStrings.INVALID_LIMITS.key
+        }
+        val previous = state
+        val changed = ClaimFlags.changed(previous, newState)
+        val revision = if (changed.isEmpty()) previous.policyRevision else previous.policyRevision + 1
+        val updated = newState.copy(
+            policyRevision = revision,
+            policyChanges = if (changed.isEmpty()) previous.policyChanges else previous.policyChanges + (revision.toString() to changed.map { it.name }),
+            appliedWorldRevisions = if (changed.isEmpty()) newState.appliedWorldRevisions else previous.appliedWorldRevisions +
+                    Bukkit.getWorlds().associate { it.uid.toString() to revision }
+        )
+        val rollback = ClaimFlags.propagate(previous, updated)
+        state = updated
+        try {
+            registerStrings()
+            syncDerivedView()
+        } catch (e: Exception) {
+            state = previous
+            try {
+                rollback()
+            } catch (restore: Exception) {
+                e.addSuppressed(restore)
+            }
+            syncDerivedView()
+            throw IllegalStateException(LangStrings.CONFIG_SAVE_FAILED.key, e)
+        }
     }
 }

@@ -140,7 +140,7 @@ the top of the root `build.gradle.kts`:
 ```kotlin
 val publishableModules = setOf(
     "discord",
-    "regions",
+    "essentials",
     // ...
     "your-new-module",
 )
@@ -151,6 +151,12 @@ This automatically:
   `releases` repository under groupId `yv.yvtils`.
 - Switches CommandAPI/coroutines/serialization to `compileOnly` for this
   module.
+
+Modules that need direct access to another plugin's API can instead be listed in
+`staticBundledModules` and added as an `implementation` dependency of core.
+For example, `regions` is bundled this way to access WorldGuard through core's
+main plugin classloader. Its registry entry uses `static = true`, so it remains
+selectable through `modules.yml` without being published or fetched dynamically.
 
 ### 3. Have exactly one lifecycle entry-point class
 

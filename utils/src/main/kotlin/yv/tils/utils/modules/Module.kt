@@ -34,7 +34,7 @@ class Module {
          * version-resource file.
          *
          * [moduleName] must match the calling module's own Gradle project name
-         * exactly (e.g. `"regions-v2"`, `"gui-26.1"`) - that's what
+         * exactly (e.g. `"regions"`, `"gui-26.1"`) - that's what
          * `generateModuleVersionResource` names the generated file after, since
          * (unlike a package path) it's something Gradle already knows for every
          * subproject with zero extra bookkeeping, and it's unique across the whole

@@ -5,90 +5,98 @@
  * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
  * with additional YVtils License Terms.
  * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
  */
 
 package yv.tils.regions.configs
 
 import yv.tils.configv2.data.annotations.ConfigDescription
 import yv.tils.configv2.data.annotations.NotGuiEditable
-import yv.tils.regions.data.Flag
 
 /**
- * regions' `config.yml`, as a plain (nested) `data class` persisted via
- * `ObjectMapperFileUtils` - replaces the old `ConfigEntry`-list-built-by-hand version of this
- * file. The per-flag defaults ([Flags]) mirror `Flag.entries`' own `defaultGroup`/
- * `defaultValue` and are what [ConfigFile.getFlags]/[ConfigFile.getFlagTypes] now read from
- * directly, instead of dotted `"flags.global.PVP"`-style string keys into a flat map.
- *
- * No GUI is wired up for this module yet - the `@ConfigDescription` annotations are already
- * in place so one can be added later with zero further changes to this file.
+ * Regions' `config.yml`, persisted as a plain data class via
+ * `ObjectMapperFileUtils` and editable in-game through [yv.tils.gui.logic.DataClassConfigGui]
+ * (see [yv.tils.regions.configs.ManageGUI]) - add more fields here as the module grows,
+ * annotated with [ConfigDescription] (GUI lore text) and, where relevant, [NotGuiEditable].
  */
 data class RegionsConfigState(
     @NotGuiEditable
     @ConfigDescription("Documentation URL")
-    val documentation: String = "https://docs.yvtils.net/modules/regions/config.yml",
+    val documentation: String = "https://docs.yvtils.net/regions/config.yml",
 
-    var settings: Settings = Settings(),
-    var flags: Flags = Flags(),
-) {
-    data class Settings(
-        var player: PlayerSettings = PlayerSettings(),
-        var region: RegionSettings = RegionSettings(),
-    ) {
-        data class PlayerSettings(
-            var max: Max = Max(),
-        ) {
-            data class Max(
-                @ConfigDescription("Max owned regions per player")
-                var own: Int = 5,
+    @ConfigDescription("Whether regions is enabled")
+    var enabled: Boolean = true,
+    @ConfigDescription("Maximum claims owned per world")
+    var maxClaimsPerWorld: Int = 5,
+    @ConfigDescription("Maximum owned claims across all worlds (-1 unlimited)")
+    var maxClaimsTotal: Int = 5,
+    @ConfigDescription("Minimum horizontal claim area in blocks")
+    var minClaimArea: Long = 1,
+    @ConfigDescription("Maximum members per claim (-1 unlimited)")
+    var maxMembersPerClaim: Int = -1,
+    @ConfigDescription("Maximum member claims per player across all worlds (-1 unlimited)")
+    var maxMembershipsPerPlayer: Int = -1,
+    @ConfigDescription("Show welcome and goodbye action bars")
+    var actionBarTransitions: Boolean = true,
+    @ConfigDescription("Charge diamonds for claims larger than the free size")
+    var currencyEnabled: Boolean = true,
+    @ConfigDescription("Price nearby claims sharing an owner as one connected cluster")
+    var clusterPricingEnabled: Boolean = true,
+    @ConfigDescription("Maximum empty block gap on each axis to connect claims (0 means touching)")
+    var clusterDistanceBlocks: Int = 16,
+    @ConfigDescription("Free maximum footprint side in chunks (16 blocks each)")
+    var freeClaimChunks: Int = 2,
+    @ConfigDescription("Diamonds per additional chunk of the longest footprint side (non-negative)")
+    var diamondsPerChunk: Int = 1,
+    @ConfigDescription("Maximum blocks in a full-height claim")
+    var maxClaimVolume: Long = 30000000,
+    @ConfigDescription("Maximum horizontal length of each claim side")
+    var maxClaimSide: Int = 256,
+    @ConfigDescription("Require survival mode to create claims")
+    var survivalOnly: Boolean = true,
+    @ConfigDescription("Worlds in which claiming is disabled")
+    var disabledWorlds: List<String> = emptyList(),
+    @ConfigDescription("Maximum 3D subzones per claim (-1 unlimited)")
+    var maxSubzonesPerClaim: Int = 10,
+    @ConfigDescription("Allow owners to open region state protections to everyone inside subzones")
+    var allowOpenSubzones: Boolean = true,
+    @NotGuiEditable
+    @ConfigDescription("Legacy role-flag list; use the admin flag policy menu")
+    var enabledRoleFlags: List<String> = listOf(
+        "block-break",
+        "block-place",
+        "chest-access",
+        "use",
+        "interact",
+        "damage-animals",
+        "entry"
+    ),
+    @NotGuiEditable
+    @ConfigDescription("Legacy global-flag list; use the admin flag policy menu")
+    var enabledGlobalFlags: List<String> = listOf(
+        "pvp",
+        "tnt",
+        "creeper-explosion",
+        "other-explosion",
+        "fire-spread",
+        "mob-spawning"
+    ),
+    @NotGuiEditable
+    @ConfigDescription("Per-flag policy; edit through the admin flags menu")
+    var flagPolicies: Map<String, FlagPolicy> = emptyMap(),
+    @NotGuiEditable
+    var policyRevision: Int = 0,
+    @NotGuiEditable
+    var policyChanges: Map<String, List<String>> = emptyMap(),
+    @NotGuiEditable
+    var appliedWorldRevisions: Map<String, Int> = emptyMap(),
+)
 
-                @ConfigDescription("Max member regions per player")
-                var member: Int = -1,
-            )
-        }
-
-        data class RegionSettings(
-            var max: Max = Max(),
-            var min: Min = Min(),
-        ) {
-            data class Max(
-                @ConfigDescription("Max region size")
-                var size: Int = 1000,
-
-                @ConfigDescription("Max members per region")
-                var members: Int = -1,
-            )
-
-            data class Min(
-                @ConfigDescription("Min region size")
-                var size: Int = 1,
-            )
-        }
-    }
-
-    /**
-     * Per-[Flag] defaults, keyed by the flag itself rather than a dotted string path.
-     * `global`/`locked.global` hold booleans (allowed/denied); `role_based`/`locked.role_based`
-     * hold the minimum [yv.tils.regions.data.RegionRoles] name required to use the flag.
-     *
-     * Field names (including the `role_based`/`locked` nesting) intentionally match the
-     * original dotted-key paths (`"flags.role_based.PLACE"`, `"flags.locked.global.PVP"`,
-     * ...) exactly, so an already-deployed `config.yml` keeps loading correctly.
-     */
-    data class Flags(
-        var global: MutableMap<Flag, Boolean> = mutableMapOf(Flag.PVP to true),
-        var role_based: MutableMap<Flag, String> = mutableMapOf(
-            Flag.PLACE to "MEMBER",
-            Flag.DESTROY to "MEMBER",
-            Flag.CONTAINER to "MEMBER",
-            Flag.INTERACT to "MEMBER",
-            Flag.TELEPORT to "MEMBER",
-        ),
-        var locked: Locked = Locked(),
-    ) {
-        data class Locked(
-            var global: MutableMap<Flag, Boolean> = mutableMapOf(),
-            var role_based: MutableMap<Flag, String> = mutableMapOf(),
-        )
-    }
-}
+data class FlagPolicy(
+    var enabled: Boolean = false,
+    var roleBased: Boolean = false,
+    /** WorldGuard-marshalled values encoded as YAML; empty means unset. */
+    var defaults: Map<String, String> = emptyMap(),
+)
