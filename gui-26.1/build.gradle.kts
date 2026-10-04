@@ -20,7 +20,7 @@
  * InvUI release that matches its target version.
  *
  * This module (`gui-26.1`) is the canonical source of truth for the actual
- * GUI code - `gui-26.2` (and any future `gui-<version>` module) points its
+ * GUI code - `gui-26.2`, `gui-26.3` (and any future `gui-<version>` module) point their
  * `sourceSets.main.kotlin` back at THIS module's `src/main/kotlin` instead of
  * duplicating it, since InvUI's public API (`Gui`, `Item`, `Window`, ...) is
  * expected to stay source-compatible across the versions this project

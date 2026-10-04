@@ -170,7 +170,8 @@ object ConfigGui {
         val defaultLabel = LanguageHandler.getRawMessage("action.gui.lore.default", player)
         val controlsKey = when (entry.type) {
             EntryType.BOOLEAN -> "action.gui.lore.controls.boolean"
-            EntryType.INT, EntryType.DOUBLE -> "action.gui.lore.controls.number"
+            EntryType.INT -> "action.gui.lore.controls.number"
+            EntryType.DOUBLE -> "action.gui.lore.controls.decimal"
             EntryType.STRING -> "action.gui.lore.controls.text"
             EntryType.LIST, EntryType.MAP -> "action.gui.lore.controls.list"
             else -> null
@@ -260,7 +261,8 @@ object ConfigGui {
 
             EntryType.DOUBLE -> {
                 val current = (entry.value as? Number)?.toDouble() ?: (entry.defaultValue as? Number)?.toDouble() ?: 0.0
-                entry.value = current + delta.toDouble()
+                entry.value = java.math.BigDecimal.valueOf(current)
+                    .add(java.math.BigDecimal.valueOf(delta.toLong(), 1)).toDouble()
             }
 
             else -> {}

@@ -176,6 +176,10 @@ public final class DynamicModuleRegistry {
                 "yv-smp", versionOf("yv-smp"), "yv.tils.yv_smp.YV_SMPYVtils",
                 "YV SMP module for YVtils",
                 false, false, true));
+        modules.put("remade-ender-dragon", new ModuleArtifact(
+                "remade-ender-dragon", versionOf("remade-ender-dragon"),
+                "yv.tils.remadeEnderDragon.RemadeEnderDragonYVtils",
+                "Remade Ender Dragon: player-scaled encounters, attacks and team support."));
         return Collections.unmodifiableMap(modules);
     }
 
@@ -195,11 +199,14 @@ public final class DynamicModuleRegistry {
         modules.put("26.2", new ModuleArtifact(
                 "gui-26.2", versionOf("gui-26.2"), "yv.tils.gui.GUIYVtils",
                 "GUI module for YVtils (Minecraft 26.2.x, InvUI 2.3.x)."));
+        modules.put("26.3", new ModuleArtifact(
+                "gui-26.3", versionOf("gui-26.3"), "yv.tils.gui.GUIYVtils",
+                "GUI module for YVtils (Minecraft 26.3.x, InvUI 2.5.x)."));
         return Collections.unmodifiableMap(modules);
     }
 
     /** The {@code gui} entry used when the running server's Minecraft version has no exact match. */
-    public static final String GUI_FALLBACK_MINECRAFT_VERSION = "26.2";
+    public static final String GUI_FALLBACK_MINECRAFT_VERSION = "26.3";
 
     /**
      * Extracts the {@code major.minor} part of a Minecraft version id (e.g. {@code "26.1.2"} ->

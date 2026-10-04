@@ -35,8 +35,8 @@ dependencies {
     // exposed as `api` so that modules depending on `gui-26.2` can also
     // reference InvUI types (Gui, Item, Window, ...) directly without
     // having to declare their own dependency on InvUI.
-    api("xyz.xenondevs.invui:invui:2.3.0")
-    api("xyz.xenondevs.invui:invui-kotlin:2.3.0")
+    api("xyz.xenondevs.invui:invui:2.3.2")
+    api("xyz.xenondevs.invui:invui-kotlin:2.3.2")
 
     compileOnly(project(":utils"))
     compileOnly(project(":config-v2"))

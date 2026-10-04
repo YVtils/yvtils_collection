@@ -27,6 +27,11 @@ This repository combines all the yvtils minecraft plugins in one place, for easi
 
 ## Modules in this Collection
 
+### Remade Ender Dragon
+
+Player-scaled dragon encounters with configurable attacks, team support, and
+admin previews. See [the module guide](docs/remade-ender-dragon.md).
+
 ### common
 
 ### config

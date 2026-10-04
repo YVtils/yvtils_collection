@@ -79,6 +79,12 @@ object RegisterStrings {
         )
 
         register(
+            "action.gui.lore.controls.decimal",
+            FileTypes.EN to "<gray>Left-Click: <white>+0.1  <gray>Shift+Left: <white>+1<newline><gray>Right-Click: <white>-0.1  <gray>Shift+Right: <white>-1",
+            FileTypes.DE to "<gray>Linksklick: <white>+0.1  <gray>Shift+Links: <white>+1<newline><gray>Rechtsklick: <white>-0.1  <gray>Shift+Rechts: <white>-1"
+        )
+
+        register(
             "action.gui.lore.controls.text",
             FileTypes.EN to "<gray>Left-Click: <white>Edit value",
             FileTypes.DE to "<gray>Linksklick: <white>Wert bearbeiten"

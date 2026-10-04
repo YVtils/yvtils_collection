@@ -336,7 +336,8 @@ object DataClassConfigGui {
         val defaultLabel = LanguageHandler.getRawMessage("action.gui.lore.default", player)
         val controlsKey = when (field.kind) {
             FieldKind.BOOLEAN -> "action.gui.lore.controls.boolean"
-            FieldKind.INT, FieldKind.LONG, FieldKind.DOUBLE -> "action.gui.lore.controls.number"
+            FieldKind.INT, FieldKind.LONG -> "action.gui.lore.controls.number"
+            FieldKind.DOUBLE -> "action.gui.lore.controls.decimal"
             FieldKind.STRING -> "action.gui.lore.controls.text"
             FieldKind.STRING_LIST -> "action.gui.lore.controls.list"
             FieldKind.NESTED -> "action.gui.lore.controls.nested"
@@ -461,7 +462,8 @@ object DataClassConfigGui {
 
             FieldKind.DOUBLE -> {
                 val current = (field.get(instance) as? Number)?.toDouble() ?: 0.0
-                field.set(instance, current + delta.toDouble())
+                field.set(instance, java.math.BigDecimal.valueOf(current)
+                    .add(java.math.BigDecimal.valueOf(delta.toLong(), 1)).toDouble())
             }
 
             else -> {}

@@ -23,7 +23,7 @@ import yv.tils.utils.modules.Module
  * events internally for windows created through it.
  *
  * This source is shared by every `gui-<version>` Gradle module (`gui-26.1`,
- * `gui-26.2`, ...) - see `gui-26.1/build.gradle.kts` for why.
+ * `gui-26.2`, `gui-26.3`, ...) - see `gui-26.1/build.gradle.kts` for why.
  *
  * NOTE: `core` resolves a matching `gui-<version>` artifact onto the runtime
  * classpath unconditionally (see `DynamicModuleRegistry.GUI_ARTIFACTS`,

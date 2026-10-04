@@ -130,7 +130,9 @@ val publishableModules = setOf(
     "stats",
     "gui-26.1",
     "gui-26.2",
+    "gui-26.3",
     "yv-smp",
+    "remade-ender-dragon",
 )
 
 /*
@@ -192,12 +194,12 @@ val usesSharedRuntimeTier = publishableModules + dynamicCoreModules + staticBund
  * runtime-selection counterpart to this compile-time mapping.
  *
  * Add an entry here (and a matching `gui-<version>` module + registry entry)
- * whenever InvUI publishes support for a new Minecraft version - e.g. once
- * InvUI supports `26.3`.
+ * whenever InvUI publishes support for a new Minecraft version.
  */
 val defaultPaperApiVersion = "26.1.2"
 val paperApiVersionOverrides = mapOf(
     "gui-26.2" to "26.2",
+    "gui-26.3" to "26.3",
 )
 
 subprojects {

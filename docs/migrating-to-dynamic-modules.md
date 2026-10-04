@@ -117,7 +117,7 @@ module, each with its own separate copy of that state.
 
 Third-party runtime dependencies (e.g. `discord`'s JDA dependency, `gui`'s
 InvUI dependency) also stay as normal `implementation`/`api` on the module
-that actually needs them directly (`gui-26.1`/`gui-26.2` themselves, for
+that actually needs them directly (the `gui-<version>` modules themselves, for
 InvUI) - you do **not** need to make Reposilite aware of them or proxy their
 host. `DynamicModuleLoader` adds a small, fixed list of well-known upstream
 repositories (Maven Central, PaperMC, xenondevs - see
@@ -418,7 +418,7 @@ Remember a module's dependencies on *other* feature modules are real Maven
 dependencies - `publishAllModulesLocally` covers this automatically since it
 publishes everything, but if you're only publishing a single module by hand,
 publish its dependencies too or you'll just trade one
-`ArtifactNotFoundException` for another. (`gui-26.1`/`gui-26.2` are the
+`ArtifactNotFoundException` for another. (The `gui-<version>` modules are the
 exception - `core` resolves those itself, unconditionally; see the note on
 `gui` in [Part 1](#part-1---migrating-a-feature-module).)
 
