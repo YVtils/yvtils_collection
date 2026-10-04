@@ -379,6 +379,21 @@ before trusting a migrated core. Confirm:
   `Core.instance.server.minecraftVersion`, not `.version`, which was already
   fixed in all copies of `CheckVersion.kt` as part of this migration).
 
+### Publishing releases in CI
+
+The Reposilite workflow runs `./gradlew build publish --no-daemon -PskipExistingReleases=true`.
+It checks each module's JAR, POM and Gradle module metadata before publishing:
+complete existing releases are skipped, and new versions are uploaded normally.
+An incomplete release or a repository error fails the run rather than hiding a
+publishing problem. CI publishing runs are serialized to prevent simultaneous
+uploads of the same release.
+
+Release versions are immutable. Bump the affected module's entry in
+`gradle/module-versions.properties` when releasing changes; an unchanged version
+continues to resolve to the already-published artifact. If a previous upload
+left an incomplete release, repair that release in Reposilite or assign a new
+module version before retrying.
+
 ## Testing your migration locally
 
 You don't need real Reposilite credentials to test a migration - Aether just

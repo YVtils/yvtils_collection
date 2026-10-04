@@ -6,6 +6,11 @@ on:
     types: [ closed ]
     branches: [ main ]
 
+# A release existence check and its upload must not race another CI run.
+concurrency:
+  group: publish-reposilite
+  cancel-in-progress: false
+
 jobs:
   publish:
     # Only run automatically once a PR is actually merged into `main` (not
@@ -34,7 +39,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build & publish to Reposilite
-        run: ./gradlew build publish --no-daemon
+        run: ./gradlew build publish --no-daemon -PskipExistingReleases=true
         env:
           REPOSILITE_URL: ${{ secrets.REPOSILITE_URL }}
           REPOSILITE_USERNAME: ${{ secrets.REPOSILITE_USERNAME }}

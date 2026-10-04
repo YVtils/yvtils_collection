@@ -16,8 +16,11 @@ import org.cyclonedx.gradle.CyclonedxDirectTask
 import org.cyclonedx.model.Component
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.WriteProperties
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.HttpURLConnection
+import java.util.Base64
 
 plugins {
     val kotlinMonorepoVersion = "2.4.10"
@@ -115,8 +118,8 @@ subprojects {
  * `compileOnly` and must not declare them as a fetchable Maven dependency.
  *
  * Versioning is independent per module (NOT tied to the root project version) -
- * set `version` at the top of each published module's own build.gradle.kts once
- * it's ready to be versioned/published on its own.
+ * update `gradle/module-versions.properties` when a module is ready for a new
+ * release. Published release versions are immutable.
  */
 val publishableModules = setOf(
     "discord",
@@ -332,6 +335,68 @@ subprojects {
         afterEvaluate {
             the<PublishingExtension>().publications.named<MavenPublication>("maven") {
                 version = project.version.toString()
+            }
+        }
+
+        // CI publishes all modules on every merge. Unchanged release versions
+        // must be skipped before PUT, since Reposilite rejects redeployment.
+        val skipExistingReleases = providers.gradleProperty("skipExistingReleases")
+            .map(String::toBoolean).orElse(false)
+        tasks.withType<PublishToMavenRepository>().configureEach {
+            onlyIf("release is not already published") {
+                if (!skipExistingReleases.get() || publication.version.endsWith("-SNAPSHOT")) {
+                    return@onlyIf true
+                }
+
+                val coordinate = "${publication.groupId}:${publication.artifactId}:${publication.version}"
+                val directory = "${publication.groupId.replace('.', '/')}/${publication.artifactId}/${publication.version}"
+                val prefix = "${publication.artifactId}-${publication.version}"
+                val filenames = publication.artifacts.map { artifact ->
+                    val classifier = artifact.classifier?.takeIf(String::isNotEmpty)?.let { "-$it" }.orEmpty()
+                    "$prefix$classifier.${artifact.extension}"
+                } + listOf("$prefix.pom", "$prefix.module")
+                val credentials = repository.credentials
+                val existing = filenames.distinct().filter { filename ->
+                    val url = repository.url.toString().trimEnd('/') + "/$directory/$filename"
+                    val connection = uri(url).toURL().openConnection() as HttpURLConnection
+                    try {
+                        connection.requestMethod = "HEAD"
+                        connection.connectTimeout = 15_000
+                        connection.readTimeout = 15_000
+                        // Do not forward repository credentials to a redirect target.
+                        connection.instanceFollowRedirects = false
+                        credentials.username?.let { username ->
+                            val token = Base64.getEncoder().encodeToString(
+                                "$username:${credentials.password.orEmpty()}".toByteArray(Charsets.UTF_8)
+                            )
+                            connection.setRequestProperty("Authorization", "Basic $token")
+                        }
+                        when (val status = connection.responseCode) {
+                            HttpURLConnection.HTTP_OK -> true
+                            HttpURLConnection.HTTP_NOT_FOUND -> false
+                            else -> {
+                                val message = "Cannot check $coordinate ($filename): repository returned HTTP $status"
+                                logger.error(message)
+                                throw GradleException(message)
+                            }
+                        }
+                    } finally {
+                        connection.disconnect()
+                    }
+                }
+                when {
+                    existing.isEmpty() -> true
+                    existing.size == filenames.distinct().size -> {
+                        logger.lifecycle("Skipping $coordinate: release already exists in ${repository.name}.")
+                        false
+                    }
+                    else -> {
+                        val message = "Incomplete release $coordinate in ${repository.name} (found ${existing.joinToString()}). " +
+                            "Repair the repository release or assign a new version in gradle/module-versions.properties."
+                        logger.error(message)
+                        throw GradleException(message)
+                    }
+                }
             }
         }
     }
