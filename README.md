@@ -40,6 +40,9 @@ admin previews. See [the module guide](docs/remade-ender-dragon.md).
 
 ### discord
 
+Modal-based SMP registration, linked-account commands and InvUI management:
+[setup, migration, permissions and verification](docs/discord-registration.md).
+
 ### discord-core
 
 ### essentials

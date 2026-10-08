@@ -71,6 +71,8 @@ data class DiscordConfigState(
         data class Settings(
             @ConfigDescription("Check minecraft accounts")
             var checkMinecraftAccount: Boolean = true,
+            @ConfigDescription("Enable legacy username-message registration and account-change prompts in the whitelist channel. Modal registration and administrative commands remain available.")
+            var legacyMessageRegistration: Boolean = true,
         )
     }
 

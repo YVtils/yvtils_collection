@@ -47,6 +47,7 @@ class DiscordYVtils : Module.YVtilsModule {
         registerPermissions()
 
         loadConfigs()
+        yv.tils.discord.commands.DiscordAccountsCommand()
 
         AppLogic().startApp()
     }
@@ -60,6 +61,7 @@ class DiscordYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
+        dev.jorel.commandapi.CommandAPI.unregister("discordaccounts")
         AppLogic().stopApp()
         unregisterModule()
     }

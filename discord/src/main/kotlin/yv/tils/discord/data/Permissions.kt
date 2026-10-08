@@ -49,6 +49,11 @@ class PermissionsData {
 }
 
 enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
+    ACCOUNTS_READ(PermissionManager.YVtilsPermission("${PermissionsData.permissionBase}.accounts.read", "List and inspect saved account links")),
+    ACCOUNTS_GUI(PermissionManager.YVtilsPermission("${PermissionsData.permissionBase}.accounts.gui", "Open account management inventories")),
+    ACCOUNTS_ADD(PermissionManager.YVtilsPermission("${PermissionsData.permissionBase}.accounts.add", "Add account links and whitelist access")),
+    ACCOUNTS_REMOVE(PermissionManager.YVtilsPermission("${PermissionsData.permissionBase}.accounts.remove", "Remove account links and whitelist access")),
+    ACCOUNTS_REPLACE(PermissionManager.YVtilsPermission("${PermissionsData.permissionBase}.accounts.replace", "Replace linked Minecraft accounts")),
     SYNC_CHAT(
         PermissionManager.YVtilsPermission(
             "${PermissionsData.permissionBase}.sync.chat",

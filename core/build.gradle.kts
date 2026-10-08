@@ -119,6 +119,11 @@ tasks.named("processResources") {
     dependsOn(embedRuntime)
 }
 
+tasks.processResources {
+    inputs.property("version", project.version)
+    filesMatching("paper-plugin.yml") { expand("version" to project.version.toString()) }
+}
+
 tasks.named("compileJava") {
     dependsOn(generateModuleVersionsKotlin)
 }

@@ -53,7 +53,7 @@ tasks.named<CyclonedxDirectTask>("cyclonedxDirectBom") {
 
 allprojects {
     group = "yv.tils"
-    version = "26.08.01"
+    version = "26.10.01"
 
     repositories {
         mavenCentral()

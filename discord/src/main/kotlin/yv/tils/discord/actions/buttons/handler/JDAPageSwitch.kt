@@ -79,12 +79,17 @@ class JDAPageSwitch {
     }
 
     private fun switchPage(e: ButtonInteractionEvent, page: Int) {
-        e.deferEdit().queue()
-
-        val hook = e.hook
-
-        hook.editOriginalComponents(
-            WhitelistComponents().forceRemoveContainer(page)
-        ).useComponentsV2().queue()
+        if (!yv.tils.discord.actions.modals.JDARegistration.allowedGuild(e.guild?.id) ||
+            !yv.tils.discord.actions.commands.handler.JDAWhitelist.authorized(e.member)) {
+            e.reply(yv.tils.discord.language.AccountText.raw("permission")).setEphemeral(true).queue()
+            return
+        }
+        e.deferEdit().queue({ hook ->
+            yv.tils.utils.coroutine.CoroutineHandler.launchTask(task = {
+                try {
+                    hook.editOriginalComponents(WhitelistComponents().forceRemoveContainer(page.coerceAtLeast(1))).useComponentsV2().queue()
+                } catch (error: Exception) { hook.sendMessage(yv.tils.discord.language.AccountText.error(error)).setEphemeral(true).queue() }
+            }, isOnce = true)
+        })
     }
 }

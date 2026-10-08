@@ -1,456 +1,176 @@
-/*
- * Part of the YVtils Project.
- * Copyright (c) 2026 Lyvric / YVtils
- *
- * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
- * with additional YVtils License Terms.
- * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
- */
-
 package yv.tils.discord.actions.commands.handler
 
 import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.interactions.InteractionContextType
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.*
 import yv.tils.configv2.language.LanguageHandler
+import yv.tils.discord.actions.modals.JDARegistration
 import yv.tils.discord.configs.ConfigFile
-import yv.tils.discord.language.RegisterStrings
+import yv.tils.discord.language.AccountText
+import yv.tils.discord.language.RegisterStrings.LangStrings
 import yv.tils.discord.logic.whitelist.*
-import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.AlreadyWhitelistedException
-import yv.tils.discord.logic.whitelist.WhitelistManage.Companion.InvalidAccountException
-import yv.tils.discord.utils.DiscordUser
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
-import java.util.concurrent.TimeUnit
 
 class JDAWhitelist {
     companion object {
-        val cmdPermission = ConfigFile.getValueAsString("commands.whitelistCommand.permission") ?: "MANAGE_CHANNEL"
+        val cmdPermission
+            get() = ConfigFile.getValueAsString("commands.whitelistCommand.permission") ?: "MANAGE_CHANNEL"
+
+        fun permission() = runCatching { Permission.valueOf(cmdPermission) }.getOrDefault(Permission.MANAGE_CHANNEL)
+        fun authorized(member: net.dv8tion.jda.api.entities.Member?) = member?.hasPermission(permission()) == true
     }
 
-    private fun handleForceAdd(e: SlashCommandInteractionEvent) {
-        val minecraftName = e.getOption("minecraft_name")?.asString ?: return
-        val discordUserID = e.getOption("discord_user")?.asUser?.id ?: "~$minecraftName"
-        val guildID: String = e.guild?.id ?: return
-
-        e.deferReply(true).queue()
-        val hook = e.hook
-
-        CoroutineHandler.launchTask(
-            task = {
-                if (WhitelistLogic.containsEntry(discordUserID)) {
-                    val oldName = WhitelistLogic.getEntryByDiscordID(discordUserID)?.minecraftName ?: "Unknown"
-                    val sender = e.user
-
-                    try {
-                        WhitelistManage.addToCache("${sender.id}_${discordUserID}", minecraftName)
-                    } catch (_: Exception) {
-                        e.channel.sendMessageComponents(
-                            WhitelistComponents().accountErrorContainer(
-                                LanguageHandler.getRawMessage(
-                                    RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_ALREADY_CACHED.key,
-                                    params = mapOf(
-                                        "user" to e.user.effectiveName
-                                    )
-                                )
-                            )
-                        ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
-
-                        Logger.warn(
-                            LanguageHandler.getMessage(
-                                RegisterStrings.LangStrings.ERROR_WHITELIST_ACCOUNT_REPLACE_ALREADY_CACHED.key,
-                                mapOf(
-                                    "user" to e.user.effectiveName
-                                )
-                            )
-                        )
-                        return@launchTask
-                    }
-
-                    hook.sendMessageComponents(
-                        WhitelistComponents().accountChangePromptContainer(
-                            oldName = oldName,
-                            newName = minecraftName
-                        )
-                    ).useComponentsV2().setEphemeral(true).queue()
-
-                    return@launchTask
-                }
-
-                try {
-                    WhitelistManage().linkAccount(minecraftName, discordUserID, guildID, e.user)
-
-                    hook.sendMessageComponents(
-                        WhitelistComponents().accountAddContainer(minecraftName)
-                    ).useComponentsV2().setEphemeral(true).queue()
-                } catch (ex: Exception) {
-                    when (ex) {
-                        is AlreadyWhitelistedException -> {
-                            hook.sendMessageComponents(
-                                WhitelistComponents().accountAlreadyListedContainer(minecraftName)
-                            ).useComponentsV2().setEphemeral(true).queue()
-
-                            Logger.info(
-                                LanguageHandler.getMessage(
-                                    RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ALREADY_LISTED.key,
-                                    mapOf(
-                                        "discordAccount" to DiscordUser.parseIDToName(discordUserID),
-                                        "minecraftAccount" to minecraftName,
-                                        "user" to e.user.effectiveName,
-                                    )
-                                )
-                            )
-                            return@launchTask
-                        }
-                        is InvalidAccountException -> {
-                            hook.sendMessageComponents(
-                                WhitelistComponents().invalidAccountContainer(minecraftName)
-                            ).useComponentsV2().setEphemeral(true).queue()
-
-                            Logger.info(
-                                LanguageHandler.getMessage(
-                                    RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_INVALID.key,
-                                    mapOf(
-                                        "discordAccount" to DiscordUser.parseIDToName(discordUserID),
-                                        "minecraftAccount" to minecraftName,
-                                        "user" to e.user.effectiveName,
-                                    )
-                                )
-                            )
-                            return@launchTask
-                        }
-                        else -> {
-                            e.channel.sendMessageComponents(
-                                WhitelistComponents().accountErrorContainer(ex.message ?: "-")
-                            ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
-
-                            Logger.warn(
-                                LanguageHandler.getMessage(
-                                    RegisterStrings.LangStrings.CONSOLE_WHITELIST_ACCOUNT_ERROR.key,
-                                    mapOf(
-                                        "discordAccount" to DiscordUser.parseIDToName(discordUserID),
-                                        "minecraftAccount" to minecraftName,
-                                        "user" to e.user.effectiveName,
-                                        "error" to (ex.message ?: "Unknown error")
-                                    )
-                                )
-                            )
-                            return@launchTask
-                        }
-                    }
-                }
-            },
-            isOnce = true
-        )
-    }
-
-    private fun handleForceRemove(e: SlashCommandInteractionEvent) {
-        val site = e.getOption("site")?.asInt ?: 1
-        val discordUser = e.getOption("discord_user")?.asUser
-        val minecraftName = e.getOption("minecraft_name")?.asString
-        val guildID: String = e.guild?.id ?: return
-
-        val user = e.user
-
-        e.deferReply(true).queue()
-        val hook = e.hook
-
-        CoroutineHandler.launchTask(
-            task = {
-                WhitelistLogic.getEntriesBySite(site)
-
-                if (discordUser != null || minecraftName != null) {
-                    var discordEntry: WhitelistEntry? = null
-                    var minecraftEntry: WhitelistEntry? = null
-
-                    if (discordUser != null) {
-                        val entry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
-                        if (entry == null) {
-                            if (minecraftName == null) {
-                                e.channel.sendMessageComponents(
-                                    WhitelistComponents().accountErrorContainer(
-                                        LanguageHandler.getRawMessage(
-                                            RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_DISCORD.key,
-                                            params = mapOf(
-                                                "discordUser" to discordUser.name
-                                            )
-                                        )
-                                    )
-                                ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
-                                return@launchTask
-                            }
-                            discordEntry = null
-                        } else {
-                            discordEntry = entry
-                        }
-                    }
-
-                    if (minecraftName != null) {
-                        val entry = WhitelistLogic.getEntryByMinecraftName(minecraftName)
-                        if (entry == null) {
-                            if (discordEntry == null) {
-                                e.channel.sendMessageComponents(
-                                    WhitelistComponents().accountErrorContainer(
-                                        LanguageHandler.getRawMessage(
-                                            RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_NO_ENTRY_MINECRAFT.key,
-                                            params = mapOf(
-                                                "minecraftName" to minecraftName
-                                            )
-                                        )
-                                    )
-                                ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
-                                return@launchTask
-                            }
-                            minecraftEntry = null
-                        } else {
-                            minecraftEntry = entry
-                        }
-                    }
-
-                    if (discordEntry != minecraftEntry && discordEntry != null && minecraftEntry != null) {
-                        e.channel.sendMessageComponents(
-                            WhitelistComponents().accountErrorContainer(
-                                LanguageHandler.getRawMessage(
-                                    RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_ENTRIES_NOT_EQUAL.key,
-                                    params = mapOf(
-                                        "discordEntry" to discordEntry.toString(),
-                                        "minecraftEntry" to minecraftEntry.toString()
-                                    )
-                                )
-                            )
-                        ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
-
-                        return@launchTask
-                    }
-
-                    val discordUserID = discordEntry?.discordUserID ?: minecraftEntry?.discordUserID ?: return@launchTask
-                    val oldEntry = WhitelistManage().unlinkAccount(discordUserID, guildID, user)
-
-                    hook.sendMessageComponents(
-                        WhitelistComponents().forceRemoveContainer(site = site, listOf(oldEntry))
-                    ).useComponentsV2().setEphemeral(true).queue()
-
-                    return@launchTask
-                }
-
-                hook.sendMessageComponents(
-                    WhitelistComponents().forceRemoveContainer(site = site)
-                ).useComponentsV2().setEphemeral(true).queue()
-            },
-            isOnce = true
-        )
-    }
-
-    private fun handleCheck(e: SlashCommandInteractionEvent) {
-        val minecraftName = e.getOption("minecraft_name")?.asString
-        val discordUser = e.getOption("discord_user")?.asUser
-
-        e.deferReply(true).queue()
-        val hook = e.hook
-
-        CoroutineHandler.launchTask(
-            task = {
-                var entry: WhitelistEntry? = null
-
-                if (minecraftName == null && discordUser == null) {
-                    val selfUser = e.user
-                    entry = WhitelistLogic.getEntryByDiscordID(selfUser.id)
-                }
-
-                if (minecraftName != null && discordUser != null) {
-                    val minecraftEntry = WhitelistLogic.getEntryByMinecraftName(minecraftName)
-                    val discordEntry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
-
-                    if (discordEntry != minecraftEntry && discordEntry != null && minecraftEntry != null) {
-                        e.channel.sendMessageComponents(
-                            WhitelistComponents().accountErrorContainer(
-                                LanguageHandler.getRawMessage(
-                                    RegisterStrings.LangStrings.ERROR_WHITELIST_FORCE_REMOVE_ENTRIES_NOT_EQUAL.key,
-                                    params = mapOf(
-                                        "discordEntry" to discordEntry.toString(),
-                                        "minecraftEntry" to minecraftEntry.toString()
-                                    )
-                                )
-                            )
-                        ).useComponentsV2().complete().delete().queueAfter(5, TimeUnit.MINUTES)
-
-
-                        return@launchTask
-                    }
-
-                    entry = minecraftEntry ?: discordEntry
-                } else if (minecraftName != null) {
-                    entry = WhitelistLogic.getEntryByMinecraftName(minecraftName)
-                } else if (discordUser != null) {
-                    entry = WhitelistLogic.getEntryByDiscordID(discordUser.id)
-                }
-
-                // TODO: Change container, if entry is null some container should be sent, which says, that the account is not whitelisted instead of an invalid account container
-                if (entry == null) {
-                    hook.sendMessageComponents(
-                        WhitelistComponents().invalidAccountContainer(
-                            minecraftName ?: discordUser?.name ?: "Unknown"
-                        )
-                    ).useComponentsV2().setEphemeral(true).queue()
-                    return@launchTask
-                }
-
-                hook.sendMessageComponents(
-                    WhitelistComponents().checkContainer(entry)
-                ).useComponentsV2().setEphemeral(true).queue()
-            },
-            isOnce = true
-        )
-    }
-
-    /**
-     * Executes the whitelist command with the provided arguments.
-     *
-     * @param e The SlashCommandInteractionEvent containing the command event.
-     */
     fun executeCommand(e: SlashCommandInteractionEvent) {
-        when (e.subcommandName) {
-            "forceadd" -> handleForceAdd(e)
-            "forceremove" -> handleForceRemove(e)
-            "check" -> handleCheck(e)
-            else -> e.reply("Unknown subcommand").setEphemeral(true).queue()
+        if (!JDARegistration.allowedGuild(e.guild?.id) || !authorized(e.member)) {
+            e.reply(AccountText.raw(if (!JDARegistration.allowedGuild(e.guild?.id)) "guild" else "permission"))
+                .setEphemeral(true).queue()
+            return
         }
+        e.deferReply(true).queue({ hook ->
+            CoroutineHandler.launchTask(task = {
+                try {
+                    when (e.subcommandName) {
+                        "setup" -> {
+                            val tutorialLink = JDARegistration.helpLink(e.getOption("tutorial_link")?.asString, e.guild!!.id)
+                            val supportLink = JDARegistration.helpLink(e.getOption("support_link")?.asString, e.guild!!.id)
+                            try {
+                                val channel = e.getOption("channel")!!.asChannel.asTextChannel()
+                                check(channel.guild.id == e.guild!!.id)
+                                channel.sendMessageComponents(JDARegistration.panel(tutorialLink, supportLink)).useComponentsV2().complete()
+                                hook.editOriginal(AccountText.raw("posted")).queue()
+                            } catch (error: Exception) {
+                                Logger.warn("Registration panel posting failed: ${error.message}")
+                                hook.editOriginal(AccountText.raw("postFailed")).queue()
+                            }
+                        }
+
+                        "forceadd" -> {
+                            val name = e.getOption("minecraft_name")!!.asString
+                            val target = e.getOption("discord_user")?.asUser?.id ?: "~$name"
+                            val old = WhitelistLogic.getEntryByDiscordID(target)
+                            if (old != null) {
+                                WhitelistManage.addToCache("${e.user.id}_$target", name)
+                                val cacheKey = "${e.user.id}_$target"
+                                CoroutineHandler.launchTask(task = {
+                                    WhitelistManage.accountReplaceCache.remove(cacheKey)
+                                    WhitelistManage.replacementSnapshots.remove(cacheKey)
+                                }, beforeDelay = 60000, isOnce = true)
+                                hook.sendMessageComponents(
+                                    WhitelistComponents().accountChangePromptContainer(
+                                        old.minecraftName,
+                                        name
+                                    )
+                                ).useComponentsV2().setEphemeral(true).queue()
+                            } else {
+                                WhitelistManage().linkAccount(name, target, e.guild!!.id, e.user)
+                                hook.editOriginal(AccountText.raw("success")).queue()
+                            }
+                        }
+
+                        "forceremove" -> {
+                            val user = e.getOption("discord_user")?.asUser?.id
+                            val name = e.getOption("minecraft_name")?.asString
+                            if (user == null && name == null) {
+                                hook.sendMessageComponents(
+                                    WhitelistComponents().forceRemoveContainer(
+                                        e.getOption("site")?.asInt ?: 1
+                                    )
+                                ).useComponentsV2().setEphemeral(true).queue()
+                            } else {
+                                val byUser = user?.let { WhitelistLogic.getEntryByDiscordID(it) }
+                                val byName = name?.let {
+                                    WhitelistLogic.getEntryByMinecraftName(it)
+                                        ?: WhitelistLogic.getEntryByMinecraftUUID(it)
+                                }
+                                if (user != null && name != null && byUser != byName) throw AccountService.Failure("stale")
+                                val entry = byUser ?: byName ?: throw AccountService.Failure("missing")
+                                AccountService.remove(entry.discordUserID, e.guild!!.id, "Discord:${e.user.id}", entry)
+                                hook.editOriginal(AccountText.raw("completed")).queue()
+                            }
+                        }
+
+                        "check" -> {
+                            val user = e.getOption("discord_user")?.asUser?.id
+                            val name = e.getOption("minecraft_name")?.asString
+                            val entry = if (name != null) WhitelistLogic.getEntryByMinecraftName(name)
+                                ?: WhitelistLogic.getEntryByMinecraftUUID(name)
+                            else WhitelistLogic.getEntryByDiscordID(user ?: e.user.id)
+                            if (entry == null) throw AccountService.Failure("missing")
+                            hook.editOriginal(
+                                AccountText.raw(
+                                    "entry",
+                                    params = mapOf(
+                                        "name" to entry.minecraftName,
+                                        "uuid" to entry.minecraftUUID,
+                                        "discord" to entry.discordUserID,
+                                        "display" to AccountText.raw("unavailable")
+                                    )
+                                )
+                            ).queue()
+                        }
+
+                        else -> hook.editOriginal(AccountText.raw("help")).queue()
+                    }
+                } catch (error: Exception) {
+                    hook.editOriginal(AccountText.error(error)).queue()
+                }
+            }, isOnce = true)
+        }, { Logger.warn("Whitelist acknowledgement failed: ${it.message}") })
     }
 
-    /**
-     * Registers the whitelist command with subcommands.
-     *
-     * @return SlashCommandData for the whitelist command.
-     */
     fun registerCommand(): SlashCommandData {
-        val subForceAdd = subForceAdd()
-        val subForceRemove = subForceRemove()
-        val subCheck = subCheck()
+        fun text(key: LangStrings) = LanguageHandler.getCleanMessage(key.key)
+        fun accountOption(key: LangStrings, required: Boolean = false) =
+            OptionData(OptionType.STRING, "minecraft_name", text(key), required)
 
-        val data = try {
-            Commands.slash(
-                "whitelist",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_DESCRIPTION.key)
+        fun userOption(key: LangStrings) = OptionData(OptionType.USER, "discord_user", text(key))
+        return Commands.slash("whitelist", text(LangStrings.SLASHCOMMANDS_WHITELIST_DESCRIPTION))
+            .setContexts(InteractionContextType.GUILD)
+            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(permission()))
+            .addSubcommands(
+                SubcommandData("setup", AccountText.raw("setup")).addOptions(
+                    OptionData(
+                        OptionType.CHANNEL,
+                        "channel",
+                        AccountText.raw("channel"),
+                        true
+                    ).setChannelTypes(ChannelType.TEXT),
+                    OptionData(OptionType.STRING, "tutorial_link", AccountText.raw("tutorialOption")).setMaxLength(500),
+                    OptionData(OptionType.STRING, "support_link", AccountText.raw("supportOption")).setMaxLength(500)
+                ),
+                SubcommandData(
+                    "forceadd",
+                    text(LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEADD_DESCRIPTION)
+                ).addOptions(
+                    accountOption(
+                        LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEADD_ARGS_MINECRAFTNAME_DESCRIPTION,
+                        true
+                    ), userOption(LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEADD_ARGS_DISCORDUSER_DESCRIPTION)
+                ),
+                SubcommandData(
+                    "forceremove",
+                    text(LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEREMOVE_DESCRIPTION)
+                ).addOptions(
+                    OptionData(
+                        OptionType.INTEGER,
+                        "site",
+                        text(LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEREMOVE_ARGS_SITE_DESCRIPTION)
+                    ),
+                    accountOption(LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEREMOVE_ARGS_MINECRAFTNAME_DESCRIPTION),
+                    userOption(LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEREMOVE_ARGS_DISCORDUSER_DESCRIPTION)
+                ),
+                SubcommandData(
+                    "check",
+                    text(LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_CHECK_DESCRIPTION)
+                ).addOptions(
+                    accountOption(LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_CHECK_ARGS_MINECRAFTNAME_DESCRIPTION),
+                    userOption(LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_CHECK_ARGS_DISCORDUSER_DESCRIPTION)
+                )
             )
-                .setContexts(InteractionContextType.GUILD)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.valueOf(cmdPermission)))
-                .addSubcommands(subForceAdd, subForceRemove, subCheck)
-        } catch (_: Exception) {
-            Commands.slash(
-                "whitelist",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_DESCRIPTION.key)
-            )
-                .setContexts(InteractionContextType.GUILD)
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
-                .addSubcommands(subForceAdd, subForceRemove, subCheck)
-        }
-
-        return data
-    }
-
-    private fun subForceAdd(): SubcommandData {
-        val subcommand = SubcommandData(
-            "forceadd",
-            LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEADD_DESCRIPTION.key)
-        )
-
-        val options = mutableListOf<OptionData>()
-        options.add(
-            OptionData(
-                OptionType.STRING,
-                "minecraft_name",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEADD_ARGS_MINECRAFTNAME_DESCRIPTION.key),
-                true
-            )
-        )
-
-        options.add(
-            OptionData(
-                OptionType.USER,
-                "discord_user",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEADD_ARGS_DISCORDUSER_DESCRIPTION.key),
-                false
-            )
-        )
-
-        subcommand.addOptions(options)
-
-        return subcommand
-    }
-
-    private fun subForceRemove(): SubcommandData {
-        val subcommand = SubcommandData(
-            "forceremove",
-            LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEREMOVE_DESCRIPTION.key)
-        )
-
-        val options = mutableListOf<OptionData>()
-        options.add(
-            OptionData(
-                OptionType.INTEGER,
-                "site",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEREMOVE_ARGS_SITE_DESCRIPTION.key),
-                false
-            )
-        )
-
-        options.add(
-            OptionData(
-                OptionType.USER,
-                "discord_user",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEREMOVE_ARGS_DISCORDUSER_DESCRIPTION.key),
-                false
-            )
-        )
-
-        options.add(
-            OptionData(
-                OptionType.STRING,
-                "minecraft_name",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_FORCEREMOVE_ARGS_MINECRAFTNAME_DESCRIPTION.key),
-                false
-            )
-        )
-
-        subcommand.addOptions(options)
-
-        return subcommand
-    }
-
-    // TODO: Add also as user context menu option
-    private fun subCheck(): SubcommandData {
-        val subcommand = SubcommandData(
-            "check",
-            LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_CHECK_DESCRIPTION.key)
-        )
-
-        val options = mutableListOf<OptionData>()
-        options.add(
-            OptionData(
-                OptionType.STRING,
-                "minecraft_name",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_CHECK_ARGS_MINECRAFTNAME_DESCRIPTION.key),
-                false
-            )
-        )
-
-        options.add(
-            OptionData(
-                OptionType.USER,
-                "discord_user",
-                LanguageHandler.getCleanMessage(RegisterStrings.LangStrings.SLASHCOMMANDS_WHITELIST_SUBCOMMANDS_CHECK_ARGS_DISCORDUSER_DESCRIPTION.key),
-                false
-            )
-        )
-
-        subcommand.addOptions(options)
-
-        return subcommand
     }
 }

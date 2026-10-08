@@ -12,7 +12,9 @@
 
 package yv.tils.discord.logic
 
-import net.dv8tion.jda.api.*
+import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.MemberCachePolicy
@@ -50,7 +52,7 @@ class AppLogic {
          * @throws IllegalStateException if the instance is not initialized.
          */
         fun getJDA(): JDA {
-            if (! ::jda.isInitialized) {
+            if (!::jda.isInitialized) {
                 throw IllegalStateException("JDA is not initialized")
             }
             return jda
@@ -117,6 +119,7 @@ class AppLogic {
         builder.addEventListeners(JDACommandsListener())
 
         builder.addEventListeners(JDAButtonsListener())
+        builder.addEventListeners(yv.tils.discord.actions.modals.JDARegistration())
 
         builder.addEventListeners(JDASelectListener())
 
@@ -124,7 +127,7 @@ class AppLogic {
     }
 
     private fun checkToken(): Boolean {
-        if (appToken == null || appToken.isEmpty() || appToken.isBlank() || appToken.trim().contains(" ")) {
+        if (appToken.isNullOrEmpty() || appToken.isBlank() || appToken.trim().contains(" ")) {
             Logger.error("App token is not set. Please configure it in the config file of the discord module.")
             return false
         }
@@ -171,6 +174,7 @@ class AppLogic {
     }
 
     private fun launchFeatures() {
+        yv.tils.discord.utils.emoji.RegistrationEmoji.initialize()
         try {
             DiscordEmoji().setPersistentEmojis()
             DiscordEmoji().loadPersistentEmojis()

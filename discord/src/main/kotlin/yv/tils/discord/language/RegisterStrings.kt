@@ -18,6 +18,7 @@ import yv.tils.configv2.language.LanguageProvider.Companion.registerNewString
 
 class RegisterStrings : LanguageProvider.RegisterStrings {
     override fun registerStrings() {
+        AccountText.register()
         registerNewString(
             LangStrings.SLASHCOMMANDS_WHITELIST_DESCRIPTION,
             mapOf(
