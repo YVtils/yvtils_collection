@@ -33,6 +33,8 @@ object Messages {
             "saved" to ("<green>Dragon configuration saved; active encounters cleaned up." to "<green>Drachenkonfiguration gespeichert; aktive Kämpfe bereinigt."),
             "status" to ("<gray>Fighters: <players> | HP: <health>/<maximum> | Active effects: <hazards> | Summons: <summons>" to "<gray>Kämpfer: <players> | Leben: <health>/<maximum> | Aktive Effekte: <hazards> | Monster: <summons>"),
             "status-use" to ("<gray><attack>: <uses> uses" to "<gray><attack>: <uses> Einsätze"),
+            "status-phase" to ("<gray>Stage: <phase> | Crystal empowerment: <empowerment>%" to "<gray>Phase: <phase> | Kristallverstärkung: <empowerment>%"),
+            "anchor-name" to ("<light_purple>Rift anchor" to "<light_purple>Rissanker"),
             "gui.title" to ("Remade Ender Dragon Config" to "Remade Ender Dragon Einstellungen"),
             "gui.general" to ("General settings" to "Allgemeine Einstellungen"),
             "gui.attacks" to ("Attacks and support" to "Angriffe und Unterstützung"),
@@ -45,11 +47,25 @@ object Messages {
             "mode.first" to ("First fight only" to "Nur der erste Kampf"),
         )
         strings.forEach { (key, values) ->
-            val prefix = if (key.startsWith("gui.") || key.startsWith("mode.") || key.endsWith("-name") || key == "warning") "" else "<prefix> "
-            BuildLanguage.registerString(BuildLanguage.RegisteredString(FileTypes.EN, "redragon.$key", prefix + values.first))
-            BuildLanguage.registerString(BuildLanguage.RegisteredString(FileTypes.DE, "redragon.$key", prefix + values.second))
+            val prefix =
+                if (key.startsWith("gui.") || key.startsWith("mode.") || key.endsWith("-name") || key == "warning") "" else "<prefix> "
+            BuildLanguage.registerString(
+                BuildLanguage.RegisteredString(
+                    FileTypes.EN,
+                    "redragon.$key",
+                    prefix + values.first
+                )
+            )
+            BuildLanguage.registerString(
+                BuildLanguage.RegisteredString(
+                    FileTypes.DE,
+                    "redragon.$key",
+                    prefix + values.second
+                )
+            )
         }
         val names = mapOf(
+            "marked-hunters" to "Marked hunters", "rift-anchors" to "Rift anchors", "breath-sweep" to "Breath sweep",
             "crystals" to "Crystal renewal", "island-wave" to "Island shockwave — jump",
             "effect-areas" to "Falling afflictions", "explosives" to "Timed explosives",
             "monsters" to "Monster reinforcements", "dragon-wave" to "Dragon shockwave — jump",
@@ -59,6 +75,7 @@ object Messages {
             "healing-pool" to "Healing pool", "enderman-wave" to "Enderman frontal shockwave — sidestep",
         )
         val germanNames = mapOf(
+            "marked-hunters" to "Markierte Jäger", "rift-anchors" to "Rissanker", "breath-sweep" to "Atemschwenk",
             "crystals" to "Kristallerneuerung", "island-wave" to "Insel-Schockwelle — springen",
             "effect-areas" to "Fallende Flüche", "explosives" to "Zeitbomben",
             "monsters" to "Monsterverstärkung", "dragon-wave" to "Drachen-Schockwelle — springen",
@@ -69,7 +86,13 @@ object Messages {
         )
         names.forEach { (id, name) ->
             BuildLanguage.registerString(BuildLanguage.RegisteredString(FileTypes.EN, "redragon.attack.$id", name))
-            BuildLanguage.registerString(BuildLanguage.RegisteredString(FileTypes.DE, "redragon.attack.$id", germanNames.getValue(id)))
+            BuildLanguage.registerString(
+                BuildLanguage.RegisteredString(
+                    FileTypes.DE,
+                    "redragon.attack.$id",
+                    germanNames.getValue(id)
+                )
+            )
         }
     }
 

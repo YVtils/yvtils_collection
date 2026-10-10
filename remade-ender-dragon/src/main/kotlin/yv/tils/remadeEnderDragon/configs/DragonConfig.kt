@@ -28,6 +28,7 @@ enum class Activation { EVERY, ADMIN, FIRST }
 enum class Attack {
     CRYSTALS, ISLAND_WAVE, EFFECT_AREAS, EXPLOSIVES, MONSTERS, DRAGON_WAVE,
     INFESTATION, MAGNETISM, BLUE_ENDERMEN, SUMMON_AREAS,
+    MARKED_HUNTERS, RIFT_ANCHORS, BREATH_SWEEP,
     SANCTUARY, RESCUE_UPDRAFT, HEALING_POOL;
 
     val id: String get() = name.lowercase().replace('_', '-')
@@ -42,6 +43,8 @@ data class AttackSettings(
     var cooldownSeconds: Double = 40.0,
     @ConfigDescription("Uses per encounter; -1 means unlimited; 0 disables")
     var maxUses: Int = 4,
+    @ConfigDescription("Continue on cooldown after this budget; zero maxUses still disables")
+    var sustainAfterBudget: Boolean = false,
     @ConfigDescription("Minimum dragon health fraction, 0..1")
     var minHealthFraction: Double = 0.0,
     @ConfigDescription("Maximum dragon health fraction, 0..1")
@@ -66,7 +69,7 @@ data class AttackSettings(
 
 data class DragonConfig(
     @NotGuiEditable
-    var schemaVersion: Int = 2,
+    var schemaVersion: Int = 3,
     @ConfigDescription("Master switch for custom encounters")
     @BooleanIcon(whenTrue = Material.LIME_DYE, whenFalse = Material.RED_DYE)
     var enabled: Boolean = true,
@@ -85,16 +88,16 @@ data class DragonConfig(
     var maxScalingPlayers: Int = 20,
     @ConfigDescription("Dragon health points for one fighter; two points equal one heart")
     @ConfigIcon(Material.DRAGON_HEAD)
-    var baseHealth: Double = 260.0,
-    var healthPerExtraPlayer: Double = 100.0,
+    var baseHealth: Double = 1200.0,
+    var healthPerExtraPlayer: Double = 900.0,
     @ConfigDescription("Hard cap on scaled dragon health")
-    var maxHealth: Double = 2200.0,
+    var maxHealth: Double = 18000.0,
     var damagePerExtraPlayer: Double = 0.025,
     var maxDamageMultiplier: Double = 1.4,
     @ConfigDescription("Fraction of armor/enchantment damage reduction ignored by scripted attacks, 0..1; absorption, resistance and sanctuary still work")
-    var customAttackProtectionPiercing: Double = 0.6,
-    var attackIntervalSeconds: Double = 12.0,
-    var minimumAttackIntervalSeconds: Double = 7.0,
+    var customAttackProtectionPiercing: Double = 0.45,
+    var attackIntervalSeconds: Double = 16.0,
+    var minimumAttackIntervalSeconds: Double = 11.0,
     var intervalReductionPerExtraPlayer: Double = 0.25,
     @ConfigDescription("Concurrent normal casts, 1..6; support has two reserved slots")
     var maxConcurrentAttacks: Int = 2,
@@ -154,12 +157,50 @@ data class DragonConfig(
     var updraftMaxUsesPerPlayer: Int = 2,
     var updraftSlowFallingSeconds: Double = 8.0,
     var supportEveryAttacks: Int = 3,
+    @ConfigDescription("Subtle sounds/particles; no attack names or instructions")
+    var subtleCues: Boolean = true,
+    var middlePhaseHealth: Double = 0.70,
+    var finalPhaseHealth: Double = 0.35,
+    var middlePhaseIntervalMultiplier: Double = 0.90,
+    var finalPhaseIntervalMultiplier: Double = 0.80,
+    @ConfigDescription("Quiet window after a major cast finishes")
+    var recoverySeconds: Double = 4.0,
+    var phaseRecoverySeconds: Double = 8.0,
+    @ConfigDescription("Minimum interval between scripted hits to one fighter")
+    var customHitRecoverySeconds: Double = 1.25,
+    var echoWavesEnabled: Boolean = true,
+    var echoWaveGapSeconds: Double = 2.0,
+    var echoWaveDamageMultiplier: Double = 0.65,
+    var crystalConvergenceEnabled: Boolean = true,
+    var crystalConvergenceLifetimeSeconds: Double = 35.0,
+    var crystalConvergenceRadius: Double = 3.0,
+    var crystalEmpowermentSeconds: Double = 25.0,
+    var crystalEmpowermentPerArrival: Double = 0.05,
+    var maxCrystalEmpowerment: Double = 0.20,
+    @ConfigDescription("Time from a hunter mark locking until its patch activates")
+    var markedLockWarningSeconds: Double = 2.5,
+    var markedRetargetSeconds: Double = 90.0,
+    var anchorHealth: Double = 24.0,
+    var anchorVulnerabilitySeconds: Double = 10.0,
+    var anchorVulnerabilityMultiplier: Double = 1.20,
+    var anchorCloudDurationMultiplier: Double = 1.25,
+    var breathSweepDegrees: Double = 70.0,
     @NotGuiEditable
     var attacks: Map<String, AttackSettings> = defaultAttacks(),
 ) {
     fun settings(attack: Attack): AttackSettings = attacks[attack.id] ?: defaultAttacks().getValue(attack.id)
 
     fun validate() {
+        require(finalPhaseHealth in 0.05..0.8 && middlePhaseHealth in 0.1..0.95 && finalPhaseHealth < middlePhaseHealth)
+        require(middlePhaseIntervalMultiplier in 0.5..1.0 && finalPhaseIntervalMultiplier in 0.5..1.0)
+        require(recoverySeconds in 1.0..30.0 && phaseRecoverySeconds in 2.0..60.0 && customHitRecoverySeconds in 0.5..5.0)
+        require(echoWaveGapSeconds in 1.5..6.0 && echoWaveDamageMultiplier in 0.0..1.0)
+        require(crystalConvergenceLifetimeSeconds in 10.0..120.0 && crystalConvergenceRadius in 1.0..6.0)
+        require(crystalEmpowermentSeconds in 5.0..60.0 && crystalEmpowermentPerArrival in 0.0..0.1 && maxCrystalEmpowerment in 0.0..0.3)
+        require(markedLockWarningSeconds in 2.0..10.0 && markedRetargetSeconds in 10.0..300.0)
+        require(anchorHealth in 1.0..100.0 && anchorVulnerabilitySeconds in 1.0..30.0)
+        require(anchorVulnerabilityMultiplier in 1.0..1.5 && anchorCloudDurationMultiplier in 1.0..1.5)
+        require(breathSweepDegrees in 30.0..100.0)
         require(islandRadius.isFinite() && islandRadius in 16.0..160.0) { "islandRadius must be 16..160" }
         require(centerX.isFinite() && centerZ.isFinite()) { "Center must be finite" }
         require(groundMinY in -64..319 && groundMaxY in -63..320 && groundMinY < groundMaxY) { "Invalid ground scan height bounds" }
@@ -200,18 +241,92 @@ data class DragonConfig(
 }
 
 fun defaultAttacks(): Map<String, AttackSettings> = mapOf(
-    "crystals" to AttackSettings(cooldownSeconds = 120.0, maxUses = 1, maxHealthFraction = 0.5, baseCount = 1, maxCount = 5),
-    "island-wave" to AttackSettings(cooldownSeconds = 55.0, maxUses = 4, damage = 7.0),
-    "effect-areas" to AttackSettings(cooldownSeconds = 30.0, maxUses = 6, damage = 3.0),
-    "explosives" to AttackSettings(cooldownSeconds = 35.0, maxUses = 5, damage = 7.0, durationSeconds = 1.0),
+    "crystals" to AttackSettings(
+        cooldownSeconds = 120.0,
+        maxUses = 1,
+        maxHealthFraction = 0.5,
+        baseCount = 1,
+        maxCount = 5
+    ),
+    "island-wave" to AttackSettings(cooldownSeconds = 55.0, maxUses = 4, sustainAfterBudget = true, damage = 7.0),
+    "effect-areas" to AttackSettings(cooldownSeconds = 30.0, maxUses = 6, sustainAfterBudget = true, damage = 3.0),
+    "explosives" to AttackSettings(
+        cooldownSeconds = 35.0,
+        maxUses = 5,
+        sustainAfterBudget = true,
+        damage = 7.0,
+        durationSeconds = 1.0
+    ),
     "monsters" to AttackSettings(cooldownSeconds = 45.0, maxUses = 4, baseCount = 3, maxCount = 10),
-    "dragon-wave" to AttackSettings(cooldownSeconds = 20.0, maxUses = 6, warningSeconds = 1.0, radius = 9.0, damage = 7.0),
+    "dragon-wave" to AttackSettings(
+        cooldownSeconds = 20.0,
+        maxUses = 6,
+        sustainAfterBudget = true,
+        warningSeconds = 1.5,
+        radius = 9.0,
+        damage = 7.0
+    ),
     "infestation" to AttackSettings(cooldownSeconds = 60.0, maxUses = 3, damage = 3.0, durationSeconds = 7.0),
-    "magnetism" to AttackSettings(cooldownSeconds = 55.0, maxUses = 3, maxHealthFraction = 0.75, durationSeconds = 3.0, maxCount = 8),
+    "magnetism" to AttackSettings(
+        cooldownSeconds = 55.0,
+        maxUses = 3,
+        maxHealthFraction = 0.75,
+        durationSeconds = 3.0,
+        maxCount = 8
+    ),
     "blue-endermen" to AttackSettings(cooldownSeconds = 50.0, maxUses = 5, baseCount = 1, maxCount = 6),
-    "summon-areas" to AttackSettings(cooldownSeconds = 50.0, maxUses = 4, maxHealthFraction = 0.75, warningSeconds = 4.0, damage = 12.0, radius = 5.0, durationSeconds = 1.0),
-    "sanctuary" to AttackSettings(cooldownSeconds = 50.0, maxUses = 4, durationSeconds = 12.0, baseCount = 1, maxCount = 3),
-    "rescue-updraft" to AttackSettings(cooldownSeconds = 50.0, maxUses = 4, durationSeconds = 15.0, baseCount = 1, maxCount = 3, radius = 2.0),
+    "summon-areas" to AttackSettings(
+        cooldownSeconds = 50.0,
+        maxUses = 4,
+        maxHealthFraction = 0.75,
+        warningSeconds = 4.0,
+        damage = 12.0,
+        radius = 5.0,
+        durationSeconds = 1.0
+    ),
+    "marked-hunters" to AttackSettings(
+        cooldownSeconds = 65.0,
+        maxUses = -1,
+        warningSeconds = 4.0,
+        durationSeconds = 6.0,
+        damage = 3.0,
+        radius = 3.0,
+        baseCount = 1,
+        extraCountPerPlayer = 0.08,
+        maxCount = 2
+    ),
+    "rift-anchors" to AttackSettings(
+        cooldownSeconds = 120.0,
+        maxUses = 6,
+        warningSeconds = 3.0,
+        durationSeconds = 25.0,
+        baseCount = 1,
+        extraCountPerPlayer = 0.05,
+        maxCount = 2
+    ),
+    "breath-sweep" to AttackSettings(
+        cooldownSeconds = 60.0,
+        maxUses = -1,
+        warningSeconds = 4.0,
+        durationSeconds = 4.0,
+        damage = 4.0,
+        radius = 24.0
+    ),
+    "sanctuary" to AttackSettings(
+        cooldownSeconds = 50.0,
+        maxUses = -1,
+        durationSeconds = 12.0,
+        baseCount = 1,
+        maxCount = 3
+    ),
+    "rescue-updraft" to AttackSettings(
+        cooldownSeconds = 50.0,
+        maxUses = -1,
+        durationSeconds = 15.0,
+        baseCount = 1,
+        maxCount = 3,
+        radius = 2.0
+    ),
     "healing-pool" to AttackSettings(cooldownSeconds = 30.0, maxUses = 0, baseCount = 1, maxCount = 1),
 )
 
@@ -228,18 +343,22 @@ class ConfigFile {
             val factory = ObjectMapper.factoryBuilder().addDiscoverer(dataClassFieldDiscoverer())
                 .defaultNamingScheme(NamingSchemes.PASSTHROUGH).build()
             val serializers = TypeSerializerCollection.defaults().childBuilder()
-                .register({ type -> GenericTypeReflector.erase(type).kotlin.isData }, factory.asTypeSerializer()).build()
+                .register({ type -> GenericTypeReflector.erase(type).kotlin.isData }, factory.asTypeSerializer())
+                .build()
             val node = BasicConfigurationNode.root(ConfigurationOptions.defaults().serializers(serializers))
             if (file.exists()) node.from(ConfigurateFileUtils.load(PATH, ConfigFormat.YAML).node)
             val next = if (file.exists()) factory.get(DragonConfig::class.java).load(node) else DragonConfig()
             if (file.exists() && node.node("schemaVersion").getInt(1) < 2) migrateCombatDefaults(next)
+            if (file.exists() && node.node("schemaVersion").getInt(1) < 3) migrateEncounterDefaults(next, node)
             applyState(next)
         }
 
         /** Upgrade untouched beta defaults while retaining administrator custom values. */
         private fun migrateCombatDefaults(next: DragonConfig) {
             val updated = next.attacks.mapValues { (_, s) -> s.copy() }.toMutableMap()
-            fun update(id: String, change: (AttackSettings) -> Unit) { updated[id]?.let(change) }
+            fun update(id: String, change: (AttackSettings) -> Unit) {
+                updated[id]?.let(change)
+            }
             update("island-wave") { if (it.damage == 5.0) it.damage = 7.0 }
             update("effect-areas") { if (it.damage == 0.0) it.damage = 3.0 }
             update("monsters") { if (it.baseCount == 2) it.baseCount = 3 }
@@ -253,6 +372,33 @@ class ConfigFile {
             next.attacks = updated
             next.schemaVersion = 2
             Logger.info("[Remade Ender Dragon] Upgraded untouched combat defaults to schema 2; custom values retained.")
+        }
+
+        private fun migrateEncounterDefaults(
+            next: DragonConfig,
+            node: org.spongepowered.configurate.ConfigurationNode
+        ) {
+            if (next.baseHealth == 260.0 && next.maxHealth >= 1200.0) next.baseHealth = 1200.0
+            if (next.healthPerExtraPlayer == 100.0) next.healthPerExtraPlayer = 900.0
+            if (next.maxHealth == 2200.0) next.maxHealth = maxOf(next.baseHealth, 18000.0)
+            if (next.customAttackProtectionPiercing == 0.6) next.customAttackProtectionPiercing = 0.45
+            if (next.attackIntervalSeconds == 12.0) next.attackIntervalSeconds = 16.0
+            if (next.minimumAttackIntervalSeconds == 7.0) next.minimumAttackIntervalSeconds = 11.0
+            val updated = next.attacks.mapValues { it.value.copy() }.toMutableMap()
+            defaultAttacks().forEach { (id, defaults) ->
+                val existing = updated[id]
+                if (existing == null) updated[id] = defaults
+                else {
+                    if (defaults.sustainAfterBudget && node.node("attacks", id, "sustainAfterBudget")
+                            .virtual()
+                    ) existing.sustainAfterBudget = true
+                    if (id in listOf("sanctuary", "rescue-updraft") && existing.maxUses == 4) existing.maxUses = -1
+                    if (id == "dragon-wave" && existing.warningSeconds == 1.0) existing.warningSeconds = 1.5
+                }
+            }
+            next.attacks = updated
+            next.schemaVersion = 3
+            Logger.info("[Remade Ender Dragon] Upgraded encounter defaults to schema 3; custom numeric values retained.")
         }
 
         /** Save before publishing a validated state; GUI edits use a detached draft. */

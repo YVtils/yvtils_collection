@@ -73,14 +73,15 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
     }
 
     private fun allowed(world: World): Boolean = world.environment == World.Environment.THE_END &&
-        (ConfigFile.state.worlds.isEmpty() || world.name in ConfigFile.state.worlds)
+            (ConfigFile.state.worlds.isEmpty() || world.name in ConfigFile.state.worlds)
 
     private fun discover() {
         val config = ConfigFile.state
         if (!config.enabled || config.activation == Activation.ADMIN) return
         Bukkit.getWorlds().filter(::allowed).forEach { world ->
             if (config.activation == Activation.FIRST && (world.uid.toString() in history.completedWorlds || world.enderDragonBattle?.hasBeenPreviouslyKilled() == true)) return@forEach
-            world.getEntitiesByClass(EnderDragon::class.java).filter { it.isValid && !it.isDead && it.phase != EnderDragon.Phase.DYING }.forEach { dragon ->
+            world.getEntitiesByClass(EnderDragon::class.java)
+                .filter { it.isValid && !it.isDead && it.phase != EnderDragon.Phase.DYING }.forEach { dragon ->
                 if (dragon.uniqueId !in fights && dragon.uniqueId !in stopped) start(dragon)
             }
         }
@@ -91,10 +92,12 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
     fun startHere(world: World, preview: Boolean = false): DragonFight? {
         if (!ConfigFile.state.enabled || !allowed(world)) return null
         here(world)?.let { existing ->
-            if (!preview && existing.preview) { existing.close(); fights.remove(existing.dragon.uniqueId) }
-            else return existing
+            if (!preview && existing.preview) {
+                existing.close(); fights.remove(existing.dragon.uniqueId)
+            } else return existing
         }
-        val dragon = world.getEntitiesByClass(EnderDragon::class.java).firstOrNull { !it.isDead && it.isValid && it.phase != EnderDragon.Phase.DYING } ?: return null
+        val dragon = world.getEntitiesByClass(EnderDragon::class.java)
+            .firstOrNull { !it.isDead && it.isValid && it.phase != EnderDragon.Phase.DYING } ?: return null
         stopped.remove(dragon.uniqueId)
         return start(dragon, preview)
     }
@@ -216,7 +219,10 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
         ).sumOf { if (event.isApplicable(it)) event.getDamage(it) else 0.0 }
         val oldMagic = if (event.isApplicable(magic)) event.getDamage(magic) else 0.0
         val oldBeforeMagic = oldBeforeResistance + oldResistance
-        if (event.isApplicable(armor)) event.setDamage(armor, FightMath.piercedReduction(event.getDamage(armor), piercing))
+        if (event.isApplicable(armor)) event.setDamage(
+            armor,
+            FightMath.piercedReduction(event.getDamage(armor), piercing)
+        )
         if (event.isApplicable(resistance) && oldBeforeResistance > 0.0) {
             val beforeResistance = event.damage + listOf(
                 EntityDamageEvent.DamageModifier.HARD_HAT, EntityDamageEvent.DamageModifier.BLOCKING, armor,
@@ -247,6 +253,25 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
             }
             if (attacker == null || attacker !in fight.players()) event.isCancelled = true
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    fun dragonDamage(event: EntityDamageEvent) {
+        val fight = here(event.entity.world) ?: return
+        if (event.entity.uniqueId == fight.dragon.uniqueId || (event.entity as? ComplexEntityPart)?.parent?.uniqueId == fight.dragon.uniqueId)
+            event.damage *= fight.dragonDamageMultiplier()
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    fun dragonHeal(event: EntityRegainHealthEvent) {
+        val fight = here(event.entity.world) ?: return
+        if (event.entity.uniqueId == fight.dragon.uniqueId) event.amount *= fight.healthConversion()
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun focusEnvironmentDamage(event: EntityDamageEvent) {
+        val fight = owner(event.entity) ?: return
+        if (fight.isFocus(event.entity) && event !is EntityDamageByEntityEvent) event.isCancelled = true
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -322,7 +347,9 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
     fun cloud(event: AreaEffectCloudApplyEvent) {
         val dragon = event.entity.source as? EnderDragon ?: return
         val fight = fights[dragon.uniqueId] ?: return
-        if (fight.config.replaceVanillaBreath) { event.isCancelled = true; event.entity.remove() }
+        if (fight.config.replaceVanillaBreath) {
+            event.isCancelled = true; event.entity.remove()
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -337,10 +364,14 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    fun slimeSplit(event: SlimeSplitEvent) { if (owner(event.entity)?.isFocus(event.entity) == true) event.isCancelled = true }
+    fun slimeSplit(event: SlimeSplitEvent) {
+        if (owner(event.entity)?.isFocus(event.entity) == true) event.isCancelled = true
+    }
 
     @EventHandler
-    fun chunkLoad(event: ChunkLoadEvent) { event.chunk.entities.forEach(::removeOrphan) }
+    fun chunkLoad(event: ChunkLoadEvent) {
+        event.chunk.entities.forEach(::removeOrphan)
+    }
 
     private fun removeOrphan(entity: Entity) {
         if (entity is EnderDragon && entity.uniqueId !in fights) {
@@ -363,8 +394,12 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
     }
 
     @EventHandler
-    fun quit(event: PlayerQuitEvent) { landings.remove(event.player.uniqueId) }
+    fun quit(event: PlayerQuitEvent) {
+        landings.remove(event.player.uniqueId)
+    }
 
     @EventHandler
-    fun changedWorld(event: PlayerChangedWorldEvent) { landings.remove(event.player.uniqueId) }
+    fun changedWorld(event: PlayerChangedWorldEvent) {
+        landings.remove(event.player.uniqueId)
+    }
 }

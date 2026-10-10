@@ -72,14 +72,17 @@ Let `n = clamp(fighters, 1, maxScalingPlayers)`:
 - Attack interval: `max(minimumAttackIntervalSeconds, attackIntervalSeconds - (n - 1) * intervalReductionPerExtraPlayer)`.
 - Infestation coverage: `min(0.6, infestationCoverage + (n - 1) * infestationCoveragePerExtraPlayer)`.
 
-HP is updated once per second, preserving the dragon's **health percentage**.
+Effective HP is updated once per second, preserving the dragon's **health percentage**.
+The real attribute stays at or below 1,024 to respect server attribute caps;
+incoming dragon damage and healing are converted to effective HP units through
+normal events. Status reports effective HP; the boss bar shows health percentage.
 Counts are captured at attack launch; damage checks the current party.
 Scaling custom damage does not multiply vanilla dragon or monster melee damage.
 Damage numbers are health points **before armor**; two points equal one heart.
 
 Scripted attacks partially pierce armor and protection enchantments. With
-`customAttackProtectionPiercing: 0.6` (default), 60% of each reduction is
-ignored; 40% remains. This makes missed mechanics noticeable in Protection IV
+`customAttackProtectionPiercing: 0.45` (default), 45% of each reduction is
+ignored; 55% remains. This makes missed mechanics noticeable in Protection IV
 netherite without raising unarmored damage. Set `0` for vanilla mitigation,
 or increase toward `1` for full armor/enchantment piercing. Resistance,
 absorption hearts, sanctuary, and event cancellation remain effective. Vanilla
@@ -87,12 +90,13 @@ dragon/monster melee and magnetism fall damage are not pierced. Damage still
 uses normal events, armor durability, hurt feedback, and vanilla invulnerability
 timing rather than direct health subtraction.
 
-Default solo HP is 260, plus 100 per extra fighter, capped at 2,200 and 20
+Default solo effective HP is 1,200, plus 900 per extra fighter, capped at 18,000 and 20
 scaling fighters. Damage grows by 2.5% per extra player, capped at 1.4×.
-New random attacks start every 12 seconds solo, decreasing toward a seven-second
+New attacks start every 16 seconds solo, decreasing toward an eleven-second
 floor. There is a 30-second initial grace period to map the loaded island.
-The scheduler respects cooldowns, phase gates, and use budgets. Once budgets
-are exhausted, vanilla combat continues rather than endlessly repeating hazards.
+The director respects cooldowns, stages, compatibility and use budgets. Basic
+waves/effect areas/explosives continue on cooldown after their initial budgets.
+Major attacks remain finite. Zero budgets and disabled attacks remain disabled.
 
 Vanilla flight, perching, crystal healing, and dragon damage remain. Dragon-source
 vanilla breath clouds are suppressed when `replaceVanillaBreath` is true;
@@ -100,7 +104,7 @@ falling effect areas supply the replacement custom breath mechanic.
 
 ## Attacks and counterplay
 
-Attack announcements and combat hints are **off by default**. Enable
+Attack announcements, instructional entity names and combat hints are **off by default**. Enable
 `announceAttacks` for localized action-bar/chat announcements. Visual warnings
 remain active independently: both dragon waves use bright block displays,
 explosives use visible primed TNT, and effect areas launch actual dragon
@@ -109,16 +113,19 @@ particles is recommended for readable healing pools and effect areas.
 
 | Attack ID | Default budget / cooldown | Behavior and counterplay |
 |---|---|---|
-| `crystals` | 1 / 120 s | Below 50% HP, spawn glowing crystals (scaled, max 5) mounted on one-hit silverfish. Silverfish pathfind toward the dragon's ground projection. An accepted hit to either entity destroys both; player hits grant crystal rewards. |
+| `crystals` | 1 / 120 s | Below 50% HP, glowing crystals ride one-hit silverfish toward a fixed convergence point shown by beams. Each arrival grants 5% temporary custom-damage empowerment, capped at 20%. Destroy either half for rewards; carriers expire after 35 seconds. |
 | `island-wave` | 4 / 55 s | Orange block-display warning followed by an expanding magma-block ring across the island. Jump over the front; each fighter can be hit once for seven base damage. Displays are visual only, not solid placed blocks. |
 | `effect-areas` | 6 / 30 s | After the warning, native dragon fireballs fly toward snapshots of fighter positions and form eight-second dragon-breath clouds where they hit. Clouds apply a random effect and three base damage per second. Move away before impact. |
 | `explosives` | 5 / 35 s | Visible glowing primed TNT appears at fighter-position snapshots. After three seconds it detonates for seven base damage in the marked radius. Vanilla TNT explosion is canceled; scripted damage/visual explosion causes no block damage or fire. |
 | `monsters` | 4 / 45 s | Scaled roster cycles through aggressive Endermen, blue Rift Endermen, and Shulkers (three base summons). Targets are refreshed toward fighters. Shared population/lifetime caps apply; blue kills grant pools, all player kills grant rally. |
-| `dragon-wave` | 6 / 20 s | A nine-block magma-display wave radiates from the dragon's horizontal cast position after a one-second warning, travelling at 18 blocks/second and dealing seven base damage. Jump over it. |
+| `dragon-wave` | 6, then sustained / 20 s | A nine-block magma-display wave radiates from the dragon's horizontal cast position after a 1.5-second warning, travelling at 18 blocks/second and dealing seven base damage. Jump over it. |
 | `infestation` | 3 / 60 s | Large contiguous dry-grass patches appear under fighter-position snapshots and across the mapped island for seven seconds. Entry deals immediate damage and Slowness III; remaining in a patch causes three base damage every 0.75 seconds. Jump or leave the patches. |
 | `magnetism` | 3 / 55 s | Below 75% HP during circling flight, pull **all current fighters**, including those joining the island during the cast. No ground markers. Lift roughly six blocks above the local surface for three seconds; next landing damage is capped at three points and cannot itself be fatal. Water/web catches still work. |
 | `blue-endermen` | 5 / 50 s | Blue-glowing Rift Endermen. They telegraph an expanding shockwave in a 90° cone (−45° to +45° from their facing at cast). Sidestep, move behind them, or jump. Player kills create healing pools and team rally buffs. |
 | `summon-areas` | 4 / 50 s | Below 75% HP: magenta circles warn for four seconds before a high-damage rift strike (12 base points). Leave them or kill the glowing focus to cancel the entire cast. |
+| `marked-hunters` | Unlimited / 65 s | Middle stage onward: one or two fighters carry a purple marker for four seconds. It locks on ground, warns for 2.5 seconds, then forms a six-second patch dealing three base points per second. Bait away from teammates; selection has a 90-second per-fighter cooldown. |
+| `rift-anchors` | 6 / 120 s | Middle stage onward: one or two glowing anchors last 25 seconds, increasing newly launched cloud duration by 25%. Player kills remove an anchor and grant ten seconds of 20% increased dragon damage. Expiry grants no reward. |
+| `breath-sweep` | Unlimited / 60 s | Middle stage onward: a fixed 70° ground sector within 24 blocks is warned for four seconds, then swept over four seconds. Move out of the sector or behind the cast. The central four blocks are safe from this custom cast. |
 
 Infestation never removes or replaces existing terrain. It only places short
 dry grass into air above End stone, with physics suppressed while owned. The
@@ -168,7 +175,7 @@ fall damage naturally. Debug can trigger magnetism outside its flight gate.
    for six seconds to fighters within 16 blocks.
 
 Sanctuary and updraft casts alternate after every third successful offensive
-cast, each with its own cooldown and four-use budget. Kill rewards mix the
+cast, each with its own cooldown and unlimited default budget. Kill rewards mix the
 remaining support mechanics into combat naturally. Support casts may use two
 reserved effect slots beyond the normal attack cap. Pools have a separate cap.
 
@@ -183,10 +190,10 @@ distances are blocks. Lists use Minecraft registry IDs (e.g. `poison` or
 | `enabled`, `activation`, `worlds` | `true`, `EVERY`, `[]` | Master switch, start policy, exact End world names; empty list allows all End worlds. |
 | `centerX`, `centerZ`, `islandRadius` | `0`, `0`, `96` | Fighter boundary, wave coverage, terrain scan; radius accepts 16–160. |
 | `groundMinY`, `groundMaxY` | `40`, `90` | Surface scan height bounds; widen for customized islands. |
-| `maxScalingPlayers`, `baseHealth`, `healthPerExtraPlayer`, `maxHealth` | `20`, `260`, `100`, `2200` | Party/HP scaling and hard cap. |
+| `maxScalingPlayers`, `baseHealth`, `healthPerExtraPlayer`, `maxHealth` | `20`, `1200`, `900`, `18000` | Effective party/HP scaling and hard cap. |
 | `damagePerExtraPlayer`, `maxDamageMultiplier` | `0.025`, `1.4` | Gentle custom damage scaling. |
-| `customAttackProtectionPiercing` | `0.6` | Fraction of armor/enchantment reduction ignored by scripted attacks; 0 = vanilla, 1 = fully pierced. Does not bypass Resistance, absorption or sanctuary. |
-| `attackIntervalSeconds`, `minimumAttackIntervalSeconds`, `intervalReductionPerExtraPlayer` | `12`, `7`, `0.25` | Global launch pacing. |
+| `customAttackProtectionPiercing` | `0.45` | Fraction of armor/enchantment reduction ignored by scripted attacks; 0 = vanilla, 1 = fully pierced. Does not bypass Resistance, absorption or sanctuary. |
+| `attackIntervalSeconds`, `minimumAttackIntervalSeconds`, `intervalReductionPerExtraPlayer` | `16`, `11`, `0.25` | Global launch pacing. |
 | `maxConcurrentAttacks` | `2` | Active normal casts; support/debug can use two additional reserved slots. |
 | `maxSummons`, `summonLifetimeSeconds` | `24`, `50` | Shared custom-monster population cap and despawn timer. |
 | `replaceVanillaBreath` | `true` | Suppress dragon-source vanilla breath clouds. |
@@ -209,6 +216,16 @@ distances are blocks. Lists use Minecraft registry IDs (e.g. `poison` or
 | `sanctuaryDamageMultiplier` | `0.25` | Sanctuary incoming damage fraction, excluding void damage. |
 | `updraftMaxUsesPerPlayer`, `updraftSlowFallingSeconds` | `2`, `8` | Per-fighter launch limit and protection duration. |
 | `supportEveryAttacks` | `3` | Successful offensive casts between alternating support casts. |
+| `subtleCues` | `true` | Quiet sounds/particles without attack names. |
+| `middlePhaseHealth`, `finalPhaseHealth` | `0.70`, `0.35` | Forward-only stage thresholds. |
+| `middlePhaseIntervalMultiplier`, `finalPhaseIntervalMultiplier` | `0.90`, `0.80` | Stage pacing, respecting the global interval floor. |
+| `recoverySeconds`, `phaseRecoverySeconds`, `customHitRecoverySeconds` | `4`, `8`, `1.25` | Post-cast/transition launch recovery and scripted-hit spacing. |
+| `echoWavesEnabled`, `echoWaveGapSeconds`, `echoWaveDamageMultiplier` | `true`, `2`, `0.65` | Every second finale wave gains a weaker echo. |
+| `crystalConvergenceEnabled`, `crystalConvergenceLifetimeSeconds`, `crystalConvergenceRadius` | `true`, `35`, `3` | Fixed crystal destination, carrier expiry, arrival distance. |
+| `crystalEmpowermentSeconds`, `crystalEmpowermentPerArrival`, `maxCrystalEmpowerment` | `25`, `0.05`, `0.20` | Temporary arrival bonus to custom damage. |
+| `markedLockWarningSeconds`, `markedRetargetSeconds` | `2.5`, `90` | Locked-position escape window and individual targeting cooldown. |
+| `anchorHealth`, `anchorVulnerabilitySeconds`, `anchorVulnerabilityMultiplier`, `anchorCloudDurationMultiplier` | `24`, `10`, `1.20`, `1.25` | Anchor durability, kill reward and cloud empowerment. |
+| `breathSweepDegrees` | `70` | Total warned sector angle. |
 
 ## Per-attack configuration
 
@@ -240,6 +257,7 @@ attacks:
 | `enabled` | Normal scheduler switch; debug bypasses it. |
 | `cooldownSeconds` | Minimum time between normal launches of this attack. |
 | `maxUses` | Encounter budget; `0` disables normal launches, `-1` is unlimited. |
+| `sustainAfterBudget` | Continue on cooldown after budget exhaustion. False except basic waves/effect areas/explosives. Does not override enabled, zero budget, health gates or cooldowns. |
 | `minHealthFraction`, `maxHealthFraction` | Inclusive HP window for normal launches (0–1). Crystals additionally require strictly below half HP. |
 | `warningSeconds` | Delay before hostile effect activation. Support zones are positive and activate immediately. |
 | `durationSeconds` | Active effect-area, infestation, magnetism, sanctuary, or updraft lifetime. Instant casts ignore this. Wave lifetime is determined by radius/speed; monsters use global summon lifetime. |
@@ -345,7 +363,8 @@ Automated checks:
 ```
 
 Pure-rule tests cover party/count caps, nonfatal-but-damaging magnet landings,
-and ±45° cone boundaries. Compilation validates the Paper and CommandAPI calls.
+±45° cone boundaries, breath angle wrapping, forward-only stages, disabled and
+sustained budgets, attack compatibility and follow-up selection. Compilation validates the Paper and CommandAPI calls.
 The module uses the repository's default Paper target (26.1.2).
 
 In-game tuning still requires a Paper server and players:
@@ -369,6 +388,61 @@ In-game tuning still requires a Paper server and players:
 8. Verify sanctuary mitigation and per-player updraft use limits.
 9. Stop/reload during overlapping attacks; inspect entities, grass and HP.
 10. Test `ADMIN`, `EVERY`, and `FIRST`, including restart and dragon respawn.
+11. Cross 70%/35%, heal the dragon and change the party: stages must not reverse.
+    Verify quiet transitions and recovery windows, including Rift Enderman waves.
+12. Preview `marked-hunters`: bait and escape; try death/world departure, island
+    edges, sanctuary/anchor/convergence proximity. No delayed lock or stale marker.
+13. Preview `rift-anchors`, then `effect-areas`; compare cloud duration. Kill an
+    anchor and inspect effective dragon damage for ten seconds; let another expire.
+14. Preview `breath-sweep` near fighters; compare displays with hit geometry on
+    platforms and across ±180° facing. Preview both wave rings and jump twice.
+15. Exhaust basics above 70% HP: offense should continue on cooldown. Inspect
+    compatibility exclusions and healing-pool independence during automatic casts.
+16. Let carriers arrive, destroy others, and let one expire. Check fixed beams,
+    capped empowerment expiry and cleanup after stop/reload/restart.
+17. Play with 5/10/15 mixed-gear fighters. Record duration/deaths and damage
+    windows. Verify bed/melee/projectile damage and crystal healing against
+    effective HP. Tune HP before damage to approach the 30-minute goal.
+
+## Longer encounter design (schema 3)
+
+The goal is roughly 30 minutes for 5–15 mixed diamond/netherite fighters, with
+first-try completion and few deaths. Five fighters have 4,800 effective HP;
+fifteen have 13,800. Duration needs multiplayer tuning: there is no hard enrage,
+forced wipe or timed invulnerability to enforce it.
+
+Stages advance at 70%/35% and never reverse. Opening introduces basic waves,
+projectiles, explosives and monsters. Middle unlocks advanced attacks. Finale
+adds an echo to every second dragon/island wave, two seconds behind the first
+with a separate warning and 65% damage. Debug wave previews include the echo.
+Stage transitions pause new offense for eight seconds; completed hostile effects
+give four seconds of recovery. Existing effects finish normally.
+
+The director favors least-recently-used attacks and avoids repeats. After effect
+areas expire and recovery ends, it favors an island wave. Waves, forced movement,
+infestation and breath sweeps cannot overlap other hostile effects. Anchors may
+coexist with offense, but magnetism waits until anchors/crystal carriers are gone.
+Rift Enderman waves honor the same movement exclusions; summons still melee.
+Local waves require nearby fighters; breath sweeps require loaded ground and a
+nearby target. Healing pools/support zones do not consume offensive slots.
+Scripted hits have a 1.25-second per-fighter gap to limit burst damage; vanilla
+combat is unaffected. Essential warnings remain; subtle cues add no names or
+instructions. Instructional entity names are hidden unless announcements are enabled.
+
+Marks cancel on death/departure, invalid ground, near the edge or near sanctuary,
+anchors/convergence. Locked positions never chase players. Anchor empowerment
+and vulnerability do not stack per anchor; cloud duration is captured at launch.
+Crystal convergence grants capped temporary empowerment rather than repeated
+healing. Disable convergence for projection-following carriers, still with expiry.
+
+Schema 3 upgrades numeric values still equal to old defaults for HP, piercing,
+pacing and local-wave warning. It adds new attacks, enables sustained basics and
+upgrades untouched four-use support budgets to unlimited. Enabled flags and zero
+budgets remain intact. Intentional values equal to old defaults are upgraded too;
+restore them afterward if desired. Other custom numbers remain. Set
+`sustainAfterBudget: false` after migration for finite basics. Live stages/marks/
+empowerment/vulnerability reset on stop/reload/restart; owned objects use existing
+cleanup and recovery mechanisms.
 
 The shipped values are conservative starting values, not a claim of completed
 multiplayer balance testing. Tune cooldowns/budgets/coverage before damage:

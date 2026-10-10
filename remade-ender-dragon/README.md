@@ -2,6 +2,10 @@
 
 A single optional YVtils module that adds player-scaled End encounters, readable
 attack warnings, finite attack budgets, and team support objectives.
+Three forward-only stages, a compatibility-aware attack director, sustained basic
+casts, crystal convergence, echo waves, hunter marks, optional rift anchors and a
+directional breath sweep support longer group encounters. Default feedback uses
+subtle sounds and visuals without naming attacks to fighters.
 
 - Module/artifact ID: `remade-ender-dragon`
 - Display name: **Remade Ender Dragon**
