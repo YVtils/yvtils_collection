@@ -14,13 +14,10 @@ import io.papermc.paperweight.userdev.PaperweightUserDependenciesExtension
 import org.cyclonedx.Version
 import org.cyclonedx.gradle.CyclonedxDirectTask
 import org.cyclonedx.model.Component
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.WriteProperties
-import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.HttpURLConnection
-import java.util.Base64
+import java.util.*
 
 plugins {
     val kotlinMonorepoVersion = "2.4.10"
@@ -214,7 +211,7 @@ subprojects {
         plugin("xyz.jpenilla.run-paper")
     }
 
-    val commandAPIVersion = "12.0.0"
+    val commandAPIVersion = "12.1.0"
 
     // Modules going through the shared runtime tier get CommandAPI/coroutines/
     // serialization as `compileOnly` (available at compile time, but NOT shaded
@@ -231,7 +228,11 @@ subprojects {
         the<PaperweightUserDependenciesExtension>().paperDevBundle("$paperApiVersion.build.+")
 
         // CommandAPI dependencies
-        add(runtimeDependencyScope, "dev.jorel:commandapi-paper-shade:$commandAPIVersion")
+        add(runtimeDependencyScope, "dev.jorel:commandapi-paper-shade:$commandAPIVersion") {
+            // This JAR already includes CommandAPI's internal modules. Its 12.1.0
+            // Gradle shadow variant also declares them as unpublished dependencies.
+            isTransitive = false
+        }
         add(runtimeDependencyScope, "dev.jorel:commandapi-kotlin-paper:$commandAPIVersion")
 
         // Other
@@ -349,7 +350,8 @@ subprojects {
                 }
 
                 val coordinate = "${publication.groupId}:${publication.artifactId}:${publication.version}"
-                val directory = "${publication.groupId.replace('.', '/')}/${publication.artifactId}/${publication.version}"
+                val directory =
+                    "${publication.groupId.replace('.', '/')}/${publication.artifactId}/${publication.version}"
                 val prefix = "${publication.artifactId}-${publication.version}"
                 val filenames = publication.artifacts.map { artifact ->
                     val classifier = artifact.classifier?.takeIf(String::isNotEmpty)?.let { "-$it" }.orEmpty()
@@ -390,9 +392,11 @@ subprojects {
                         logger.lifecycle("Skipping $coordinate: release already exists in ${repository.name}.")
                         false
                     }
+
                     else -> {
-                        val message = "Incomplete release $coordinate in ${repository.name} (found ${existing.joinToString()}). " +
-                            "Repair the repository release or assign a new version in gradle/module-versions.properties."
+                        val message =
+                            "Incomplete release $coordinate in ${repository.name} (found ${existing.joinToString()}). " +
+                                    "Repair the repository release or assign a new version in gradle/module-versions.properties."
                         logger.error(message)
                         throw GradleException(message)
                     }
