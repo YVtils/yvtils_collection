@@ -119,6 +119,8 @@ subprojects {
  * release. Published release versions are immutable.
  */
 val publishableModules = setOf(
+    // Fusion uses the same shared runtime tier as the other dynamically resolved features.
+    "fusion",
     "discord",
     "multiMine",
     "essentials",

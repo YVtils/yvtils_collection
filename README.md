@@ -150,8 +150,20 @@ Let players sit down everywhere.
 - Tempmute Command `/tempmute <player> <time> <unit> [reason]`
 - Unban Command `/unban <player>`
 - Unmute Command `/unmute <player>`
+- Warn Command `/warn <player> [reason]`
+- Moderation GUI `/modgui [player-name-or-UUID]`
+    - Paginated online/offline player selection and name/UUID search
+    - Ban, tempban, kick, mute, tempmute, warn, unban and unmute using existing action permissions
+    - Anvil reason/duration input, confirmation, current mute/ban status and warning history
+    - Requires `yvtils.moderation.command.modgui` plus the permission for each action
+
+See [essentials/moderation settings and verification](docs/moderation-and-essentials.md).
 
 ## Fusion Module / Custom Crafting
+
+The collection now includes the dynamic Fusion module. See
+[Fusion setup, recipe schema and verification](fusion/README.md) and the
+[future recipe ideas](fusion/RECIPE_IDEAS.md).
 
 `/fusion [manage]`
 
@@ -214,6 +226,7 @@ Let players sit down everywhere.
 
 - Anti Too Expensive
     - Bypasses the "Too Expensive" Enchantment Limit
+    - `essentials` setting `disableTooExpensive: true` (default); normal XP costs and enchantment-level limits still apply.
 
   ![Anti Too Expensive](.github/assets/AntiTooExpensive.png)
 
@@ -244,6 +257,13 @@ Let players sit down everywhere.
 - Seed Command `/seed show`
 
 # Other
+
+## Chat colors
+
+Set `allowChatColors: false` in `plugins/yvtils/essentials/config.yml` and restart
+to use Paper's normal chat rendering without parsing player MiniMessage tags.
+The default is `true`. Color-enabled chat retains Paper's audiences and event
+cancellation, including moderation mutes.
 
 ## Smart Language System
 

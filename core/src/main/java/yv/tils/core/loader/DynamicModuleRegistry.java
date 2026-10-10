@@ -137,6 +137,9 @@ public final class DynamicModuleRegistry {
 
     private static Map<String, ModuleArtifact> buildKnownModules() {
         LinkedHashMap<String, ModuleArtifact> modules = new LinkedHashMap<>();
+        modules.put("fusion", new ModuleArtifact(
+                "fusion", versionOf("fusion"), "yv.tils.fusion.FusionYVtils",
+                "Custom crafting with recipe browsing, bulk crafting and an in-game recipe editor."));
         modules.put("discord", new ModuleArtifact(
                 "discord", versionOf("discord"), "yv.tils.discord.DiscordYVtils",
                 "Discord integration: chat bridging, webhooks and linked accounts."));

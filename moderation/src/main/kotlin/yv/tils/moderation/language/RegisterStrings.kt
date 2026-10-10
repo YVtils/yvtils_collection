@@ -18,6 +18,54 @@ import yv.tils.utils.colors.Colors
 
 class RegisterStrings {
     fun registerStrings() {
+        val guiStrings = mapOf(
+            "players" to ("Player moderation" to "Spielermoderation"),
+            "details" to ("Player details" to "Spielerdetails"),
+            "online" to ("Online" to "Online"),
+            "offline" to ("Offline" to "Offline"),
+            "empty" to ("No entries" to "Keine Einträge"),
+            "search" to ("Find player by name or UUID" to "Spieler per Name oder UUID suchen"),
+            "refresh" to ("Refresh" to "Aktualisieren"),
+            "next" to ("Next page" to "Nächste Seite"),
+            "previous" to ("Previous page" to "Vorherige Seite"),
+            "back" to ("Back" to "Zurück"),
+            "cancel" to ("Cancel" to "Abbrechen"),
+            "continue" to ("Continue" to "Weiter"),
+            "confirm" to ("Confirm action" to "Aktion bestätigen"),
+            "review" to ("Review moderation action" to "Moderationsaktion prüfen"),
+            "reason" to ("Enter reason" to "Grund eingeben"),
+            "duration" to ("Duration: number and s/m/h/d/w" to "Dauer: Zahl und s/m/h/d/w"),
+            "history" to ("Warning history" to "Verwarnungsverlauf"),
+            "warning" to ("Warning" to "Verwarnung"),
+            "ban" to ("Ban" to "Bannen"),
+            "tempban" to ("Temporary ban" to "Temporär bannen"),
+            "kick" to ("Kick" to "Kicken"),
+            "mute" to ("Mute" to "Stummschalten"),
+            "tempmute" to ("Temporary mute" to "Temporär stummschalten"),
+            "warn" to ("Warn" to "Verwarnen"),
+            "unban" to ("Unban" to "Entbannen"),
+            "unmute" to ("Unmute" to "Stummschaltung aufheben"),
+            "state" to ("Banned: <banned> | Muted: <muted> | Warnings: <warnings>" to
+                    "Gebannt: <banned> | Stumm: <muted> | Verwarnungen: <warnings>"),
+            "muteReason" to ("Mute reason: <reason>" to "Stummschaltungsgrund: <reason>"),
+            "expires" to ("Expires: <time>" to "Läuft ab: <time>"),
+            "issued" to ("Issuer: <issuer> | Timestamp: <time>" to "Aussteller: <issuer> | Zeitstempel: <time>"),
+            "denied" to ("<prefix> <red>You do not have permission for this action." to
+                    "<prefix> <red>Du hast keine Berechtigung für diese Aktion."),
+            "unknown" to ("<prefix> <red>Player not found. Use a known player name or UUID." to
+                    "<prefix> <red>Spieler nicht gefunden. Nutze einen bekannten Namen oder eine UUID."),
+            "invalidDuration" to ("<prefix> <red>Use a positive duration such as 30 m, 2 h or 7 d (s/m/h/d/w)." to
+                    "<prefix> <red>Nutze eine positive Dauer wie 30 m, 2 h oder 7 d (s/m/h/d/w)."),
+            "stale" to ("<prefix> <yellow>The player's punishment state changed. Review it again." to
+                    "<prefix> <yellow>Der Strafstatus hat sich geändert. Bitte erneut prüfen.")
+        )
+        guiStrings.forEach { (key, translations) ->
+            registerNewString(
+                "moderation.gui.$key",
+                mapOf(FileTypes.EN to translations.first, FileTypes.DE to translations.second)
+            )
+        }
+
         registerNewString(
             "command.moderation.broadcast.message.permanent",
             mapOf(

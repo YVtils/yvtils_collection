@@ -17,7 +17,26 @@ import yv.tils.configv2.language.LanguageProvider
 import yv.tils.utils.colors.ColorUtils
 import yv.tils.utils.colors.Colors
 
-enum class LangStrings(override val key: String, override val translations: Map<FileTypes, String>) : LanguageProvider.LangStrings {
+enum class LangStrings(override val key: String, override val translations: Map<FileTypes, String>) :
+    LanguageProvider.LangStrings {
+    CONFIG_TITLE(
+        "essentials.config.title", mapOf(
+            FileTypes.EN to "Essentials Config",
+            FileTypes.DE to "Essentials-Einstellungen"
+        )
+    ),
+    CONFIG_DENIED(
+        "essentials.config.denied", mapOf(
+            FileTypes.EN to "<prefix> <red>You do not have permission to edit Essentials configuration.",
+            FileTypes.DE to "<prefix> <red>Du darfst die Essentials-Einstellungen nicht bearbeiten."
+        )
+    ),
+    ANVIL_COST(
+        "essentials.anvil.cost", mapOf(
+            FileTypes.EN to "<prefix> <gray>Anvil cost: <yellow><cost> levels<gray>. You have <yellow><levels><gray> levels.",
+            FileTypes.DE to "<prefix> <gray>Ambosskosten: <yellow><cost> Level<gray>. Du hast <yellow><levels><gray> Level."
+        )
+    ),
     SPAWN_ELYTRA_BOOST(
         "spawn.elytra.boost",
         mapOf(

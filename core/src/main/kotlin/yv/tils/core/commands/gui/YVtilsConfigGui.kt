@@ -38,10 +38,8 @@ import yv.tils.utils.modules.Module
  * its own opener closure to [Module.addModule] when constructing its `MODULE` data, and this
  * GUI just invokes whatever it finds already registered.
  *
- * Modules without a registered opener (e.g. `essentials`, whose only "config" is runtime
- * state rather than user settings) are simply not listed - there being nothing to open for
- * them, unlike `/yvtils modules` where every known module is always listed (togglable or
- * not).
+ * Modules without a registered opener are not listed here; `/yvtils modules` lists all
+ * advertised modules independently of whether they expose a configuration editor.
  */
 object YVtilsConfigGui {
     fun open(player: Player) {

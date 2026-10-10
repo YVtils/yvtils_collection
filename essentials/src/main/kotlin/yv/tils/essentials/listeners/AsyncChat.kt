@@ -15,7 +15,7 @@ package yv.tils.essentials.listeners
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.event.*
 import yv.tils.essentials.commands.handler.GlobalMuteHandler
-import yv.tils.utils.logger.Logger
+import yv.tils.essentials.config.ConfigFile
 import yv.tils.utils.message.MessageUtils
 
 class AsyncChat : Listener {
@@ -30,20 +30,12 @@ class AsyncChat : Listener {
     }
 
     private fun colorizeChatMessage(e: AsyncChatEvent) {
-        // TODO: Reimplement, when config module is ready
-        // if (!(Config.config["allowChatColors"] as Boolean)) return
+        if (!ConfigFile.state.allowChatColors) return
 
         val message = MessageUtils.convertChatMessage(e.originalMessage())
-        val sender = e.player
-
-        e.isCancelled = true
-
-        Logger.info(
-            sender.displayName().append(MessageUtils.convert("<white>: ").append(message))
-        )
-
-        e.player.server.onlinePlayers.forEach { player ->
-            player.sendMessage(sender.displayName().append(MessageUtils.convert("<white>: ").append(message)))
+        // Keep Paper's audience and cancellation pipeline intact (especially moderation mutes).
+        e.renderer { _, displayName, _, _ ->
+            displayName.append(MessageUtils.convert("<white>: ")).append(message)
         }
     }
 }

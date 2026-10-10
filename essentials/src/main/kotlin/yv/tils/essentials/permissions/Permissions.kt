@@ -49,6 +49,13 @@ class PermissionsData {
 }
 
 enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
+    CONFIG(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.config",
+            "Edit Essentials configuration in game",
+            default = false
+        )
+    ),
     BYPASS_GLOBAL_MUTE(
         PermissionManager.YVtilsPermission(
             "${PermissionsData.permissionBase}.bypass.globalmute",

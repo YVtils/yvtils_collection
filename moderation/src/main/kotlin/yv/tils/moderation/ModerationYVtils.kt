@@ -83,7 +83,7 @@ class ModerationYVtils : Module.YVtilsModule {
 
         WarnCommand()
 
-        //ModGUICommand()
+        ModGUICommand()
     }
 
     private fun registerLogFilters() {

@@ -18,6 +18,7 @@ import yv.tils.configv2.language.LanguageProvider
 import yv.tils.essentials.commands.register.*
 import yv.tils.essentials.config.StatesFile
 import yv.tils.essentials.config.ConfigFile
+import yv.tils.essentials.config.ManageGUI
 import yv.tils.essentials.logic.SpawnElytra
 import yv.tils.essentials.language.LangStrings
 import yv.tils.essentials.listeners.*
@@ -32,7 +33,8 @@ class EssentialYVtils : Module.YVtilsModule {
             Module.readVersion(EssentialYVtils::class.java, "essentials"),
             "Essentials module for YVtils",
             "YVtils",
-            "https://docs.yvtils.net/essentials/"
+            "https://docs.yvtils.net/essentials/",
+            configGuiOpener = { player -> ManageGUI().openGUI(player) }
         )
     }
 
@@ -90,6 +92,7 @@ class EssentialYVtils : Module.YVtilsModule {
         pm.registerEvents(PlayerGameModeChange(), plugin)
         pm.registerEvents(PlayerJoin(), plugin)
         pm.registerEvents(PlayerPortal(), plugin)
+        pm.registerEvents(AntiTooExpensive(), plugin)
     }
 
     private fun registerPermissions() {
