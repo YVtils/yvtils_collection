@@ -24,6 +24,7 @@ import yv.tils.configv2.files.ObjectMapperFileUtils
 import yv.tils.remadeEnderDragon.configs.*
 import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.player.PlayerUtils.Companion.isSupported
 import java.util.UUID
 
 data class FightHistory(var completedWorlds: List<String> = emptyList())
@@ -66,8 +67,9 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
             landings.entries.removeIf { (id, landing) ->
                 val p = Bukkit.getPlayer(id)
                 if (p == null || p.world.uid != landing.world || p.isDead || tick >= landing.expires) return@removeIf true
-                if (!p.isOnGround && !p.isInWater) landing.airborne = true
-                landing.airborne && (p.isOnGround || p.isInWater || p.location.block.type == Material.COBWEB)
+                val supported = isSupported(p)
+                if (!supported && !p.isInWater) landing.airborne = true
+                landing.airborne && (supported || p.isInWater || p.location.block.type == Material.COBWEB)
             }
         }, 2L, 2L)
     }
@@ -365,7 +367,9 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
 
     @EventHandler(ignoreCancelled = true)
     fun slimeSplit(event: SlimeSplitEvent) {
-        if (owner(event.entity)?.isFocus(event.entity) == true) event.isCancelled = true
+        // Use the stable EntityEvent signature: Paper 26.3 changed the covariant return type.
+        val entity = (event as EntityEvent).entity
+        if (owner(entity)?.isFocus(entity) == true) event.isCancelled = true
     }
 
     @EventHandler

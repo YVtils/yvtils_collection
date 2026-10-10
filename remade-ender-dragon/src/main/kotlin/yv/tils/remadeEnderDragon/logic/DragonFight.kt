@@ -24,6 +24,7 @@ import yv.tils.remadeEnderDragon.language.Messages
 import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.logger.DEBUG_LEVEL
+import yv.tils.utils.player.PlayerUtils.Companion.isSupported
 import org.bukkit.command.CommandSender
 import java.util.UUID
 import kotlin.math.*
@@ -1173,7 +1174,7 @@ class DragonFight(
         effect(now + seconds(s.durationSeconds)) {
             targets.forEach { at ->
                 circle(at, s.radius, Color.AQUA)
-                players().filter { nearby(it, at, s.radius) && it.isOnGround }.forEach { p ->
+                players().filter { nearby(it, at, s.radius) && isSupported(it) }.forEach { p ->
                     if (updraftUses.getOrDefault(p.uniqueId, 0) >= config.updraftMaxUsesPerPlayer) return@forEach
                     updraftUses[p.uniqueId] = updraftUses.getOrDefault(p.uniqueId, 0) + 1
                     p.addPotionEffect(

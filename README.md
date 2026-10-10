@@ -224,6 +224,12 @@ Let players sit down everywhere.
   ![MSG System](.github/assets/MSG.png)
 
 - Spawn Elytra
+    - Optional `essentials` feature: double-jump near spawn to glide without an Elytra;
+      use the swap-offhand key for one boost per flight.
+    - Enable with `spawnElytra.enabled: true` in `plugins/yvtils/essentials/config.yml`.
+      Configure `worlds` (default `[world]`), `radius` (default `100.0`, 3D distance),
+      and `boostStrength` (default `2.0`) under `spawnElytra`, then restart.
+    - Survival only; protects against fall/wall damage during the flight and respects `/fly`.
 
 ![Spawn Elytra](.github/assets/SpawnElytra.png)
 

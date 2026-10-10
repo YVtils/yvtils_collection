@@ -18,6 +18,13 @@ import yv.tils.utils.colors.ColorUtils
 import yv.tils.utils.colors.Colors
 
 enum class LangStrings(override val key: String, override val translations: Map<FileTypes, String>) : LanguageProvider.LangStrings {
+    SPAWN_ELYTRA_BOOST(
+        "spawn.elytra.boost",
+        mapOf(
+            FileTypes.EN to "<white>Press <yellow><key:key.swapOffhand><white> to boost!",
+            FileTypes.DE to "<white>Drücke <yellow><key:key.swapOffhand><white> für einen Schub!",
+        )
+    ),
     GAMEMODE_SURVIVAL(
         "gamemode.survival",
         mapOf(

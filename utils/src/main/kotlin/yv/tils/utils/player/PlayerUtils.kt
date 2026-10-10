@@ -15,6 +15,7 @@ package yv.tils.utils.player
 import net.kyori.adventure.text.Component
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
+import org.bukkit.util.BoundingBox
 import yv.tils.utils.modules.Core
 import yv.tils.utils.message.MessageUtils
 import java.util.*
@@ -22,6 +23,21 @@ import java.util.*
 class PlayerUtils {
     companion object {
         const val PLAYER_HEAD_API = "https://cravatar.eu/helmhead/<uuid>/600"
+
+        /**
+         * Checks server-side collision support just beneath the player's feet.
+         * Accounts for partial blocks, excludes side contact and upward movement,
+         * and does not treat water as ground. Call on the player's server thread.
+         */
+        fun isSupported(player: Player): Boolean {
+            if (player.velocity.y > 0.0) return false
+            val box = player.boundingBox
+            val feet = BoundingBox(
+                box.minX + 0.001, box.minY - 0.01, box.minZ + 0.001,
+                box.maxX - 0.001, box.minY, box.maxZ - 0.001,
+            )
+            return player.wouldCollideUsing(feet)
+        }
 
         fun getSkinHash(player: Player): String {
             val skin = player.playerProfile.textures.skin

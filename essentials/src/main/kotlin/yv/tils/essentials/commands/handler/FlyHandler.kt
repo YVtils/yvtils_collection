@@ -20,6 +20,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.*
 import yv.tils.configv2.language.LanguageHandler
+import yv.tils.essentials.logic.SpawnElytra
 import yv.tils.utils.modules.Core
 import java.util.*
 
@@ -36,6 +37,7 @@ class FlyHandler {
      * @param silent Boolean to toggle silent mode
      */
     fun flySwitch(player: Player, sender: CommandSender = player, state: Boolean? = null, silent: Boolean = false) {
+        SpawnElytra.release(player)
         val uuid = player.uniqueId
 
         if ((fly[uuid] == null || fly[uuid] == false) || state == true) {

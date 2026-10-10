@@ -17,6 +17,8 @@ import yv.tils.common.permissions.PermissionManager
 import yv.tils.configv2.language.LanguageProvider
 import yv.tils.essentials.commands.register.*
 import yv.tils.essentials.config.StatesFile
+import yv.tils.essentials.config.ConfigFile
+import yv.tils.essentials.logic.SpawnElytra
 import yv.tils.essentials.language.LangStrings
 import yv.tils.essentials.listeners.*
 import yv.tils.essentials.permissions.PermissionsData
@@ -48,6 +50,7 @@ class EssentialYVtils : Module.YVtilsModule {
         registerPermissions()
 
         loadConfigs()
+        SpawnElytra.start()
     }
 
     override fun onLateEnablePlugin() {
@@ -55,7 +58,7 @@ class EssentialYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
-
+        SpawnElytra.stop()
     }
 
     private fun registerCommands() {
@@ -95,5 +98,6 @@ class EssentialYVtils : Module.YVtilsModule {
 
     private fun loadConfigs() {
         StatesFile().loadConfig()
+        ConfigFile().loadConfig()
     }
 }
