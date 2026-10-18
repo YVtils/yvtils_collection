@@ -14,3 +14,13 @@ subtle sounds and visuals without naming attacks to fighters.
 Build with `./gradlew :remade-ender-dragon:build`. Enable
 `remade-ender-dragon: true` in `plugins/yvtils/modules.yml`, with the artifact
 available through the configured module repository, then restart.
+
+## Structure
+
+- `RemadeEnderDragonYVtils.kt`: lifecycle and command/listener wiring.
+- `configs/DragonConfig.kt`: typed settings, validation and reload.
+- `commands/`, `gui/`, `language/`, `data/`: administration and permissions.
+- `logic/FightManager.kt`: encounter discovery, scheduling and recovery.
+- `logic/DragonFight.kt`: attack/stage orchestration and team objectives.
+- `logic/TemporaryTerrain.kt`: journaled temporary-block ownership/recovery.
+- `logic/FightMath.kt`, `AttackDirector.kt`, `src/test/`: pure encounter rules.

@@ -33,6 +33,6 @@ REPOSILITE_URL="http://127.0.0.1:8095/" ./gradlew :core:runServer
 ```
 
 - Focused publish: `./gradlew :sit:publishToMavenLocal generateLocalMavenChecksums`; publish required feature dependencies and the matching GUI artifact too. Plain `publishToMavenLocal` lacks checksums; runtime resolution requires an HTTP(S) repository.
-- Enable features in `core/run/plugins/yvtils/modules.yml` (lowercase shared data directory), then restart. Defaults are all disabled; GUI is always fetched. `yv-smp` is manual opt-in; `migration` is hidden and cannot be enabled here.
+- Enable features in `core/run/plugins/yvtils/modules.yml` (lowercase shared data directory), then restart. Defaults are all disabled; GUI is always fetched. `yv-smp` is manual opt-in. The legacy migration module is removed.
 - Paper also caches resolved artifacts under `core/run/libraries/yv/yvtils/`, independently of `~/.m2/repository`. When reusing a local module version, remove that module/version's stale Paper cache before restarting, or use a new version.
 - Publishing credentials/environment are documented in `.env.example`; Gradle does not auto-load `.env` (`set -a; source .env; set +a`). Release CI runs `./gradlew build publish --no-daemon -PskipExistingReleases=true`, skipping complete existing releases and failing incomplete ones.

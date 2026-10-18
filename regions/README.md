@@ -1,5 +1,15 @@
 # Regions
 
+## Source structure
+
+`RegionsYVtils.kt` wires lifecycle and WorldGuard activation. `commands/` provides
+the claim tree and WorldGuard-aware `/rg` routing; `gui/` renders claim workflows.
+`logic/` owns geometry, pricing, role policies, occupancy, subzones and transactional
+mutations. `data/ClaimMetadata.kt` stores display metadata separately from native
+WorldGuard protection. `configs/`, `language/` and `listeners/` provide settings,
+translations and event adapters. `src/test/` covers geometry, pricing and real
+WorldGuard flag-calculation policy. Core statically bundles this module.
+
 Full-height survival claims created through commands or a GUI, backed by WorldGuard, with particle previews,
 Owner/Member/Visitor roles and in-game management menus.
 

@@ -7,4 +7,5 @@ Follow [root AGENTS.md](../AGENTS.md) for toolchain, dynamic-module publishing, 
 - `logic/music/` uses Lavaplayer, YouTube sources, and Opus encoding. `logic/music/svc/VoicechatBridge.kt` accesses Simple Voice Chat reflectively because dynamic library-tier code cannot see that plugin's API classes.
 - Do not add `voicechat-api` dependencies or static references to its types, even `compileOnly`; use the existing bridge/proxy boundary.
 - Disable fades/stops players and shuts down `VoiceChatAudioPlayer`'s executor. Preserve audio resource cleanup and player-quit behavior.
+- `logic/start/CinematicRuntime` owns all cinematic scheduler callbacks and player snapshots. Stop, disconnect, phase failure and disable cancel callbacks and restore borrowed player state. Keep phase/camera/particle scheduling routed through it.
 - Verification from the repository root: `./gradlew :yv-smp:build`; playback needs Paper, Simple Voice Chat, and manual `yv-smp: true` opt-in in the shared modules file.

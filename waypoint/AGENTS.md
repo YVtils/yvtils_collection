@@ -1,8 +1,9 @@
-# Waypoint scaffold
+# Waypoints
 
 Follow [root AGENTS.md](../AGENTS.md) for toolchain and new-module wiring.
 
-- `waypoint` is currently an included Gradle scaffold with an empty dependency block and no source tree or module entrypoint. Root README's waypoint commands are not implemented in this directory.
-- It is absent from `publishableModules`, the centralized version entries, and `DynamicModuleRegistry.KNOWN_MODULES`; existing build JARs do not establish runtime availability.
-- Implementing this feature requires the root new-module registration steps and shared-runtime dependency scopes before it can be enabled in core.
-- Scaffold verification from the repository root: `./gradlew :waypoint:build`; this currently validates no gameplay implementation.
+- `WaypointYVtils` wires lifecycle; `commands/`, `config/`, `language/`, `permissions/`, `listeners/`, `logic/` separate implementation responsibilities.
+- Public points are listed globally; private points are owner-only; unlisted points are navigable by name but listed only to their owner.
+- `gui/WaypointsGui.kt` uses InvUI pagination, anvil input and delete confirmation. Admin browsing requires `.admin`; config editing requires `.config`. Recheck permission and stale record on every mutation. Config GUI edits a detached draft, validates and atomically saves before applying.
+- Names are globally unique and case-insensitive. Preserve world/owner UUID identity. Navigation owns private non-persistent BlockDisplays; never modify real blocks or force-load chunks. Cleanup on stop, arrival, death, world change, quit and disable.
+- Verify with `./gradlew :waypoint:build` and the staging checks in `docs/breaking-release.md`.

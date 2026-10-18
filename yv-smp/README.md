@@ -1,5 +1,21 @@
 # YV SMP ambient sound sources
 
+## Module overview and structure
+
+Optional `yv-smp` provides staged SMP-start cinematics, border/setup controls,
+Simple Voice Chat music and persistent ambient sound sources. Enable it manually
+with `yv-smp: true`; its runtime name/data folder is `yv_smp`.
+
+- `YV_SMPYVtils.kt`: module lifecycle and command/listener wiring.
+- `commands/`, `gui/`: start/setup/music/ambient administration.
+- `logic/start/`, `utils/`: cinematic phases, owned scheduler/camera cleanup and particles.
+- `logic/music/`: audio loading/playback and reflective Simple Voice Chat bridge.
+- `logic/ambient/`: Minecraft sound/particle sources, independent of voice chat.
+- `configs/`, `language/`, `permissions/`: settings, feedback and access policy.
+
+Build with `./gradlew :yv-smp:build`. Music requires Simple Voice Chat; ambient
+effects do not. The commands below describe ambient source administration.
+
 Named sound sources are managed with `/yvsmp ambient`. Creation and movement use
 the player's current position; other operations also work from the console.
 Permission: `yvtils.yv_smp.command.ambient` (operators by default).
