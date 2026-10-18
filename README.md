@@ -2,6 +2,15 @@
 
 This repository combines all the yvtils minecraft plugins in one place, for easier access and management.
 
+## Breaking release
+
+This release introduces a new launcher and configuration/runtime architecture. It is
+installed as a fresh deployment; legacy plugin data, permissions and APIs are not
+supported upgrade inputs. See [installation and release verification](docs/breaking-release.md).
+
+Requires Java 25 and Paper **26.1.2, 26.2 or 26.3**. Install the core JAR, start once,
+then enable desired modules in `plugins/yvtils/modules.yml` and restart.
+
 ## For contributors
 
 - Creating a new feature module? See
@@ -11,17 +20,14 @@ This repository combines all the yvtils minecraft plugins in one place, for easi
 
 ## Plugins included in this collection
 
-- YVtils-SMP **(IN MIGRATION PROCESS)**
-- YVtils-Discord ([Modrinth](https://modrinth.com/plugin/yvtils_dc))
-    - [Core](https://github.com/YVtils/yvtils_collection/tree/main/discord-core)
-    - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/discord)
-- YVtils-MultiMine ([Modrinth](https://modrinth.com/plugin/yvtils_mm))
-    - [Core](https://github.com/YVtils/yvtils_collection/tree/main/multiMine-core)
-    - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/multiMine)
-- YVtils-Regions ([Modrinth](https://modrinth.com/plugin/yvtils_rg)) **(IN RECODE PROCESS)**
-    - [Core](https://github.com/YVtils/yvtils_collection/tree/main/regions-core)
-    - [Logic](https://github.com/YVtils/yvtils_collection/tree/main/regions)
-- YVtils-YV_SMP **(IN MIGRATION PROCESS)**
+- One [core launcher](core/) with selectable feature libraries.
+- Discord integration, MultiMine, WorldGuard-backed Regions, Essentials,
+  Moderation, Fusion, Sit, Status, Message, Server, Stats, Vanish and Waypoints.
+- Optional YV SMP cinematics/music/ambient sounds and Remade Ender Dragon.
+
+The old standalone plugin launchers are retired. Their Modrinth pages and older
+repository branches describe previous products rather than installable artifacts
+for this release.
 
 ---
 
@@ -32,54 +38,18 @@ This repository combines all the yvtils minecraft plugins in one place, for easi
 Player-scaled dragon encounters with configurable attacks, team support, and
 admin previews. See [the module guide](docs/remade-ender-dragon.md).
 
-### common
+Each module README describes features, settings, structure and verification:
 
-### config
+[Core](core/README.md) · [Common](common/README.md) · [Config](config/README.md) ·
+[Utils](utils/README.md) · [Discord](discord/README.md) · [Essentials](essentials/README.md) ·
+[Fusion](fusion/README.md) · [Moderation](moderation/README.md) · [MultiMine](multiMine/README.md) ·
+[Regions](regions/README.md) · [Server](server/README.md) · [Sit](sit/README.md) ·
+[Stats](stats/README.md) · [Status](status/README.md) · [Message](message/README.md) ·
+[Vanish](vanish/README.md) · [Waypoints](waypoint/README.md) · [YV SMP](yv-smp/README.md) ·
+[Remade Ender Dragon](remade-ender-dragon/README.md).
 
-### core
-
-### discord
-
-Modal-based SMP registration, linked-account commands and InvUI management:
-[setup, migration, permissions and verification](docs/discord-registration.md).
-
-### discord-core
-
-### essentials
-
-### fusion
-
-### gui
-
-### message
-
-### migration
-
-### moderation
-
-### multiMine
-
-### multiMine-core
-
-### regions
-
-### regions-core
-
-### server
-
-### sit
-
-### stats
-
-### status
-
-### test-core
-
-### vanish
-
-### waypoint
-
-### yv_smp-core
+GUI libraries: [26.1 shared source](gui-26.1/README.md), [26.2](gui-26.2/README.md),
+[26.3](gui-26.3/README.md). Historical launcher directories have retirement notices.
 
 ---
 
@@ -131,7 +101,11 @@ Let players sit down everywhere.
 
 ## Extended Vanish Module
 
-`/v [quick]`
+`/vanish [layer]`
+
+Current commands: `/vanish` (`/v`) toggles layer 1; `/vanish <1-100>` toggles a
+staff layer. Permissions: `yvtils.vanish.use`, `yvtils.vanish.layers` (OP by
+default). Silent container inspection uses a detached, read-only snapshot.
 
 - Silent Container Interaction
 - No Mob Targeting
@@ -212,7 +186,21 @@ The collection now includes the dynamic Fusion module. See
 
 ## Waypoints Module
 
-`/waypoint <naviagte/create/delete> <name> [visibility]`
+`/waypoint create <name> [public/private/unlisted]`
+`/waypoint navigate <name>`
+`/waypoint delete <name>`
+`/waypoint list`
+`/waypoint stop`
+`/waypoint` — player management GUI
+`/waypoint manage` — administrator management GUI
+`/waypoint config` — module settings GUI
+
+`/wp` is an alias. Creation defaults to private. Names are globally unique,
+case-insensitive, and contain 1–64 letters, digits, `_` or `-`. Navigation uses
+private glowing block displays and action-bar direction/distance in the destination world.
+Permissions: `yvtils.waypoint.use`, `yvtils.waypoint.create`, and
+`yvtils.waypoint.admin` (delete another owner's public/unlisted waypoint).
+These permissions default to OP unless granted explicitly.
 
 - Create waypoints with visibilities
     - Public - Everyone can see it
@@ -247,6 +235,14 @@ The collection now includes the dynamic Fusion module. See
 ![Spawn Elytra](.github/assets/SpawnElytra.png)
 
 # Commands
+
+- Online/offline inventory inspection `/invsee <known-name-or-UUID>`
+  (`yvtils.essentials.command.invsee`)
+- Online/offline ender-chest inspection `/ecsee <known-name-or-UUID>`
+  (`yvtils.essentials.command.ecsee`)
+  Add `.edit` to either permission to exchange a target slot with your cursor.
+  Online views refresh live; offline exchanges save immediately. See
+  [inventory administration](essentials/README.md#inventory-administration).
 
 - Fly Command `/fly [player]`
 - Heal Command `/heal [player]`

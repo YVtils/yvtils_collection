@@ -1,9 +1,9 @@
 # Waypoints
 
-Persistent public/private/unlisted locations with private terrain highlighting.
+Persistent public/private/unlisted/shared locations with private terrain highlighting.
 
 ```text
-/waypoint create <name> [public/private/unlisted]
+/waypoint create <name> [public/private/unlisted/shared]
 /waypoint list
 /waypoint navigate <name>
 /waypoint delete <name>
@@ -37,7 +37,22 @@ World changes, death, quit, arrival, deletion and disable remove displays.
 - `logic/WaypointNavigation.kt`, `listeners/`: run scheduling and cleanup.
 
 Enable `waypoint`; state: `plugins/yvtils/waypoint/waypoints.json`.
-Permissions: `yvtils.waypoint.use`, `.create`, `.admin` (OP defaults).
+Permissions: `yvtils.waypoint.use`, `.create`, `.admin` and `.config`.
+Basic `.use` and `.create` are granted to everyone by default; `.admin` and
+`.config` remain OP-only. Explicit permission denies are still respected.
+`/waypoint list` contains clickable names that run `/waypoint view <name>` and
+recheck access before opening details. The main GUI has no close/back barrier;
+admin mode's view toggle returns to the ordinary player's accessible waypoints.
+
+The details sharing screen adds known player names/UUIDs or removes recipients.
+Adding a recipient selects `SHARED` visibility. Only the owner and recipients can
+list/open/navigate a shared waypoint; recipients cannot modify it. Admin management
+still sees all records. Recipient lists persist across restart and are capped at
+100 players. Changing access cancels navigation to the previous record.
+The sharing menu has two paginated rows of player heads with asynchronous texture
+resolution, and a fixed add-player button in the bottom-right corner. List-command
+entries include the owner's name (UUID fallback) and an empty-state response when
+no locations are available.
 `/waypoint` opens the InvUI player browser; `/waypoint manage` requires `.admin`
 and includes all owners/private records. Detail screens navigate, rename, move to the
 actor's position, cycle visibility and confirm deletion. Name lookup supports

@@ -12,3 +12,5 @@ management GUI update saved UUID-keyed text together.
 
 Enable `status`; files live below `plugins/yvtils/status/`.
 Verify with `./gradlew :status:build`; check reconnects and scoreboard interaction.
+The shared connection-message display hook reads saved status text for Server and
+Vanish announcements, including before the join listener initializes display names.

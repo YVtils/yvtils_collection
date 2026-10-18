@@ -62,7 +62,7 @@ If you only remember one thing from this document, remember that.
 | Component | Status |
 |---|---|
 | `utils`, `config`, `common` | Not published individually. Bundled together via `common`'s own `shadowJar` output and embedded as a `JarLibrary` resource by migrated cores. No change needed to these modules themselves. |
-| `discord`, `regions`, `multiMine`, `essentials`, `sit`, `status`, `server`, `message`, `moderation`, `gui-26.1`, `gui-26.2`, `migration`, `stats` | **Gradle-level migration done.** All are in `publishableModules` in the root `build.gradle.kts`, have `compileOnly` on `utils`/`config`/`common`, and get CommandAPI/coroutines/serialization as `compileOnly` automatically. `sit` has been round-tripped through a real publish+fetch+enable test. `gui-<version>` modules are a special case, resolved unconditionally by `core` based on the running server's Minecraft version rather than through `modules.yml` - see `DynamicModuleRegistry.GUI_ARTIFACTS`. The others have not been individually verified yet - do that before relying on them. |
+| Current feature libraries | Consult root `publishableModules` and `DynamicModuleRegistry` for the authoritative list. Regions is statically bundled; GUI is selected unconditionally by server version. The legacy migration feature has been deleted. |
 | `test-core` | **Fully migrated.** Reference implementation - has the `PluginLoader`, the embedded runtime bundle, and dynamic module discovery wired up end-to-end. |
 | `core`, `discord-core`, `regions-core`, `multiMine-core` | **Not migrated yet.** Still shade every module directly (old pattern). This is the main remaining work - see [Part 2](#part-2---migrating-a-corelauncher). |
 
@@ -231,7 +231,6 @@ dependencies {
     implementation(project(":utils"))
     implementation(project(":config"))
     implementation(project(":discord"))
-    implementation(project(":migration"))
     implementation(project(":stats"))
 }
 ```
@@ -248,7 +247,7 @@ dependencies {
 }
 ```
 
-The feature modules (`discord`, `migration`, `stats`, etc.) should be
+The feature modules (`discord`, `stats`, etc.) should be
 **removed** from the dependency list entirely - they're no longer compiled
 against directly, they get fetched at runtime and driven reflectively (see
 step 4).
@@ -310,7 +309,7 @@ test-core/src/main/kotlin/yv/tils/core/loader/DynamicModuleDriver.kt
 ```
 
 In `DynamicModuleRegistry.KNOWN_MODULES`, keep only the modules this specific
-product actually ships (e.g. `discord-core` only needs `discord`, `migration`,
+product actually ships (e.g. the former `discord-core` needed `discord`,
 `stats` - it doesn't need `sit` or `regions`).
 
 > **Note:** right now each migrated core gets its own copy of this package,
@@ -363,7 +362,7 @@ first boot if one doesn't exist yet, listing every module in
 `defaultEnabledModules` argument passed to `readEnabledModules(...)` (and the
 `knownModules` argument, if this product ships a trimmed-down registry - see
 step 4) to match what this specific product should ship enabled out of the
-box (e.g. `discord-core` should default to `discord`, `migration`, `stats`
+box (e.g. the former `discord-core` defaulted to `discord`, `stats`
 set to `true`, not `sit`).
 
 ### Step 8 - Build, publish, test

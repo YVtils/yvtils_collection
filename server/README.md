@@ -12,3 +12,8 @@ displayed capacity, join/quit messages and shared maintenance status.
 Enable `server`; configure `plugins/yvtils/server/config.yml`.
 `listeners/PlayerLogin.kt` currently does not enforce maintenance admission.
 Verify with `./gradlew :server:build` and server-list/connection checks.
+
+Real and Vanish-generated connection messages resolve `<player>` through the
+optional Status module, preserving its configured status/name formatting. Without
+Status or a saved status, the plain account name is used. `<playerName>` always
+provides the unformatted account name for custom templates.
