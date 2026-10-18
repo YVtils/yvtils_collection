@@ -1,0 +1,44 @@
+name: Build Core JAR
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-core-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # shadowJar includes the embedded shared runtime and statically bundled modules.
+      - name: Build server plugin JAR
+        run: ./gradlew :core:shadowJar --no-daemon
+
+      - name: Upload server plugin JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: YVtils-core-${{ github.sha }}
+          path: core/build/libs/YVtils_v*.jar
+          if-no-files-found: error
+          retention-days: 30

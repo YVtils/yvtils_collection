@@ -25,7 +25,7 @@ class PermissionsData {
             get() = PermissionManager.YVtilsPermission(
                 "${permissionBase}.*",
                 "Wildcard permission for all ${YV_SMPYVtils.MODULE.name} permissions",
-                default = true,
+                default = false,
                 children = getPermissionsForWildcard()
             )
 
@@ -51,6 +51,13 @@ class PermissionsData {
 }
 
 enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
+    COMMAND_AMBIENT(
+        PermissionManager.YVtilsPermission(
+            "${PermissionsData.permissionBase}.command.ambient",
+            "Allows creating and managing ambient sound sources",
+            default = false
+        )
+    ),
     COMMAND_START(
         PermissionManager.YVtilsPermission(
             "${PermissionsData.permissionBase}.command.start",

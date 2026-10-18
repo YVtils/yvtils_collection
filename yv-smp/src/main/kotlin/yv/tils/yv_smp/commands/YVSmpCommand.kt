@@ -38,7 +38,11 @@ class YVSmpCommand {
     init {
         commandTree("yvsmp") {
             withPermission(CommandPermission.NONE)
-            withUsage("/yvsmp <gui|start|stop|setup>")
+            withUsage("/yvsmp <gui|start|stop|setup|ambient>")
+
+            literalArgument("ambient") {
+                AmbientCommand.register(this)
+            }
 
             // /yvsmp (no args) - open the GUI for players, show usage otherwise
             playerExecutor { player, _ ->

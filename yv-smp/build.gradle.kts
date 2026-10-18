@@ -31,4 +31,9 @@ dependencies {
     implementation("de.maxhenkel.opus4j:opus4j:${opus4jVersion}")
     implementation("dev.arbjerg:lavaplayer:${lavaplayerVersion}")
     implementation("dev.lavalink.youtube:v2:${lavalinkYoutubeVersion}")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+tasks.test { useJUnitPlatform() }

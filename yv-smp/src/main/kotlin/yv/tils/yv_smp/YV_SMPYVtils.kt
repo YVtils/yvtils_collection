@@ -22,6 +22,7 @@ import yv.tils.yv_smp.commands.YVSmpCommand
 import yv.tils.yv_smp.configs.ConfigFile
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.listeners.PlayerQuitListener
+import yv.tils.yv_smp.logic.ambient.AmbientSounds
 import yv.tils.yv_smp.logic.music.MusicHandler
 import yv.tils.yv_smp.logic.music.SVCManager
 import yv.tils.yv_smp.logic.music.VoiceChatAudioPlayer
@@ -53,6 +54,7 @@ class YV_SMPYVtils : Module.YVtilsModule {
         registerPermissions()
 
         loadConfigs()
+        AmbientSounds.start()
     }
 
     override fun onLateEnablePlugin() {
@@ -60,6 +62,7 @@ class YV_SMPYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
+        AmbientSounds.stop()
         // Stop all active audio players with a short fade-out
         MusicHandler.stopAll(fadeoutTime = 500L)
 

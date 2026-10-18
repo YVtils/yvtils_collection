@@ -655,5 +655,77 @@ enum class LangStrings(override val key: String, override val translations: Map<
             FileTypes.DE to "<red>Bitte gib eine gültige Zahl größer als 0 ein.</red>",
         )
     ),
-     ;
+    AMBIENT_HELP(
+        "command.ambient.help", mapOf(
+            FileTypes.EN to "<gold>Ambient sources</gold><newline><gray>/yvsmp ambient create [name] [sound] [radius] [looping] [interval]<newline>/yvsmp ambient set [name] [sound|radius|looping|interval|particle] [value]<newline>/yvsmp ambient [list|info|play|move|remove] [name]<newline>Intervals: 40t, 10s, 5m, 1h. Particle: Minecraft ID or none.</gray>",
+            FileTypes.DE to "<gold>Umgebungsgeräusche</gold><newline><gray>/yvsmp ambient create [name] [sound] [radius] [looping] [interval]<newline>/yvsmp ambient set [name] [sound|radius|looping|interval|particle] [value]<newline>/yvsmp ambient [list|info|play|move|remove] [name]<newline>Intervalle: 40t, 10s, 5m, 1h. Partikel: Minecraft-ID oder none.</gray>",
+        )
+    ),
+    AMBIENT_SAVED(
+        "command.ambient.saved", mapOf(
+            FileTypes.EN to "<green>Ambient source <name> saved.</green>",
+            FileTypes.DE to "<green>Geräuschquelle <name> gespeichert.</green>",
+        )
+    ),
+    AMBIENT_REMOVED(
+        "command.ambient.removed", mapOf(
+            FileTypes.EN to "<green>Ambient source <name> removed.</green>",
+            FileTypes.DE to "<green>Geräuschquelle <name> entfernt.</green>",
+        )
+    ),
+    AMBIENT_PLAYED(
+        "command.ambient.played", mapOf(
+            FileTypes.EN to "<green>Triggered ambient source <name> for players in its radius (if its world is loaded).</green>",
+            FileTypes.DE to "<green>Geräuschquelle <name> für Spieler im Radius ausgelöst (falls die Welt geladen ist).</green>",
+        )
+    ),
+    AMBIENT_LIST(
+        "command.ambient.list", mapOf(
+            FileTypes.EN to "<gold>Ambient sources:</gold> <sources>",
+            FileTypes.DE to "<gold>Geräuschquellen:</gold> <sources>",
+        )
+    ),
+    AMBIENT_INFO(
+        "command.ambient.info", mapOf(
+            FileTypes.EN to "<gold><name></gold><newline><gray>Location: <world> (<x>, <y>, <z>)<newline>Sound: <sound><newline>Radius: <radius> blocks | Looping: <looping><newline>Interval: <interval> ticks | Particle: <particle></gray>",
+            FileTypes.DE to "<gold><name></gold><newline><gray>Position: <world> (<x>, <y>, <z>)<newline>Sound: <sound><newline>Radius: <radius> Blöcke | Wiederholen: <looping><newline>Intervall: <interval> Ticks | Partikel: <particle></gray>",
+        )
+    ),
+    AMBIENT_INVALID_NAME(
+        "command.ambient.invalid-name", mapOf(
+            FileTypes.EN to "<red>Use 1–64 letters, numbers, underscores or hyphens for the source name.</red>",
+            FileTypes.DE to "<red>Verwende 1–64 Buchstaben, Zahlen, Unterstriche oder Bindestriche als Namen.</red>",
+        )
+    ),
+    AMBIENT_DUPLICATE(
+        "command.ambient.duplicate", mapOf(
+            FileTypes.EN to "<red>A source with that name already exists.</red>",
+            FileTypes.DE to "<red>Eine Quelle mit diesem Namen existiert bereits.</red>",
+        )
+    ),
+    AMBIENT_MISSING(
+        "command.ambient.missing", mapOf(
+            FileTypes.EN to "<red>No ambient source with that name exists.</red>",
+            FileTypes.DE to "<red>Keine Geräuschquelle mit diesem Namen vorhanden.</red>",
+        )
+    ),
+    AMBIENT_INVALID_PARTICLE(
+        "command.ambient.invalid-particle", mapOf(
+            FileTypes.EN to "<red>Unknown particle. Select a suggested Minecraft particle or none.</red>",
+            FileTypes.DE to "<red>Unbekannter Partikel. Wähle einen vorgeschlagenen Minecraft-Partikel oder none.</red>",
+        )
+    ),
+    AMBIENT_INVALID_INTERVAL(
+        "command.ambient.invalid-interval", mapOf(
+            FileTypes.EN to "<red>Use a positive whole-tick duration: 40t, 10s, 5m or 1h. Bare numbers are ticks.</red>",
+            FileTypes.DE to "<red>Verwende eine positive Dauer in ganzen Ticks: 40t, 10s, 5m oder 1h. Zahlen ohne Einheit sind Ticks.</red>",
+        )
+    ),
+    AMBIENT_SAVE_FAILED(
+        "command.ambient.save-failed", mapOf(
+            FileTypes.EN to "<red>The ambient source operation failed. Check the server log.</red>",
+            FileTypes.DE to "<red>Die Aktion für die Geräuschquelle ist fehlgeschlagen. Prüfe das Serverlog.</red>",
+        )
+    ),
+    ;
 }
