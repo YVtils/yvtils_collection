@@ -148,6 +148,9 @@ jobs:
           loaders: paper
           environment: server
           # Keep this range aligned with DynamicModuleRegistry.GUI_ARTIFACTS.
-          game-versions: '>=26.1 <26.4'
+          game-versions: |
+            26.1.2
+            26.2
+            26.3
           game-version-filter: releases
           java: '25'

@@ -33,7 +33,7 @@ jobs:
 
       # shadowJar includes the embedded shared runtime and statically bundled modules.
       - name: Build server plugin JAR
-        run: ./gradlew :core:shadowJar --no-daemon
+        run: ./gradlew build --no-daemon
 
       - name: Upload server plugin JAR
         uses: actions/upload-artifact@v4
