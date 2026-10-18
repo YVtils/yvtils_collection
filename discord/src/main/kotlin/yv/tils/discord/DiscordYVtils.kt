@@ -12,17 +12,21 @@
 
 package yv.tils.discord
 
+import dev.jorel.commandapi.CommandAPI
 import yv.tils.common.permissions.PermissionManager
 import yv.tils.config.language.LanguageHandler
-import yv.tils.discord.actions.commands.JDACommandsRegister
-import yv.tils.discord.configs.*
+import yv.tils.discord.commands.DiscordAccountsCommand
+import yv.tils.discord.configs.ConfigFile
+import yv.tils.discord.configs.ManageGUI
+import yv.tils.discord.configs.SaveFile
+import yv.tils.discord.configs.StatsSyncSaveFile
 import yv.tils.discord.data.PermissionsData
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.listener.*
 import yv.tils.discord.logic.AppLogic
+import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
-import yv.tils.utils.logger.Logger
 
 class DiscordYVtils : Module.YVtilsModule {
     companion object {
@@ -47,13 +51,12 @@ class DiscordYVtils : Module.YVtilsModule {
         registerPermissions()
 
         loadConfigs()
-        yv.tils.discord.commands.DiscordAccountsCommand()
+        DiscordAccountsCommand()
 
         AppLogic().startApp()
     }
 
     override fun onLateEnablePlugin() {
-        JDACommandsRegister().registerCommands()
 
         if (AppLogic.started) {
             Logger.info(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_START_SUCCESS.key))
@@ -61,9 +64,13 @@ class DiscordYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
-        dev.jorel.commandapi.CommandAPI.unregister("discordaccounts")
-        AppLogic().stopApp()
-        unregisterModule()
+        CommandAPI.unregister("discordaccounts")
+        try {
+            AppLogic().stopApp()
+        } finally {
+            yv.tils.discord.connection.DiscordConnectionLogging.close()
+            unregisterModule()
+        }
     }
 
     fun unregisterModule() {

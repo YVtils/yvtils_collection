@@ -15,6 +15,7 @@ package yv.tils.discord.logic.sync.serverConsole
 import org.apache.logging.log4j.core.LogEvent
 import org.apache.logging.log4j.core.appender.AbstractAppender
 import yv.tils.discord.configs.ConfigFile
+import yv.tils.discord.connection.DiscordConnectionLogging
 import yv.tils.discord.logic.AppLogic.Companion.getJDA
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
@@ -33,6 +34,8 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
 
         private val messageQueue = ConcurrentLinkedQueue<String>()
         private val isProcessing = AtomicBoolean(false)
+        @Volatile
+        private var retryAfter = 0L
 
         private var lastProcessedTime = System.currentTimeMillis()
 
@@ -45,6 +48,7 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
     }
 
     private fun processMessageQueue() {
+        if (System.nanoTime() < retryAfter) return
         if (!isProcessing.compareAndSet(false, true)) return
 
         if (messageQueue.isEmpty()) {
@@ -55,7 +59,7 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
         try {
             while (messageQueue.isNotEmpty()) {
                 val message = messageQueue.poll() ?: break
-                
+
                 // Check if adding this message would exceed the limit
                 if (currentMessageContent.length + message.length >= MAX_MESSAGE_LENGTH - MARKDOWN_OVERHEAD) {
                     // Send current content and start new message
@@ -65,7 +69,7 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
                         lastMessageID = null
                     }
                 }
-                
+
                 currentMessageContent.append(message)
             }
 
@@ -79,6 +83,7 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
     }
 
     private fun sendFormattedMessage(content: String) {
+        if (System.nanoTime() < retryAfter) return
         try {
             if (content.isEmpty()) return
 
@@ -97,32 +102,40 @@ class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
                     // Try to edit existing message
                     channel.editMessageById(lastMessageID!!, formattedContent).complete()
                 }
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                if (DiscordConnectionLogging.restFailure(error)) throw error
                 // If edit fails, create new message
                 val message = channel.sendMessage(formattedContent).complete()
                 lastMessageID = message.id
                 messageIDs.add(lastMessageID!!)
             }
         } catch (e: Exception) {
-            Logger.error("Failed to send console message to Discord: ${e.message}")
+            retryAfter = System.nanoTime() + 60_000_000_000L
+            if (!DiscordConnectionLogging.restFailure(e))
+                Logger.error("[Discord] [ConsoleSync] Could not forward console output: ${e.message}")
         }
     }
 
     override fun append(event: LogEvent) {
         if (!active) return
+        // Never send transport failures back through the transport that produced them.
+        if (event.loggerName.startsWith("net.dv8tion.jda.") ||
+            event.message.formattedMessage.let { "[Discord] [Connection]" in it || "[Discord] [ConsoleSync]" in it }
+        ) return
 
         // Only process messages that occurred after the last command
         if (event.timeMillis < lastProcessedTime) return
 
         val formattedMessage = formatLogMessage(event)
-        messageQueue.offer(formattedMessage)
+        // A long outage must not accumulate unbounded console output in memory.
+        if (messageQueue.size < 1000) messageQueue.offer(formattedMessage)
     }
 
     private fun formatLogMessage(event: LogEvent): String {
         val timestamp = SimpleDateFormat("HH:mm:ss").format(event.timeMillis)
         val name = event.loggerName
         val level = event.level.toString()
-        val color = when(event.level.toString()) {
+        val color = when (event.level.toString()) {
             "ERROR" -> "\u001B[31m" // Red
             "WARN" -> "\u001B[33m"  // Yellow
             "INFO" -> "\u001B[37m"  // White

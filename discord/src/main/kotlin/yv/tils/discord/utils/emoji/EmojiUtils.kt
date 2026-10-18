@@ -17,10 +17,11 @@ import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.player.PlayerUtils
+import java.util.concurrent.ConcurrentHashMap
 
 class EmojiUtils {
     companion object {
-        val playerEmojis = mutableMapOf<String, Long>()
+        val playerEmojis = ConcurrentHashMap<String, Long>()
 
         fun getPlayerEmoji(hash: String): Long? {
             return playerEmojis[hash]
@@ -68,10 +69,10 @@ class EmojiUtils {
      *             If false, the emoji will only be removed if persistent emojis are disabled.
      */
     fun removePlayerEmoji(player: Player, force: Boolean = false) {
-        if (force || ! DiscordEmoji.persistentEmojis) {
+        if (force || !DiscordEmoji.persistentEmojis) {
             val skinHash = PlayerUtils.getSkinHash(player).take(29)
 
-            if (! hasPlayerEmoji(skinHash)) {
+            if (!hasPlayerEmoji(skinHash)) {
                 return
             }
 

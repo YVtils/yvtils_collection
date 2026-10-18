@@ -23,8 +23,10 @@ import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.DiscordYVtils
 import yv.tils.discord.actions.buttons.JDAButtonsListener
 import yv.tils.discord.actions.commands.JDACommandsListener
+import yv.tils.discord.actions.commands.JDACommandsRegister
 import yv.tils.discord.actions.select.JDASelectListener
 import yv.tils.discord.configs.ConfigFile
+import yv.tils.discord.connection.DiscordConnectionLogging
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager
 import yv.tils.discord.logic.sync.serverChats.SyncChats
@@ -33,7 +35,10 @@ import yv.tils.discord.logic.sync.serverConsole.SendCMD
 import yv.tils.discord.logic.sync.serverStats.CollectStats
 import yv.tils.discord.logic.whitelist.WhitelistManage
 import yv.tils.discord.utils.emoji.DiscordEmoji
+import yv.tils.discord.utils.emoji.RegistrationEmoji
+import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.modules.Core
 import java.time.Duration
 import org.apache.logging.log4j.core.Logger as Logger4J
 
@@ -42,7 +47,14 @@ class AppLogic {
         lateinit var instance: AppLogic
         lateinit var jda: JDA
         lateinit var builder: JDABuilder
+        @Volatile
         var started = false
+        @Volatile
+        private var stopping = false
+        private var connectionTask: org.bukkit.scheduler.BukkitTask? = null
+        private fun shutdownPendingConnection() {
+            if (::jda.isInitialized) jda.shutdownNow()
+        }
 
         lateinit var appID: String
 
@@ -66,6 +78,8 @@ class AppLogic {
     private val activityMessage = ConfigFile.getValueAsString("botSettings.activityMessage") ?: "Minecraft"
 
     fun startApp() {
+        stopping = false
+        DiscordConnectionLogging.start()
         if (checkToken()) {
             instance = this
             appearance()
@@ -78,23 +92,28 @@ class AppLogic {
     }
 
     fun stopApp() {
+        stopping = true
+        DiscordConnectionLogging.stopping()
+        connectionTask?.cancel()
+        connectionTask = null
+        if (!started) shutdownPendingConnection()
         if (started) {
             Logger.info(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_STOP_SHUTDOWN.key))
 
-            CollectStats().serverShutdown()
-
-            GetConsole.active = false
-            GetConsole().stop()
-
             try {
+                runCatching { CollectStats().serverShutdown() }
+                    .onFailure { Logger.warn("Could not publish Discord shutdown statistics: ${it.message}") }
+                GetConsole.active = false
+                runCatching { GetConsole().stop() }
                 builder.setStatus(OnlineStatus.OFFLINE)
                 jda.shutdown()
 
                 if (!jda.awaitShutdown(Duration.ofSeconds(10))) {
                     jda.shutdownNow()
-                    jda.awaitShutdown()
+                    jda.awaitShutdown(Duration.ofSeconds(2))
                 }
             } catch (e: Exception) {
+                jda.shutdownNow()
                 Logger.error(
                     LanguageHandler.getMessage(
                         RegisterStrings.LangStrings.BOT_STOP_FAILED.key,
@@ -112,6 +131,7 @@ class AppLogic {
     }
 
     private fun eventListeners() {
+        builder.addEventListeners(DiscordConnectionLogging)
         builder.addEventListeners(SendCMD())
 
         builder.addEventListeners(SyncChats())
@@ -161,10 +181,33 @@ class AppLogic {
     private fun buildJDA() {
         try {
             jda = builder.build()
-            jda.awaitReady()
-            started = true
-            appID = jda.selfUser.id
-            launchFeatures()
+            connectionTask = Core.instance.server.scheduler.runTaskAsynchronously(
+                Core.instance, Runnable {
+                    try {
+                        jda.awaitReady()
+                        if (stopping) {
+                            jda.shutdownNow(); return@Runnable
+                        }
+                        Core.instance.server.scheduler.runTask(
+                            Core.instance, Runnable ready@{
+                                if (stopping) return@ready
+                                started = true
+                                appID = jda.selfUser.id
+                                try {
+                                    launchFeatures()
+                                    JDACommandsRegister().registerCommands()
+                                    Logger.info("Discord connection ready.")
+                                } catch (error: Exception) {
+                                    Logger.error("Discord feature initialization failed", error)
+                                    started = false
+                                    jda.shutdownNow()
+                                }
+                            })
+                    } catch (error: Exception) {
+                        if (!stopping) Logger.error("Discord connection failed: ${error.message}")
+                        jda.shutdownNow()
+                    }
+                })
         } catch (e: Exception) {
             Logger.error("Failed to start Discord app: ${e.message}")
             started = false
@@ -174,14 +217,15 @@ class AppLogic {
     }
 
     private fun launchFeatures() {
-        yv.tils.discord.utils.emoji.RegistrationEmoji.initialize()
-        try {
-            DiscordEmoji().setPersistentEmojis()
-            DiscordEmoji().loadPersistentEmojis()
-        } catch (e: Exception) {
-            Logger.error("Failed to initialize Discord emojis: ${e.message}")
-            Logger.debug("Stack trace: ${e.stackTraceToString()}", 2)
-        }
+        RegistrationEmoji.initialize()
+        CoroutineHandler.launchTask(task = {
+            if (!stopping) try {
+                DiscordEmoji().setPersistentEmojis()
+                DiscordEmoji().loadPersistentEmojis()
+            } catch (e: Exception) {
+                Logger.error("Failed to initialize Discord emojis: ${e.message}")
+            }
+        }, isOnce = true)
 
         ServerChatsSyncManager().loadChannelFromID()
 
