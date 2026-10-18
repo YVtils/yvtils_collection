@@ -29,11 +29,14 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgePillarRise
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
+import java.util.UUID
+import kotlin.math.sqrt
+import org.bukkit.HeightMap
 
 class PreparationPhase : PhasePlugin {
     companion object {
         /** Game modes to restore after spectator cinematic ends (set in phaseActions, read in FinalPhasePartTwo). */
-        val savedGameModes = mutableMapOf<java.util.UUID, GameMode>()
+        val savedGameModes = mutableMapOf<UUID, GameMode>()
     }
 
     override fun getPhaseDuration(): Long {
@@ -50,7 +53,7 @@ class PreparationPhase : PhasePlugin {
         // phase duration (140 ticks = 7 s) so the player watches the edge
         // pillars and glow effects below them as they drop toward the island.
         val surfaceY = world.getHighestBlockYAt(
-            spawnLoc.blockX, spawnLoc.blockZ, org.bukkit.HeightMap.WORLD_SURFACE
+            spawnLoc.blockX, spawnLoc.blockZ, HeightMap.WORLD_SURFACE
         ).toDouble() + 1.0
         val landingLoc = spawnLoc.clone().apply { y = surfaceY }
         CinematicCamera.descentToSpawn(
@@ -78,7 +81,7 @@ class PreparationPhase : PhasePlugin {
             edges.maxOf { e ->
                 val dx = e.x - spawnLoc.x;
                 val dz = e.z - spawnLoc.z
-                kotlin.math.sqrt(dx * dx + dz * dz)
+                sqrt(dx * dx + dz * dz)
             }
         } else 30.0
 

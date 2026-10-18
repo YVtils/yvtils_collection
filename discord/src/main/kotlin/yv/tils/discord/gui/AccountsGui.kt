@@ -24,6 +24,9 @@ import yv.tils.gui.utils.Heads
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.coroutine.CoroutineHandler
+import org.bukkit.Bukkit
+import yv.tils.discord.utils.DiscordAccountNames
+import yv.tils.utils.modules.Core
 
 object AccountsGui {
     private fun text(key: String, viewer: Player, params: Map<String, Any> = emptyMap()) =
@@ -84,9 +87,9 @@ object AccountsGui {
             styled(AccountHeads.head(entry), Component.text(entry.minecraftName), lines)
         }.addClickHandler { _, event -> click(event.player()) }.build()
         AccountHeads.load(entry, item)
-        yv.tils.discord.utils.DiscordAccountNames.retrieve(entry.discordUserID).whenComplete { _, _ ->
-            if (yv.tils.utils.modules.Core.instance.isEnabled) {
-                org.bukkit.Bukkit.getScheduler().runTask(yv.tils.utils.modules.Core.instance, Runnable { item.notifyWindows() })
+        DiscordAccountNames.retrieve(entry.discordUserID).whenComplete { _, _ ->
+            if (Core.instance.isEnabled) {
+                Bukkit.getScheduler().runTask(Core.instance, Runnable { item.notifyWindows() })
             }
         }
         return item

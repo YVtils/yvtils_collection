@@ -38,6 +38,7 @@ import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
+import java.math.BigDecimal
 
 /**
  * Reflection/annotation-driven equivalent of [ConfigGui], for Kotlin `data class` config
@@ -462,8 +463,8 @@ object DataClassConfigGui {
 
             FieldKind.DOUBLE -> {
                 val current = (field.get(instance) as? Number)?.toDouble() ?: 0.0
-                field.set(instance, java.math.BigDecimal.valueOf(current)
-                    .add(java.math.BigDecimal.valueOf(delta.toLong(), 1)).toDouble())
+                field.set(instance, BigDecimal.valueOf(current)
+                    .add(BigDecimal.valueOf(delta.toLong(), 1)).toDouble())
             }
 
             else -> {}

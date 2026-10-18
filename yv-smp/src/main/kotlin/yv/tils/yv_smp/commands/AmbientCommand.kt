@@ -19,6 +19,8 @@ import yv.tils.yv_smp.logic.ambient.AmbientInterval
 import yv.tils.yv_smp.logic.ambient.AmbientSounds
 import yv.tils.yv_smp.logic.ambient.AmbientSource
 import yv.tils.yv_smp.permissions.Permissions
+import java.util.logging.Level
+import yv.tils.utils.modules.Core
 
 object AmbientCommand {
     fun register(root: Argument<*>) = root.apply {
@@ -217,8 +219,8 @@ object AmbientCommand {
     }
 
     private fun failure(sender: CommandSender, exception: Exception) {
-        yv.tils.utils.modules.Core.instance.logger.log(
-            java.util.logging.Level.SEVERE, "Ambient source operation failed", exception
+        Core.instance.logger.log(
+            Level.SEVERE, "Ambient source operation failed", exception
         )
         message(sender, LangStrings.AMBIENT_SAVE_FAILED)
     }

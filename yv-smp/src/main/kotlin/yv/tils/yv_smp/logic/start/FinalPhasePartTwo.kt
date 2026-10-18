@@ -29,6 +29,8 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveOutward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.particleCountdown
 import java.time.Duration
+import kotlin.math.sqrt
+import org.bukkit.HeightMap
 
 class FinalPhasePartTwo : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -55,7 +57,7 @@ class FinalPhasePartTwo : PhasePlugin {
         val islandRadius = if (edges.isNotEmpty()) edges.maxOf { e ->
             val dx = e.x - spawnLoc.x;
             val dz = e.z - spawnLoc.z
-            kotlin.math.sqrt(dx * dx + dz * dz)
+            sqrt(dx * dx + dz * dz)
         } else 32.0
         players.forEach { player ->
             player.playSound(player.location, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f)
@@ -181,7 +183,7 @@ class FinalPhasePartTwo : PhasePlugin {
         // "GO"       starts at t=60 → visible t=60..75
         val surfaceY = world.getHighestBlockYAt(
             spawnLoc.blockX, spawnLoc.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE
+            HeightMap.WORLD_SURFACE
         ).toDouble()
         val countdownCenter = spawnLoc.clone().apply { y = surfaceY }
 

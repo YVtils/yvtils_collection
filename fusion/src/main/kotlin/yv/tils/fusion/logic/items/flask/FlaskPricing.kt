@@ -2,6 +2,8 @@
  * MPL-2.0 with additional terms: https://yvtils.net/license */
 package yv.tils.fusion.logic.items.flask
 
+import kotlin.math.ceil
+
 /** Pure raw-XP pricing rules, independent of Bukkit item/interaction handling. */
 object FlaskPricing {
     data class Saturation(val amount: Float, val cost: Int)
@@ -9,7 +11,7 @@ object FlaskPricing {
     fun saturation(foodLevel: Int, current: Float, points: Int, xpPerPoint: Int, perUse: Int): Saturation {
         require(foodLevel in 0..20 && current.isFinite() && points >= 0 && xpPerPoint > 0 && perUse >= 0)
         val amount = minOf((foodLevel - current).coerceAtLeast(0f), perUse.toFloat(), (points / xpPerPoint).toFloat())
-        return Saturation(amount, kotlin.math.ceil(amount.toDouble() * xpPerPoint).toInt())
+        return Saturation(amount, ceil(amount.toDouble() * xpPerPoint).toInt())
     }
     data class Feeding(val food: Int, val cost: Int)
 

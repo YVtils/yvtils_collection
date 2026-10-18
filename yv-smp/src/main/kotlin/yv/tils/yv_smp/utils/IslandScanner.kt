@@ -20,6 +20,8 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import net.kyori.adventure.text.minimessage.MiniMessage
+import org.bukkit.Color
 
 /**
  * IslandScanner — detects the shoreline of a floating island by casting rays
@@ -231,9 +233,9 @@ object IslandScanner {
             Logger.info("    edge @ ${it.blockX}, ${it.blockY}, ${it.blockZ}")
         }
 
-        val greenDust = Particle.DustOptions(org.bukkit.Color.fromRGB(0, 220, 60), 1.0f)
-        val redDust = Particle.DustOptions(org.bukkit.Color.fromRGB(255, 30, 30), 1.0f)
-        val yellowDust = Particle.DustOptions(org.bukkit.Color.fromRGB(255, 220, 0), 1.8f)
+        val greenDust = Particle.DustOptions(Color.fromRGB(0, 220, 60), 1.0f)
+        val redDust = Particle.DustOptions(Color.fromRGB(255, 30, 30), 1.0f)
+        val yellowDust = Particle.DustOptions(Color.fromRGB(255, 220, 0), 1.8f)
 
         data class Dot(val x: Double, val y: Double, val z: Double, val dust: Particle.DustOptions)
 
@@ -306,12 +308,12 @@ object IslandScanner {
         Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             Bukkit.getScheduler().cancelTask(paintTask[0])
             Bukkit.getScheduler().cancelTask(outlineTask[0])
-            val mm = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+            val mm = MiniMessage.miniMessage()
             player.sendMessage(mm.deserialize("<gray>[Scanner] Debug finished."))
         }, 600L)
 
         // ── Chat summary ──────────────────────────────────────────────────────
-        val mm = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+        val mm = MiniMessage.miniMessage()
         player.sendMessage(
             mm.deserialize(
                 "<yellow>[Scanner] Rays: $angleSteps | Edges: <white>${edgePoints.size}</white> | Center: <white>$cx,$cz</white>"

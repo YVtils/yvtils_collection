@@ -10,10 +10,12 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import yv.tils.fusion.api.FusionRegistry
+import org.bukkit.event.player.PlayerItemConsumeEvent
+import yv.tils.utils.logger.Logger
 
 class FusionInteractionListener : Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    fun consume(event: org.bukkit.event.player.PlayerItemConsumeEvent) {
+    fun consume(event: PlayerItemConsumeEvent) {
         if (FusionItems.kind(event.item) == "NOURISHING_FLASK") event.isCancelled = true
     }
 
@@ -26,7 +28,7 @@ class FusionInteractionListener : Listener {
         try {
             FusionRegistry.behavior(kind)?.interact(event, item)
         } catch (error: Exception) {
-            yv.tils.utils.logger.Logger.error("Fusion item behavior failed: $kind", error)
+            Logger.error("Fusion item behavior failed: $kind", error)
         }
     }
 }

@@ -4,6 +4,7 @@ import com.sk89q.worldedit.math.BlockVector3
 import org.bukkit.entity.Player
 import yv.tils.regions.language.LangStrings.*
 import java.util.UUID
+import yv.tils.regions.data.Permissions
 
 /** Independent 3D selection; does not replace the player's full-height claim selection. */
 object SubzoneSelection {
@@ -12,7 +13,7 @@ object SubzoneSelection {
     private val selections = mutableMapOf<UUID, Selection>()
 
     fun select(player: Player, claim: Claim, first: Boolean) {
-        yv.tils.regions.data.Permissions.SUBZONES_CREATE.require(player)
+        Permissions.SUBZONES_CREATE.require(player)
         ClaimService.requireOwner(player, claim)
         check(player.world == claim.world) { SAME_WORLD.key }
         val at = BlockVector3.at(player.location.blockX, player.location.blockY, player.location.blockZ)

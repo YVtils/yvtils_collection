@@ -29,6 +29,7 @@ import yv.tils.fusion.api.OutputSelection
 import yv.tils.fusion.language.FusionText
 import yv.tils.fusion.logic.items.OutputLore
 import java.util.*
+import org.bukkit.event.entity.FoodLevelChangeEvent
 
 object NourishingFlask : FusionOutputType, FusionItemBehavior {
     private val lastUse = mutableMapOf<UUID, Int>()
@@ -110,7 +111,7 @@ object NourishingFlask : FusionOutputType, FusionItemBehavior {
         }
         // Reserve the use before invoking other listeners, preventing recursive/double-hand spending.
         lastUse[player.uniqueId] = tick
-        val change = org.bukkit.event.entity.FoodLevelChangeEvent(player, player.foodLevel + quote.food, item.clone())
+        val change = FoodLevelChangeEvent(player, player.foodLevel + quote.food, item.clone())
         if (!change.callEvent()) return
         // Other listeners may change hunger or XP while handling the event; price from the current state.
         val currentPoints = player.calculateTotalExperiencePoints()

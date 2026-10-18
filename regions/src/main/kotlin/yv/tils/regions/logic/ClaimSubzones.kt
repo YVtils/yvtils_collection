@@ -23,11 +23,15 @@ import yv.tils.regions.data.ClaimMetadata
 import yv.tils.regions.data.SubzoneRecord
 import yv.tils.regions.language.LangStrings.*
 import java.util.*
+import com.sk89q.worldedit.bukkit.BukkitAdapter
+import com.sk89q.worldguard.WorldGuard
+import org.bukkit.World
+import yv.tils.regions.data.Permissions
 
 object ClaimSubzones {
-    fun refresh(world: org.bukkit.World) {
-        val manager = com.sk89q.worldguard.WorldGuard.getInstance().platform.regionContainer
-            .get(com.sk89q.worldedit.bukkit.BukkitAdapter.adapt(world)) ?: return
+    fun refresh(world: World) {
+        val manager = WorldGuard.getInstance().platform.regionContainer
+            .get(BukkitAdapter.adapt(world)) ?: return
         val rollbacks = mutableListOf<() -> Unit>()
         try {
             ClaimService.claims(world).forEach { rollbacks += sync(it) }
@@ -43,7 +47,7 @@ object ClaimSubzones {
         .filter { it.id.startsWith(SubzonePolicies.prefix(claim.region.id)) }
 
     fun requireZone(sender: CommandSender, claim: Claim, id: String): SubzoneRecord {
-        yv.tils.regions.data.Permissions.SUBZONES_VIEW.require(sender)
+        Permissions.SUBZONES_VIEW.require(sender)
         ClaimService.requireOwner(sender, claim)
         return claim.metadata.subzones.firstOrNull { it.uuid == id } ?: error(SUBZONE_MISSING.key)
     }
@@ -107,7 +111,7 @@ object ClaimSubzones {
     }
 
     fun create(player: Player, claim: Claim, name: String): SubzoneRecord {
-        yv.tils.regions.data.Permissions.SUBZONES_CREATE.require(player)
+        Permissions.SUBZONES_CREATE.require(player)
         ClaimService.requireOwner(player, claim)
         check(name.isNotBlank() && name.length <= 64 && name.none { it.isISOControl() }) { INVALID_NAME.key }
         check(
@@ -140,13 +144,13 @@ object ClaimSubzones {
     }
 
     fun delete(sender: CommandSender, claim: Claim, id: String) {
-        yv.tils.regions.data.Permissions.SUBZONES_DELETE.require(sender)
+        Permissions.SUBZONES_DELETE.require(sender)
         requireZone(sender, claim, id)
         save(sender, claim, claim.metadata.subzones.filterNot { it.uuid == id })
     }
 
     fun open(sender: CommandSender, claim: Claim, id: String, enabled: Boolean) {
-        yv.tils.regions.data.Permissions.SUBZONES_OPEN.require(sender)
+        Permissions.SUBZONES_OPEN.require(sender)
         val zone = requireZone(sender, claim, id)
         check(!enabled || ConfigFile.state.allowOpenSubzones) { SUBZONE_OPEN_DISABLED.key }
         save(
@@ -156,7 +160,7 @@ object ClaimSubzones {
     }
 
     fun set(sender: CommandSender, claim: Claim, id: String, flag: Flag<*>, role: ClaimRole?, value: Any?) {
-        yv.tils.regions.data.Permissions.SUBZONES_FLAGS.require(sender)
+        Permissions.SUBZONES_FLAGS.require(sender)
         val zone = requireZone(sender, claim, id)
         check(!zone.openProtection || !ConfigFile.state.allowOpenSubzones) { SUBZONE_OPEN_ACTIVE.key }
         check(ClaimFlags.enabled(flag, role)) { FLAG_CHANGED.key }

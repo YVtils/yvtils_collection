@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.profile.PlayerProfile
 import yv.tils.fusion.*
 import java.util.function.Consumer
+import org.bukkit.event.inventory.ClickType
 
 /** All methods and callbacks run on the server thread unless explicitly documented otherwise. */
 interface FusionApi {
@@ -51,7 +52,7 @@ interface FusionOutputType {
     /** Click-aware control; existing addons keep their original configure callback. */
     fun configureClick(
         player: Player, recipe: FusionRecipe, selection: OutputSelection,
-        click: org.bukkit.event.inventory.ClickType, selected: Consumer<OutputSelection>
+        click: ClickType, selected: Consumer<OutputSelection>
     ) =
         configure(player, recipe, selection, selected)
 

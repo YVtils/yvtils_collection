@@ -23,6 +23,8 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
+import java.net.URI
+import yv.tils.discord.utils.emoji.RegistrationEmoji
 
 class JDARegistration : ListenerAdapter() {
     companion object {
@@ -64,7 +66,7 @@ class JDARegistration : ListenerAdapter() {
                 TextDisplay.of(AccountText.raw("panelDescription")),
                 TextDisplay.of("### ⬇️ ${AccountText.raw("registrationCallToAction")}"),
                 ActionRow.of(Button.success("whitelist:register", AccountText.raw("registerButton"))
-                    .withEmoji(yv.tils.discord.utils.emoji.RegistrationEmoji.get()))
+                    .withEmoji(RegistrationEmoji.get()))
             )
             fun helpDestination(label: String, destination: String): String =
                 if (destination.startsWith("<#")) "- ${AccountText.raw(label)}: $destination"
@@ -88,7 +90,7 @@ class JDARegistration : ListenerAdapter() {
             val channelID = value.removePrefix("<#").removeSuffix(">")
                 .takeIf { it.matches(Regex("[0-9]{17,20}")) && (value == it || value == "<#$it>") }
             if (channelID != null) return "<#$channelID>"
-            val uri = runCatching { java.net.URI(value) }.getOrNull()
+            val uri = runCatching { URI(value) }.getOrNull()
             if (uri == null || uri.scheme !in listOf("http", "https") || uri.host.isNullOrBlank() ||
                 value.any { it.isWhitespace() || it in "()<>" }) throw AccountService.Failure("invalidHelpLink")
             val discordChannel = Regex("/channels/([0-9]{17,20})/([0-9]{17,20})/?").matchEntire(uri.path)

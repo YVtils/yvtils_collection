@@ -7,6 +7,7 @@ import yv.tils.regions.configs.ConfigFile
 import yv.tils.regions.language.LangStrings
 import yv.tils.regions.language.RegionFailure
 import java.util.UUID
+import yv.tils.regions.data.Permissions
 
 object ClaimCurrency {
     fun price(bounds: ClaimBounds): Long =
@@ -38,7 +39,7 @@ object ClaimCurrency {
             )
         }
         val quote = ClaimClusters.quote(candidate, existing, ConfigFile.state)
-        val exempt = !ConfigFile.state.currencyEnabled || yv.tils.regions.data.Permissions.BYPASS_COST.allowed(sender)
+        val exempt = !ConfigFile.state.currencyEnabled || Permissions.BYPASS_COST.allowed(sender)
         // Credit only the newly covered deficit to the changed claim; neighbouring credits remain untouched.
         return Payment(if (exempt) 0 else quote.due, Math.addExact(ownCredit, quote.due))
     }

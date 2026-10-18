@@ -23,6 +23,7 @@ import org.spongepowered.configurate.util.NamingSchemes
 import java.math.BigInteger
 import java.sql.Date
 import java.sql.Timestamp
+import java.io.FileNotFoundException
 
 /**
  * ObjectMapper-based facade over [ConfigurateFileUtils] for persisting a Kotlin `data class`
@@ -162,7 +163,7 @@ class ObjectMapperFileUtils {
         ): T {
             val file = try {
                 ConfigurateFileUtils.load(path, format, overwriteParentDir)
-            } catch (_: java.io.FileNotFoundException) {
+            } catch (_: FileNotFoundException) {
                 return default
             }
 
@@ -217,7 +218,7 @@ class ObjectMapperFileUtils {
         ): MutableList<T> {
             val file = try {
                 ConfigurateFileUtils.load(path, format, overwriteParentDir)
-            } catch (_: java.io.FileNotFoundException) {
+            } catch (_: FileNotFoundException) {
                 return mutableListOf()
             }
 

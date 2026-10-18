@@ -15,6 +15,10 @@ package yv.tils.discord.actions.buttons.handler
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import yv.tils.discord.logic.whitelist.WhitelistComponents
 import yv.tils.discord.logic.whitelist.WhitelistLogic
+import yv.tils.discord.actions.commands.handler.JDAWhitelist
+import yv.tils.discord.actions.modals.JDARegistration
+import yv.tils.discord.language.AccountText
+import yv.tils.utils.coroutine.CoroutineHandler
 
 class JDAPageSwitch {
     fun executeSitePrevious(e: ButtonInteractionEvent) {
@@ -79,16 +83,16 @@ class JDAPageSwitch {
     }
 
     private fun switchPage(e: ButtonInteractionEvent, page: Int) {
-        if (!yv.tils.discord.actions.modals.JDARegistration.allowedGuild(e.guild?.id) ||
-            !yv.tils.discord.actions.commands.handler.JDAWhitelist.authorized(e.member)) {
-            e.reply(yv.tils.discord.language.AccountText.raw("permission")).setEphemeral(true).queue()
+        if (!JDARegistration.allowedGuild(e.guild?.id) ||
+            !JDAWhitelist.authorized(e.member)) {
+            e.reply(AccountText.raw("permission")).setEphemeral(true).queue()
             return
         }
         e.deferEdit().queue({ hook ->
-            yv.tils.utils.coroutine.CoroutineHandler.launchTask(task = {
+            CoroutineHandler.launchTask(task = {
                 try {
                     hook.editOriginalComponents(WhitelistComponents().forceRemoveContainer(page.coerceAtLeast(1))).useComponentsV2().queue()
-                } catch (error: Exception) { hook.sendMessage(yv.tils.discord.language.AccountText.error(error)).setEphemeral(true).queue() }
+                } catch (error: Exception) { hook.sendMessage(AccountText.error(error)).setEphemeral(true).queue() }
             }, isOnce = true)
         })
     }

@@ -17,6 +17,10 @@ import yv.tils.gui.utils.GuiStyle
 import xyz.xenondevs.invui.gui.Gui
 import yv.tils.gui.utils.Filler
 import yv.tils.utils.logger.Logger
+import org.bukkit.inventory.ItemStack
+import xyz.xenondevs.invui.gui.Markers
+import xyz.xenondevs.invui.gui.PagedGui
+import yv.tils.fusion.api.OutputSelection
 
 object RecipeEditor {
     fun open(player: Player, draft: FusionRecipe, original: FusionRecipe?) {
@@ -65,7 +69,7 @@ object RecipeEditor {
         field('c', Material.BOOKSHELF, "editCategory", draft.category) { draft.copy(category = it) }
         gui.addIngredient('t', Item.builder().setItemProvider {
             FusionStyle.item(
-                if (draft.exactThumbnail.isBlank()) org.bukkit.inventory.ItemStack(Material.valueOf(draft.thumbnail))
+                if (draft.exactThumbnail.isBlank()) ItemStack(Material.valueOf(draft.thumbnail))
                 else FusionItems.decode(draft.exactThumbnail), FusionText.text(player, "editThumbnail"),
                 listOf(GuiStyle.lore(FusionText.text(player, "pickHint")))
             )
@@ -120,7 +124,7 @@ object RecipeEditor {
         )
         gui.addIngredient('o', Item.builder().setItemProvider {
             FusionStyle.item(
-                if (draft.exactOutput.isBlank()) org.bukkit.inventory.ItemStack(Material.valueOf(draft.output))
+                if (draft.exactOutput.isBlank()) ItemStack(Material.valueOf(draft.output))
                 else FusionItems.decode(draft.exactOutput), FusionText.text(player, "editOutput"),
                 listOf(GuiStyle.lore(FusionText.text(player, "pickHint")))
             )
@@ -182,8 +186,8 @@ object RecipeEditor {
         })
         gui.addIngredient('v', Item.builder().setItemProvider {
             val output = runCatching {
-                FusionItems.output(draft, yv.tils.fusion.api.OutputSelection(), preview = true)
-            }.getOrElse { org.bukkit.inventory.ItemStack(Material.BARRIER) }
+                FusionItems.output(draft, OutputSelection(), preview = true)
+            }.getOrElse { ItemStack(Material.BARRIER) }
             output.editMeta { meta ->
                 meta.displayName(GuiStyle.title(Component.text(draft.name)))
                 meta.lore((listOf(Component.text(draft.description)) + draft.ingredients.map {
@@ -217,10 +221,10 @@ object RecipeEditor {
                 mapOf("setting" to FusionGui.ingredientName(ingredient))
             )
         }
-        val gui = xyz.xenondevs.invui.gui.PagedGui.itemsBuilder()
+        val gui = PagedGui.itemsBuilder()
             .setStructure("# x x x x x x x #", "# x x x x x x x #", "b # # < a > # # #")
             .addIngredient('#', Filler.item())
-            .addIngredient('x', xyz.xenondevs.invui.gui.Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+            .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
             .addIngredient('<', FusionGui.page(player, false, true))
             .addIngredient('>', FusionGui.page(player, true, true))
             .addIngredient('b', FusionGui.button(player, Material.ARROW, "back") { open(it, draft, original) })
@@ -237,13 +241,13 @@ object RecipeEditor {
     }
 
     private fun ingredientChoice(
-        player: Player, item: org.bukkit.inventory.ItemStack, back: (Player) -> Unit,
+        player: Player, item: ItemStack, back: (Player) -> Unit,
         select: (Player, Ingredient) -> Unit
     ) {
         val gui = Gui.builder().setStructure("# # # # # # # # #", "# m # i # e # # #", "b # # # # # # # #")
             .addIngredient('#', Filler.item())
             .addIngredient('b', FusionGui.button(player, Material.ARROW, "back", click = back))
-            .addIngredient('i', Item.simple(xyz.xenondevs.invui.item.ItemWrapper(item.clone())))
+            .addIngredient('i', Item.simple(ItemWrapper(item.clone())))
             .addIngredient('m', FusionGui.button(player, Material.CRAFTING_TABLE, "matchMaterial") {
                 if (FusionGui.allowed(it, true)) select(
                     it,
@@ -290,10 +294,10 @@ object RecipeEditor {
                 }
             }
         }
-        val gui = xyz.xenondevs.invui.gui.PagedGui.itemsBuilder()
+        val gui = PagedGui.itemsBuilder()
             .setStructure("# # # # # # # # #", "# x x x x x x x #", "b # d < a > # # #")
             .addIngredient('#', Filler.item())
-            .addIngredient('x', xyz.xenondevs.invui.gui.Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+            .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
             .addIngredient('<', FusionGui.page(player, false, true))
             .addIngredient('>', FusionGui.page(player, true, true))
             .addIngredient('b', FusionGui.button(player, Material.ARROW, "back") { open(it, draft, original) })
@@ -339,10 +343,10 @@ object RecipeEditor {
                 if (FusionGui.allowed(it, true)) settings(it, draft.copy(settings = draft.settings - key), original)
             }
         }
-        val gui = xyz.xenondevs.invui.gui.PagedGui.itemsBuilder()
+        val gui = PagedGui.itemsBuilder()
             .setStructure("# x x x x x x x #", "b # # < # > # # #")
             .addIngredient('#', Filler.item())
-            .addIngredient('x', xyz.xenondevs.invui.gui.Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+            .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
             .addIngredient('<', FusionGui.page(player, false, true))
             .addIngredient('>', FusionGui.page(player, true, true))
             .addIngredient('b', FusionGui.button(player, Material.ARROW, "back") { settings(it, draft, original) })

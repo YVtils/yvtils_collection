@@ -18,6 +18,8 @@ import yv.tils.stats.data.StatValue
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
+import java.lang.Double as JavaDouble
+import yv.tils.stats.data.PersistedStat
 
 /**
  * Thread-safe registry for stats metrics.
@@ -81,13 +83,13 @@ object StatsRegistry {
             var next: Long
             do {
                 current = sum.get()
-                val currentDouble = java.lang.Double.longBitsToDouble(current)
-                next = java.lang.Double.doubleToLongBits(currentDouble + value)
+                val currentDouble = JavaDouble.longBitsToDouble(current)
+                next = JavaDouble.doubleToLongBits(currentDouble + value)
             } while (!sum.compareAndSet(current, next))
         }
 
         fun getCount(): Long = count.get()
-        fun getSum(): Double = java.lang.Double.longBitsToDouble(sum.get())
+        fun getSum(): Double = JavaDouble.longBitsToDouble(sum.get())
 
         fun toHistogramData(): HistogramData = HistogramData(
             count = getCount(),
@@ -135,7 +137,7 @@ object StatsRegistry {
         /**
          * Set the gauge to a specific double value (stored as long bits).
          */
-        fun set(value: Double) = set(key, java.lang.Double.doubleToLongBits(value))
+        fun set(value: Double) = set(key, JavaDouble.doubleToLongBits(value))
 
         /**
          * Increment the gauge by 1.
@@ -577,7 +579,7 @@ object StatsRegistry {
     /**
      * Restore stats from persistence. Internal use only.
      */
-    internal fun restore(persistedStats: Map<String, yv.tils.stats.data.PersistedStat>) {
+    internal fun restore(persistedStats: Map<String, PersistedStat>) {
         for ((key, persisted) in persistedStats) {
             val type = try {
                 StatType.valueOf(persisted.type)

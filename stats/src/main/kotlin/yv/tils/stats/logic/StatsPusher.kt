@@ -26,6 +26,9 @@ import java.net.URI
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 /**
  * Service for pushing stats to the YVtils API at api.yvtils.net/stats.
@@ -449,11 +452,11 @@ object StatsPusher {
                 
                 return PushResult.Error("HTTP $responseCode: $errorBody", responseCode)
             }
-        } catch (e: java.net.SocketTimeoutException) {
+        } catch (e: SocketTimeoutException) {
             return PushResult.Error("Connection timed out")
-        } catch (e: java.net.UnknownHostException) {
+        } catch (e: UnknownHostException) {
             return PushResult.Error("Could not resolve host: ${e.message}")
-        } catch (e: java.net.ConnectException) {
+        } catch (e: ConnectException) {
             return PushResult.Error("Connection refused: ${e.message}")
         } catch (e: Exception) {
             return PushResult.Error("Request failed: ${e.message}")

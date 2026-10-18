@@ -20,6 +20,7 @@ import yv.tils.discord.configs.StatsSyncSaveFile
 import yv.tils.discord.logic.AppLogic.Companion.jda
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import net.dv8tion.jda.api.entities.Guild
 
 class StatsAsChannels {
     companion object {
@@ -119,7 +120,7 @@ class StatsAsChannels {
         channelIDs.putAll(channelIDList)
     }
     
-    private fun createVoiceChannel(guild: net.dv8tion.jda.api.entities.Guild, name: String): CompletableFuture<VoiceChannel> {
+    private fun createVoiceChannel(guild: Guild, name: String): CompletableFuture<VoiceChannel> {
         val future = CompletableFuture<VoiceChannel>()
         
         guild.createVoiceChannel(name).queue({ channel ->

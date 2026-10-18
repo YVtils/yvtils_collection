@@ -28,6 +28,7 @@ import java.util.*
 import java.util.function.Consumer
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.math.abs
 
 @OptIn(ExperimentalAtomicApi::class)
 class LeaveDecayHandler {
@@ -161,7 +162,7 @@ class LeaveDecayHandler {
 
                 // Enqueue 6-neighborhood neighbors based on their current distance
                 for (dx in -1..1) for (dy in -1..1) for (dz in -1..1) {
-                    if (kotlin.math.abs(dx) + kotlin.math.abs(dy) + kotlin.math.abs(dz) != 1) continue
+                    if (abs(dx) + abs(dy) + abs(dz) != 1) continue
                     val nx = x + dx
                     val ny = y + dy
                     val nz = z + dz

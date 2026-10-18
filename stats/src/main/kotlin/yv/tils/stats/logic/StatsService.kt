@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 import yv.tils.stats.configs.ConfigFile
 import yv.tils.stats.data.*
 import yv.tils.stats.registry.StatsRegistry
+import org.bukkit.Bukkit
 
 /**
  * Core service for stats serialization and export.
@@ -131,7 +132,7 @@ class StatsService {
          */
         private fun buildMetadata(): StatsMetadata {
             val serverVersion = try {
-                org.bukkit.Bukkit.getVersion()
+                Bukkit.getVersion()
             } catch (_: Exception) {
                 "Unknown"
             }

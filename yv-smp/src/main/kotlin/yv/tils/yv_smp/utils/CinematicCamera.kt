@@ -20,6 +20,9 @@ import org.bukkit.entity.Player
 import yv.tils.utils.modules.Core
 import yv.tils.yv_smp.utils.CinematicCamera.INTERPOLATION_INTERVAL
 import kotlin.math.*
+import java.util.UUID
+import org.bukkit.GameMode
+import org.bukkit.HeightMap
 
 /**
  * Smooth cinematic camera system for the start sequence.
@@ -83,14 +86,14 @@ object CinematicCamera {
      */
     private const val INTERPOLATION_INTERVAL = 1
 
-    private val cameraEntities = mutableMapOf<java.util.UUID, ItemDisplay>()
+    private val cameraEntities = mutableMapOf<UUID, ItemDisplay>()
     private val activeTasks = mutableListOf<Int>()
 
     /**
      * Last (unwrapped, may exceed +-180) yaw sent to each player's camera
      * display - see [unwrapYaw].
      */
-    private val lastYaw = mutableMapOf<java.util.UUID, Float>()
+    private val lastYaw = mutableMapOf<UUID, Float>()
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -105,7 +108,7 @@ object CinematicCamera {
     ) {
         val surfaceY = center.world?.getHighestBlockYAt(
             center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE
+            HeightMap.WORLD_SURFACE
         )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
@@ -126,7 +129,7 @@ object CinematicCamera {
     ) {
         val surfaceY = center.world?.getHighestBlockYAt(
             center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE
+            HeightMap.WORLD_SURFACE
         )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
@@ -156,7 +159,7 @@ object CinematicCamera {
     ) {
         val surfaceY = center.world?.getHighestBlockYAt(
             center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE
+            HeightMap.WORLD_SURFACE
         )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
@@ -183,7 +186,7 @@ object CinematicCamera {
         // Heights are above the actual island surface, not the raw spawn Y
         val surfaceY = center.world?.getHighestBlockYAt(
             center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE
+            HeightMap.WORLD_SURFACE
         )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
@@ -208,7 +211,7 @@ object CinematicCamera {
     ) {
         val surfaceY = center.world?.getHighestBlockYAt(
             center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE
+            HeightMap.WORLD_SURFACE
         )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
@@ -237,7 +240,7 @@ object CinematicCamera {
     ) {
         val surfaceY = center.world?.getHighestBlockYAt(
             center.blockX, center.blockZ,
-            org.bukkit.HeightMap.WORLD_SURFACE
+            HeightMap.WORLD_SURFACE
         )?.toDouble() ?: center.y
         val sc = center.clone().apply { y = surfaceY }
         players.forEachIndexed { index, player ->
@@ -298,7 +301,7 @@ object CinematicCamera {
                     Bukkit.getScheduler().cancelTask(taskIdHolder[0])
                     activeTasks.remove(taskIdHolder[0])
                     dismountCamera(player)
-                    if (restoreGameMode) player.gameMode = org.bukkit.GameMode.SURVIVAL
+                    if (restoreGameMode) player.gameMode = GameMode.SURVIVAL
                     player.teleport(landing)
                 }
             }, 0L, INTERPOLATION_INTERVAL.toLong())
@@ -440,7 +443,7 @@ object CinematicCamera {
      * that's fine, Minecraft normalizes yaw for rendering regardless of the
      * raw float value.
      */
-    private fun unwrapYaw(uuid: java.util.UUID, targetYaw: Float): Float {
+    private fun unwrapYaw(uuid: UUID, targetYaw: Float): Float {
         val prev = lastYaw[uuid] ?: run {
             lastYaw[uuid] = targetYaw
             return targetYaw

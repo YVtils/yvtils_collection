@@ -9,6 +9,7 @@ import yv.tils.regions.language.LangStrings
 import yv.tils.regions.language.message
 import yv.tils.utils.modules.Core
 import java.util.UUID
+import yv.tils.regions.data.ClaimMetadata
 
 /** Main-thread API. Queries use current locations, not stale movement caches. */
 object ClaimOccupancy {
@@ -36,7 +37,7 @@ object ClaimOccupancy {
                     val parts = mutableListOf<Component>()
                     if (old != null) {
                         val custom =
-                            yv.tils.regions.data.ClaimMetadata.state.claims[old.first.toString()]?.goodbye.orEmpty()
+                            ClaimMetadata.state.claims[old.first.toString()]?.goodbye.orEmpty()
                         parts += if (custom.isEmpty()) LangStrings.GOODBYE_BAR.message("region" to old.second)
                             .component(player)
                         else Component.text(custom.replace("{region}", old.second).replace("{player}", player.name))

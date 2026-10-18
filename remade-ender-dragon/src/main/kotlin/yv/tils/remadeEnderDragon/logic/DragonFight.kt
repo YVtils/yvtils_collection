@@ -29,6 +29,7 @@ import org.bukkit.command.CommandSender
 import java.util.UUID
 import kotlin.math.*
 import kotlin.random.Random
+import org.bukkit.scoreboard.Scoreboard
 
 private data class RunningEffect(val end: Long, val attack: Attack?, val tick: (Long) -> Unit, val cleanup: () -> Unit)
 private data class Summon(val entity: LivingEntity, val expires: Long, val blue: Boolean, var nextWave: Long)
@@ -70,7 +71,7 @@ class DragonFight(
     private var empowerment = 0.0
     private var waveCasts = 0
     private var scaledHealth = originalMaxHealth
-    private val blueTeams = mutableMapOf<org.bukkit.scoreboard.Scoreboard, Team>()
+    private val blueTeams = mutableMapOf<Scoreboard, Team>()
     private val protections = mutableListOf<Protection>()
     private val uses = mutableMapOf<Attack, Int>()
     private val lastUse = mutableMapOf<Attack, Long>()

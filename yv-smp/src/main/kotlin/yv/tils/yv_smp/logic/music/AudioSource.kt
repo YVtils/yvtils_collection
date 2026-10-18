@@ -16,6 +16,7 @@ import org.bukkit.Registry
 import org.bukkit.Sound
 import java.net.URI
 import java.net.URL
+import java.io.File as IoFile
 
 /**
  * Represents different types of audio sources that can be played.
@@ -28,7 +29,7 @@ sealed class AudioSource {
      * Audio source from a local file on the server.
      * The file must exist and be in a supported format (e.g., .ogg, .wav).
      */
-    data class File(val file: java.io.File) : AudioSource() {
+    data class File(val file: IoFile) : AudioSource() {
         init {
             require(file.exists()) { "Audio file does not exist: ${file.absolutePath}" }
             require(file.isFile) { "Path is not a file: ${file.absolutePath}" }

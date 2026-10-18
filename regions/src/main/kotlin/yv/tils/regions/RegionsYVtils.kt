@@ -32,6 +32,7 @@ import yv.tils.regions.logic.SubzoneSelection
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
+import com.sk89q.worldedit.bukkit.BukkitAdapter
 
 class RegionsYVtils : Module.YVtilsModule {
     companion object {
@@ -78,7 +79,7 @@ class RegionsYVtils : Module.YVtilsModule {
         Core.instance.server.worlds.forEach(ClaimService::refreshMetadata)
         Core.instance.server.worlds.filter {
             WorldGuard.getInstance().platform.regionContainer.get(
-                com.sk89q.worldedit.bukkit.BukkitAdapter.adapt(
+                BukkitAdapter.adapt(
                     it
                 )
             ) != null

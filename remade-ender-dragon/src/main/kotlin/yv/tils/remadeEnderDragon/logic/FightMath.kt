@@ -9,6 +9,11 @@ package yv.tils.remadeEnderDragon.logic
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 /** Pure rules shared by runtime and boundary tests. */
 object FightMath {
@@ -16,11 +21,11 @@ object FightMath {
     fun healthConversion(visibleMaximum: Double, effectiveMaximum: Double): Double = visibleMaximum / effectiveMaximum
 
     fun angleDistance(a: Double, b: Double): Double =
-        kotlin.math.abs(kotlin.math.atan2(kotlin.math.sin(a - b), kotlin.math.cos(a - b)))
+        abs(atan2(sin(a - b), cos(a - b)))
 
     fun inSweep(dx: Double, dz: Double, bearing: Double, radius: Double, halfWidthDegrees: Double): Boolean =
         dx * dx + dz * dz in 16.0..(radius * radius) &&
-                angleDistance(kotlin.math.atan2(dz, dx), bearing) <= Math.toRadians(halfWidthDegrees)
+                angleDistance(atan2(dz, dx), bearing) <= Math.toRadians(halfWidthDegrees)
 
     fun piercedReduction(reduction: Double, piercing: Double): Double =
         if (reduction < 0.0) reduction * (1.0 - piercing.coerceIn(0.0, 1.0)) else reduction
@@ -42,9 +47,9 @@ object FightMath {
         val distanceSquared = dx * dx + dz * dz
         if (distanceSquared > radius * radius) return false
         if (distanceSquared < 0.0001) return true
-        val forwardLength = kotlin.math.sqrt(forwardX * forwardX + forwardZ * forwardZ)
+        val forwardLength = sqrt(forwardX * forwardX + forwardZ * forwardZ)
         if (forwardLength < 0.0001) return false
-        return (dx * forwardX + dz * forwardZ) / (kotlin.math.sqrt(distanceSquared) * forwardLength) >= kotlin.math.sqrt(
+        return (dx * forwardX + dz * forwardZ) / (sqrt(distanceSquared) * forwardLength) >= sqrt(
             0.5
         )
     }

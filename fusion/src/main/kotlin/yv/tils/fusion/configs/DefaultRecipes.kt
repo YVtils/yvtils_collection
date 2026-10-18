@@ -4,10 +4,11 @@ package yv.tils.fusion.configs
 
 import yv.tils.fusion.FusionRecipe
 import yv.tils.fusion.Ingredient
+import org.bukkit.Material
 
 /** Bootstrap recipes only; administrator files become authoritative after initialization. */
 object DefaultRecipes {
-    val glassMaterials: List<String> = listOf("GLASS") + org.bukkit.Material.entries
+    val glassMaterials: List<String> = listOf("GLASS") + Material.entries
         .filter { it.name.endsWith("_STAINED_GLASS") }.map { it.name }
 
     /** Upgrade only the built-in plain-glass selector, preserving exact/tag/custom selectors. */

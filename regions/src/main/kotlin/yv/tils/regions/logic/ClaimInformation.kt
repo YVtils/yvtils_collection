@@ -11,9 +11,11 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import java.util.Locale
+import yv.tils.regions.data.Permissions
 
 object ClaimInformation {
-    private val timestampFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm z", java.util.Locale.ROOT)
+    private val timestampFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm z", Locale.ROOT)
         .withZone(ZoneId.systemDefault())
 
     fun formattedTimestamp(created: Long): String = timestampFormat.format(Instant.ofEpochMilli(created))
@@ -42,7 +44,7 @@ object ClaimInformation {
             .map { (flag, value) -> FLAG_SUMMARY.message("flag" to flag.name, "value" to valueName(sender, value)) }
 
     fun sendSummary(sender: CommandSender, claim: Claim) {
-        yv.tils.regions.data.Permissions.INFO.require(sender)
+        Permissions.INFO.require(sender)
         val bounds = ClaimBounds(claim.world, claim.region.minimumPoint, claim.region.maximumPoint)
         RegionText.send(sender, CURRENT_AREA_SUMMARY.message(
             "region" to claim.name,
@@ -104,7 +106,7 @@ object ClaimInformation {
     }
 
     fun send(sender: CommandSender, claim: Claim) {
-        yv.tils.regions.data.Permissions.INFO.require(sender)
+        Permissions.INFO.require(sender)
         messages(sender, claim).forEach { RegionText.send(sender, it) }
     }
 }

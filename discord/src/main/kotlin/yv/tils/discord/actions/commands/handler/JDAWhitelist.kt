@@ -15,6 +15,7 @@ import yv.tils.discord.language.RegisterStrings.LangStrings
 import yv.tils.discord.logic.whitelist.*
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
+import net.dv8tion.jda.api.entities.Member
 
 class JDAWhitelist {
     companion object {
@@ -22,7 +23,7 @@ class JDAWhitelist {
             get() = ConfigFile.getValueAsString("commands.whitelistCommand.permission") ?: "MANAGE_CHANNEL"
 
         fun permission() = runCatching { Permission.valueOf(cmdPermission) }.getOrDefault(Permission.MANAGE_CHANNEL)
-        fun authorized(member: net.dv8tion.jda.api.entities.Member?) = member?.hasPermission(permission()) == true
+        fun authorized(member: Member?) = member?.hasPermission(permission()) == true
     }
 
     fun executeCommand(e: SlashCommandInteractionEvent) {

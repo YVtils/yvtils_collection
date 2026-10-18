@@ -30,6 +30,7 @@ import yv.tils.essentials.language.LangStrings
 import yv.tils.utils.modules.Core
 import yv.tils.utils.player.PlayerUtils.Companion.isSupported
 import java.util.*
+import org.bukkit.event.HandlerList
 
 /** Temporary spawn gliding, coordinated with essentials' normal /fly ownership. */
 object SpawnElytra : Listener {
@@ -53,7 +54,7 @@ object SpawnElytra : Listener {
         Core.instance.server.onlinePlayers.forEach { release(it) }
         grantedFlight.clear()
         flights.clear()
-        org.bukkit.event.HandlerList.unregisterAll(this)
+        HandlerList.unregisterAll(this)
     }
 
     private fun eligible(player: Player): Boolean =

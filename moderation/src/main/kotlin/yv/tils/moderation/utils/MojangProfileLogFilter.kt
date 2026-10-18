@@ -21,6 +21,7 @@ import org.apache.logging.log4j.core.Logger
 import org.apache.logging.log4j.core.filter.AbstractFilter
 import org.apache.logging.log4j.message.Message
 import yv.tils.utils.logger.DEBUG_LEVEL
+import yv.tils.utils.logger.Logger as YVtilsLogger
 
 /**
  * Log4j2 filter to suppress Mojang profile lookup warnings.
@@ -37,10 +38,10 @@ class MojangProfileLogFilter : AbstractFilter() {
 
     private fun shouldSuppressWarning(): Boolean {
         // Allow warnings to show when debug mode is EXTRA (4) or higher
-        return !yv.tils.utils.logger.Logger.Companion::class.java.getDeclaredField("debugMode").apply {
+        return !YVtilsLogger.Companion::class.java.getDeclaredField("debugMode").apply {
             isAccessible = true
         }.getBoolean(null) ||
-        yv.tils.utils.logger.Logger.Companion::class.java.getDeclaredField("debugLevel").apply {
+        YVtilsLogger.Companion::class.java.getDeclaredField("debugLevel").apply {
             isAccessible = true
         }.getInt(null) < DEBUG_LEVEL.EXTRA.level
     }

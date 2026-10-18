@@ -22,6 +22,11 @@ import yv.tils.regions.logic.ClaimFlags
 import yv.tils.regions.logic.ClaimSelection
 import yv.tils.regions.logic.ClaimService
 import yv.tils.utils.modules.Core
+import com.sk89q.worldedit.bukkit.BukkitAdapter
+import com.sk89q.worldguard.WorldGuard
+import yv.tils.regions.logic.ClaimOccupancy
+import yv.tils.regions.logic.ClaimSubzones
+import yv.tils.regions.logic.SubzoneSelection
 
 /** Releases transient selections and particle tasks when a player disconnects. */
 class RegionsJoin : Listener {
@@ -31,14 +36,14 @@ class RegionsJoin : Listener {
             if (ConfigFile.state.enabled) {
                 ClaimService.upgradeNames(event.world)
                 ClaimService.refreshMetadata(event.world)
-                if (com.sk89q.worldguard.WorldGuard.getInstance().platform.regionContainer.get(
-                        com.sk89q.worldedit.bukkit.BukkitAdapter.adapt(
+                if (WorldGuard.getInstance().platform.regionContainer.get(
+                        BukkitAdapter.adapt(
                             event.world
                         )
                     ) != null
                 )
                     ClaimFlags.catchUp(event.world)
-                yv.tils.regions.logic.ClaimSubzones.refresh(event.world)
+                ClaimSubzones.refresh(event.world)
             }
         })
     }
@@ -46,7 +51,7 @@ class RegionsJoin : Listener {
     @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
         ClaimSelection.clear(event.player.uniqueId)
-        yv.tils.regions.logic.SubzoneSelection.clear(event.player.uniqueId)
-        yv.tils.regions.logic.ClaimOccupancy.forget(event.player.uniqueId)
+        SubzoneSelection.clear(event.player.uniqueId)
+        ClaimOccupancy.forget(event.player.uniqueId)
     }
 }

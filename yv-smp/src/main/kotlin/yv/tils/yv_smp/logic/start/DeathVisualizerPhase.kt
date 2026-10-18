@@ -30,6 +30,9 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgePillarRise
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
+import kotlin.math.PI
+import kotlin.math.sqrt
+import org.bukkit.GameMode
 
 class DeathVisualizerPhase : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -42,14 +45,14 @@ class DeathVisualizerPhase : PhasePlugin {
         val spawnLoc = world.spawnLocation
 
         // ── Camera: pendulum — eerie oscillating sweep, never a full revolution ─
-        players.forEach { it.gameMode = org.bukkit.GameMode.SPECTATOR }
+        players.forEach { it.gameMode = GameMode.SPECTATOR }
         CinematicCamera.pendulum(
             players = players,
             center = spawnLoc,
             orbitRadius = 38.0,
             height = 14.0,
             durationTicks = 255L,
-            swingHalfAngle = kotlin.math.PI / 2.5,
+            swingHalfAngle = PI / 2.5,
             swingPeriod = 90L,
         )
         Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
@@ -68,7 +71,7 @@ class DeathVisualizerPhase : PhasePlugin {
         val islandRadius = if (edges.isNotEmpty()) edges.maxOf { e ->
             val dx = e.x - spawnLoc.x;
             val dz = e.z - spawnLoc.z
-            kotlin.math.sqrt(dx * dx + dz * dz)
+            sqrt(dx * dx + dz * dz)
         } else 30.0
 
         // ── 1. Dark soul edge glow — cliff wreathed in soul flame ────────────

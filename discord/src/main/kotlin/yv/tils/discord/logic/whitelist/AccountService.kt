@@ -12,6 +12,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.net.URI
 import java.util.UUID
+import java.net.HttpURLConnection
+import java.util.concurrent.Callable
 
 /** All entry points share this lock, including replacement, persistence and role completion. */
 object AccountService {
@@ -21,7 +23,7 @@ object AccountService {
     class RoleFailure(val entry: WhitelistEntry, cause: Throwable) : Exception("roles", cause)
 
     suspend fun <T> server(action: () -> T): T = withContext(Dispatchers.IO) {
-        Core.instance.server.scheduler.callSyncMethod(Core.instance, java.util.concurrent.Callable { action() }).get()
+        Core.instance.server.scheduler.callSyncMethod(Core.instance, Callable { action() }).get()
     }
 
     private suspend fun resolve(input: String, user: String): WhitelistEntry = withContext(Dispatchers.IO) {
@@ -37,7 +39,7 @@ object AccountService {
         }
         val endpoint = if (uuidInput == null) "https://api.minecraftservices.com/minecraft/profile/lookup/name/$name"
         else "https://api.minecraftservices.com/minecraft/profile/lookup/$uuidInput"
-        val connection = URI(endpoint).toURL().openConnection() as java.net.HttpURLConnection
+        val connection = URI(endpoint).toURL().openConnection() as HttpURLConnection
         try {
             connection.connectTimeout = 10000
             connection.readTimeout = 10000

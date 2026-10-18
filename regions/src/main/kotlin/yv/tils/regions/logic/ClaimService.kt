@@ -17,6 +17,8 @@ import yv.tils.regions.configs.ConfigFile
 import yv.tils.regions.data.*
 import yv.tils.regions.language.LangStrings.*
 import java.util.UUID
+import org.bukkit.command.ConsoleCommandSender
+import org.bukkit.command.RemoteConsoleCommandSender
 
 data class Claim(val world: World, val region: ProtectedRegion) {
     val uuid: UUID get() = UUID.fromString(region.id.removePrefix(ClaimService.PREFIX))
@@ -26,8 +28,8 @@ data class Claim(val world: World, val region: ProtectedRegion) {
 
 object ClaimService {
     const val PREFIX = "yv2_"
-    fun admin(sender: CommandSender) = sender is org.bukkit.command.ConsoleCommandSender ||
-            sender is org.bukkit.command.RemoteConsoleCommandSender || Permissions.ADMIN_OTHERS.allowed(sender)
+    fun admin(sender: CommandSender) = sender is ConsoleCommandSender ||
+            sender is RemoteConsoleCommandSender || Permissions.ADMIN_OTHERS.allowed(sender)
 
     fun manager(world: World): RegionManager = WorldGuard.getInstance().platform.regionContainer
         .get(BukkitAdapter.adapt(world)) ?: error(NO_MANAGER.key)

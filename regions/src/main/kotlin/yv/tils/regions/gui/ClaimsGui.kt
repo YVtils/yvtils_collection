@@ -48,6 +48,7 @@ import yv.tils.regions.logic.*
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.message.MessageUtils
 import java.util.*
+import org.bukkit.event.inventory.ClickType
 
 object ClaimsGui {
     fun action(player: Player, action: () -> Unit) = RegionText.action(player, action)
@@ -717,12 +718,12 @@ object ClaimsGui {
             )
             Item.builder().setItemProvider { viewer -> provider(viewer, flag) }.addClickHandler { item, click ->
                 action(player) {
-                    if (click.clickType() == org.bukkit.event.inventory.ClickType.RIGHT) {
+                    if (click.clickType() == ClickType.RIGHT) {
                         set(flag, null)
                         item.notifyWindows()
                         return@action
                     }
-                    if (click.clickType() != org.bukkit.event.inventory.ClickType.LEFT) return@action
+                    if (click.clickType() != ClickType.LEFT) return@action
                     val value = value(flag)
                     input(
                         player,

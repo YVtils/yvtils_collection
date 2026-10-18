@@ -28,6 +28,8 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgePillarRise
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
+import kotlin.math.sqrt
+import org.bukkit.GameMode
 
 class ItemClearPhase : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -40,7 +42,7 @@ class ItemClearPhase : PhasePlugin {
         val spawnLoc = world.spawnLocation
 
         // ── Camera: spiral descent — overhead crane dropping through the smoke ─
-        players.forEach { it.gameMode = org.bukkit.GameMode.SPECTATOR }
+        players.forEach { it.gameMode = GameMode.SPECTATOR }
         CinematicCamera.spiralDown(
             players = players,
             center = spawnLoc,
@@ -65,7 +67,7 @@ class ItemClearPhase : PhasePlugin {
         val islandRadius = if (edges.isNotEmpty()) edges.maxOf { e ->
             val dx = e.x - spawnLoc.x;
             val dz = e.z - spawnLoc.z
-            kotlin.math.sqrt(dx * dx + dz * dz)
+            sqrt(dx * dx + dz * dz)
         } else 28.0
 
         // ── 1. Electric edge glow — items being incinerated at the cliff ──────

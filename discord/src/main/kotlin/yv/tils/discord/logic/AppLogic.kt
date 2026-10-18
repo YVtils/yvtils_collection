@@ -41,6 +41,8 @@ import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import java.time.Duration
 import org.apache.logging.log4j.core.Logger as Logger4J
+import org.bukkit.scheduler.BukkitTask
+import yv.tils.discord.actions.modals.JDARegistration
 
 class AppLogic {
     companion object {
@@ -51,7 +53,7 @@ class AppLogic {
         var started = false
         @Volatile
         private var stopping = false
-        private var connectionTask: org.bukkit.scheduler.BukkitTask? = null
+        private var connectionTask: BukkitTask? = null
         private fun shutdownPendingConnection() {
             if (::jda.isInitialized) jda.shutdownNow()
         }
@@ -139,7 +141,7 @@ class AppLogic {
         builder.addEventListeners(JDACommandsListener())
 
         builder.addEventListeners(JDAButtonsListener())
-        builder.addEventListeners(yv.tils.discord.actions.modals.JDARegistration())
+        builder.addEventListeners(JDARegistration())
 
         builder.addEventListeners(JDASelectListener())
 

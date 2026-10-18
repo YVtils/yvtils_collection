@@ -27,6 +27,8 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgePillarRise
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
+import kotlin.math.sqrt
+import org.bukkit.GameMode
 
 class FinalPhase : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -39,7 +41,7 @@ class FinalPhase : PhasePlugin {
         val spawnLoc = world.spawnLocation
 
         // ── Camera: rising orbit — camera ascends as tension builds to peak ───
-        players.forEach { it.gameMode = org.bukkit.GameMode.SPECTATOR }
+        players.forEach { it.gameMode = GameMode.SPECTATOR }
         CinematicCamera.orbitRising(
             players = players,
             center = spawnLoc,
@@ -65,7 +67,7 @@ class FinalPhase : PhasePlugin {
         val islandRadius = if (edges.isNotEmpty()) edges.maxOf { e ->
             val dx = e.x - spawnLoc.x;
             val dz = e.z - spawnLoc.z
-            kotlin.math.sqrt(dx * dx + dz * dz)
+            sqrt(dx * dx + dz * dz)
         } else 28.0
 
         // ── 1. Hellfire edge glow — cliff ablaze ──────────────────────────────

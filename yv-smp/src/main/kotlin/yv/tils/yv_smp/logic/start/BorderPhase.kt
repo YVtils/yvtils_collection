@@ -29,6 +29,7 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeGlow
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveOutward
 import java.time.Duration
+import org.bukkit.GameMode
 
 class BorderPhase : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -41,7 +42,7 @@ class BorderPhase : PhasePlugin {
 
         // ── Camera: overhead dolly — starts high and wide, slowly pushes toward
         // the edge so the outward expansion fills the whole frame ─────────────
-        players.forEach { it.gameMode = org.bukkit.GameMode.SPECTATOR }
+        players.forEach { it.gameMode = GameMode.SPECTATOR }
         CinematicCamera.spiralDown(
             players = players,
             center = spawnLoc,

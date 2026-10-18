@@ -24,6 +24,12 @@ import yv.tils.regions.configs.FlagPolicy
 import yv.tils.regions.configs.RegionsConfigState
 import yv.tils.regions.language.LangStrings.*
 import yv.tils.regions.language.RegionFailure
+import com.sk89q.worldguard.protection.flags.InvalidFlagFormat
+import com.sk89q.worldguard.protection.managers.RegionManager
+import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import org.bukkit.World
+import org.bukkit.configuration.ConfigurationSection
+import yv.tils.regions.data.Permissions
 
 enum class ClaimRole { OWNER, MEMBER, VISITOR }
 
@@ -68,7 +74,7 @@ object ClaimFlags {
         if (encoded.isBlank()) return null
         val yaml = YamlConfiguration().apply { loadFromString(encoded) }
         fun plain(value: Any?): Any? = when (value) {
-            is org.bukkit.configuration.ConfigurationSection -> value.getValues(false).mapValues { plain(it.value) }
+            is ConfigurationSection -> value.getValues(false).mapValues { plain(it.value) }
             is List<*> -> value.map { plain(it) }
             else -> value
         }
@@ -83,7 +89,7 @@ object ClaimFlags {
                     if (player is Player) WorldGuardPlugin.inst().wrapPlayer(player) else BukkitAdapter.adapt(player)
                 ).setInput(input).build()
             )
-        } catch (e: com.sk89q.worldguard.protection.flags.InvalidFlagFormat) {
+        } catch (e: InvalidFlagFormat) {
             throw RegionFailure(INVALID_FLAG, cause = e)
         }
     }
@@ -127,7 +133,7 @@ object ClaimFlags {
     }
 
     fun restoreDefaults(sender: CommandSender, claim: Claim) {
-        yv.tils.regions.data.Permissions.FLAGS_RESET.require(sender)
+        Permissions.FLAGS_RESET.require(sender)
         ClaimService.requireOwner(sender, claim)
         val snapshots = listOf(null, ClaimRole.OWNER, ClaimRole.MEMBER)
             .associate { ClaimService.target(claim, it).let { region -> region to region.flags.toMap() } }
@@ -145,7 +151,7 @@ object ClaimFlags {
     }
 
     fun set(player: CommandSender, claim: Claim, flag: Flag<*>, role: ClaimRole?, value: Any?) {
-        yv.tils.regions.data.Permissions.FLAGS_EDIT.require(player)
+        Permissions.FLAGS_EDIT.require(player)
         ClaimService.requireOwner(player, claim)
         check(enabled(flag, role)) { FLAG_CHANGED.key }
         val target = ClaimService.target(claim, role)
@@ -172,7 +178,7 @@ object ClaimFlags {
         all().filterNot(::locked).filter { policy(it, before) != policy(it, after) }
 
     /** Worlds not loaded during an admin update catch up once they become available. */
-    fun catchUp(world: org.bukkit.World) {
+    fun catchUp(world: World) {
         val config = ConfigFile.state
         val applied = config.appliedWorldRevisions[world.uid.toString()] ?: 0
         if (applied >= config.policyRevision) return
@@ -180,7 +186,7 @@ object ClaimFlags {
         val flags = all().filter { it.name in names && !locked(it) }
         val manager = ClaimService.manager(world)
         val snapshots =
-            mutableListOf<Pair<com.sk89q.worldguard.protection.regions.ProtectedRegion, Map<Flag<*>, Any>>>()
+            mutableListOf<Pair<ProtectedRegion, Map<Flag<*>, Any>>>()
         val subzoneRollbacks = mutableListOf<() -> Unit>()
         try {
             for (claim in ClaimService.claims(world)) {
@@ -204,8 +210,8 @@ object ClaimFlags {
         val openChanged = before.allowOpenSubzones != after.allowOpenSubzones
         if (changed.isEmpty() && !openChanged) return {}
         val snapshots =
-            mutableListOf<Pair<com.sk89q.worldguard.protection.regions.ProtectedRegion, Map<Flag<*>, Any>>>()
-        val managers = mutableSetOf<com.sk89q.worldguard.protection.managers.RegionManager>()
+            mutableListOf<Pair<ProtectedRegion, Map<Flag<*>, Any>>>()
+        val managers = mutableSetOf<RegionManager>()
         val subzoneRollbacks = mutableListOf<() -> Unit>()
         val rollback = {
             subzoneRollbacks.asReversed().forEach { it() }
@@ -215,7 +221,7 @@ object ClaimFlags {
         try {
             for (world in Bukkit.getWorlds()) {
                 val manager = WorldGuard.getInstance().platform.regionContainer.get(
-                    com.sk89q.worldedit.bukkit.BukkitAdapter.adapt(world)
+                    BukkitAdapter.adapt(world)
                 ) ?: continue
                 for (claim in ClaimService.claims(world)) {
                     val targets = listOf(null, ClaimRole.OWNER, ClaimRole.MEMBER).map { ClaimService.target(claim, it) }

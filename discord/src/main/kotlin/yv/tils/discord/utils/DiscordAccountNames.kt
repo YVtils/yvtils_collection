@@ -5,6 +5,7 @@ import yv.tils.discord.logic.AppLogic
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 
 /** REST requests are asynchronous and shared between inventory entries and command inspection. */
 object DiscordAccountNames {
@@ -29,7 +30,7 @@ object DiscordAccountNames {
         val now = System.currentTimeMillis()
         names.entries.removeIf { now - it.value.created > 300000 }
         val cached = names.computeIfAbsent(key) {
-            val future = CompletableFuture<String?>().completeOnTimeout(null, 15, java.util.concurrent.TimeUnit.SECONDS)
+            val future = CompletableFuture<String?>().completeOnTimeout(null, 15, TimeUnit.SECONDS)
             try {
                 val jda = AppLogic.getJDA()
                 fun userFallback() {

@@ -10,6 +10,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import yv.tils.utils.modules.Core
+import org.bukkit.event.HandlerList
 
 /** Route the shared shorthand without replacing WorldGuard's namespaced command. */
 object RegionAlias : Listener {
@@ -80,6 +81,6 @@ object RegionAlias : Listener {
         if (map.getCommand("yvtils:rg") === installed) map.knownCommands.remove("yvtils:rg")
         installed = null
         previous = null
-        org.bukkit.event.HandlerList.unregisterAll(this)
+        HandlerList.unregisterAll(this)
     }
 }

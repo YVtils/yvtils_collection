@@ -17,6 +17,9 @@ import org.bukkit.Color
 import org.bukkit.Particle
 import org.bukkit.entity.Player
 import yv.tils.utils.modules.Core
+import kotlin.math.sqrt
+import org.bukkit.HeightMap
+import org.bukkit.Location
 
 class ParticleEffects {
     companion object {
@@ -71,7 +74,7 @@ class ParticleEffects {
          */
         fun particleGlyph(
             players: List<Player>,
-            center: org.bukkit.Location,
+            center: Location,
             glyph: Char,
             color: Color = Color.WHITE,
             baseHeight: Double = 14.0,
@@ -121,7 +124,7 @@ class ParticleEffects {
          */
         fun particleCountdown(
             players: List<Player>,
-            center: org.bukkit.Location,
+            center: Location,
             startDelay: Long = 0L,
             digitShowTicks: Long = 15L,
             digitGapTicks: Long = 5L,
@@ -182,7 +185,7 @@ class ParticleEffects {
 
         fun islandRain(
             players: List<Player>,
-            center: org.bukkit.Location,
+            center: Location,
             particle: Particle,
             areaRadius: Double = 35.0,
             duration: Long = 80L,
@@ -199,7 +202,7 @@ class ParticleEffects {
                         // always starts above the island, not from spawn Y.
                         val surfaceY = world.getHighestBlockYAt(
                             px.toInt(), pz.toInt(),
-                            org.bukkit.HeightMap.WORLD_SURFACE
+                            HeightMap.WORLD_SURFACE
                         ).toDouble()
                         val py = surfaceY + 8.0 + Math.random() * 4
                         players.forEach { player ->
@@ -224,7 +227,7 @@ class ParticleEffects {
          */
         fun edgeGlow(
             players: List<Player>,
-            edges: List<org.bukkit.Location>,
+            edges: List<Location>,
             particleA: Particle = Particle.GLOW,
             particleB: Particle = Particle.END_ROD,
             stackHeight: Double = 0.7,
@@ -254,7 +257,7 @@ class ParticleEffects {
          */
         fun edgePillarRise(
             players: List<Player>,
-            edges: List<org.bukkit.Location>,
+            edges: List<Location>,
             particle: Particle = Particle.END_ROD,
             riseHeight: Int = 40,
             count: Int = 3,
@@ -280,8 +283,8 @@ class ParticleEffects {
          */
         fun edgeShockwaveInward(
             players: List<Player>,
-            edges: List<org.bukkit.Location>,
-            center: org.bukkit.Location,
+            edges: List<Location>,
+            center: Location,
             particles: Pair<Particle, Particle> = Pair(Particle.ELECTRIC_SPARK, Particle.GLOW),
             waves: Int = 3,
             waveDelay: Long = 18L,
@@ -316,8 +319,8 @@ class ParticleEffects {
          */
         fun edgeShockwaveOutward(
             players: List<Player>,
-            edges: List<org.bukkit.Location>,
-            center: org.bukkit.Location,
+            edges: List<Location>,
+            center: Location,
             particles: Pair<Particle, Particle> = Pair(Particle.END_ROD, Particle.GLOW),
             waves: Int = 3,
             waveDelay: Long = 18L,
@@ -355,8 +358,8 @@ class ParticleEffects {
          */
         fun edgeFlyOut(
             players: List<Player>,
-            edges: List<org.bukkit.Location>,
-            center: org.bukkit.Location,
+            edges: List<Location>,
+            center: Location,
             particle: Particle = Particle.END_ROD,
             travelBlocks: Int = 30,
             waves: Int = 3,
@@ -365,12 +368,12 @@ class ParticleEffects {
         ) {
             if (edges.isEmpty()) return
             // Pre-compute the outward unit direction per edge so we don't repeat it every tick
-            data class EdgeDir(val loc: org.bukkit.Location, val ndx: Double, val ndz: Double)
+            data class EdgeDir(val loc: Location, val ndx: Double, val ndz: Double)
 
             val dirs = edges.map { edge ->
                 val dx = edge.x - center.x
                 val dz = edge.z - center.z
-                val len = kotlin.math.sqrt(dx * dx + dz * dz).coerceAtLeast(0.001)
+                val len = sqrt(dx * dx + dz * dz).coerceAtLeast(0.001)
                 EdgeDir(edge, dx / len, dz / len)
             }
             for (wave in 0 until waves) {
@@ -396,8 +399,8 @@ class ParticleEffects {
          */
         fun edgeBurstOutward(
             players: List<Player>,
-            edges: List<org.bukkit.Location>,
-            center: org.bukkit.Location,
+            edges: List<Location>,
+            center: Location,
             particle: Particle = Particle.ELECTRIC_SPARK,
             speed: Double = 0.4,
             count: Int = 6,
@@ -406,7 +409,7 @@ class ParticleEffects {
             edges.forEach { edge ->
                 val dx = edge.x - center.x
                 val dz = edge.z - center.z
-                val len = kotlin.math.sqrt(dx * dx + dz * dz).coerceAtLeast(0.001)
+                val len = sqrt(dx * dx + dz * dz).coerceAtLeast(0.001)
                 val vx = (dx / len) * speed
                 val vz = (dz / len) * speed
                 players.forEach { pl ->

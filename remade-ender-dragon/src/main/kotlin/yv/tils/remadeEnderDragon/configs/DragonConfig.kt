@@ -22,6 +22,7 @@ import org.spongepowered.configurate.util.NamingSchemes
 import io.leangen.geantyref.GenericTypeReflector
 import org.spongepowered.configurate.BasicConfigurationNode
 import yv.tils.utils.logger.Logger
+import org.spongepowered.configurate.ConfigurationNode
 
 enum class Activation { EVERY, ADMIN, FIRST }
 
@@ -376,7 +377,7 @@ class ConfigFile {
 
         private fun migrateEncounterDefaults(
             next: DragonConfig,
-            node: org.spongepowered.configurate.ConfigurationNode
+            node: ConfigurationNode
         ) {
             if (next.baseHealth == 260.0 && next.maxHealth >= 1200.0) next.baseHealth = 1200.0
             if (next.healthPerExtraPlayer == 100.0) next.healthPerExtraPlayer = 900.0

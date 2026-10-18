@@ -29,6 +29,8 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgePillarRise
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
+import kotlin.math.sqrt
+import org.bukkit.GameMode
 
 class HealPhase : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -40,7 +42,7 @@ class HealPhase : PhasePlugin {
         val spawnLoc = world.spawnLocation
 
         // ── Camera: rising orbit — ground level lifts to sky as health returns ─
-        players.forEach { player -> player.gameMode = org.bukkit.GameMode.SPECTATOR }
+        players.forEach { player -> player.gameMode = GameMode.SPECTATOR }
         CinematicCamera.orbitRising(
             players = players,
             center = spawnLoc,
@@ -66,7 +68,7 @@ class HealPhase : PhasePlugin {
         val islandRadius = if (edges.isNotEmpty()) edges.maxOf { e ->
             val dx = e.x - spawnLoc.x;
             val dz = e.z - spawnLoc.z
-            kotlin.math.sqrt(dx * dx + dz * dz)
+            sqrt(dx * dx + dz * dz)
         } else 28.0
 
         // ── 1. Soft golden-green edge glow for the whole phase (t=0) ─────────

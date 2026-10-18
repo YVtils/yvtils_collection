@@ -14,10 +14,12 @@ package yv.tils.regions.configs
 
 import org.bukkit.entity.Player
 import yv.tils.regions.logic.ClaimService
+import yv.tils.regions.data.Permissions
+import yv.tils.regions.gui.ClaimsGui
 
 class ManageGUI {
     fun openGUI(sender: Player) {
-        if (!yv.tils.regions.data.Permissions.ADMIN_CONFIG.allowed(sender)) return
-        yv.tils.regions.gui.ClaimsGui.configuration(sender)
+        if (!Permissions.ADMIN_CONFIG.allowed(sender)) return
+        ClaimsGui.configuration(sender)
     }
 }

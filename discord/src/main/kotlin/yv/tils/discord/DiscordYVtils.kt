@@ -27,6 +27,7 @@ import yv.tils.discord.logic.AppLogic
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
+import yv.tils.discord.connection.DiscordConnectionLogging
 
 class DiscordYVtils : Module.YVtilsModule {
     companion object {
@@ -68,7 +69,7 @@ class DiscordYVtils : Module.YVtilsModule {
         try {
             AppLogic().stopApp()
         } finally {
-            yv.tils.discord.connection.DiscordConnectionLogging.close()
+            DiscordConnectionLogging.close()
             unregisterModule()
         }
     }

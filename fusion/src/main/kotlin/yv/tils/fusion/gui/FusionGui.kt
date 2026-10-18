@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit
 import yv.tils.fusion.api.OutputSelection
 import yv.tils.fusion.api.FusionRegistry
 import java.util.function.Consumer
+import yv.tils.fusion.configs.DefaultRecipes
 
 object FusionGui {
     fun allowed(player: Player, manage: Boolean = false): Boolean {
@@ -84,7 +85,7 @@ object FusionGui {
     }
 
     internal fun ingredientName(ingredient: Ingredient) = when {
-        ingredient.materials.toSet() == yv.tils.fusion.configs.DefaultRecipes.glassMaterials.toSet() -> "Glass (any color)"
+        ingredient.materials.toSet() == DefaultRecipes.glassMaterials.toSet() -> "Glass (any color)"
         ingredient.exactItem.isNotBlank() -> FusionItems.decode(ingredient.exactItem).type.name + " (exact)"
         ingredient.fusionId.isNotBlank() -> "@${ingredient.fusionId}"
         ingredient.tag.isNotBlank() -> "#${ingredient.tag}"

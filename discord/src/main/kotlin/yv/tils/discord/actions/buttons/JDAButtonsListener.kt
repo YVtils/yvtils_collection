@@ -16,17 +16,19 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import yv.tils.discord.actions.buttons.handler.JDAAccountReplace
 import yv.tils.discord.actions.buttons.handler.JDAPageSwitch
+import yv.tils.discord.actions.modals.JDARegistration
+import yv.tils.discord.language.AccountText
 
 class JDAButtonsListener : ListenerAdapter() {
     override fun onButtonInteraction(e: ButtonInteractionEvent) {
         val buttonId = e.componentId
         if (buttonId.startsWith("whitelist:modal:confirm:") || buttonId.startsWith("whitelist:modal:cancel:")) {
-            yv.tils.discord.actions.modals.JDARegistration().handleReplacement(e)
+            JDARegistration().handleReplacement(e)
             return
         }
 
         when (buttonId) {
-            "whitelist:register" -> yv.tils.discord.actions.modals.JDARegistration().open(e)
+            "whitelist:register" -> JDARegistration().open(e)
             "whitelist:change:confirm" -> {
                 JDAAccountReplace().executeConfirm(e)
             }
@@ -41,7 +43,7 @@ class JDAButtonsListener : ListenerAdapter() {
                 JDAPageSwitch().executeSiteNext(e)
             }
             else -> {
-                e.reply(yv.tils.discord.language.AccountText.raw("unexpected")).setEphemeral(true).queue()
+                e.reply(AccountText.raw("unexpected")).setEphemeral(true).queue()
             }
         }
     }

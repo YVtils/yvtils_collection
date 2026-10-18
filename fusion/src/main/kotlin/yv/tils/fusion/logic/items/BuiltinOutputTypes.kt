@@ -16,6 +16,9 @@ import org.bukkit.entity.Player
 import yv.tils.fusion.api.*
 import yv.tils.gui.utils.GuiStyle
 import java.util.function.Consumer
+import org.bukkit.event.inventory.ClickType
+import yv.tils.config.language.LanguageHandler
+import yv.tils.fusion.gui.ValueControls
 
 object BuiltinOutputTypes {
     fun register() {
@@ -61,7 +64,7 @@ object BuiltinOutputTypes {
                     Material.LIGHT,
                     FusionText.text(player, "light", mapOf("value" to selection.light)),
                     listOf(
-                        yv.tils.config.language.LanguageHandler.getMessage(
+                        LanguageHandler.getMessage(
                             "action.gui.lore.controls.number",
                             player
                         )
@@ -79,9 +82,9 @@ object BuiltinOutputTypes {
 
             override fun configureClick(
                 player: Player, recipe: FusionRecipe, selection: OutputSelection,
-                click: org.bukkit.event.inventory.ClickType, selected: Consumer<OutputSelection>
+                click: ClickType, selected: Consumer<OutputSelection>
             ) {
-                val delta = yv.tils.fusion.gui.ValueControls.delta(click) ?: return
+                val delta = ValueControls.delta(click) ?: return
                 selected.accept(selection.copy(light = (selection.light + delta).coerceIn(0, 15)))
             }
         })

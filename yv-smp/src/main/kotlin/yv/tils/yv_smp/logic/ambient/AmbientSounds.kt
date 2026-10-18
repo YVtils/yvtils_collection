@@ -22,6 +22,7 @@ import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.utils.modules.Core
 import java.util.UUID
 import kotlin.random.Random
+import org.bukkit.block.data.BlockData
 
 /** All access, including commands, runs on the server thread. No entities or chunks are retained. */
 object AmbientSounds {
@@ -162,7 +163,7 @@ object AmbientSounds {
                 Color::class.java -> Color.WHITE
                 Particle.DustOptions::class.java -> Particle.DustOptions(Color.WHITE, 1f)
                 Particle.DustTransition::class.java -> Particle.DustTransition(Color.WHITE, Color.AQUA, 1f)
-                org.bukkit.block.data.BlockData::class.java -> Material.STONE.createBlockData()
+                BlockData::class.java -> Material.STONE.createBlockData()
                 ItemStack::class.java -> ItemStack(Material.AMETHYST_SHARD)
                 Float::class.javaObjectType -> 1f
                 Int::class.javaObjectType -> 0

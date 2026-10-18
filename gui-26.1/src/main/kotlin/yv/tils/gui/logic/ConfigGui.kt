@@ -35,6 +35,7 @@ import net.kyori.adventure.text.Component
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
+import java.math.BigDecimal
 
 /**
  * Builds an InvUI-powered GUI for editing a list of [ConfigEntry] values
@@ -261,8 +262,8 @@ object ConfigGui {
 
             EntryType.DOUBLE -> {
                 val current = (entry.value as? Number)?.toDouble() ?: (entry.defaultValue as? Number)?.toDouble() ?: 0.0
-                entry.value = java.math.BigDecimal.valueOf(current)
-                    .add(java.math.BigDecimal.valueOf(delta.toLong(), 1)).toDouble()
+                entry.value = BigDecimal.valueOf(current)
+                    .add(BigDecimal.valueOf(delta.toLong(), 1)).toDouble()
             }
 
             else -> {}

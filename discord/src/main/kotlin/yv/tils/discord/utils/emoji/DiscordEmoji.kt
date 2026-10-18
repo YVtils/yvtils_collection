@@ -226,7 +226,7 @@ class DiscordEmoji {
 
             return tempFile
         } catch (e: IOException) {
-            throw okio.IOException("Failed to download image from URL: $url", e)
+            throw IOException("Failed to download image from URL: $url", e)
         }
     }
 }

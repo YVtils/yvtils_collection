@@ -20,6 +20,7 @@ import org.bukkit.event.world.ChunkUnloadEvent
 import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.logger.DEBUG_LEVEL
+import java.util.UUID
 
 data class MarkerRecord(var world: String = "", var x: Int = 0, var y: Int = 0, var z: Int = 0, var material: String = "SHORT_GRASS")
 data class TerrainJournal(var markers: List<MarkerRecord> = emptyList())
@@ -65,7 +66,7 @@ class TemporaryTerrain : Listener {
     private fun restore(predicate: (MarkerRecord) -> Boolean) {
         var changed = false
         markers.keys.toList().filter(predicate).forEach { r ->
-            val world = Bukkit.getWorld(java.util.UUID.fromString(r.world)) ?: return@forEach
+            val world = Bukkit.getWorld(UUID.fromString(r.world)) ?: return@forEach
             if (!world.isChunkLoaded(r.x shr 4, r.z shr 4)) return@forEach
             val block = world.getBlockAt(r.x, r.y, r.z)
             if (block.type.name == r.material) block.setType(Material.AIR, false)

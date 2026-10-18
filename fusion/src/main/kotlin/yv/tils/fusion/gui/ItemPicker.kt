@@ -11,6 +11,7 @@ import xyz.xenondevs.invui.item.Item
 import yv.tils.fusion.language.FusionText
 import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.GuiStyle
+import xyz.xenondevs.invui.item.ItemWrapper
 
 /** Clickable copies of inventory items: selecting never consumes or moves the originals. */
 object ItemPicker {
@@ -27,7 +28,7 @@ object ItemPicker {
                         )
                     )
                 }
-                xyz.xenondevs.invui.item.ItemWrapper(display)
+                ItemWrapper(display)
             }.addClickHandler { _, event ->
                 val viewer = event.player()
                 if (FusionGui.allowed(viewer, true)) select(viewer, snapshot.clone())

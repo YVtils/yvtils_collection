@@ -3,6 +3,7 @@ package yv.tils.discord.logic.whitelist
 import kotlinx.serialization.Serializable
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.logic.AppLogic
+import net.dv8tion.jda.api.Permission
 
 class WhitelistLogic {
     companion object {
@@ -27,7 +28,7 @@ class WhitelistLogic {
             val guild = AppLogic.getJDA().getGuildById(guildID) ?: error("Guild unavailable")
             val roles = configured.map { guild.getRoleById(it) ?: error("Missing role: $it") }
             val member = guild.retrieveMemberById(user).complete()
-            check(guild.selfMember.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_ROLES)) { "Missing MANAGE_ROLES permission" }
+            check(guild.selfMember.hasPermission(Permission.MANAGE_ROLES)) { "Missing MANAGE_ROLES permission" }
             roles.forEach { check(!it.isManaged && guild.selfMember.canInteract(it)) { "Role hierarchy: ${it.id}" } }
             roles.forEach {
                 if (add) guild.addRoleToMember(member, it).complete()

@@ -27,6 +27,7 @@ import yv.tils.stats.registry.StatsRegistry
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.modules.Module
 import yv.tils.utils.logger.Logger
+import org.bukkit.Bukkit
 
 /**
  * Main module class for the stats module.
@@ -239,7 +240,7 @@ class StatsYVtils : Module.YVtilsModule {
             // Server version
             val versionHandle = StatsRegistry.registerString("server_version", "Paper/Bukkit server version")
             try {
-                versionHandle?.set(org.bukkit.Bukkit.getVersion())
+                versionHandle?.set(Bukkit.getVersion())
             } catch (e: Exception) {
                 versionHandle?.set("Unknown")
             }
@@ -248,7 +249,7 @@ class StatsYVtils : Module.YVtilsModule {
             if (ConfigFile.getBoolean("metadata.collect_player_count") != false) {
                 val playerCountHandle = StatsRegistry.registerGauge("player_count", "Current online player count")
                 try {
-                    playerCountHandle?.set(org.bukkit.Bukkit.getOnlinePlayers().size.toLong())
+                    playerCountHandle?.set(Bukkit.getOnlinePlayers().size.toLong())
                 } catch (e: Exception) {
                     // Bukkit might not be available in tests
                 }
@@ -257,7 +258,7 @@ class StatsYVtils : Module.YVtilsModule {
                 CoroutineHandler.launchTask(
                     suspend {
                         try {
-                            StatsRegistry.set("player_count", org.bukkit.Bukkit.getOnlinePlayers().size.toLong())
+                            StatsRegistry.set("player_count", Bukkit.getOnlinePlayers().size.toLong())
                         } catch (e: Exception) {
                             // Ignore if Bukkit not available
                         }

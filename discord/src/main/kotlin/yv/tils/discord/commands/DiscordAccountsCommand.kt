@@ -9,6 +9,7 @@ import yv.tils.discord.gui.AccountsGui
 import yv.tils.discord.language.AccountText
 import yv.tils.discord.logic.whitelist.*
 import yv.tils.utils.coroutine.CoroutineHandler
+import yv.tils.discord.utils.DiscordAccountNames
 
 class DiscordAccountsCommand {
     companion object {
@@ -24,8 +25,8 @@ class DiscordAccountsCommand {
             ?: throw AccountService.Failure("missing")
 
         fun params(entry: WhitelistEntry, sender: CommandSender): Map<String, Any> {
-            val lookup = yv.tils.discord.utils.DiscordAccountNames.retrieve(entry.discordUserID)
-            val display = yv.tils.discord.utils.DiscordAccountNames.cached(entry.discordUserID)
+            val lookup = DiscordAccountNames.retrieve(entry.discordUserID)
+            val display = DiscordAccountNames.cached(entry.discordUserID)
             val fallback = when {
                 entry.discordUserID.startsWith("~") -> "noDiscordLink"
                 !lookup.isDone -> "discordNameLoading"
