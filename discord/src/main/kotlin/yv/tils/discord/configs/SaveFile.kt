@@ -9,11 +9,11 @@
 
 package yv.tils.discord.configs
 
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.discord.logic.whitelist.WhitelistEntry
 import yv.tils.discord.logic.whitelist.WhitelistLogic
-import yv.tils.configv2.files.ConfigurateFileUtils
-import yv.tils.configv2.files.ConfigFormat
+import yv.tils.config.files.ConfigurateFileUtils
+import yv.tils.config.files.ConfigFormat
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import kotlinx.serialization.Serializable

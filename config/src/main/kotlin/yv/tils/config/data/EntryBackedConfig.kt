@@ -10,9 +10,9 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.configv2.data
+package yv.tils.config.data
 
-import yv.tils.configv2.files.ConfigFormat
+import yv.tils.config.files.ConfigFormat
 
 /**
  * A reusable, Configurate-backed version of the `entries`/`configIndex`/

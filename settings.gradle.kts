@@ -27,7 +27,6 @@ rootProject.name = "yvtils_collection"
 include("core")
 include("common")
 include("config")
-include("config-v2")
 include("vanish")
 include("moderation")
 include("discord")

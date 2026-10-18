@@ -13,7 +13,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.Particle
 import org.bukkit.Registry
 import org.bukkit.command.CommandSender
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.logic.ambient.AmbientInterval
 import yv.tils.yv_smp.logic.ambient.AmbientSounds

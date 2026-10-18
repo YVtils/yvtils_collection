@@ -14,6 +14,13 @@ package yv.tils.config.data
 
 import org.bukkit.Material
 
+/**
+ * A single editable config value, as used by the in-game config GUI
+ * (`ConfigGui` in `gui`) and [ConfigEntryFileUtils]/[EntryBackedConfig]
+ * for persistence. Unchanged from the original `config` module's
+ * `yv.tils.config.data.ConfigEntry` - this is plain data with no
+ * Configurate/Bukkit-config dependency of its own.
+ */
 data class ConfigEntry(
     val key: String,
     val type: EntryType,

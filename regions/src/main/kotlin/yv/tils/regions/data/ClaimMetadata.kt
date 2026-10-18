@@ -1,6 +1,6 @@
 package yv.tils.regions.data
 
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ObjectMapperFileUtils
 import java.util.UUID
 
 data class ClaimRecord(

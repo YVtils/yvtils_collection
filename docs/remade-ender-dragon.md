@@ -9,7 +9,7 @@ Publish/install the module artifact using the normal
 `remade-ender-dragon: true` in `plugins/yvtils/modules.yml`, and restart.
 
 Configuration is generated at `plugins/yvtils/remade-ender-dragon/config.yml`
-(or beneath the configured config-v2 base directory). Keys are camelCase.
+(or beneath the configured config base directory). Keys are camelCase.
 Edit the YAML and run `/redragon reload`. Reload stops and cleans up active
 custom encounters; automatic modes rediscover eligible dragons afterward.
 Invalid configuration is rejected before active encounters are stopped.
@@ -338,7 +338,7 @@ Debug examples:
   are preserved. Do not delete `terrain-journal.json` while markers exist.
 - Server restarts reset attack cooldown/use budgets. Completion history and
   terrain recovery persist; live encounter timers do not.
-- Announcements/command messages are registered with config-v2 language files.
+- Announcements/command messages are registered with config language files.
   English and German messages are provided; attack labels are editable per locale.
 - Shared `Logger` records module lifecycle, encounter starts/stops, configuration
   edits/reload failures, debug-preview requests and terrain recovery. Per-attack

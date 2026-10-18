@@ -14,7 +14,7 @@ import java.util.Properties
 
 dependencies {
     compileOnly(project(":common"))
-    compileOnly(project(":config-v2"))
+    compileOnly(project(":config"))
     compileOnly(project(":utils"))
     compileOnly(project(":gui-26.1"))
 

@@ -6,7 +6,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import xyz.xenondevs.invui.item.Item
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.fusion.language.FusionText
 import yv.tils.gui.utils.GuiStyle
 

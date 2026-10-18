@@ -13,8 +13,8 @@
 package yv.tils.regions.configs
 
 import org.bukkit.Bukkit
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.regions.language.LangStrings
 import yv.tils.regions.logic.ClaimFlags
 

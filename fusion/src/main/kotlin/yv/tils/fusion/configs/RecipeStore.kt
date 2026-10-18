@@ -13,9 +13,9 @@ import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.util.NamingSchemes
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import io.leangen.geantyref.GenericTypeReflector
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ConfigurateFileUtils
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ConfigurateFileUtils
+import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.fusion.api.FusionRegistry
 import java.nio.file.Files
 import java.nio.file.Path

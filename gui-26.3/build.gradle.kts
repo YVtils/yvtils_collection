@@ -34,7 +34,7 @@ dependencies {
     api("xyz.xenondevs.invui:invui-kotlin:2.5.1")
 
     compileOnly(project(":utils"))
-    compileOnly(project(":config-v2"))
+    compileOnly(project(":config"))
     compileOnly(project(":common"))
     // DataClassConfigGui reflects over data class properties/annotations directly.
     compileOnly(kotlin("reflect"))

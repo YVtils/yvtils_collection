@@ -23,8 +23,8 @@ import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemBuilder
 import xyz.xenondevs.invui.window.AnvilWindow
 import xyz.xenondevs.invui.window.Window
-import yv.tils.configv2.data.annotations.*
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.data.annotations.*
+import yv.tils.config.language.LanguageHandler
 import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.HeadUtils
@@ -42,7 +42,7 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * Reflection/annotation-driven equivalent of [ConfigGui], for Kotlin `data class` config
  * state (the kind persisted via `ObjectMapperFileUtils`) instead of a hand-built
- * `List<yv.tils.configv2.data.ConfigEntry>`.
+ * `List<yv.tils.config.data.ConfigEntry>`.
  *
  * Where [ConfigGui] needs every field described up front as a `ConfigEntry` (key, type,
  * description, icon - all kept in sync by hand), this enumerates the target data class's

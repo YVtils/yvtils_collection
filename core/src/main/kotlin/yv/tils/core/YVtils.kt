@@ -17,7 +17,7 @@ import dev.jorel.commandapi.CommandAPIPaperConfig
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import yv.tils.common.CommonYVtils
-import yv.tils.configv2.ConfigV2YVtils
+import yv.tils.config.ConfigYVtils
 import yv.tils.core.commands.register.YVtilsCommand
 import yv.tils.core.loader.DynamicModuleDriver
 import yv.tils.core.loader.ModuleConfig
@@ -43,9 +43,9 @@ class YVtils : JavaPlugin() {
     // Every module `core` can statically or dynamically load (the always-
     // embedded `common`/`utils` trio, plus everything in
     // `DynamicModuleRegistry.KNOWN_MODULES`) has been migrated to
-    // `config-v2` - only `ConfigV2YVtils` needs to run now.
+    // `config` - only `ConfigYVtils` needs to run now.
     private val modules: List<Module.YVtilsModule> = listOf(
-        ConfigV2YVtils(),
+        ConfigYVtils(),
         UtilsYVtils(),
         CommonYVtils()
     )

@@ -9,7 +9,7 @@ module system works.
 
 ## Dependencies
 
-- `utils`, `config-v2`, `common` (always `compileOnly`, provided by the shared runtime tier)
+- `utils`, `config`, `common` (always `compileOnly`, provided by the shared runtime tier)
 - `gui-26.1` (`compileOnly`, for the in-game config editor)
 - WorldGuard Bukkit 7.0.18 (`compileOnly`, provided by the installed WorldGuard plugin)
 - WorldEdit or FastAsyncWorldEdit (WorldGuard's runtime dependency)

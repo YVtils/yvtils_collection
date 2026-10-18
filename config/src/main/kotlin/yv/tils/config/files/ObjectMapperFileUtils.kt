@@ -10,7 +10,7 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.configv2.files
+package yv.tils.config.files
 
 import io.leangen.geantyref.GenericTypeReflector
 import org.spongepowered.configurate.BasicConfigurationNode
@@ -20,7 +20,6 @@ import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.objectmapping.ObjectMapper
 import org.spongepowered.configurate.serialize.TypeSerializerCollection
 import org.spongepowered.configurate.util.NamingSchemes
-import yv.tils.utils.logger.Logger
 import java.math.BigInteger
 import java.sql.Date
 import java.sql.Timestamp
@@ -146,7 +145,7 @@ class ObjectMapperFileUtils {
          * Loads [path] and maps it into an instance of [T] (a Kotlin `data class`).
          *
          * Returns [default] as-is - without touching disk any further - if the file doesn't
-         * exist yet, or logs an error and returns [default] if it exists but fails to parse.
+         * exist yet. Existing unreadable or malformed files throw; callers must not save defaults over them.
          * Callers that need to bootstrap a fresh file on first run should explicitly call
          * [save] with the returned value afterward (see `StatesFile.loadConfig()` for the
          * established pattern) - `load` itself never writes anything.
@@ -161,8 +160,11 @@ class ObjectMapperFileUtils {
             format: ConfigFormat = ConfigFormat.JSON,
             overwriteParentDir: Boolean = false,
         ): T {
-            val file = runCatching { ConfigurateFileUtils.load(path, format, overwriteParentDir) }.getOrNull()
-                ?: return default
+            val file = try {
+                ConfigurateFileUtils.load(path, format, overwriteParentDir)
+            } catch (_: java.io.FileNotFoundException) {
+                return default
+            }
 
             // Bridge into a node backed by the format-appropriate options (which know about
             // nested data classes) before handing it to the mapper - `file.node` itself only
@@ -170,10 +172,9 @@ class ObjectMapperFileUtils {
             // (path resolution only) ConfigurateFileUtils loader.
             val bridge = BasicConfigurationNode.root(optionsFor(format))
             bridge.from(file.node)
+            require(bridge.isMap) { "$path: expected an object" }
 
-            return runCatching { factory.get<T>().load(bridge) }
-                .onFailure { Logger.error("Failed to load $path as ${T::class.simpleName}: ${it.message}") }
-                .getOrDefault(default)
+            return factory.get<T>().load(bridge)
         }
 
         /**
@@ -205,9 +206,8 @@ class ObjectMapperFileUtils {
          * a list of [T] instances (a Kotlin `data class`, which may itself contain nested
          * data classes, enums, and enum-keyed maps - all handled transparently).
          *
-         * Returns an empty list if the file doesn't exist, [key] is missing, or [key] isn't a
-         * list. Entries that individually fail to map (e.g. a corrupt/incompatible record)
-         * are skipped and logged rather than failing the whole load.
+         * Returns an empty list only when the file does not exist. Invalid wrappers or records
+         * fail the complete load, preserving the original file for recovery.
          */
         inline fun <reified T : Any> loadList(
             path: String,
@@ -215,21 +215,20 @@ class ObjectMapperFileUtils {
             format: ConfigFormat = ConfigFormat.JSON,
             overwriteParentDir: Boolean = false,
         ): MutableList<T> {
-            val file = runCatching { ConfigurateFileUtils.load(path, format, overwriteParentDir) }.getOrNull()
-                ?: return mutableListOf()
+            val file = try {
+                ConfigurateFileUtils.load(path, format, overwriteParentDir)
+            } catch (_: java.io.FileNotFoundException) {
+                return mutableListOf()
+            }
 
             val listNode = file.node.node(key)
-            if (listNode.virtual() || !listNode.isList()) return mutableListOf()
+            require(listNode.isList()) { "$path: '$key' must be a list" }
 
             val bridge = BasicConfigurationNode.root(optionsFor(format))
             bridge.from(listNode)
 
             val mapper = factory.get<T>()
-            return bridge.childrenList().mapNotNull { child ->
-                runCatching { mapper.load(child) }
-                    .onFailure { Logger.error("Failed to load an entry from $path: ${it.message}") }
-                    .getOrNull()
-            }.toMutableList()
+            return bridge.childrenList().map { child -> mapper.load(child) }.toMutableList()
         }
 
         /**
@@ -246,6 +245,7 @@ class ObjectMapperFileUtils {
         ) {
             val bridge = BasicConfigurationNode.root(optionsFor(format))
             val bridgeList = bridge.node(key)
+            bridgeList.raw(emptyList<Any>())
             val mapper = factory.get<T>()
             values.forEach { mapper.save(it, bridgeList.appendListNode()) }
 

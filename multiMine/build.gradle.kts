@@ -12,7 +12,7 @@
 
 dependencies {
     compileOnly(project(":utils"))
-    compileOnly(project(":config-v2"))
+    compileOnly(project(":config"))
     compileOnly(project(":common"))
     compileOnly(project(":gui-26.1"))
 }

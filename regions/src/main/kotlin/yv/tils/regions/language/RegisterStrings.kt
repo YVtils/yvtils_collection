@@ -12,7 +12,7 @@
 
 package yv.tils.regions.language
 
-import yv.tils.configv2.language.LanguageProvider
+import yv.tils.config.language.LanguageProvider
 
 class RegisterStrings : LanguageProvider.RegisterStrings {
     override fun registerStrings() {

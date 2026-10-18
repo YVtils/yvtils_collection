@@ -14,7 +14,7 @@ val worldguardVersion = "7.0.18"
 
 dependencies {
     compileOnly(project(":utils"))
-    compileOnly(project(":config-v2"))
+    compileOnly(project(":config"))
     compileOnly(project(":common"))
     // Compile-time only, to reference GUI types - NOT shaded into this module's own
     // published artifact. The actual gui-<version> build used at runtime is resolved
@@ -29,7 +29,7 @@ dependencies {
     // release) conflicts with those strict constraints and fails resolution.
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:$worldguardVersion")
     testImplementation("com.sk89q.worldguard:worldguard-core:$worldguardVersion")
-    testImplementation(project(":config-v2"))
+    testImplementation(project(":config"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

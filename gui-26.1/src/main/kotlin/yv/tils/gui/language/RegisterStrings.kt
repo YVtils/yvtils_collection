@@ -12,8 +12,8 @@
 
 package yv.tils.gui.language
 
-import yv.tils.configv2.language.BuildLanguage
-import yv.tils.configv2.language.FileTypes
+import yv.tils.config.language.BuildLanguage
+import yv.tils.config.language.FileTypes
 
 object RegisterStrings {
     fun registerStrings() {

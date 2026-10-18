@@ -10,15 +10,14 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.configv2.data
+package yv.tils.config.language
 
-enum class EntryType {
-    STRING,
-    INT,
-    DOUBLE,
-    BOOLEAN,
-    LIST,
-    MAP,
-    ANY,
-    UNKNOWN;
+/**
+ * The languages a translation string can be registered for. Unchanged from
+ * the original `config` module - each entry maps to `/languages/<name>.yml`
+ * (lowercased).
+ */
+enum class FileTypes {
+    EN,
+    DE,
 }

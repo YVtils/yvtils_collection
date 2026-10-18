@@ -13,7 +13,7 @@
 val jdaVersion = "6.5.0"
 
 dependencies {
-    compileOnly(project(":config-v2"))
+    compileOnly(project(":config"))
     compileOnly(project(":utils"))
     compileOnly(project(":common"))
     // Compile-time only, to reference GUI types - NOT shaded into this module's own

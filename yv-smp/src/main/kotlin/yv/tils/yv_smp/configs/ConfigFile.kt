@@ -9,8 +9,8 @@
 
 package yv.tils.yv_smp.configs
 
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ObjectMapperFileUtils
 
 /**
  * Configuration file handler for the YV_SMP module.

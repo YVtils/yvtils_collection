@@ -14,7 +14,7 @@
 dependencies {
     compileOnly(kotlin("reflect"))
     compileOnly(project(":utils"))
-    compileOnly(project(":config-v2"))
+    compileOnly(project(":config"))
     compileOnly(project(":common"))
     compileOnly(project(":gui-26.1"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")

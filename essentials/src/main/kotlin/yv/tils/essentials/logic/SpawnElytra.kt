@@ -23,7 +23,7 @@ import org.bukkit.event.entity.EntityToggleGlideEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.*
 import org.bukkit.scheduler.BukkitTask
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.essentials.commands.handler.FlyHandler
 import yv.tils.essentials.config.ConfigFile
 import yv.tils.essentials.language.LangStrings

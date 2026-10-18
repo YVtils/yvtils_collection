@@ -9,8 +9,8 @@
 
 package yv.tils.server.configs
 
-import yv.tils.configv2.data.annotations.ConfigDescription
-import yv.tils.configv2.data.annotations.NotGuiEditable
+import yv.tils.config.data.annotations.ConfigDescription
+import yv.tils.config.data.annotations.NotGuiEditable
 
 /**
  * server's `config.yml`, as a plain (nested) `data class` persisted via

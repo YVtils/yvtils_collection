@@ -61,7 +61,7 @@ object BuiltinOutputTypes {
                     Material.LIGHT,
                     FusionText.text(player, "light", mapOf("value" to selection.light)),
                     listOf(
-                        yv.tils.configv2.language.LanguageHandler.getMessage(
+                        yv.tils.config.language.LanguageHandler.getMessage(
                             "action.gui.lore.controls.number",
                             player
                         )

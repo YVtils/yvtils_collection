@@ -9,7 +9,7 @@
 
 package yv.tils.essentials.config
 
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.essentials.commands.handler.PvPHandler
 
 class StatesFile {

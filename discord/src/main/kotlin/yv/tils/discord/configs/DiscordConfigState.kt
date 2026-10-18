@@ -9,8 +9,8 @@
 
 package yv.tils.discord.configs
 
-import yv.tils.configv2.data.annotations.ConfigDescription
-import yv.tils.configv2.data.annotations.NotGuiEditable
+import yv.tils.config.data.annotations.ConfigDescription
+import yv.tils.config.data.annotations.NotGuiEditable
 
 /**
  * discord's `config.yml`, as a plain (nested) `data class` persisted via

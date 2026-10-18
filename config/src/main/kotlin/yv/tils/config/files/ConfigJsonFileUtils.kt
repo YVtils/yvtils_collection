@@ -10,7 +10,7 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.configv2.files
+package yv.tils.config.files
 
 /**
  * Thin, JSON-specific facade over [ConfigurateFileUtils] (mirrors the
@@ -21,7 +21,7 @@ package yv.tils.configv2.files
  * functions are needed here, [ConfigurateFileUtils.update] handles merging
  * for this format the same way it does for YAML.
  */
-class JsonFileUtils {
+class ConfigJsonFileUtils {
     companion object {
         fun loadJsonFile(path: String, overwriteParentDir: Boolean = false): ConfigFile =
             ConfigurateFileUtils.load(path, ConfigFormat.JSON, overwriteParentDir)

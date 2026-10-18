@@ -12,8 +12,8 @@
 
 package yv.tils.regions.configs
 
-import yv.tils.configv2.data.annotations.ConfigDescription
-import yv.tils.configv2.data.annotations.NotGuiEditable
+import yv.tils.config.data.annotations.ConfigDescription
+import yv.tils.config.data.annotations.NotGuiEditable
 
 /**
  * Regions' `config.yml`, persisted as a plain data class via

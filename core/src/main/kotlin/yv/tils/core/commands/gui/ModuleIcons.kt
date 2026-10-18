@@ -38,7 +38,7 @@ object ModuleIcons {
         "migration" -> Material.RECOVERY_COMPASS
         "common" -> Material.COMMAND_BLOCK
         "core" -> Material.NETHER_STAR
-        "config", "config-v2" -> Material.COMPARATOR
+        "config", "config" -> Material.COMPARATOR
         "utils" -> Material.BUNDLE
         "gui", "gui-26.1", "gui-26.2", "gui-26.3" -> Material.CHEST
         else -> Material.PAPER

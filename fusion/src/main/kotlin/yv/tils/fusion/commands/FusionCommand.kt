@@ -3,7 +3,7 @@
 package yv.tils.fusion.commands
 
 import dev.jorel.commandapi.kotlindsl.*
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.fusion.FusionRecipe
 import yv.tils.fusion.api.FusionRegistry
 import yv.tils.fusion.configs.RecipeStore

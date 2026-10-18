@@ -18,7 +18,7 @@ import org.bukkit.GameMode
 import org.bukkit.Sound
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.modules.Core
 import yv.tils.utils.player.PlayerUtils
 import yv.tils.yv_smp.configs.ConfigFile

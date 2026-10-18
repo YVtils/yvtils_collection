@@ -9,8 +9,8 @@
 
 package yv.tils.moderation.configs
 
-import yv.tils.configv2.data.annotations.NotGuiEditable
-import yv.tils.configv2.data.annotations.ConfigDescription
+import yv.tils.config.data.annotations.NotGuiEditable
+import yv.tils.config.data.annotations.ConfigDescription
 
 /**
  * moderation's `config.yml`, as a plain `data class` persisted via `ObjectMapperFileUtils` -

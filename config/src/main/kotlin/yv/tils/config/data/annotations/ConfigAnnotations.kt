@@ -10,16 +10,16 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.configv2.data.annotations
+package yv.tils.config.data.annotations
 
 import org.bukkit.Material
 
 /**
  * GUI-facing metadata for a `data class` field, read reflectively by `gui`'s
- * `DataClassConfigGui` (and ignored entirely by [yv.tils.configv2.files.ObjectMapperFileUtils],
+ * `DataClassConfigGui` (and ignored entirely by [yv.tils.config.files.ObjectMapperFileUtils],
  * which only cares about the field's name/type/value).
  *
- * This is what makes a plain data class usable both as [yv.tils.configv2.files.ObjectMapperFileUtils]
+ * This is what makes a plain data class usable both as [yv.tils.config.files.ObjectMapperFileUtils]
  * persistence *and* as an in-game editable config, without needing a separate
  * `ConfigEntry`-style list kept in sync by hand: the description/icon live directly on the
  * property declaration, right next to its type and default value.
@@ -52,7 +52,7 @@ annotation class ConfigIcon(val material: Material)
 
 /**
  * A GUI icon for a `Boolean` field that swaps depending on its current (or default, if
- * unset) value - the annotation-based equivalent of [yv.tils.configv2.data.ConfigEntry]'s
+ * unset) value - the annotation-based equivalent of [yv.tils.config.data.ConfigEntry]'s
  * `dynamicInvItem` lambda, covering every real use of it in this project (all of which just
  * swap between two fixed materials based on a boolean).
  */

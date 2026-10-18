@@ -16,7 +16,7 @@ import org.bukkit.command.CommandSender
 import yv.tils.common.language.LangStrings
 import yv.tils.common.updateChecker.PluginVersion
 import yv.tils.common.updateChecker.VersionState
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
 

@@ -17,7 +17,7 @@ import org.bukkit.event.block.BlockPhysicsEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.logger.DEBUG_LEVEL
 

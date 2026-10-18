@@ -12,7 +12,7 @@
 
 dependencies {
     compileOnly(project(":utils"))
-    compileOnly(project(":config-v2"))
+    compileOnly(project(":config"))
     compileOnly(project(":common"))
     // Compile-time only, to reference GUI types - NOT shaded into this module's own
     // published artifact. The actual gui-<version> build used at runtime is resolved

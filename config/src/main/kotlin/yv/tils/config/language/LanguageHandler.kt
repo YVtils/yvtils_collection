@@ -17,11 +17,15 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
-import java.util.*
+import java.util.Locale
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 class LanguageHandler {
     companion object {
-        val playerLang = mutableMapOf<UUID, Locale>()
+        val playerLang = ConcurrentHashMap<UUID, Locale>()
+
+        @Volatile
         private var serverDefaultLang: Locale = Locale.ENGLISH
 
         fun getMessage(key: LanguageProvider.LangStrings, uuid: UUID? = null): Component =
@@ -131,10 +135,18 @@ class LanguageHandler {
             Logger.debug("Getting string for key: $key, locale: $locale")
             val langString = Language.langStrings[key] ?: return key
 
-            val lang = Language().localeToLanguage(locale)
-            val shortLang = lang.split("_")
+            val lang = Language.localeToLanguage(locale)
+            // `lang` is always "<country>_<language>" (see Language.localeToLanguage),
+            // but derive the short form defensively instead of `lang.split("_")[1]` -
+            // the original module's version threw IndexOutOfBoundsException on any
+            // value that didn't contain an underscore.
+            val shortLang = lang.substringAfter('_', missingDelimiterValue = lang)
 
-            return langString.value[lang] ?: langString.value[shortLang[1]] ?: langString.value[Language().localeToShortLanguage(serverDefaultLang)] ?: key
+            return langString.value[lang]
+                ?: langString.value[shortLang]
+                ?: langString.value[Language.localeToShortLanguage(serverDefaultLang)]
+                ?: langString.value["en"]
+                ?: key
         }
     }
 
@@ -149,7 +161,7 @@ class LanguageHandler {
     }
 
     fun setServerDefaultLanguage(locale: String) {
-        setServerDefaultLanguage(Language().stringToLocale(locale))
+        setServerDefaultLanguage(Language.stringToLocale(locale))
     }
 
     fun setServerDefaultLanguage(locale: Locale) {

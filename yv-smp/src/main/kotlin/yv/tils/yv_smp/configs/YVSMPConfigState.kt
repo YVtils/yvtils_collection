@@ -9,8 +9,8 @@
 
 package yv.tils.yv_smp.configs
 
-import yv.tils.configv2.data.annotations.ConfigDescription
-import yv.tils.configv2.data.annotations.NotGuiEditable
+import yv.tils.config.data.annotations.ConfigDescription
+import yv.tils.config.data.annotations.NotGuiEditable
 
 /**
  * YV_SMP's `config.yml`, as a plain (nested) `data class` persisted via

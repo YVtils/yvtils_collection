@@ -3,9 +3,9 @@
 package yv.tils.fusion.language
 
 import org.bukkit.entity.Player
-import yv.tils.configv2.language.BuildLanguage
-import yv.tils.configv2.language.FileTypes
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.BuildLanguage
+import yv.tils.config.language.FileTypes
+import yv.tils.config.language.LanguageHandler
 
 object FusionText {
     private val strings = mapOf(

@@ -9,7 +9,7 @@
 
 package yv.tils.migration.config
 
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ObjectMapperFileUtils
 
 class SaveFile {
     companion object {

@@ -1,9 +1,9 @@
 package yv.tils.discord.language
 
 import org.bukkit.command.CommandSender
-import yv.tils.configv2.language.FileTypes
-import yv.tils.configv2.language.LanguageProvider
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.FileTypes
+import yv.tils.config.language.LanguageProvider
+import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.logic.whitelist.AccountService
 import yv.tils.utils.logger.Logger
 import net.kyori.adventure.text.minimessage.MiniMessage

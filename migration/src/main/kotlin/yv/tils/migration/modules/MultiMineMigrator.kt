@@ -14,10 +14,10 @@ package yv.tils.migration.modules
 
 import org.bukkit.Material
 import org.bukkit.Tag
-import yv.tils.configv2.files.ConfigFile
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ConfigurateFileUtils
-import yv.tils.configv2.files.JsonFileUtils
+import yv.tils.config.files.ConfigFile
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ConfigurateFileUtils
+import yv.tils.config.files.ConfigJsonFileUtils
 import yv.tils.migration.base.BaseMigrator
 import yv.tils.utils.logger.Logger
 import java.io.File
@@ -96,7 +96,7 @@ class MultiMineMigrator: BaseMigrator() {
         val saveWrapper = mapOf("saves" to saveEntries)
 
         // Save as JSON
-        val jsonFile = JsonFileUtils.makeJsonFile(newSavePath, saveWrapper)
+        val jsonFile = ConfigJsonFileUtils.makeJsonFile(newSavePath, saveWrapper)
         ConfigurateFileUtils.save(jsonFile)
 
         Logger.info("MultiMine save migrated successfully (${saveEntries.size} entries)")

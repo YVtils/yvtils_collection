@@ -9,7 +9,7 @@
 
 package yv.tils.multiMine.configs
 
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import java.util.*
 

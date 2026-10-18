@@ -12,8 +12,8 @@
 
 package yv.tils.migration
 
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ConfigurateFileUtils
 import yv.tils.utils.modules.Module
 import yv.tils.utils.logger.Logger
 

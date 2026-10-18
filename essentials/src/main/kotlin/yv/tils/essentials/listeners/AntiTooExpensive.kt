@@ -14,7 +14,7 @@ import org.bukkit.entity.Player
 import org.bukkit.Bukkit
 import org.bukkit.inventory.view.AnvilView
 import yv.tils.essentials.config.ConfigFile
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.essentials.language.LangStrings
 import yv.tils.utils.modules.Core
 import java.util.UUID

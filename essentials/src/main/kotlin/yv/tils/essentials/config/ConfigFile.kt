@@ -12,12 +12,12 @@
 
 package yv.tils.essentials.config
 
-import yv.tils.configv2.data.annotations.ConfigDescription
-import yv.tils.configv2.data.annotations.ConfigIcon
-import yv.tils.configv2.data.annotations.BooleanIcon
+import yv.tils.config.data.annotations.ConfigDescription
+import yv.tils.config.data.annotations.ConfigIcon
+import yv.tils.config.data.annotations.BooleanIcon
 import org.bukkit.Material
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ObjectMapperFileUtils
 
 class ConfigFile {
     companion object {

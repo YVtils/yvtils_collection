@@ -43,7 +43,7 @@ Permission: `yvtils.yv_smp.command.ambient` (operators by default).
   selected; types requiring extra data use defaults such as white dust, stone
   blocks, or amethyst items. `none` disables particles.
 - Sources save immediately to `plugins/yvtils/yv_smp/ambient-sources.yml` using
-  config-v2. Sources in unloaded worlds stay dormant until those worlds load;
+  config. Sources in unloaded worlds stay dormant until those worlds load;
   they do not force-load worlds or chunks. Particle effects continue independently
   of whether sound playback is looping.
 

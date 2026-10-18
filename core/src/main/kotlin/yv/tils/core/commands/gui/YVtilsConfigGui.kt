@@ -18,7 +18,7 @@ import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemBuilder
 import xyz.xenondevs.invui.window.Window
 import yv.tils.common.language.LangStrings
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.HeadUtils

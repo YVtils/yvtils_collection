@@ -6,7 +6,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemProvider
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 
 /** Shared left-click toggle, optional right-click reset, and in-place display refresh. */
 object ToggleControl {

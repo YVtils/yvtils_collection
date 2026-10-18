@@ -14,10 +14,11 @@ package yv.tils.config.language
 
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
+import java.util.concurrent.ConcurrentHashMap
 
 class LanguageProvider {
     companion object {
-        private val registeredEnumClasses = mutableSetOf<Class<out Enum<*>>>()
+        private val registeredEnumClasses: MutableSet<Class<out Enum<*>>> = ConcurrentHashMap.newKeySet()
 
         fun registerNewString(langKey: OLDLangStrings, translations: Map<FileTypes, String>) {
             for ((fileType, value) in translations) {

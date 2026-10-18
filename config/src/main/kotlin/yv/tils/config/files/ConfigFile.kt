@@ -10,7 +10,7 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.configv2.files
+package yv.tils.config.files
 
 import org.spongepowered.configurate.ConfigurationNode
 import java.io.File

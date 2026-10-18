@@ -23,7 +23,7 @@ import xyz.xenondevs.invui.item.ItemBuilder
 import xyz.xenondevs.invui.state.MutableProperty
 import xyz.xenondevs.invui.window.Window
 import yv.tils.common.language.LangStrings
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.core.loader.DynamicModuleRegistry
 import yv.tils.core.loader.ModuleConfig
 import yv.tils.gui.core.InvUIBootstrap
@@ -42,7 +42,7 @@ import java.nio.file.Path
  * enabled state in the shared `modules.yml` (read/written through
  * [ModuleConfig]).
  *
- * Statically-embedded modules (`common`, `utils`, `config-v2`) are not
+ * Statically-embedded modules (`common`, `utils`, `config`) are not
  * togglable - they are always loaded by every core - and are therefore not
  * listed here. Only entries from [DynamicModuleRegistry.KNOWN_MODULES] are
  * shown, excluding any marked [DynamicModuleRegistry.ModuleArtifact.hidden]

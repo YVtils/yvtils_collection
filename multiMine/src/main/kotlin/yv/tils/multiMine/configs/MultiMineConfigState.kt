@@ -14,7 +14,7 @@ package yv.tils.multiMine.configs
 
 import org.bukkit.Material
 import org.bukkit.Tag
-import yv.tils.configv2.data.annotations.*
+import yv.tils.config.data.annotations.*
 
 /**
  * multiMine's `config.yml`, as a plain `data class` persisted via `ObjectMapperFileUtils`

@@ -2,8 +2,8 @@
  * MPL-2.0 with additional terms: https://yvtils.net/license */
 package yv.tils.regions.language
 
-import yv.tils.configv2.language.FileTypes
-import yv.tils.configv2.language.LanguageProvider
+import yv.tils.config.language.FileTypes
+import yv.tils.config.language.LanguageProvider
 import yv.tils.utils.colors.Colors
 
 /** Stable, descriptive keys and named placeholders, following the other modules. */

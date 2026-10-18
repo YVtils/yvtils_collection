@@ -9,8 +9,8 @@
 
 package yv.tils.discord.configs
 
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ObjectMapperFileUtils
 
 // TODO: Add option to allow multiple whitelist channels
 class ConfigFile {

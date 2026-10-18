@@ -6,14 +6,14 @@
  */
 package yv.tils.remadeEnderDragon.configs
 
-import yv.tils.configv2.data.annotations.ConfigDescription
-import yv.tils.configv2.data.annotations.NotGuiEditable
-import yv.tils.configv2.data.annotations.ConfigIcon
-import yv.tils.configv2.data.annotations.BooleanIcon
+import yv.tils.config.data.annotations.ConfigDescription
+import yv.tils.config.data.annotations.NotGuiEditable
+import yv.tils.config.data.annotations.ConfigIcon
+import yv.tils.config.data.annotations.BooleanIcon
 import org.bukkit.Material
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ObjectMapperFileUtils
-import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ObjectMapperFileUtils
+import yv.tils.config.files.ConfigurateFileUtils
 import org.spongepowered.configurate.ConfigurationOptions
 import org.spongepowered.configurate.kotlin.dataClassFieldDiscoverer
 import org.spongepowered.configurate.objectmapping.ObjectMapper

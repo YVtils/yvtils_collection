@@ -17,8 +17,8 @@ import org.bukkit.Vibration
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitTask
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.utils.modules.Core
 import java.util.UUID
 import kotlin.random.Random

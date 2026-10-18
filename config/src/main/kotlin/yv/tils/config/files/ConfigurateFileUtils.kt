@@ -10,7 +10,7 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.configv2.files
+package yv.tils.config.files
 
 import org.spongepowered.configurate.ConfigurationNode
 import org.spongepowered.configurate.gson.GsonConfigurationLoader
@@ -21,6 +21,8 @@ import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import java.io.File
 import java.io.FileNotFoundException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 /**
  * Format-agnostic load/save/merge logic for YAML and JSON files, backed by
@@ -51,7 +53,7 @@ class ConfigurateFileUtils {
          *
          * `null` (the default) means "keep using [defaultBaseDirectory]",
          * computed fresh on every call. Set this once (e.g. from your
-         * plugin's `onLoad()`, before any config-v2 file I/O happens, and
+         * plugin's `onLoad()`, before any config file I/O happens, and
          * *after* `Core.initCore(...)`) to redirect all of it elsewhere -
          * useful for things like a dedicated data directory, or pointing a
          * test harness at a scratch directory instead of a real plugin
@@ -84,7 +86,7 @@ class ConfigurateFileUtils {
          * `discord-core`, `multiMine-core`, `regions-core`, `test-core`,
          * ...) - each of those is a *separate* Bukkit plugin with its own
          * `dataFolder`, but they're all part of the same ecosystem, so
-         * config-v2-backed data (a module's `/multiMine/config.yml`,
+         * config-backed data (a module's `/multiMine/config.yml`,
          * `/languages/en.yml`, etc.) defaults to one common location instead
          * of being duplicated/scattered per-launcher.
          *
@@ -141,7 +143,7 @@ class ConfigurateFileUtils {
          */
         fun load(path: String, format: ConfigFormat, overwriteParentDir: Boolean = false): ConfigFile {
             val file = resolvePath(path, overwriteParentDir)
-            if (!file.exists()) throw FileNotFoundException("File not found: $path")
+            if (Files.notExists(file.toPath())) throw FileNotFoundException("File not found: $path")
 
             Logger.debug("Loading ${format.name} file: $path")
 
@@ -216,11 +218,19 @@ class ConfigurateFileUtils {
          * Persists [configFile] to disk, creating parent directories and
          * overwriting any existing file at that path.
          */
+        @Synchronized
         fun save(configFile: ConfigFile) {
             Logger.debug("Saving ${configFile.format.name} file: ${configFile.file.path}")
 
             configFile.file.parentFile?.mkdirs()
-            loaderFor(configFile.file, configFile.format).save(configFile.node)
+            val target = configFile.file.toPath()
+            val temporary = Files.createTempFile(target.toAbsolutePath().parent, ".yvtils-", ".tmp")
+            try {
+                loaderFor(temporary.toFile(), configFile.format).save(configFile.node)
+                Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+            } finally {
+                Files.deleteIfExists(temporary)
+            }
         }
 
         /**
@@ -237,6 +247,7 @@ class ConfigurateFileUtils {
          * When `true`, [configFile] completely replaces the file's contents
          * via [ConfigurationNode.from].
          */
+        @Synchronized
         fun update(configFile: ConfigFile, overwriteExisting: Boolean = false) {
             Logger.debug("Updating ${configFile.format.name} file: ${configFile.file.path} | overwriteExisting: $overwriteExisting")
 
@@ -255,7 +266,7 @@ class ConfigurateFileUtils {
                 existing.mergeFrom(configFile.node)
             }
 
-            loader.save(existing)
+            save(ConfigFile(configFile.file, existing, configFile.format))
         }
 
         /**
@@ -271,7 +282,7 @@ class ConfigurateFileUtils {
          * depth, which [ConfigurationNode] doesn't do on its own since it
          * models nesting structurally rather than through dotted keys.
          *
-         * Unlike [yv.tils.configv2.language.Language]'s private `flatten` (which only
+         * Unlike [yv.tils.config.language.Language]'s private `flatten` (which only
          * keeps `String` leaves, since language files are always string-valued),
          * this keeps whatever [ConfigurationNode.raw] returns for each leaf.
          */

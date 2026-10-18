@@ -10,7 +10,7 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.configv2.files
+package yv.tils.config.files
 
 /**
  * Thin, YAML-specific facade over [ConfigurateFileUtils], for call sites that

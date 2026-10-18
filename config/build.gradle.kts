@@ -12,4 +12,28 @@
 
 dependencies {
     implementation(project(":utils"))
+
+    // Exposed as `api` so that modules depending on `config` can work
+    // directly with Configurate's `ConfigurationNode`/`ConfigurationLoader`
+    // types (e.g. to read/write custom sections) without having to declare
+    // their own dependency on Configurate.
+    //
+    // `configurate-yaml` backs .yml files (SnakeYAML, with comment
+    // preservation via CommentedConfigurationNode) and `configurate-gson`
+    // backs .json files (Gson) - both formats are modeled through the same
+    // `ConfigurationNode` API, which is what lets `ConfigurateFileUtils`
+    // implement loading/saving/merging once instead of per-format.
+    api("org.spongepowered:configurate-core:4.2.0")
+    api("org.spongepowered:configurate-yaml:4.2.0")
+    api("org.spongepowered:configurate-gson:4.2.0")
+    // Adds `dataClassFieldDiscoverer()` (org.spongepowered.configurate.kotlin),
+    // letting Configurate's ObjectMapper read/write Kotlin `data class`
+    // instances directly - used by ObjectMapperFileUtils so state/save
+    // classes only need their field list updated in one place (the data
+    // class itself) instead of hand-written per-field node reads/writes.
+    api("org.spongepowered:configurate-extra-kotlin:4.2.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+tasks.test { useJUnitPlatform() }

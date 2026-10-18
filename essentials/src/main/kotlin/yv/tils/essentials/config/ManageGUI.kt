@@ -3,7 +3,7 @@
 package yv.tils.essentials.config
 
 import org.bukkit.entity.Player
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.essentials.language.LangStrings
 import yv.tils.essentials.permissions.Permissions
 import yv.tils.gui.logic.DataClassConfigGui

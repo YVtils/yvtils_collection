@@ -13,7 +13,7 @@
 package yv.tils.yv_smp
 
 import yv.tils.common.permissions.PermissionManager
-import yv.tils.configv2.language.LanguageProvider
+import yv.tils.config.language.LanguageProvider
 import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module

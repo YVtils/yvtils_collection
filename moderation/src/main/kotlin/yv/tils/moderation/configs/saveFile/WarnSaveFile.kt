@@ -9,7 +9,7 @@
 
 package yv.tils.moderation.configs.saveFile
 
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ObjectMapperFileUtils
 import java.util.UUID
 
 class WarnSaveFile {

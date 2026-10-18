@@ -290,7 +290,7 @@ $LICENSE_HEADER
 
 dependencies {
     compileOnly(project(":utils"))
-    compileOnly(project(":config-v2"))
+    compileOnly(project(":config"))
     compileOnly(project(":common"))
     // Compile-time only, to reference GUI types - NOT shaded into this module's own
     // published artifact. The actual gui-<version> build used at runtime is resolved
@@ -307,8 +307,8 @@ $LICENSE_HEADER
 
 package yv.tils.$PACKAGE_NAME.configs
 
-import yv.tils.configv2.data.annotations.ConfigDescription
-import yv.tils.configv2.data.annotations.NotGuiEditable
+import yv.tils.config.data.annotations.ConfigDescription
+import yv.tils.config.data.annotations.NotGuiEditable
 
 /**
  * $MODULE_NAME's \`config.yml\`, persisted as a plain data class via
@@ -331,8 +331,8 @@ $LICENSE_HEADER
 
 package yv.tils.$PACKAGE_NAME.configs
 
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ObjectMapperFileUtils
 
 class ConfigFile {
     companion object {
@@ -399,8 +399,8 @@ $LICENSE_HEADER
 
 package yv.tils.$PACKAGE_NAME.language
 
-import yv.tils.configv2.language.BuildLanguage
-import yv.tils.configv2.language.FileTypes
+import yv.tils.config.language.BuildLanguage
+import yv.tils.config.language.FileTypes
 
 class RegisterStrings {
     fun registerStrings() {
@@ -485,7 +485,7 @@ package yv.tils.$PACKAGE_NAME.commands
 
 import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.playerExecutor
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.$PACKAGE_NAME.data.Permissions
 
 /**
@@ -644,7 +644,7 @@ module system works.
 
 ## Dependencies
 
-- \`utils\`, \`config-v2\`, \`common\` (always \`compileOnly\`, provided by the shared runtime tier)
+- \`utils\`, \`config\`, \`common\` (always \`compileOnly\`, provided by the shared runtime tier)
 - \`gui-26.1\` (\`compileOnly\`, for the in-game config editor)
 - TODO: list any other module/third-party dependency added later
 

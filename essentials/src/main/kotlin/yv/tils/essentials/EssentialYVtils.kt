@@ -14,7 +14,7 @@ package yv.tils.essentials
 
 import dev.jorel.commandapi.CommandAPI
 import yv.tils.common.permissions.PermissionManager
-import yv.tils.configv2.language.LanguageProvider
+import yv.tils.config.language.LanguageProvider
 import yv.tils.essentials.commands.register.*
 import yv.tils.essentials.config.StatesFile
 import yv.tils.essentials.config.ConfigFile

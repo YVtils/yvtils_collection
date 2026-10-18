@@ -9,8 +9,8 @@
 
 package yv.tils.server.configs
 
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.utils.logger.Logger
 
 class ConfigFile {

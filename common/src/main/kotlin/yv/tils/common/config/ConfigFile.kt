@@ -9,8 +9,8 @@
 
 package yv.tils.common.config
 
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ObjectMapperFileUtils
 
 class ConfigFile {
     companion object {

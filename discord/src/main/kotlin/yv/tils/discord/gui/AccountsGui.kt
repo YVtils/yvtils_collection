@@ -11,7 +11,7 @@ import xyz.xenondevs.invui.item.BoundItem
 import xyz.xenondevs.invui.item.ItemWrapper
 import xyz.xenondevs.invui.window.Window
 import xyz.xenondevs.invui.window.AnvilWindow
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.commands.DiscordAccountsCommand
 import yv.tils.discord.data.Permissions
 import yv.tils.discord.language.AccountText

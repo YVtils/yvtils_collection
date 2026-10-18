@@ -10,11 +10,11 @@
 package yv.tils.common.config
 
 import org.bukkit.Material
-import yv.tils.configv2.data.annotations.BooleanIcon
-import yv.tils.configv2.data.annotations.ConfigDescription
-import yv.tils.configv2.data.annotations.ConfigIcon
-import yv.tils.configv2.data.annotations.DefaultValue
-import yv.tils.configv2.data.annotations.NotGuiEditable
+import yv.tils.config.data.annotations.BooleanIcon
+import yv.tils.config.data.annotations.ConfigDescription
+import yv.tils.config.data.annotations.ConfigIcon
+import yv.tils.config.data.annotations.DefaultValue
+import yv.tils.config.data.annotations.NotGuiEditable
 
 /**
  * The root `/config.yml`, as a plain (nested) `data class` persisted via

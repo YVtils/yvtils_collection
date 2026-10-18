@@ -11,7 +11,7 @@
  */
 
 dependencies {
-    compileOnly(project(":config-v2"))
+    compileOnly(project(":config"))
     compileOnly(project(":utils"))
     compileOnly(project(":common"))
     compileOnly(project(":gui-26.1"))

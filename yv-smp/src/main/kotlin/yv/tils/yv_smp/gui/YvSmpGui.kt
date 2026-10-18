@@ -24,7 +24,7 @@ import xyz.xenondevs.invui.item.setItemProvider
 import xyz.xenondevs.invui.window.AnvilWindow
 import xyz.xenondevs.invui.window.Window
 import xyz.xenondevs.invui.window.addRenameHandler
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.gui.utils.Filler
 import yv.tils.utils.player.PlayerUtils

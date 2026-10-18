@@ -10,12 +10,12 @@
  * the YVtils Brand Protection Clause.
  */
 
-package yv.tils.configv2.data
+package yv.tils.config.data
 
 import org.spongepowered.configurate.ConfigurationNode
-import yv.tils.configv2.files.ConfigFile
-import yv.tils.configv2.files.ConfigFormat
-import yv.tils.configv2.files.ConfigurateFileUtils
+import yv.tils.config.files.ConfigFile
+import yv.tils.config.files.ConfigFormat
+import yv.tils.config.files.ConfigurateFileUtils
 import yv.tils.utils.logger.Logger
 
 /**

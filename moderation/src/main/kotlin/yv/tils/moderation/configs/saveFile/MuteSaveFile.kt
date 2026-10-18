@@ -9,7 +9,7 @@
 
 package yv.tils.moderation.configs.saveFile
 
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.player.PlayerUtils
 import java.util.*

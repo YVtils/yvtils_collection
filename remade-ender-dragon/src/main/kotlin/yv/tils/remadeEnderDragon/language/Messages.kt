@@ -7,9 +7,9 @@
 package yv.tils.remadeEnderDragon.language
 
 import org.bukkit.command.CommandSender
-import yv.tils.configv2.language.BuildLanguage
-import yv.tils.configv2.language.FileTypes
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.BuildLanguage
+import yv.tils.config.language.FileTypes
+import yv.tils.config.language.LanguageHandler
 import org.bukkit.entity.Player
 import yv.tils.utils.message.MessageUtils
 

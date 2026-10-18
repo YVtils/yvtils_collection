@@ -4,7 +4,7 @@ package yv.tils.regions.language
 
 import net.kyori.adventure.text.Component
 import org.bukkit.command.CommandSender
-import yv.tils.configv2.language.LanguageHandler
+import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.logger.Logger
 import net.kyori.adventure.text.minimessage.MiniMessage
 

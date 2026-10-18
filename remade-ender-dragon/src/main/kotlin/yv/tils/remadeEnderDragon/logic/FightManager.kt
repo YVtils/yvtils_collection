@@ -20,7 +20,7 @@ import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.WorldUnloadEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.scheduler.BukkitTask
-import yv.tils.configv2.files.ObjectMapperFileUtils
+import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.remadeEnderDragon.configs.*
 import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
