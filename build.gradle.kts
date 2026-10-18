@@ -91,7 +91,7 @@ allprojects {
  * (see `utils`) / `generateModuleVersionResource` below both key off
  * `project.version`, whatever set it.
  */
-val moduleVersions = java.util.Properties().apply {
+val moduleVersions = Properties().apply {
     rootProject.file("gradle/module-versions.properties").inputStream().use { load(it) }
 }
 
@@ -119,7 +119,8 @@ subprojects {
  * release. Published release versions are immutable.
  */
 val publishableModules = setOf(
-    // Fusion uses the same shared runtime tier as the other dynamically resolved features.
+    "vanish",
+    "waypoint",
     "fusion",
     "discord",
     "multiMine",
@@ -246,6 +247,11 @@ subprojects {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_25)
         }
+    }
+
+    tasks.withType<AbstractArchiveTask>().configureEach {
+        isPreserveFileTimestamps = false
+        isReproducibleFileOrder = true
     }
 
     /*
@@ -391,6 +397,36 @@ subprojects {
                 when {
                     existing.isEmpty() -> true
                     existing.size == filenames.distinct().size -> {
+                        publication.artifacts.filter { it.extension == "jar" }.forEach { artifact ->
+                            val classifier = artifact.classifier?.takeIf(String::isNotEmpty)?.let { "-$it" }.orEmpty()
+                            val url = repository.url.toString().trimEnd('/') +
+                                    "/$directory/$prefix$classifier.jar.sha1"
+                            val connection = uri(url).toURL().openConnection() as HttpURLConnection
+                            try {
+                                connection.connectTimeout = 15_000
+                                connection.readTimeout = 15_000
+                                connection.instanceFollowRedirects = false
+                                credentials.username?.let { username ->
+                                    val token = Base64.getEncoder().encodeToString(
+                                        "$username:${credentials.password.orEmpty()}".toByteArray(Charsets.UTF_8)
+                                    )
+                                    connection.setRequestProperty("Authorization", "Basic $token")
+                                }
+                                if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                                    throw GradleException("Cannot verify published checksum for $coordinate")
+                                }
+                                val published = connection.inputStream.bufferedReader().use { it.readText().trim() }
+                                    .substringBefore(' ')
+                                if (!published.equals(sha1Hex(artifact.file), ignoreCase = true)) {
+                                    throw GradleException(
+                                        "Immutable artifact mismatch for $coordinate. " +
+                                                "Assign a fresh version in gradle/module-versions.properties."
+                                    )
+                                }
+                            } finally {
+                                connection.disconnect()
+                            }
+                        }
                         logger.lifecycle("Skipping $coordinate: release already exists in ${repository.name}.")
                         false
                     }
