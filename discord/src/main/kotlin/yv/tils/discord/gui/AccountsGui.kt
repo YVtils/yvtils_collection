@@ -21,6 +21,9 @@ import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.GuiStyle
 import yv.tils.gui.utils.HeadUtils
 import yv.tils.gui.utils.Heads
+import yv.tils.gui.utils.PlayerHeads
+import org.bukkit.Material
+import java.util.UUID
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.coroutine.CoroutineHandler
@@ -75,6 +78,7 @@ object AccountsGui {
         extra: Map<String, Any> = emptyMap(),
         click: (Player) -> Unit = {}
     ): Item {
+        val uuid = runCatching { UUID.fromString(entry.minecraftUUID) }.getOrNull()
         val item = Item.builder().setItemProvider { viewer ->
             val lines = MessageUtils.handleLore(text("entry", viewer, DiscordAccountsCommand.params(entry, viewer))) +
                     if (hint == null) emptyList() else listOf(Component.empty()) + MessageUtils.handleLore(
@@ -84,9 +88,10 @@ object AccountsGui {
                             extra
                         )
                     )
-            styled(AccountHeads.head(entry), Component.text(entry.minecraftName), lines)
+            val head = uuid?.let { PlayerHeads.head(it) } ?: ItemStack(Material.PLAYER_HEAD)
+            styled(head, Component.text(entry.minecraftName), lines)
         }.addClickHandler { _, event -> click(event.player()) }.build()
-        AccountHeads.load(entry, item)
+        if (uuid != null) PlayerHeads.load(uuid, item)
         DiscordAccountNames.retrieve(entry.discordUserID).whenComplete { _, _ ->
             if (Core.instance.isEnabled) {
                 Bukkit.getScheduler().runTask(Core.instance, Runnable { item.notifyWindows() })
