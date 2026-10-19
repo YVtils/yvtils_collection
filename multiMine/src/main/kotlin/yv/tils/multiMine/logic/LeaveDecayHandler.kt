@@ -21,7 +21,6 @@ import org.bukkit.entity.Player
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.utils.BlockUtils
 import yv.tils.multiMine.utils.BlockUtils.Companion.processFinishedMap
-import yv.tils.multiMine.utils.ToolUtils.Companion.toolBroke
 import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import java.util.*
@@ -55,7 +54,6 @@ class LeaveDecayHandler {
         // Reset values
         BlockUtils.runningProcessesMap[playerId] = AtomicInt(0)
         BlockUtils.brokenMap[playerId]?.store(0)
-        toolBroke = false
 
         LeaveDecayHandler().triggerArea(
             world = origin.world!!,

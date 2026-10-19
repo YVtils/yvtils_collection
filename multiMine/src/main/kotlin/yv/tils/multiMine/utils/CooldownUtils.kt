@@ -19,7 +19,7 @@ import java.util.*
 
 class CooldownUtils {
     companion object {
-        val cooldownTime = ConfigFile.config["cooldownTime"] as Int
+        val cooldownTime get() = ConfigFile.config["cooldownTime"] as Int
 
         val cooldownMap: MutableMap<UUID, Int> = mutableMapOf()
     }
@@ -47,9 +47,9 @@ class CooldownUtils {
      */
     fun cooldownHandler() {
         Logger.debug("Handling multiMine cooldowns...", DEBUG_LEVEL.SPAM)
-        for (entry in cooldownMap) {
-            if (entry.value == 0) continue
-            cooldownMap[entry.key] = entry.value - 1
+        for ((key, value) in cooldownMap) {
+            if (value == 0) continue
+            cooldownMap[key] = value - 1
         }
     }
 }

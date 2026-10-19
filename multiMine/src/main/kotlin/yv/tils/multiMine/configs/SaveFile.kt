@@ -10,12 +10,12 @@
 package yv.tils.multiMine.configs
 
 import yv.tils.config.files.ObjectMapperFileUtils
-import yv.tils.utils.coroutine.CoroutineHandler
 import java.util.*
 
 class SaveFile {
     companion object {
         val saves = mutableMapOf<UUID, MultiMineSave>()
+        private val lock = Any()
 
         private const val FILE_PATH = "/multiMine/save.json"
     }
@@ -40,17 +40,12 @@ class SaveFile {
     }
 
     fun updatePlayerSetting(uuid: UUID, state: Boolean) {
-        if (saves.containsKey(uuid)) {
-            saves[uuid]?.toggled = state
-        } else {
-            saves[uuid] = MultiMineSave(uuid.toString(), state)
+        synchronized(lock) {
+            val next = saves.toMutableMap().apply { put(uuid, MultiMineSave(uuid.toString(), state)) }
+            registerStrings(next.values.toMutableList())
+            saves.clear()
+            saves.putAll(next)
         }
-
-        CoroutineHandler.launchTask(
-            suspend { registerStrings(saves.values.toMutableList()) },
-            null,
-            isOnce = true,
-        )
     }
 
     data class MultiMineSave(

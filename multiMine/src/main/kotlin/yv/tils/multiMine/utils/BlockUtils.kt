@@ -13,14 +13,15 @@
 package yv.tils.multiMine.utils
 
 import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.Damageable
 import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.logic.LeaveDecayHandler
-import yv.tils.multiMine.utils.ToolUtils.Companion.toolBroke
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
@@ -34,10 +35,10 @@ import kotlin.concurrent.atomics.incrementAndFetch
 @OptIn(ExperimentalAtomicApi::class)
 class BlockUtils {
     companion object {
-        val animationTime = ConfigFile.config["animationTime"] as Int
-        val breakLimit = ConfigFile.config["breakLimit"] as Int
-        val matchBlockTypeOnly = ConfigFile.config["matchBlockTypeOnly"] as Boolean
-        val blocks = ConfigFile.blockList
+        val animationTime get() = ConfigFile.config["animationTime"] as Int
+        val breakLimit get() = ConfigFile.config["breakLimit"] as Int
+        val matchBlockTypeOnly get() = ConfigFile.config["matchBlockTypeOnly"] as Boolean
+        val blocks get() = ConfigFile.blockList
 
         val runningProcessesMap: ConcurrentHashMap<UUID, AtomicInt> = ConcurrentHashMap()
         val brokenMap: ConcurrentHashMap<UUID, AtomicInt> = ConcurrentHashMap()
@@ -89,17 +90,12 @@ class BlockUtils {
         }
 
         if (checkBlock(block.type, blockList, player) && ToolUtils().checkTool(block, item)) {
-            if (brokenMap[player.uniqueId]!!.load() != 0) {
-                try {
-                    if (toolBroke) return false
-
-                    if (ToolUtils().damageTool(player, 1, item)) {
-                        return false
-                    }
-                } catch (_: NullPointerException) {
-                    return false
-                }
-            }
+            if (!player.isOnline || player.gameMode != GameMode.SURVIVAL ||
+                player.inventory.itemInMainHand !== item && player.inventory.itemInMainHand != item
+            ) return false
+            val damage = item.itemMeta as? Damageable ?: return false
+            if (ConfigFile.getBoolean("canToolsBreak") == false && damage.damage + 1 >= item.type.maxDurability) return false
+            if (!ChainedBlockBreak.breakBlock(player, block)) return false
 
             brokenMap[player.uniqueId]?.incrementAndFetch()
             Logger.debug(
@@ -107,7 +103,6 @@ class BlockUtils {
                 DEBUG_LEVEL.DETAILED
             )
 
-            block.breakNaturally(item, true, true)
             return true
         }
         return false
@@ -214,18 +209,6 @@ class BlockUtils {
                             } catch (e: Exception) {
                                 Logger.warn("Error during task finalization: ${e.message}")
                                 Logger.debug("Error: ${e.stackTraceToString()}", 2)
-                                // TODO: Look into this error -> Maybe this is fixed now?
-                                // [17:00:07] [Server thread/WARN]: [YVtils] Task #525404 for YVtils-MultiMine v2.0.0-beta.3 generated an exception
-                                //java.lang.NullPointerException: null
-                                //	at YVtils-MM_v2.0.0-beta.3.jar/yv.tils.multiMine.utils.BlockUtils.registerBlocks$lambda$1(BlockUtils.kt:196) ~[YVtils-MM_v2.0.0-beta.3.jar:?]
-                                //	at org.bukkit.craftbukkit.scheduler.CraftTask.run(CraftTask.java:78) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                //	at org.bukkit.craftbukkit.scheduler.CraftScheduler.mainThreadHeartbeat(CraftScheduler.java:474) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                //	at net.minecraft.server.MinecraftServer.tickChildren(MinecraftServer.java:1771) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                //	at net.minecraft.server.MinecraftServer.tickServer(MinecraftServer.java:1645) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                //	at net.minecraft.server.dedicated.DedicatedServer.tickServer(DedicatedServer.java:467) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                //	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1365) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                //	at net.minecraft.server.MinecraftServer.lambda$spin$2(MinecraftServer.java:388) ~[purpur-1.21.10.jar:1.21.10-2527-edbd95c]
-                                //	at java.base/java.lang.Thread.run(Thread.java:1583) ~[?:?]
                             }
                         }
                     }, animationTime * 1L)

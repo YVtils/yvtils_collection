@@ -77,11 +77,9 @@ class MultiMineYVtils : Module.YVtilsModule {
     }
 
     private fun registerCoroutines() {
-        CoroutineHandler.launchTask(
-            suspend { CooldownUtils().cooldownHandler() },
-            "yvtils-multiMine-cooldownHandler",
-            1 * 1000L,
-        )
+        Core.instance.server.scheduler.runTaskTimer(Core.instance, Runnable {
+            CooldownUtils().cooldownHandler()
+        }, 20L, 20L)
     }
 
     private fun registerPermissions() {

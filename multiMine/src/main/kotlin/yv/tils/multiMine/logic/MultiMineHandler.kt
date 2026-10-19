@@ -29,10 +29,13 @@ import yv.tils.multiMine.utils.ToolUtils
 import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import yv.tils.multiMine.utils.ChainedBlockBreak
 
 @OptIn(ExperimentalAtomicApi::class)
 class MultiMineHandler {
     fun trigger(e: BlockBreakEvent) {
+        if (ChainedBlockBreak.isChained(e.player.uniqueId)) return
+        if ((BlockUtils.runningProcessesMap[e.player.uniqueId]?.load() ?: 0) > 0) return
         val loc = e.block.location
         val player = e.player
         val uuid = player.uniqueId
