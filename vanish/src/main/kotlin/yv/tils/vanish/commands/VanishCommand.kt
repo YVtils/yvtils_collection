@@ -20,13 +20,21 @@ import yv.tils.vanish.configs.ConfigFile
 import yv.tils.vanish.configs.ManageGUI
 import yv.tils.vanish.logic.VanishService
 import yv.tils.vanish.permissions.VanishPermissions
+import yv.tils.vanish.configs.PlayerSettings
+import yv.tils.vanish.gui.SettingsGui
 
 class VanishCommand(service: VanishService) {
     init {
         commandTree("vanish") {
             withAliases("v")
             withPermission(VanishPermissions.USE)
-            playerExecutor { player, _ -> service.toggle(player, ConfigFile.state.defaultLayer) }
+            playerExecutor { player, _ -> service.toggle(player, PlayerSettings.get(player.uniqueId).layer) }
+            literalArgument("settings") {
+                playerExecutor { player, _ -> SettingsGui(service).open(player) }
+            }
+            literalArgument("silent") {
+                playerExecutor { player, _ -> service.toggle(player, PlayerSettings.get(player.uniqueId).layer, true) }
+            }
             literalArgument("config") {
                 withPermission(VanishPermissions.CONFIG)
                 playerExecutor { player, _ -> ManageGUI.open(player) }

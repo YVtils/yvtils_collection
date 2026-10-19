@@ -16,6 +16,7 @@ dependencies {
     compileOnly(project(":config"))
     compileOnly(project(":utils"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testImplementation(project(":config"))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

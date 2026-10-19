@@ -26,6 +26,9 @@ import yv.tils.vanish.listeners.SilentContainers
 import yv.tils.vanish.listeners.VanishListener
 import yv.tils.vanish.logic.VanishService
 import yv.tils.vanish.permissions.VanishPermissions
+import java.util.function.Predicate
+import yv.tils.utils.modules.ConnectionMessages
+import yv.tils.vanish.configs.PlayerSettings
 
 class VanishYVtils : Module.YVtilsModule {
     companion object {
@@ -42,6 +45,8 @@ class VanishYVtils : Module.YVtilsModule {
     override fun onLoad() = VanishText.register()
     override fun enablePlugin() {
         ConfigFile.load()
+        PlayerSettings.load()
+        ConnectionMessages.hidden = Predicate { service.hidden(it.uniqueId) }
         InvUIBootstrap.ensure()
         ConfigFile.changed = { containers.close(); service.refresh() }
         VanishPermissions.register()
@@ -60,6 +65,7 @@ class VanishYVtils : Module.YVtilsModule {
         permissionRefresh?.cancel()
         containers.close()
         service.close()
+        ConnectionMessages.hidden = Predicate { false }
         CommandAPI.unregister("vanish")
         CommandAPI.unregister("v")
         Module.removeModule(MODULE)
