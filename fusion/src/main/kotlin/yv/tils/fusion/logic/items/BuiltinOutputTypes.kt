@@ -1,24 +1,36 @@
-/* Part of the YVtils Project. Copyright (c) 2026 Lyvric / YVtils.
- * MPL-2.0 with additional terms: https://yvtils.net/license */
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2026 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
 package yv.tils.fusion.logic.items
 
-import yv.tils.fusion.FusionRecipe
-import yv.tils.fusion.gui.FusionGui
-import yv.tils.fusion.language.FusionText
-import yv.tils.fusion.logic.items.flask.NourishingFlask
-
+import com.destroystokyo.paper.profile.PlayerProfile
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.data.type.Light
+import org.bukkit.entity.Player
+import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BlockDataMeta
 import org.bukkit.inventory.meta.SkullMeta
-import org.bukkit.entity.Player
-import yv.tils.fusion.api.*
+import yv.tils.config.language.LanguageHandler
+import yv.tils.fusion.FusionRecipe
+import yv.tils.fusion.api.FusionOutputType
+import yv.tils.fusion.api.FusionRegistry
+import yv.tils.fusion.api.OutputSelection
+import yv.tils.fusion.gui.FusionGui
+import yv.tils.fusion.gui.ValueControls
+import yv.tils.fusion.language.FusionText
+import yv.tils.fusion.logic.items.flask.NourishingFlask
 import yv.tils.gui.utils.GuiStyle
 import java.util.function.Consumer
-import org.bukkit.event.inventory.ClickType
-import yv.tils.config.language.LanguageHandler
-import yv.tils.fusion.gui.ValueControls
 
 object BuiltinOutputTypes {
     fun register() {
@@ -39,8 +51,10 @@ object BuiltinOutputTypes {
             }
 
             override fun create(recipe: FusionRecipe, base: ItemStack, selection: OutputSelection) = base.apply {
-                OutputLore.apply(this, recipe, listOf("Place to display an item without a visible frame."),
-                    listOf("Frame" to "Invisible"))
+                OutputLore.apply(
+                    this, recipe, listOf("Place to display an item without a visible frame."),
+                    listOf("Frame" to "Invisible")
+                )
             }
         })
         FusionRegistry.registerOutputType("LIGHT", object : FusionOutputType {
@@ -55,8 +69,10 @@ object BuiltinOutputTypes {
                     data.level = selection.light.coerceIn(0, 15)
                     meta.setBlockData(data)
                     itemMeta = meta
-                    OutputLore.apply(this, recipe, listOf("Place to illuminate your build."),
-                        listOf("Light level" to "${data.level} / 15"))
+                    OutputLore.apply(
+                        this, recipe, listOf("Place to illuminate your build."),
+                        listOf("Light level" to "${data.level} / 15")
+                    )
                 }
 
             override fun control(player: Player, recipe: FusionRecipe, selection: OutputSelection) =
@@ -97,9 +113,13 @@ object BuiltinOutputTypes {
             override fun create(recipe: FusionRecipe, base: ItemStack, selection: OutputSelection): ItemStack =
                 base.apply {
                     val meta = itemMeta as SkullMeta
-                    meta.ownerProfile = selection.profile ?: error("Select a player first")
+                    val profile = selection.profile ?: error("Select a player first")
+                    // Preserve the public addon API's Bukkit profile parameter; new lookups return Paper profiles.
+                    @Suppress("DEPRECATION")
+                    meta.playerProfile = profile as? PlayerProfile
+                        ?: Bukkit.createProfile(profile.uniqueId, profile.name).apply { setTextures(profile.textures) }
                     itemMeta = meta
-                    OutputLore.apply(this, recipe, stats = listOf("Player" to (selection.profile?.name ?: "Selected player")))
+                    OutputLore.apply(this, recipe, stats = listOf("Player" to (profile.name ?: "Selected player")))
                 }
 
             override fun control(player: Player, recipe: FusionRecipe, selection: OutputSelection) =

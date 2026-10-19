@@ -16,7 +16,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.bukkit.profile.PlayerProfile
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.Markers
 import xyz.xenondevs.invui.gui.PagedGui
@@ -30,7 +29,7 @@ import yv.tils.gui.utils.GuiStyle
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.modules.Core
 import java.util.UUID
-import java.util.concurrent.TimeUnit
+import yv.tils.gui.utils.PlayerHeads
 import yv.tils.fusion.api.OutputSelection
 import yv.tils.fusion.api.FusionRegistry
 import java.util.function.Consumer
@@ -410,8 +409,7 @@ object FusionGui {
             }
             viewer.closeInventory()
             FusionText.send(viewer, "resolving")
-            val profile = if (uuid != null) Bukkit.createPlayerProfile(uuid) else Bukkit.createPlayerProfile(value)
-            profile.update().orTimeout(15, TimeUnit.SECONDS).whenComplete { resolved, error ->
+            PlayerHeads.resolve(uuid = uuid, name = if (uuid == null) value else null).whenComplete { resolved, error ->
                 if (!Core.instance.isEnabled || !FusionYVtils.active) return@whenComplete
                 Bukkit.getScheduler().runTask(Core.instance, Runnable {
                     if (!viewer.isOnline || !allowed(viewer)) return@Runnable
