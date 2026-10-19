@@ -63,6 +63,8 @@ object DynamicModuleDriver {
                 Logger.debug("[DynamicModuleDriver] Loaded module '$moduleName' (${artifact.entryPointClass})", DEBUG_LEVEL.BASIC)
             } catch (e: ClassNotFoundException) {
                 failed.add(moduleName to "class not found on classpath (artifact failed to resolve?): ${e.message}")
+            } catch (e: LinkageError) {
+                failed.add(moduleName to "incompatible module: ${e.message}")
             } catch (e: Exception) {
                 failed.add(moduleName to "failed to instantiate: ${e.message}")
             }

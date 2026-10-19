@@ -170,7 +170,7 @@ public final class ModuleConfig {
         StringBuilder sb = new StringBuilder();
         sb.append("# YVtils dynamic module configuration.\n");
         sb.append("# Set each module to true or false, then restart the server for changes to take effect.\n");
-        sb.append("# Note: some internal modules (e.g. migration) are intentionally not\n");
+        sb.append("# Note: internal modules are intentionally not\n");
         sb.append("# listed here and cannot be enabled through this file. The `gui` module isn't\n");
         sb.append("# listed either, but for a different reason - it isn't a togglable feature at\n");
         sb.append("# all; `core` always resolves exactly one `gui-<version>` build matching the\n");

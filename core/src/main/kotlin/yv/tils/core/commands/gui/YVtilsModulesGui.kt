@@ -46,7 +46,7 @@ import java.nio.file.Path
  * togglable - they are always loaded by every core - and are therefore not
  * listed here. Only entries from [DynamicModuleRegistry.KNOWN_MODULES] are
  * shown, excluding any marked [DynamicModuleRegistry.ModuleArtifact.hidden]
- * (e.g. `migration`) - those are excluded from the dynamic-module system
+ * - those are excluded from the dynamic-module system
  * entirely (see [ModuleConfig.readEnabledModules]), not just from this GUI,
  * and cannot be enabled through `modules.yml` either - as well as any marked
  * [DynamicModuleRegistry.ModuleArtifact.manual], which are opt-in modules

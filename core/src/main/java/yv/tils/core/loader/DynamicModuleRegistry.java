@@ -36,7 +36,9 @@ public final class DynamicModuleRegistry {
     private DynamicModuleRegistry() {
     }
 
-    /** A single module's Maven coordinate + lifecycle entry point + toggle metadata. */
+    /**
+     * A single module's Maven coordinate + lifecycle entry point + toggle metadata.
+     */
     public static final class ModuleArtifact {
         private final String artifactId;
         private final String version;
@@ -90,7 +92,7 @@ public final class DynamicModuleRegistry {
         /**
          * Whether this module is excluded from the dynamic-module system entirely (never listed in
          * {@code modules.yml}/the GUI, and any hand-added {@code true} line is ignored). Used for
-         * internal, non-togglable modules (e.g. {@code migration}).
+         * internal, non-togglable modules.
          */
         public boolean isHidden() {
             return hidden;
@@ -137,6 +139,12 @@ public final class DynamicModuleRegistry {
 
     private static Map<String, ModuleArtifact> buildKnownModules() {
         LinkedHashMap<String, ModuleArtifact> modules = new LinkedHashMap<>();
+        modules.put("vanish", new ModuleArtifact(
+                "vanish", versionOf("vanish"), "yv.tils.vanish.VanishYVtils",
+                "Layered staff visibility, silent containers and interaction protection."));
+        modules.put("waypoint", new ModuleArtifact(
+                "waypoint", versionOf("waypoint"), "yv.tils.waypoint.WaypointYVtils",
+                "Public, private and unlisted waypoints with private block-display trails."));
         modules.put("fusion", new ModuleArtifact(
                 "fusion", versionOf("fusion"), "yv.tils.fusion.FusionYVtils",
                 "Custom crafting with recipe browsing, bulk crafting and an in-game recipe editor."));
@@ -149,16 +157,16 @@ public final class DynamicModuleRegistry {
                 false, true, false));
         modules.put("multiMine", new ModuleArtifact(
                 "multiMine", versionOf("multiMine"), "yv.tils.multiMine.MultiMineYVtils",
-                "Lets multiple players break the same block together."));
+                "Connected-block vein mining, timber and accelerated leaf decay."));
         modules.put("essentials", new ModuleArtifact(
                 "essentials", versionOf("essentials"), "yv.tils.essentials.EssentialYVtils",
-                "Core quality-of-life commands (home, spawn, gamemode, etc.)."));
+                "Utility commands, inventory inspection, dimension controls and spawn gliding."));
         modules.put("sit", new ModuleArtifact(
                 "sit", versionOf("sit"), "yv.tils.sit.SitYVtils",
-                "Lets players sit on stairs and slabs."));
+                "Lets players sit at their current position."));
         modules.put("status", new ModuleArtifact(
                 "status", versionOf("status"), "yv.tils.status.StatusYVtils",
-                "Player status effects and vanity status displays."));
+                "Player-written status text in names, tab lists and scoreboard prefixes."));
         modules.put("server", new ModuleArtifact(
                 "server", versionOf("server"), "yv.tils.server.ServerYVtils",
                 "Server utility and administration commands."));
@@ -168,13 +176,10 @@ public final class DynamicModuleRegistry {
         modules.put("moderation", new ModuleArtifact(
                 "moderation", versionOf("moderation"), "yv.tils.moderation.ModerationYVtils",
                 "Moderation tools such as mutes and punishment logging."));
-        modules.put("migration", new ModuleArtifact(
-                "migration", versionOf("migration"), "yv.tils.migration.MigrationYVtils",
-                "Migration tools for moving data between YVtils versions.",
-                true, false, false));
         modules.put("stats", new ModuleArtifact(
                 "stats", versionOf("stats"), "yv.tils.stats.StatsYVtils",
-                "Player and server statistics tracking."));
+                "Player and server statistics tracking.",
+                false, false, true));
         modules.put("yv-smp", new ModuleArtifact(
                 "yv-smp", versionOf("yv-smp"), "yv.tils.yv_smp.YV_SMPYVtils",
                 "YV SMP module for YVtils",
@@ -208,7 +213,9 @@ public final class DynamicModuleRegistry {
         return Collections.unmodifiableMap(modules);
     }
 
-    /** The {@code gui} entry used when the running server's Minecraft version has no exact match. */
+    /**
+     * The {@code gui} entry used when the running server's Minecraft version has no exact match.
+     */
     public static final String GUI_FALLBACK_MINECRAFT_VERSION = "26.3";
 
     /**

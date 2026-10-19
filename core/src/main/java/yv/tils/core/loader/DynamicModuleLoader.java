@@ -72,15 +72,17 @@ public final class DynamicModuleLoader implements PluginLoader {
      * against its ToS and Paper guards against it).
      */
     private static final List<String[]> THIRD_PARTY_REPOSITORIES = List.of(
-            new String[] {"maven-central", MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR},
-            new String[] {"maven-snapshots", "https://s01.oss.sonatype.org/content/repositories/snapshots/"},
-            new String[] {"papermc", "https://repo.papermc.io/repository/maven-public/"},
-            new String[] {"xenondevs", "https://repo.xenondevs.xyz/releases"},
-            new String[] {"maxhenkel", "https://maven.maxhenkel.de/repository/public"},
-            new String[] {"lavalink", "https://maven.lavalink.dev/releases"},
-            new String[] {"enginehub", "https://maven.enginehub.org/repo"});
+            new String[]{"maven-central", MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR},
+            new String[]{"maven-snapshots", "https://s01.oss.sonatype.org/content/repositories/snapshots/"},
+            new String[]{"papermc", "https://repo.papermc.io/repository/maven-public/"},
+            new String[]{"xenondevs", "https://repo.xenondevs.xyz/releases"},
+            new String[]{"maxhenkel", "https://maven.maxhenkel.de/repository/public"},
+            new String[]{"lavalink", "https://maven.lavalink.dev/releases"},
+            new String[]{"enginehub", "https://maven.enginehub.org/repo"});
 
-    /** Reposilite registry URL; overridable via {@code REPOSILITE_URL} for local development. */
+    /**
+     * Reposilite registry URL; overridable via {@code REPOSILITE_URL} for local development.
+     */
     private static String repositoryUrl() {
         String env = System.getenv("REPOSILITE_URL");
         return (env != null) ? env : "https://reposilite-registry.yvtils.net/releases";
@@ -97,6 +99,11 @@ public final class DynamicModuleLoader implements PluginLoader {
 
     @Override
     public void classloader(@NotNull PluginClasspathBuilder classpathBuilder) {
+        String minecraftVersion = ServerBuildInfo.buildInfo().minecraftVersionId();
+        if (!List.of("26.1.2", "26.2", "26.3").contains(minecraftVersion)) {
+            throw new IllegalStateException("Unsupported Paper version: " + minecraftVersion
+                    + ". Supported versions: 26.1.2, 26.2, 26.3");
+        }
         var logger = classpathBuilder.getContext().getLogger();
         Path sharedDirectory = ModuleConfig.sharedDataDirectory(classpathBuilder.getContext().getDataDirectory());
         String repositoryUrl = repositoryUrl();
@@ -112,9 +119,9 @@ public final class DynamicModuleLoader implements PluginLoader {
         addGuiModule(classpathBuilder, repositoryUrl, skipChecksums);
 
         List<String> enabledModules = ModuleConfig.readEnabledModules(sharedDirectory);
-        logger.info("[DynamicModuleLoader] Shared data directory: " + sharedDirectory);
-        logger.info("[DynamicModuleLoader] Enabled modules from config: " + enabledModules);
-        logger.info("[DynamicModuleLoader] Resolving against repository: " + repositoryUrl);
+        logger.info("[DynamicModuleLoader] Shared data directory: {}", sharedDirectory);
+        logger.info("[DynamicModuleLoader] Enabled modules from config: {}", enabledModules);
+        logger.info("[DynamicModuleLoader] Resolving against repository: {}", repositoryUrl);
 
         if (skipChecksums) {
             logger.warn("[DynamicModuleLoader] YVTILS_DEV_SKIP_CHECKSUMS is enabled - checksum validation is "
@@ -125,7 +132,7 @@ public final class DynamicModuleLoader implements PluginLoader {
             DynamicModuleRegistry.ModuleArtifact artifact = DynamicModuleRegistry.KNOWN_MODULES.get(moduleName);
 
             if (artifact == null) {
-                logger.warn("[DynamicModuleLoader] Unknown module '" + moduleName + "', skipping.");
+                logger.warn("[DynamicModuleLoader] Unknown module '{}', skipping.", moduleName);
                 continue;
             }
 
@@ -133,8 +140,7 @@ public final class DynamicModuleLoader implements PluginLoader {
                 // Shaded into this launcher's own main jar - there's nothing to resolve over the
                 // network. DynamicModuleDriver still instantiates it from the main jar. See
                 // DynamicModuleRegistry.ModuleArtifact#isStatic.
-                logger.info("[DynamicModuleLoader] Module '" + moduleName
-                        + "' is statically bundled - not resolved from the registry.");
+                logger.info("[DynamicModuleLoader] Module '{}' is statically bundled - not resolved from the registry.", moduleName);
                 continue;
             }
 
@@ -145,9 +151,7 @@ public final class DynamicModuleLoader implements PluginLoader {
                     null));
 
             classpathBuilder.addLibrary(resolver);
-            logger.info("[DynamicModuleLoader] Queued module '" + moduleName + "' ("
-                    + DynamicModuleRegistry.GROUP_ID + ":" + artifact.getArtifactId() + ":" + artifact.getVersion()
-                    + ") for resolution.");
+            logger.info("[DynamicModuleLoader] Queued module '{}' (" + DynamicModuleRegistry.GROUP_ID + ":{}:{}) for resolution.", moduleName, artifact.getArtifactId(), artifact.getVersion());
         }
     }
 
@@ -161,11 +165,7 @@ public final class DynamicModuleLoader implements PluginLoader {
         String minorVersion = DynamicModuleRegistry.minecraftMinorVersion(minecraftVersionId);
 
         if (!DynamicModuleRegistry.GUI_ARTIFACTS.containsKey(minorVersion)) {
-            logger.warn("[DynamicModuleLoader] No 'gui' artifact registered for Minecraft " + minecraftVersionId
-                    + " (minor version '" + minorVersion + "') - falling back to the "
-                    + DynamicModuleRegistry.GUI_FALLBACK_MINECRAFT_VERSION + " build. GUI-dependent features may not "
-                    + "work correctly. Add a 'gui-" + minorVersion + "' entry to DynamicModuleRegistry.GUI_ARTIFACTS "
-                    + "once InvUI publishes support for this version.");
+            logger.warn("[DynamicModuleLoader] No 'gui' artifact registered for Minecraft {} (minor version '{}') - falling back to the " + DynamicModuleRegistry.GUI_FALLBACK_MINECRAFT_VERSION + " build. GUI-dependent features may not work correctly. Add a 'gui-{}' entry to DynamicModuleRegistry.GUI_ARTIFACTS once InvUI publishes support for this version.", minecraftVersionId, minorVersion, minorVersion);
         }
 
         DynamicModuleRegistry.ModuleArtifact artifact = DynamicModuleRegistry.guiArtifactFor(minecraftVersionId);
@@ -176,9 +176,7 @@ public final class DynamicModuleLoader implements PluginLoader {
                 null));
 
         classpathBuilder.addLibrary(resolver);
-        logger.info("[DynamicModuleLoader] Queued gui module for Minecraft " + minecraftVersionId + " ("
-                + DynamicModuleRegistry.GROUP_ID + ":" + artifact.getArtifactId() + ":" + artifact.getVersion()
-                + ") for resolution.");
+        logger.info("[DynamicModuleLoader] Queued gui module for Minecraft {} (" + DynamicModuleRegistry.GROUP_ID + ":{}:{}) for resolution.", minecraftVersionId, artifact.getArtifactId(), artifact.getVersion());
     }
 
     /**
@@ -227,6 +225,6 @@ public final class DynamicModuleLoader implements PluginLoader {
         }
 
         classpathBuilder.addLibrary(new JarLibrary(extractedPath));
-        logger.info("[DynamicModuleLoader] Added embedded runtime bundle from " + extractedPath);
+        logger.info("[DynamicModuleLoader] Added embedded runtime bundle from {}", extractedPath);
     }
 }

@@ -33,12 +33,13 @@ object ModuleIcons {
     fun fallbackMaterial(name: String): Material = when (name) {
         "fusion" -> Material.CRAFTING_TABLE
         "regions" -> Material.FILLED_MAP
+        "vanish" -> Material.GLASS_BOTTLE
+        "waypoint" -> Material.RECOVERY_COMPASS
         "remade-ender-dragon" -> Material.DRAGON_HEAD
         "yv-smp", "yv_smp" -> Material.GRASS_BLOCK
-        "migration" -> Material.RECOVERY_COMPASS
         "common" -> Material.COMMAND_BLOCK
         "core" -> Material.NETHER_STAR
-        "config", "config" -> Material.COMPARATOR
+        "config" -> Material.COMPARATOR
         "utils" -> Material.BUNDLE
         "gui", "gui-26.1", "gui-26.2", "gui-26.3" -> Material.CHEST
         else -> Material.PAPER

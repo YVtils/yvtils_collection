@@ -31,7 +31,7 @@ import java.util.function.Consumer
 
 class YVtils : JavaPlugin() {
     companion object {
-        val yvtilsVersion = YVtils().pluginMeta.version
+        val yvtilsVersion: String get() = instance.pluginMeta.version
         lateinit var instance: YVtils
 
         const val PLUGIN_NAME_FULL = "YVtils Collection"
@@ -52,6 +52,23 @@ class YVtils : JavaPlugin() {
 
     private var dynamicModules: List<Module.YVtilsModule> = listOf()
     private var dynamicModuleDiscovery: DynamicModuleDriver.DiscoveryResult? = null
+    private val initializedModules = mutableListOf<Module.YVtilsModule>()
+    private var startupFailed = false
+
+    private fun phase(name: String, targets: List<Module.YVtilsModule>, action: (Module.YVtilsModule) -> Unit): Boolean {
+        var succeeded = true
+        targets.forEach { module ->
+            try {
+                action(module)
+            } catch (error: Throwable) {
+                if (error is VirtualMachineError) throw error
+                succeeded = false
+                Logger.error("Module ${module.javaClass.name} failed during $name", error)
+            }
+        }
+        if (!succeeded) startupFailed = true
+        return succeeded
+    }
 
     override fun onLoad() {
         instance = this
@@ -93,11 +110,9 @@ class YVtils : JavaPlugin() {
                 .fallbackToLatestNMS(true)
         )
 
-        try {
-            modules.forEach { it.onLoad() }
-        } catch (e: Exception) {
-            Logger.error("Error during YVtils loading: ${e.message}")
-            e.printStackTrace()
+        phase("load", modules) {
+            initializedModules.add(it)
+            it.onLoad()
         }
 
         val discovery = DynamicModuleDriver.discover(ModuleConfig.sharedDataDirectory(dataFolder.toPath()))
@@ -112,23 +127,24 @@ class YVtils : JavaPlugin() {
         dynamicModules = discovery.loaded
         dynamicModuleDiscovery = discovery
 
-        try {
-            dynamicModules.forEach { it.onLoad() }
-        } catch (e: Exception) {
-            Logger.error("Error during dynamic module loading: ${e.message}")
-            e.printStackTrace()
+        if (discovery.failed.isNotEmpty()) startupFailed = true
+        phase("load", dynamicModules) {
+            initializedModules.add(it)
+            it.onLoad()
         }
     }
 
     override fun onEnable() {
         Logger.debug("$PLUGIN_NAME v$yvtilsVersion is starting...", DEBUG_LEVEL.BASIC)
 
-        try {
-            modules.forEach { it.enablePlugin() }
-            dynamicModules.forEach { it.enablePlugin() }
-        } catch (e: Exception) {
-            Logger.error("Error during YVtils startup: ${e.message}")
-            e.printStackTrace()
+        if (startupFailed || !CheckVersion().serverVersion()) {
+            Logger.error("YVtils startup aborted: module loading failed or the server version is unsupported.")
+            server.pluginManager.disablePlugin(this)
+            return
+        }
+        if (!phase("enable", modules + dynamicModules) { it.enablePlugin() }) {
+            server.pluginManager.disablePlugin(this)
+            return
         }
 
         // `common` can't register its own `configGuiOpener` (doing so would need a
@@ -141,6 +157,7 @@ class YVtils : JavaPlugin() {
         }
 
         YVtilsCommand()
+        CommandAPI.onEnable()
 
         if (instance.isEnabled) {
             onLateEnablePlugin()
@@ -150,12 +167,9 @@ class YVtils : JavaPlugin() {
     fun onLateEnablePlugin() {
         Logger.debug("$PLUGIN_NAME v$yvtilsVersion is performing late enable...", DEBUG_LEVEL.BASIC)
 
-        try {
-            modules.forEach { it.onLateEnablePlugin() }
-            dynamicModules.forEach { it.onLateEnablePlugin() }
-        } catch (e: Exception) {
-            Logger.error("Error during YVtils late startup: ${e.message}")
-            e.printStackTrace()
+        if (!phase("late enable", modules + dynamicModules) { it.onLateEnablePlugin() }) {
+            server.pluginManager.disablePlugin(this)
+            return
         }
 
         if (!CheckVersion().serverVersion()) {
@@ -219,13 +233,9 @@ class YVtils : JavaPlugin() {
     override fun onDisable() {
         Logger.debug("$PLUGIN_NAME v$yvtilsVersion is stopping...", DEBUG_LEVEL.BASIC)
 
-        try {
-            modules.forEach { it.disablePlugin() }
-            dynamicModules.forEach { it.disablePlugin() }
-        } catch (e: Exception) {
-            Logger.error("Error during YVtils shutdown: ${e.message}")
-            e.printStackTrace()
-        }
+        phase("disable", initializedModules.asReversed()) { it.disablePlugin() }
+        initializedModules.clear()
+        if (CommandAPI.isLoaded()) CommandAPI.onDisable()
 
         Logger.info("----------")
         Logger.info("YVtils Collection by YVtils")
