@@ -30,9 +30,18 @@ import yv.tils.vanish.language.VanishText
 import yv.tils.vanish.logic.VanishService
 import yv.tils.vanish.permissions.VanishPermissions
 import java.util.*
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 
 class SilentContainers(private val service: VanishService) : Listener {
-    private val windows = mutableMapOf<Window, UUID>()
+    private data class View(
+        val uuid: UUID, val location: Location, val type: Material,
+        val gui: Gui, val contents: List<ItemStack?>
+    )
+
+    private val windows = mutableMapOf<Window, View>()
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     fun interact(event: PlayerInteractEvent) {
@@ -63,7 +72,9 @@ class SilentContainers(private val service: VanishService) : Listener {
         lateinit var window: Window
         window = Window.builder().setTitle(VanishText.text(player, "container")).setUpperGui(gui)
             .addCloseHandler { windows.remove(window) }.build(player)
-        windows[window] = player.uniqueId
+        windows[window] = View(
+            player.uniqueId, container.location, container.type, gui,
+            container.inventory.contents.map { it?.clone() })
         window.open()
     }
 
@@ -73,13 +84,38 @@ class SilentContainers(private val service: VanishService) : Listener {
     }
 
     fun refresh() {
-        windows.toMap().forEach { (window, uuid) ->
+        windows.toMap().forEach { (window, view) ->
             if (!service.capability(
-                    uuid,
+                    view.uuid,
                     VanishPermissions.SILENT_CONTAINERS,
                     ConfigFile.state.silentContainers
                 )
-            ) window.close()
+            ) {
+                window.close(); return@forEach
+            }
+            val world = view.location.world
+            val viewer = Bukkit.getPlayer(view.uuid)
+            if (viewer == null || viewer.world != world || viewer.location.distanceSquared(view.location) > 64.0) {
+                window.close(); return@forEach
+            }
+            if (!world.isChunkLoaded(view.location.blockX shr 4, view.location.blockZ shr 4)) {
+                window.close(); return@forEach
+            }
+            val container = view.location.block.state as? Container
+            if (container == null || container.type != view.type) {
+                window.close(); return@forEach
+            }
+            val next = container.inventory.contents.take(54).map { it?.clone() }
+            for (index in 0 until maxOf(next.size, view.contents.size).coerceAtMost(54)) {
+                if (next.getOrNull(index) != view.contents.getOrNull(index)) {
+                    val stack = next.getOrNull(index)
+                    view.gui.setItem(
+                        index, if (stack == null || stack.type.isAir) Filler.item()
+                        else Item.builder().setItemProvider(ItemWrapper(stack)).build()
+                    )
+                }
+            }
+            windows[window] = view.copy(contents = next)
         }
     }
 }

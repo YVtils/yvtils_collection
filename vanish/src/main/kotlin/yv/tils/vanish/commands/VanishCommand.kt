@@ -16,12 +16,11 @@ import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.integerArgument
 import dev.jorel.commandapi.kotlindsl.literalArgument
 import dev.jorel.commandapi.kotlindsl.playerExecutor
-import yv.tils.vanish.configs.ConfigFile
 import yv.tils.vanish.configs.ManageGUI
-import yv.tils.vanish.logic.VanishService
-import yv.tils.vanish.permissions.VanishPermissions
 import yv.tils.vanish.configs.PlayerSettings
 import yv.tils.vanish.gui.SettingsGui
+import yv.tils.vanish.logic.VanishService
+import yv.tils.vanish.permissions.VanishPermissions
 
 class VanishCommand(service: VanishService) {
     init {
