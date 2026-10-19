@@ -3,6 +3,11 @@ name: Publish to Reposilite
 on:
   workflow_dispatch:
     inputs:
+      publish_modrinth:
+        description: Publish to Modrinth
+        type: boolean
+        required: true
+        default: true
       release_type:
         description: Modrinth release type (auto detects it from the core version)
         type: choice
@@ -60,6 +65,7 @@ jobs:
           REPOSILITE_TOKEN: ${{ secrets.REPOSILITE_TOKEN }}
 
       - name: Upload core JAR for Modrinth deployment
+        if: github.event_name != 'workflow_dispatch' || inputs.publish_modrinth
         uses: actions/upload-artifact@v4
         with:
           name: modrinth-core
@@ -70,6 +76,7 @@ jobs:
   deploy-modrinth:
     name: Deploy core to Modrinth
     needs: publish
+    if: github.event_name != 'workflow_dispatch' || inputs.publish_modrinth
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
