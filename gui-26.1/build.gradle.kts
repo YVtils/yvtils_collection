@@ -46,4 +46,8 @@ dependencies {
     // through config's inlined ObjectMapperFileUtils calls), so it needs its own
     // kotlin-reflect on the compile classpath.
     compileOnly(kotlin("reflect"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+tasks.test { useJUnitPlatform() }

@@ -7,4 +7,5 @@ Follow [root AGENTS.md](../AGENTS.md) for toolchain, classloader boundaries, and
 - Core resolves GUI unconditionally but does not drive `GUIYVtils` lifecycle. Preserve idempotent bootstrap paths rather than relying on that entrypoint being instantiated.
 - Shared config editors and navigation live here, including `logic/DataClassConfigGui.kt` and `CommonConfigGui.kt`. Common's GUI opener is installed by core to avoid a dependency cycle.
 - Consumers reference GUI via `compileOnly`; preserve a single runtime InvUI copy and the common `yv.tils.gui` API across builds.
+- Inventory player skins use `utils/PlayerHeads`: call `head(uuid)` from the item provider and `load(uuid, item)` after building the item. It shares bounded asynchronous lookups, refreshes on the server thread, and clears on launcher disable. Feature modules must not clear the shared cache when individually disabled. `resolve(uuid, name)` also supports head-selection workflows.
 - Verify shared changes from the repository root: `./gradlew :gui-26.1:build :gui-26.2:build :gui-26.3:build`.
