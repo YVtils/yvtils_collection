@@ -15,8 +15,7 @@ package yv.tils.status.logic
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.SkullMeta
+import yv.tils.gui.utils.PlayerHeads
 import xyz.xenondevs.commons.provider.mutableProvider
 import xyz.xenondevs.invui.ExperimentalReactiveApi
 import xyz.xenondevs.invui.gui.Gui
@@ -48,6 +47,7 @@ class StatusManager {
         val statusHeadItem = Item.builder()
             .setItemProvider { buildStatusHead(player, target) }
             .build()
+        PlayerHeads.load(target.uniqueId, statusHeadItem)
 
         val editItem = Item.builder()
             .setItemProvider {
@@ -97,10 +97,7 @@ class StatusManager {
     private fun buildStatusHead(player: Player, target: Player): ItemBuilder {
         val status = StatusUtils.currentStatus(target)?.content ?: ""
 
-        val head = ItemStack(Material.PLAYER_HEAD)
-        val meta = head.itemMeta as SkullMeta
-        meta.playerProfile = target.playerProfile
-        head.itemMeta = meta
+        val head = PlayerHeads.head(target.uniqueId)
 
         return ItemBuilder(head)
             .setCustomName(MessageUtils.convert("<white>${target.name}"))

@@ -22,6 +22,10 @@ import yv.tils.status.listeners.PlayerJoin
 import yv.tils.status.listeners.PlayerQuit
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
+import java.util.function.Function
+import net.kyori.adventure.text.Component
+import yv.tils.utils.message.MessageUtils
+import yv.tils.utils.modules.ConnectionMessages
 
 class StatusYVtils : Module.YVtilsModule {
     companion object {
@@ -49,6 +53,14 @@ class StatusYVtils : Module.YVtilsModule {
         registerCoroutines()
 
         loadConfigs()
+        ConnectionMessages.displayName = Function { player ->
+            val status = SaveFile.saves[player.uniqueId]?.content.orEmpty()
+            if (status.isBlank()) Component.text(player.name)
+            else MessageUtils.replacer(
+                ConfigFile.config["display"] as String,
+                mapOf("status" to status, "playerName" to player.name)
+            )
+        }
     }
 
     override fun onLateEnablePlugin() {
@@ -56,7 +68,9 @@ class StatusYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
-
+        ConnectionMessages.displayName = Function {
+            Component.text(it.name)
+        }
     }
 
     private fun registerCommands() {

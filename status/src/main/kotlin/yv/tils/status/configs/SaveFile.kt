@@ -10,12 +10,13 @@
 package yv.tils.status.configs
 
 import yv.tils.config.files.ObjectMapperFileUtils
-import yv.tils.utils.coroutine.CoroutineHandler
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class SaveFile {
     companion object {
-        val saves = mutableMapOf<UUID, StatusSave>()
+        val saves = ConcurrentHashMap<UUID, StatusSave>()
+        private val lock = Any()
     }
 
     private val filePath = "/status/save.json"
@@ -37,17 +38,13 @@ class SaveFile {
     }
 
     fun updatePlayerSetting(uuid: UUID, content: String) {
-        if (saves.containsKey(uuid)) {
-            saves[uuid]?.content = content
-        } else {
-            saves[uuid] = StatusSave(uuid.toString(), content)
+        synchronized(lock) {
+            val next = saves.toMutableMap()
+            if (content.isEmpty()) next.remove(uuid) else next[uuid] = StatusSave(uuid.toString(), content)
+            registerStrings(next.values.toMutableList())
+            saves.clear()
+            saves.putAll(next)
         }
-
-        CoroutineHandler.launchTask(
-            suspend { registerStrings(saves.values.toMutableList()) },
-            null,
-            isOnce = true,
-        )
     }
 
     data class StatusSave(
