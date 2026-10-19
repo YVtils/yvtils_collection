@@ -20,6 +20,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import yv.tils.gui.utils.PlayerHeads
 import org.bukkit.inventory.meta.SkullMeta
 import xyz.xenondevs.invui.gui.Gui
 import xyz.xenondevs.invui.gui.Markers
@@ -471,9 +472,8 @@ object ClaimsGui {
     private fun memberHead(player: Player, claim: Claim, uuid: UUID): Item =
         Item.builder().setItemProvider { viewer ->
             val offline = Bukkit.getOfflinePlayer(uuid)
-            val stack = ItemStack(Material.PLAYER_HEAD)
+            val stack = PlayerHeads.head(uuid)
             stack.editMeta { meta ->
-                (meta as SkullMeta).owningPlayer = offline
                 meta.displayName(GuiStyle.title(plain(offline.name ?: uuid.toString())))
                 meta.lore(
                     MessageUtils.handleLore(
@@ -487,7 +487,7 @@ object ClaimsGui {
                 ClaimService.requireOwner(player, claim)
                 chooseRole(player, claim, uuid)
             }
-        }.build()
+        }.build().also { PlayerHeads.load(uuid, it) }
 
     private fun settings(player: Player, claim: Claim): Unit = action(player) {
         ClaimService.requireOwner(player, claim)
