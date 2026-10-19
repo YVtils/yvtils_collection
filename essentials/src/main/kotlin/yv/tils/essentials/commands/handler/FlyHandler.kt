@@ -20,6 +20,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.*
 import yv.tils.config.language.LanguageHandler
+import yv.tils.essentials.language.LangStrings
 import yv.tils.essentials.logic.SpawnElytra
 import yv.tils.utils.modules.Core
 import java.util.*
@@ -46,12 +47,12 @@ class FlyHandler {
             player.isFlying = true
             if (!silent) {
                 player.sendMessage(
-                    LanguageHandler.getMessage("command.fly.enable.self", player.uniqueId, params = mapOf("prefix" to Core.prefix))
+                    LanguageHandler.getMessage(LangStrings.COMMAND_FLY_ENABLE_SELF, player.uniqueId, params = mapOf("prefix" to Core.prefix))
                 )
 
                 if (player != sender) {
                     sender.sendMessage(
-                        LanguageHandler.getMessage("command.fly.enable.other", sender, params = mapOf("prefix" to Core.prefix, "player" to player.name))
+                        LanguageHandler.getMessage(LangStrings.COMMAND_FLY_ENABLE_OTHER, sender, params = mapOf("prefix" to Core.prefix, "player" to player.name))
                     )
                 }
             }
@@ -68,12 +69,12 @@ class FlyHandler {
 
             if (!silent) {
                 player.sendMessage(
-                    LanguageHandler.getMessage("command.fly.disable.self", player.uniqueId, params = mapOf("prefix" to Core.prefix))
+                    LanguageHandler.getMessage(LangStrings.COMMAND_FLY_DISABLE_SELF, player.uniqueId, params = mapOf("prefix" to Core.prefix))
                 )
 
                 if (player != sender) {
                     sender.sendMessage(
-                        LanguageHandler.getMessage("command.fly.disable.other", sender, params = mapOf("prefix" to Core.prefix, "player" to player.name))
+                        LanguageHandler.getMessage(LangStrings.COMMAND_FLY_DISABLE_OTHER, sender, params = mapOf("prefix" to Core.prefix, "player" to player.name))
                     )
                 }
             }

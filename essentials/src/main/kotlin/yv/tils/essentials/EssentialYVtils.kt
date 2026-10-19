@@ -25,6 +25,8 @@ import yv.tils.essentials.listeners.*
 import yv.tils.essentials.permissions.PermissionsData
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
+import yv.tils.essentials.inventory.InventoryEditor
+import yv.tils.gui.core.InvUIBootstrap
 
 class EssentialYVtils : Module.YVtilsModule {
     companion object {
@@ -43,6 +45,7 @@ class EssentialYVtils : Module.YVtilsModule {
     }
 
     override fun enablePlugin() {
+        InvUIBootstrap.ensure()
         Module.addModule(MODULE)
 
         unregisterCommands()
@@ -60,10 +63,13 @@ class EssentialYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
+        InventoryEditor.closeAll()
         SpawnElytra.stop()
     }
 
     private fun registerCommands() {
+        InventoryEditor.start()
+        InventoryInspection()
         DimensionCMD()
         FlyCMD()
         GamemodeCMD()

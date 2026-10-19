@@ -49,6 +49,14 @@ class PermissionsData {
 }
 
 enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
+    INVENTORY_EDIT(PermissionManager.YVtilsPermission(
+        "${PermissionsData.permissionBase}.command.invsee.edit", "Edit online and offline player inventories")),
+    ENDER_CHEST_EDIT(PermissionManager.YVtilsPermission(
+        "${PermissionsData.permissionBase}.command.ecsee.edit", "Edit online and offline ender chests")),
+    INVENTORY_INSPECT(PermissionManager.YVtilsPermission(
+        "${PermissionsData.permissionBase}.command.invsee", "View online and offline player inventories")),
+    ENDER_CHEST_INSPECT(PermissionManager.YVtilsPermission(
+        "${PermissionsData.permissionBase}.command.ecsee", "View online and offline ender chests")),
     CONFIG(
         PermissionManager.YVtilsPermission(
             "${PermissionsData.permissionBase}.config",

@@ -36,13 +36,15 @@ class StatesFile {
     }
 
     fun updatePvPState(pvpState: Boolean) {
-        state = state.copy(pvpState = pvpState)
-        registerStrings()
+        val next = state.copy(pvpState = pvpState)
+        ObjectMapperFileUtils.save(FILE_PATH, next)
+        state = next
     }
 
     fun updateDimensionState(dimension: String, allowed: Boolean) {
-        state.dimensions[dimension] = allowed
-        registerStrings()
+        val next = state.copy(dimensions = state.dimensions.toMutableMap().apply { put(dimension, allowed) })
+        ObjectMapperFileUtils.save(FILE_PATH, next)
+        state = next
     }
 
     data class EssentialsState(
