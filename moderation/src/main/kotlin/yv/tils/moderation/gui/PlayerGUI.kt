@@ -2,6 +2,8 @@
  * MPL-2.0 with additional terms: https://yvtils.net/license */
 package yv.tils.moderation.gui
 
+import yv.tils.gui.utils.GuiWindows
+
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -250,7 +252,7 @@ class PlayerGUI {
             .addIngredient('y', button(player, Material.LIME_DYE, "confirm") { viewer ->
                 if (!submitted && access(viewer, action)) {
                     submitted = true
-                    viewer.closeInventory()
+                    GuiWindows.close(viewer)
                     if (banned != target.isBanned || mute != MuteSaveFile().getMuteInfo(target.uniqueId)) {
                         viewer.sendMessage(text(viewer, "stale"))
                         details(viewer, target)

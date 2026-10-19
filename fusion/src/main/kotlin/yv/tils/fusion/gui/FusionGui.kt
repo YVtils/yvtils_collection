@@ -2,6 +2,8 @@
  * MPL-2.0 with additional terms: https://yvtils.net/license */
 package yv.tils.fusion.gui
 
+import yv.tils.gui.utils.GuiWindows
+
 import yv.tils.fusion.FusionRecipe
 import yv.tils.fusion.Ingredient
 import yv.tils.fusion.FusionYVtils
@@ -407,7 +409,7 @@ object FusionGui {
             if (uuid == null && !value.matches(Regex("[A-Za-z0-9_]{3,16}"))) {
                 FusionText.send(viewer, "badHead"); details(viewer, recipe, selection); return@input
             }
-            viewer.closeInventory()
+            GuiWindows.close(viewer)
             FusionText.send(viewer, "resolving")
             PlayerHeads.resolve(uuid = uuid, name = if (uuid == null) value else null).whenComplete { resolved, error ->
                 if (!Core.instance.isEnabled || !FusionYVtils.active) return@whenComplete

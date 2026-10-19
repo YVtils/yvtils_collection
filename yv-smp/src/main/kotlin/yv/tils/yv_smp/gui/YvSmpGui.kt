@@ -12,6 +12,8 @@
 
 package yv.tils.yv_smp.gui
 
+import yv.tils.gui.utils.GuiWindows
+
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -107,7 +109,7 @@ class YvSmpGui {
                     )
                 )
             }
-            .addClickHandler { _, click -> click.player().closeInventory() }
+            .addClickHandler { _, click -> GuiWindows.close(click.player()) }
             .build()
 
         val gui = Gui.builder()
@@ -192,7 +194,7 @@ class YvSmpGui {
                 ItemBuilder(Material.LIME_WOOL).setName(LanguageHandler.getMessage("action.gui.nav.confirm", player))
             }
             .addClickHandler { _, click ->
-                click.player().closeInventory()
+                GuiWindows.close(click.player())
                 StartLogic().start(click.player())
             }
             .build()

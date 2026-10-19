@@ -12,6 +12,8 @@
 
 package yv.tils.waypoint.gui
 
+import yv.tils.gui.utils.GuiWindows
+
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -179,7 +181,7 @@ class WaypointsGui(private val store: WaypointStore, private val navigation: Way
                 if (current(it, point, admin)) {
                     if (it.world.uid != point.world) WaypointText.send(it, "missing")
                     else {
-                        navigation.toggle(it, point); it.closeInventory()
+                        navigation.toggle(it, point); GuiWindows.close(it)
                     }
                 }
             })
@@ -269,7 +271,7 @@ class WaypointsGui(private val store: WaypointStore, private val navigation: Way
             val point = store.find(actor, name)
             if (point == null || point.world != actor.world.uid) WaypointText.send(actor, "missing")
             else {
-                navigation.toggle(actor, point); actor.closeInventory()
+                navigation.toggle(actor, point); GuiWindows.close(actor)
             }
         }
     }

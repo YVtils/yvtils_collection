@@ -2,6 +2,8 @@
  * MPL-2.0 with additional terms: https://yvtils.net/license */
 package yv.tils.remadeEnderDragon.gui
 
+import yv.tils.gui.utils.GuiWindows
+
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import xyz.xenondevs.invui.item.Item
@@ -48,7 +50,7 @@ class ManageGUI(private val manager: FightManager) {
             }.build(),
             button(player, Material.DRAGON_HEAD, "gui.attacks") { openAttacks(player) },
         )
-        DataClassConfigGui.openItems(player, Messages.plain("gui.title", player), items) { player.closeInventory() }
+        DataClassConfigGui.openItems(player, Messages.plain("gui.title", player), items) { GuiWindows.close(player) }
     }
 
     private fun openAttacks(player: Player) {

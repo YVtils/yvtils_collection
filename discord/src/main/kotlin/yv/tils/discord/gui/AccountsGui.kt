@@ -1,5 +1,7 @@
 package yv.tils.discord.gui
 
+import yv.tils.gui.utils.GuiWindows
+
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -130,7 +132,7 @@ object AccountsGui {
         val gui = PagedGui.itemsBuilder().setStructure(*structure.toTypedArray())
             .addIngredient('#', Filler.item()).addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
             .addIngredient('<', navigation(false)).addIngredient('>', navigation(true))
-            .addIngredient('b', control(Heads.X_CHARACTER, "guiClose") { if (access(it)) it.closeInventory() })
+            .addIngredient('b', control(Heads.X_CHARACTER, "guiClose") { if (access(it)) GuiWindows.close(it) })
             .addIngredient('i', control(Heads.DISCORD_LOGO, "title", "guiListHint") {})
             .addIngredient('r', control(Heads.TOOLBOX, "guiRefresh", "guiRefreshHint") { open(it) })
             .addIngredient('w', BoundItem.pagedBuilder().setItemProvider { viewer, paged ->
@@ -181,7 +183,7 @@ object AccountsGui {
                 ) {
                     submitted = true
                     val input = pending.trim()
-                    viewer.closeInventory()
+                    GuiWindows.close(viewer)
                     AccountText.send(viewer, "guiResolving")
                     CoroutineHandler.launchTask(task = {
                         try {
@@ -231,7 +233,7 @@ object AccountsGui {
                 control(Heads.X_CHARACTER, "cancel", "guiCancelHint") { details(it, entry, replacementName) })
             .addIngredient('y', control(Heads.CHECK_MARK, "confirm", "guiConfirmHint") {
                 if (current(it, entry) && DiscordAccountsCommand.allowed(it, permission)) {
-                    it.closeInventory()
+                    GuiWindows.close(it)
                     DiscordAccountsCommand.action(it, permission) { actor ->
                         AccountService.server { if (!access(it)) throw AccountService.Failure("permission") }
                         if (replacement == null) AccountService.remove(entry.discordUserID, null, actor, entry)

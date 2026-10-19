@@ -11,6 +11,8 @@
  */
 package yv.tils.regions.gui
 
+import yv.tils.gui.utils.GuiWindows
+
 import com.sk89q.worldguard.protection.flags.BooleanFlag
 import com.sk89q.worldguard.protection.flags.Flag
 import com.sk89q.worldguard.protection.flags.StateFlag
@@ -168,7 +170,7 @@ object ClaimsGui {
             .addIngredient('<', pageButton(Heads.PREVIOUS_PAGE, PREVIOUS) { it.page-- })
             .addIngredient('>', pageButton(Heads.NEXT_PAGE, NEXT) { it.page++ })
             .addIngredient('b', button(Heads.PREVIOUS_PAGE, (if (back == null) CLOSE else BACK).message()) {
-                if (back == null) player.closeInventory() else back()
+                if (back == null) GuiWindows.close(player) else back()
             }).setContent(items)
         tabs.forEach { (key, item) -> builder.addIngredient(key, item) }
         val gui = builder.build()
@@ -264,7 +266,7 @@ object ClaimsGui {
                     button(Heads.TOOLBOX, SERVER.message()) { admin(player) } else Filler.item())
             .addIngredient('l', if (Permissions.INFO.allowed(player)) button(Material.SPYGLASS, INSPECT.message()) {
                 action(player) {
-                    player.closeInventory()
+                    GuiWindows.close(player)
                     val claim = ClaimService.at(player.location)
                     if (claim == null) RegionText.send(player, NO_CLAIM_HERE.message())
                     else ClaimInformation.sendSummary(player, claim)
@@ -337,7 +339,7 @@ object ClaimsGui {
                     }
                 })
             .addIngredient('p', button(Material.SPYGLASS, PREVIEW.message()) {
-                action(player) { ClaimSelection.preview(player); player.closeInventory() }
+                action(player) { ClaimSelection.preview(player); GuiWindows.close(player) }
             })
             .addIngredient('c', button(Heads.CHECK_MARK, CONFIRM.message()) {
                 action(player) {
@@ -393,7 +395,7 @@ object ClaimsGui {
                         player,
                         ClaimBounds(claim.world, claim.region.minimumPoint, claim.region.maximumPoint)
                     )
-                    player.closeInventory()
+                    GuiWindows.close(player)
                     RegionText.send(player, PREVIEW_STARTED.message())
                 }
             })
@@ -786,7 +788,7 @@ object ClaimsGui {
                         ClaimSelection.preview(
                             player,
                             SubzoneSelection.bounds(player, claim)
-                        ); player.closeInventory()
+                        ); GuiWindows.close(player)
                     }
                 },
                 button(Heads.CHECK_MARK, CONFIRM.message()) {
@@ -823,7 +825,7 @@ object ClaimsGui {
                         player,
                         ClaimBounds(claim.world, SubzonePolicies.min(zone), SubzonePolicies.max(zone))
                     )
-                    player.closeInventory()
+                    GuiWindows.close(player)
                 }
             })
         if (!open && Permissions.SUBZONES_FLAGS.allowed(player)) for (role in listOf(null) + ClaimRole.entries) items += button(
