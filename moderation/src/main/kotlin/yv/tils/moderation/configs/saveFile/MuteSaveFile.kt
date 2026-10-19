@@ -10,13 +10,14 @@
 package yv.tils.moderation.configs.saveFile
 
 import yv.tils.config.files.ObjectMapperFileUtils
-import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.player.PlayerUtils
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class MuteSaveFile {
     companion object {
-        val saves = mutableMapOf<UUID, MuteSave>()
+        val saves = ConcurrentHashMap<UUID, MuteSave>()
+        private val lock = Any()
     }
 
     private val filePath = "/moderation/mutedPlayers.json"
@@ -38,13 +39,12 @@ class MuteSaveFile {
     }
 
     fun mutePlayer(uuid: UUID, reason: String, muted: Boolean, modAction: ModAction, expires: String = "null") {
-        saves[uuid] = MuteSave(uuid.toString(), reason, muted, expires, modAction)
-
-        CoroutineHandler.launchTask(
-            suspend { registerStrings(saves.values.toMutableList()) },
-            null,
-            isOnce = true,
-        )
+        synchronized(lock) {
+            val next = saves.toMutableMap()
+            next[uuid] = MuteSave(uuid.toString(), reason, muted, expires, modAction)
+            registerStrings(next.values.toMutableList())
+            saves[uuid] = next.getValue(uuid)
+        }
     }
 
     fun getMuteInfo(uuid: UUID): MuteSave? {
@@ -52,13 +52,11 @@ class MuteSaveFile {
     }
 
     fun unmutePlayer(uuid: UUID) {
-        saves.remove(uuid)
-
-        CoroutineHandler.launchTask(
-            suspend { registerStrings(saves.values.toMutableList()) },
-            null,
-            isOnce = true,
-        )
+        synchronized(lock) {
+            val next = saves.toMutableMap().apply { remove(uuid) }
+            registerStrings(next.values.toMutableList())
+            saves.remove(uuid)
+        }
     }
 
     fun getAllMutes(): Array<String> {

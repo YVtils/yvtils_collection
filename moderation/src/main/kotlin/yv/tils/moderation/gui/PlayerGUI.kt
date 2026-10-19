@@ -13,11 +13,13 @@ import xyz.xenondevs.invui.gui.PagedGui
 import xyz.xenondevs.invui.item.BoundItem
 import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemBuilder
+import xyz.xenondevs.invui.item.ItemWrapper
 import xyz.xenondevs.invui.window.AnvilWindow
 import xyz.xenondevs.invui.window.Window
 import yv.tils.config.language.LanguageHandler
 import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.GuiStyle
+import yv.tils.gui.utils.PlayerHeads
 import yv.tils.moderation.configs.saveFile.MuteSaveFile
 import yv.tils.moderation.configs.saveFile.WarnSaveFile
 import yv.tils.moderation.data.Permissions
@@ -28,6 +30,7 @@ import java.util.UUID
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import org.bukkit.inventory.ItemStack
 
 /** Inventory actions reuse the command logic, on the server thread, with permissions rechecked. */
 class PlayerGUI {
@@ -66,7 +69,20 @@ class PlayerGUI {
         player: Player, material: Material, key: String, lines: List<Component> = emptyList(),
         click: (Player) -> Unit = {}
     ): Item = Item.builder()
-        .setItemProvider { GuiStyle.field(material, text(player, key), lines) }
+        .setItemProvider {
+            val stack = ItemStack(material)
+            stack.editMeta {
+                it.displayName(
+                    GuiStyle.title(
+                        text(
+                            player,
+                            key
+                        )
+                    )
+                ); it.lore(lines.map(ModerationText::lore))
+            }
+            ItemWrapper(stack)
+        }
         .addClickHandler { _, event -> if (access(event.player())) click(event.player()) }.build()
 
     private fun show(player: Player, key: String, gui: Gui) {
@@ -76,17 +92,15 @@ class PlayerGUI {
     fun openGUI(player: Player) {
         if (!access(player)) return
         val items = knownPlayers().map { target ->
-            Item.builder().setItemProvider {
-                GuiStyle.field(
-                    Material.PLAYER_HEAD, Component.text(label(target)), listOf(
-                        text(player, if (target.isOnline) "online" else "offline"),
-                        Component.text(target.uniqueId.toString())
-                    )
+            playerHead(
+                target, Component.text(label(target)), listOf(
+                    text(player, if (target.isOnline) "online" else "offline"),
+                    Component.text(target.uniqueId.toString())
                 )
-            }.addClickHandler { _, event -> details(event.player(), target) }.build()
+            ) { viewer -> details(viewer, target) }
         }.ifEmpty { listOf(button(player, Material.PAPER, "empty")) }
         val gui = PagedGui.itemsBuilder().setStructure(
-            "# x x x x x x x #", "# x x x x x x x #", "# x x x x x x x #", "s # # < # > # r #"
+            "# # # # # # # # #", "# x x x x x x x #", "# x x x x x x x #", "# x x x x x x x #", "s # # < # > # # r"
         )
             .addIngredient('#', Filler.item()).addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
             .addIngredient('s', button(player, Material.COMPASS, "search") { player ->
@@ -118,6 +132,21 @@ class PlayerGUI {
     }
 
     private fun label(target: OfflinePlayer) = target.name ?: target.uniqueId.toString()
+
+    private fun playerHead(
+        target: OfflinePlayer,
+        title: Component,
+        lines: List<Component>,
+        click: (Player) -> Unit = {}
+    ): Item {
+        val item = Item.builder().setItemProvider {
+            val stack = PlayerHeads.head(target.uniqueId)
+            stack.editMeta { it.displayName(GuiStyle.title(title)); it.lore(lines.map(ModerationText::lore)) }
+            ItemWrapper(stack)
+        }.addClickHandler { _, event -> if (access(event.player())) click(event.player()) }.build()
+        PlayerHeads.load(target.uniqueId, item)
+        return item
+    }
 
     private fun details(player: Player, target: OfflinePlayer) {
         if (!access(player)) return
@@ -155,7 +184,7 @@ class PlayerGUI {
             .addIngredient('#', Filler.item()).addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
             .addIngredient('b', button(player, Material.ARROW, "back") { openGUI(it) })
             .addIngredient('r', button(player, Material.SUNFLOWER, "refresh") { details(it, target) })
-            .addIngredient('i', button(player, Material.PLAYER_HEAD, "details", lines))
+            .addIngredient('i', playerHead(target, text(player, "details"), lines))
             .addIngredient('h', button(player, Material.BOOK, "history") { history(it, target) })
             .addIngredient('<', pageButton(player, false)).addIngredient('>', pageButton(player, true))
             .setContent(actions).build()
@@ -213,7 +242,7 @@ class PlayerGUI {
         var submitted = false
         val lines = listOf(
             Component.text(label(target)), text(player, action.name.lowercase()),
-            Component.text(reason)
+            ModerationText.reason(reason)
         ) + if (action.temporary) listOf(Component.text("$duration $unit")) else emptyList()
         val gui = Gui.builder().setStructure("# # # # # # # # #", "# # y # i # n # #", "# # # # # # # # #")
             .addIngredient('#', Filler.item()).addIngredient('i', button(player, action.material, "review", lines))
@@ -249,7 +278,7 @@ class PlayerGUI {
         val items = WarnSaveFile().getWarnings(target.uniqueId).toList().map { warning ->
             button(
                 player, Material.PAPER, "warning", listOf(
-                    Component.text(warning.reason),
+                    ModerationText.reason(warning.reason),
                     Component.text(warning.id), text(
                         player, "issued", mapOf(
                             "issuer" to

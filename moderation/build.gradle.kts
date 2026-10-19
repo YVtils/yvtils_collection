@@ -20,4 +20,15 @@ dependencies {
     // version (InvUI, which `gui` wraps, dropped multi-version support in v2 - see
     // DynamicModuleRegistry.GUI_ARTIFACTS for the full explanation).
     compileOnly(project(":gui-26.1"))
+    testImplementation(project(":utils"))
+    testImplementation(project(":config"))
+    testImplementation("io.papermc.paper:paper-api:26.1.2.build.74-stable")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    workingDir = layout.buildDirectory.get().asFile
 }

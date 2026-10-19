@@ -22,9 +22,9 @@ import yv.tils.moderation.configs.saveFile.WarnSaveFile
 import yv.tils.moderation.data.PermissionsData
 import yv.tils.moderation.language.RegisterStrings
 import yv.tils.moderation.listeners.AsyncChat
+import yv.tils.moderation.listeners.BannedLogin
 import yv.tils.moderation.utils.MojangProfileLogFilter
 import yv.tils.moderation.utils.TargetUtils
-import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
 
@@ -63,11 +63,9 @@ class ModerationYVtils : Module.YVtilsModule {
     }
 
     override fun onLateEnablePlugin() {
-
     }
 
     override fun disablePlugin() {
-
     }
 
     private fun registerCommands() {
@@ -95,14 +93,13 @@ class ModerationYVtils : Module.YVtilsModule {
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(AsyncChat(), plugin)
+        pm.registerEvents(BannedLogin(), plugin)
     }
 
     private fun registerCoroutines() {
-        CoroutineHandler.launchTask(
-            suspend { TargetUtils().cleanupMutedPlayers() },
-            "yvtils-moderation-mutedPlayersHandler",
-            300 * 1000L,
-        )
+        Core.instance.server.scheduler.runTaskTimer(Core.instance, Runnable {
+            TargetUtils().cleanupMutedPlayers()
+        }, 6000L, 6000L)
     }
 
     private fun registerPermissions() {

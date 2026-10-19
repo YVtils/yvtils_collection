@@ -25,6 +25,7 @@ import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.time.TimeUtils
+import yv.tils.utils.modules.Core
 
 class TargetUtils {
     companion object {
@@ -53,6 +54,12 @@ class TargetUtils {
         }
 
         fun loopThroughTargets(targets: List<PlayerProfile>, logic: (PlayerProfile, Map<String, Any>) -> Unit, params: Map<String, Any>) {
+            if (!Bukkit.isPrimaryThread()) {
+                Bukkit.getScheduler().runTask(Core.instance, Runnable {
+                    loopThroughTargets(targets, logic, params)
+                })
+                return
+            }
             for (target in targets) {
                 logic(target, params)
             }
@@ -76,7 +83,6 @@ class TargetUtils {
             val durationLong = muteData.expires.toLong()
             val currentTime = System.currentTimeMillis()
             if (currentTime > durationLong) {
-                MuteSaveFile().unmutePlayer(target.uniqueId)
                 return false
             }
 
@@ -127,7 +133,6 @@ class TargetUtils {
             if (muteSave.expires != "null") {
                 val expiresLong = muteSave.expires.toLong()
                 if (currentTime > expiresLong) {
-                    iterator.remove()
                     MuteSaveFile().unmutePlayer(entry.key)
                     Logger.debug("Unmuted player with UUID: ${entry.key} as the mute duration has expired.", DEBUG_LEVEL.BASIC)
                 }

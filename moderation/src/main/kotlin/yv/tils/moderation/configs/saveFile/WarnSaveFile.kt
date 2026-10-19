@@ -11,10 +11,12 @@ package yv.tils.moderation.configs.saveFile
 
 import yv.tils.config.files.ObjectMapperFileUtils
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 class WarnSaveFile {
     companion object {
-        val saves = mutableMapOf<UUID, WarnSave>()
+        val saves = ConcurrentHashMap<UUID, WarnSave>()
+        private val lock = Any()
     }
 
     private val filePath = "/moderation/warnedPlayers.json"
@@ -36,20 +38,12 @@ class WarnSaveFile {
     }
 
     fun warnPlayer(uuid: UUID, newWarn: Warning) {
-        val warnSave = saves[uuid]
-
-        if (warnSave != null) {
-            warnSave.warningCount += 1
-            warnSave.warnings.add(newWarn)
-        } else {
-            saves[uuid] = WarnSave(
-                uuid = uuid.toString(),
-                warningCount = 1,
-                warnings = mutableListOf(newWarn)
-            )
+        synchronized(lock) {
+            val warnings = (saves[uuid]?.warnings.orEmpty() + newWarn).toMutableList()
+            val next = saves.toMutableMap().apply { put(uuid, WarnSave(uuid.toString(), warnings.size, warnings)) }
+            registerStrings(next.values.toMutableList())
+            saves[uuid] = next.getValue(uuid)
         }
-
-        registerStrings(saves.values.toMutableList())
     }
 
     fun getWarnings(uuid: UUID): List<Warning> {
@@ -63,19 +57,19 @@ class WarnSaveFile {
     }
 
     fun removeWarning(uuid: UUID, warningID: String) {
-        val warnSave = saves[uuid] ?: return
-
-        val warningToRemove = warnSave.warnings.find { it.id == warningID } ?: return
-
-        warnSave.warnings.remove(warningToRemove)
-        warnSave.warningCount -= 1
-
-        registerStrings(saves.values.toMutableList())
+        synchronized(lock) {
+            val previous = saves[uuid] ?: return
+            val warnings = previous.warnings.filterNot { it.id == warningID }.toMutableList()
+            val next = saves.toMutableMap().apply { put(uuid, previous.copy(warningCount = warnings.size, warnings = warnings)) }
+            registerStrings(next.values.toMutableList())
+            saves[uuid] = next.getValue(uuid)
+        }
     }
 
     fun clearWarnings(uuid: UUID) {
-        saves.remove(uuid)
-
-        registerStrings(saves.values.toMutableList())
+        synchronized(lock) {
+            registerStrings(saves.filterKeys { it != uuid }.values.toMutableList())
+            saves.remove(uuid)
+        }
     }
 }

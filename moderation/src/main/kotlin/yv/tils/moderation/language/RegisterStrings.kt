@@ -18,6 +18,14 @@ import yv.tils.utils.colors.Colors
 
 class RegisterStrings {
     fun registerStrings() {
+        registerNewString("moderation.ban.screen.permanent", mapOf(
+            FileTypes.EN to "<color:${Colors.MAIN.color}><bold>YVtils</bold></color><newline><red>You are banned from this server.</red><newline><newline><gray>Reason: <white><reason><newline><gray>Issued by: <white><issuer><newline><newline><gray>Duration: <red>Permanent",
+            FileTypes.DE to "<color:${Colors.MAIN.color}><bold>YVtils</bold></color><newline><red>Du bist auf diesem Server gebannt.</red><newline><newline><gray>Grund: <white><reason><newline><gray>Aussteller: <white><issuer><newline><newline><gray>Dauer: <red>Permanent"
+        ))
+        registerNewString("moderation.ban.screen.temporary", mapOf(
+            FileTypes.EN to "<color:${Colors.MAIN.color}><bold>YVtils</bold></color><newline><red>You are temporarily banned from this server.</red><newline><newline><gray>Reason: <white><reason><newline><gray>Issued by: <white><issuer><newline><newline><gray>Expires: <yellow><expires>",
+            FileTypes.DE to "<color:${Colors.MAIN.color}><bold>YVtils</bold></color><newline><red>Du bist vorübergehend auf diesem Server gebannt.</red><newline><newline><gray>Grund: <white><reason><newline><gray>Aussteller: <white><issuer><newline><newline><gray>Läuft ab: <yellow><expires>"
+        ))
         val guiStrings = mapOf(
             "players" to ("Player moderation" to "Spielermoderation"),
             "details" to ("Player details" to "Spielerdetails"),
