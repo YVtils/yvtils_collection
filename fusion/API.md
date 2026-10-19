@@ -113,6 +113,11 @@ persisted implicitly.
 Light-level selection and asynchronous head resolution use this design. A custom
 output type does not need a new switch in `FusionItems`, `FusionGui` or the editor.
 
+`OutputSelection.profile` and the profile parameter of `FusionItems.output` use
+Paper's `com.destroystokyo.paper.profile.PlayerProfile`. Create profiles with
+`Bukkit.createProfile(...)` and read their UUID through `profile.id`. Addons built
+against the former Bukkit profile signatures must update their imports and recompile.
+
 ## Craft guards and observers
 
 ```kotlin

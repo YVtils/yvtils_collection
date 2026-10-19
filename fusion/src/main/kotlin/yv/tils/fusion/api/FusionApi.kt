@@ -5,7 +5,7 @@ package yv.tils.fusion.api
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.profile.PlayerProfile
+import com.destroystokyo.paper.profile.PlayerProfile
 import yv.tils.fusion.*
 import java.util.function.Consumer
 import org.bukkit.event.inventory.ClickType

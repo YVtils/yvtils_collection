@@ -8,7 +8,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.profile.PlayerProfile
+import com.destroystokyo.paper.profile.PlayerProfile
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import java.util.Base64
