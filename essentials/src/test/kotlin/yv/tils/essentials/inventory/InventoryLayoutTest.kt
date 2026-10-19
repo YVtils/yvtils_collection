@@ -25,7 +25,7 @@ class InventoryLayoutTest {
             assertNull(kind.targetSlot(-999))
             assertNull(kind.targetSlot(kind.viewSize))
         }
-        (listOf(0, 1, 6, 8).plusElement((36..44))).forEach { assertNull(InventoryKind.PLAYER.targetSlot(it)) }
+        (listOf(0, 1, 6, 8) + (36..44)).forEach { assertNull(InventoryKind.PLAYER.targetSlot(it)) }
         (0..8).forEach { assertNull(InventoryKind.ENDER_CHEST.targetSlot(it)) }
     }
 
