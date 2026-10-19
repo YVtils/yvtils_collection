@@ -14,6 +14,7 @@ package yv.tils.essentials.commands.handler
 
 import yv.tils.utils.modules.Core
 import yv.tils.config.language.LanguageHandler
+import yv.tils.common.language.LangStrings as CommonLangStrings
 import yv.tils.utils.message.MessageUtils
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
@@ -35,7 +36,7 @@ class SeedHandler {
                 MessageUtils.convert(
                     Core.prefix + " Seed: <gray>[<green><click:copy_to_clipboard:${seedMap.keys.first()}><hover:show_text:'${
                         LanguageHandler.getRawMessage(
-                            "text.action.copy",
+                            CommonLangStrings.TEXT_COPY.key,
                             sender,
                         )
                     }'>${seedMap.keys.first()}</click><gray>]"
@@ -48,7 +49,7 @@ class SeedHandler {
                 seedList.add(
                     "<white>${seedMap[seed]}: <gray>[<green><click:copy_to_clipboard:$seed><hover:show_text:'${
                         LanguageHandler.getRawMessage(
-                            "text.action.copy",
+                            CommonLangStrings.TEXT_COPY.key,
                             sender,
                         )
                     }'>$seed</click><gray>]"

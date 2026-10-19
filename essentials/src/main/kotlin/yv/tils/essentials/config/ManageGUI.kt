@@ -24,7 +24,7 @@ class ManageGUI {
         var expected = original
         DataClassConfigGui.open(
             player,
-            LanguageHandler.getRawMessage(LangStrings.CONFIG_TITLE.key, player),
+            LanguageHandler.getRawMessage(LangStrings.CONFIG_TITLE, player),
             draft,
             saver = { updated ->
                 check(player.hasPermission(Permissions.CONFIG.permission.name)) { "No permission to save Essentials configuration" }

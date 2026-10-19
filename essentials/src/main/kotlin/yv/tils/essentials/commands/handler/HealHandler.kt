@@ -19,6 +19,7 @@ import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import yv.tils.config.language.LanguageHandler
+import yv.tils.essentials.language.LangStrings
 import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.Logger
 
@@ -51,7 +52,7 @@ class HealHandler {
 
         player.sendMessage(
             LanguageHandler.getMessage(
-                "command.heal.self",
+                LangStrings.COMMAND_HEAL_SELF,
                 player.uniqueId,
                 params = mapOf("prefix" to Core.prefix)
             )
@@ -60,7 +61,7 @@ class HealHandler {
         if (sender != player) {
             sender.sendMessage(
                 LanguageHandler.getMessage(
-                    "command.heal.other",
+                    LangStrings.COMMAND_HEAL_OTHER,
                     sender,
                     params = mapOf("prefix" to Core.prefix, "player" to player.name)
                 )

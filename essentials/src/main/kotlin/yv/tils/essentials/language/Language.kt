@@ -14,118 +14,180 @@ package yv.tils.essentials.language
 
 import yv.tils.config.language.FileTypes
 import yv.tils.config.language.LanguageProvider
-import yv.tils.utils.colors.ColorUtils
 import yv.tils.utils.colors.Colors
 
 enum class LangStrings(override val key: String, override val translations: Map<FileTypes, String>) :
     LanguageProvider.LangStrings {
-    INVENTORY_NOT_FOUND("essentials.inventory.not_found", mapOf(
-        FileTypes.EN to "<prefix> <red>Player not found. Use a known name or UUID.",
-        FileTypes.DE to "<prefix> <red>Spieler nicht gefunden. Verwende einen bekannten Namen oder eine UUID."
-    )),
-    INVENTORY_SELF("essentials.inventory.self", mapOf(
-        FileTypes.EN to "<prefix> <red>You cannot inspect your own inventory with this command.",
-        FileTypes.DE to "<prefix> <red>Du kannst dein eigenes Inventar mit diesem Befehl nicht ansehen."
-    )),
-    INVENTORY_BUSY("essentials.inventory.busy", mapOf(
-        FileTypes.EN to "<prefix> <red>This player is already being inspected. Try again shortly.",
-        FileTypes.DE to "<prefix> <red>Dieser Spieler wird bereits angesehen. Versuche es gleich erneut."
-    )),
-    INVENTORY_CONNECTING("essentials.inventory.connecting", mapOf(
-        FileTypes.EN to "<prefix> <red>This player is connecting. Reopen the editor after login.",
-        FileTypes.DE to "<prefix> <red>Dieser Spieler verbindet sich gerade. Öffne den Editor nach der Anmeldung erneut."
-    )),
-    INVENTORY_LOAD_FAILED("essentials.inventory.load_failed", mapOf(
-        FileTypes.EN to "<prefix> <red>The inventory could not be loaded. See the server log for details.",
-        FileTypes.DE to "<prefix> <red>Das Inventar konnte nicht geladen werden. Details stehen im Serverprotokoll."
-    )),
-    INVENTORY_EDIT_FAILED("essentials.inventory.edit_failed", mapOf(
-        FileTypes.EN to "<prefix> <red>The change could not be applied. The inventory may have changed; reopen it and try again.",
-        FileTypes.DE to "<prefix> <red>Die Änderung konnte nicht übernommen werden. Das Inventar wurde möglicherweise geändert; öffne es erneut und versuche es noch einmal."
-    )),
-    INVENTORY_LOGIN_HANDOFF("essentials.inventory.login_handoff", mapOf(
-        FileTypes.EN to "<prefix> <${Colors.SECONDARY.color}><player><white> is connecting. Your inventory editor was closed; completed changes are saved. <${Colors.TERTIARY.color}>Reopen it after login to continue editing live.",
-        FileTypes.DE to "<prefix> <${Colors.SECONDARY.color}><player><white> verbindet sich. Dein Inventareditor wurde geschlossen; abgeschlossene Änderungen sind gespeichert. <${Colors.TERTIARY.color}>Öffne ihn nach der Anmeldung erneut, um live weiterzubearbeiten."
-    )),
-    INVENTORY_LOGOUT_HANDOFF("essentials.inventory.logout_handoff", mapOf(
-        FileTypes.EN to "<prefix> <${Colors.SECONDARY.color}><player><white> disconnected. Your inventory editor was closed; completed changes are saved. <${Colors.TERTIARY.color}>Reopen it to continue editing offline.",
-        FileTypes.DE to "<prefix> <${Colors.SECONDARY.color}><player><white> hat den Server verlassen. Dein Inventareditor wurde geschlossen; abgeschlossene Änderungen sind gespeichert. <${Colors.TERTIARY.color}>Öffne ihn erneut, um offline weiterzubearbeiten."
-    )),
-    INVENTORY_REOPEN("essentials.inventory.reopen", mapOf(
-        FileTypes.EN to "<${Colors.SECONDARY.color}><underlined>[Reopen inventory]</underlined>",
-        FileTypes.DE to "<${Colors.SECONDARY.color}><underlined>[Inventar erneut öffnen]</underlined>"
-    )),
-    INVENTORY_REOPEN_HINT("essentials.inventory.reopen_hint", mapOf(
-        FileTypes.EN to "<${Colors.TERTIARY.color}>Click to reopen this player's inventory.",
-        FileTypes.DE to "<${Colors.TERTIARY.color}>Klicke, um das Inventar dieses Spielers erneut zu öffnen."
-    )),
-    INVENTORY_OPEN_EDIT("essentials.inventory.open_edit", mapOf(
-        FileTypes.EN to "<prefix> <white>Inspecting <${Colors.SECONDARY.color}><player><white>. Left-click: swap; right-click: half/one item; middle-click: copy in creative; shift-click: transfer; drag: distribute. <${Colors.TERTIARY.color}>Changes save immediately.",
-        FileTypes.DE to "<prefix> <white>Du siehst das Inventar von <${Colors.SECONDARY.color}><player><white>. Linksklick: tauschen; Rechtsklick: Hälfte/ein Item; Mittelklick: im Kreativmodus kopieren; Umschalt-Klick: verschieben; Ziehen: verteilen. <${Colors.TERTIARY.color}>Änderungen werden sofort gespeichert."
-    )),
-    INVENTORY_OPEN_READ_ONLY("essentials.inventory.open_read_only", mapOf(
-        FileTypes.EN to "<prefix> <white>Inspecting <${Colors.SECONDARY.color}><player><white> in <${Colors.TERTIARY.color}>read-only mode<white>.",
-        FileTypes.DE to "<prefix> <white>Du siehst das Inventar von <${Colors.SECONDARY.color}><player><white> im <${Colors.TERTIARY.color}>Lesemodus<white>."
-    )),
-    INVENTORY_PLAYER_TITLE("essentials.inventory.player_title", mapOf(
-        FileTypes.EN to "<${Colors.MAIN.color}>Invsee <dark_gray>» <${Colors.TERTIARY.color}><player>",
-        FileTypes.DE to "<${Colors.MAIN.color}>Invsee <dark_gray>» <${Colors.TERTIARY.color}><player>"
-    )),
-    INVENTORY_ENDER_TITLE("essentials.inventory.ender_title", mapOf(
-        FileTypes.EN to "<${Colors.MAIN.color}>ECsee <dark_gray>» <${Colors.TERTIARY.color}><player>",
-        FileTypes.DE to "<${Colors.MAIN.color}>ECsee <dark_gray>» <${Colors.TERTIARY.color}><player>"
-    )),
-    INVENTORY_INFO("essentials.inventory.info", mapOf(
-        FileTypes.EN to "<${Colors.SECONDARY.color}>Inventory inspection",
-        FileTypes.DE to "<${Colors.SECONDARY.color}>Inventaransicht"
-    )),
-    INVENTORY_TARGET("essentials.inventory.target", mapOf(
-        FileTypes.EN to "<gray>Player: <${Colors.TERTIARY.color}><player>",
-        FileTypes.DE to "<gray>Spieler: <${Colors.TERTIARY.color}><player>"
-    )),
-    INVENTORY_ONLINE("essentials.inventory.online", mapOf(
-        FileTypes.EN to "<gray>Status: <${Colors.SECONDARY.color}>Online <gray>• Refreshes live",
-        FileTypes.DE to "<gray>Status: <${Colors.SECONDARY.color}>Online <gray>• Live-Aktualisierung"
-    )),
-    INVENTORY_OFFLINE("essentials.inventory.offline", mapOf(
-        FileTypes.EN to "<gray>Status: <${Colors.TERTIARY.color}>Offline <gray>• Saved player data",
-        FileTypes.DE to "<gray>Status: <${Colors.TERTIARY.color}>Offline <gray>• Gespeicherte Spielerdaten"
-    )),
-    INVENTORY_EDIT_HINT("essentials.inventory.edit_hint", mapOf(
-        FileTypes.EN to "<${Colors.TERTIARY.color}>Left: swap • Right: half/one • Middle: creative copy<newline>Shift-click: transfer • Drag: distribute",
-        FileTypes.DE to "<${Colors.TERTIARY.color}>Links: tauschen • Rechts: Hälfte/eins • Mitte: Kreativkopie<newline>Umschalt-Klick: verschieben • Ziehen: verteilen"
-    )),
-    INVENTORY_READ_ONLY_HINT("essentials.inventory.read_only_hint", mapOf(
-        FileTypes.EN to "<${Colors.TERTIARY.color}>Read-only • Editing is not permitted",
-        FileTypes.DE to "<${Colors.TERTIARY.color}>Lesemodus • Bearbeiten ist nicht erlaubt"
-    )),
-    INVENTORY_HELMET("essentials.inventory.helmet", mapOf(
-        FileTypes.EN to "<${Colors.SECONDARY.color}>Helmet", FileTypes.DE to "<${Colors.SECONDARY.color}>Helm"
-    )),
-    INVENTORY_CHESTPLATE("essentials.inventory.chestplate", mapOf(
-        FileTypes.EN to "<${Colors.SECONDARY.color}>Chestplate", FileTypes.DE to "<${Colors.SECONDARY.color}>Brustpanzer"
-    )),
-    INVENTORY_LEGGINGS("essentials.inventory.leggings", mapOf(
-        FileTypes.EN to "<${Colors.SECONDARY.color}>Leggings", FileTypes.DE to "<${Colors.SECONDARY.color}>Beinschutz"
-    )),
-    INVENTORY_BOOTS("essentials.inventory.boots", mapOf(
-        FileTypes.EN to "<${Colors.SECONDARY.color}>Boots", FileTypes.DE to "<${Colors.SECONDARY.color}>Stiefel"
-    )),
-    INVENTORY_OFFHAND("essentials.inventory.offhand", mapOf(
-        FileTypes.EN to "<${Colors.SECONDARY.color}>Offhand", FileTypes.DE to "<${Colors.SECONDARY.color}>Nebenhand"
-    )),
-    INVENTORY_EMPTY("essentials.inventory.empty", mapOf(
-        FileTypes.EN to "<gray>Empty equipment slot", FileTypes.DE to "<gray>Leerer Ausrüstungsslot"
-    )),
-    INVENTORY_STORAGE("essentials.inventory.storage", mapOf(
-        FileTypes.EN to "<${Colors.SECONDARY.color}>↑ Main inventory", FileTypes.DE to "<${Colors.SECONDARY.color}>↑ Hauptinventar"
-    )),
-    INVENTORY_HOTBAR("essentials.inventory.hotbar", mapOf(
-        FileTypes.EN to "<${Colors.SECONDARY.color}>↓ Hotbar", FileTypes.DE to "<${Colors.SECONDARY.color}>↓ Schnellzugriffsleiste"
-    )),
-    INVENTORY_ENDER_CHEST("essentials.inventory.ender_chest", mapOf(
-        FileTypes.EN to "<${Colors.SECONDARY.color}>↓ Ender chest", FileTypes.DE to "<${Colors.SECONDARY.color}>↓ Endertruhe"
-    )),
+    INVENTORY_NOT_FOUND(
+        "essentials.inventory.not_found", mapOf(
+            FileTypes.EN to "<prefix> <red>Player not found. Use a known name or UUID.",
+            FileTypes.DE to "<prefix> <red>Spieler nicht gefunden. Verwende einen bekannten Namen oder eine UUID."
+        )
+    ),
+    INVENTORY_SELF(
+        "essentials.inventory.self", mapOf(
+            FileTypes.EN to "<prefix> <red>You cannot inspect your own inventory with this command.",
+            FileTypes.DE to "<prefix> <red>Du kannst dein eigenes Inventar mit diesem Befehl nicht ansehen."
+        )
+    ),
+    INVENTORY_BUSY(
+        "essentials.inventory.busy", mapOf(
+            FileTypes.EN to "<prefix> <red>This player is already being inspected. Try again shortly.",
+            FileTypes.DE to "<prefix> <red>Dieser Spieler wird bereits angesehen. Versuche es gleich erneut."
+        )
+    ),
+    INVENTORY_CONNECTING(
+        "essentials.inventory.connecting", mapOf(
+            FileTypes.EN to "<prefix> <red>This player is connecting. Reopen the editor after login.",
+            FileTypes.DE to "<prefix> <red>Dieser Spieler verbindet sich gerade. Öffne den Editor nach der Anmeldung erneut."
+        )
+    ),
+    INVENTORY_LOAD_FAILED(
+        "essentials.inventory.load_failed", mapOf(
+            FileTypes.EN to "<prefix> <red>The inventory could not be loaded. See the server log for details.",
+            FileTypes.DE to "<prefix> <red>Das Inventar konnte nicht geladen werden. Details stehen im Serverprotokoll."
+        )
+    ),
+    INVENTORY_EDIT_FAILED(
+        "essentials.inventory.edit_failed", mapOf(
+            FileTypes.EN to "<prefix> <red>The change could not be applied. The inventory may have changed; reopen it and try again.",
+            FileTypes.DE to "<prefix> <red>Die Änderung konnte nicht übernommen werden. Das Inventar wurde möglicherweise geändert; öffne es erneut und versuche es noch einmal."
+        )
+    ),
+    INVENTORY_LOGIN_HANDOFF(
+        "essentials.inventory.login_handoff", mapOf(
+            FileTypes.EN to "<prefix> <${Colors.SECONDARY.color}><player><white> is connecting. Your inventory editor was closed; completed changes are saved. <${Colors.TERTIARY.color}>Reopen it after login to continue editing live.",
+            FileTypes.DE to "<prefix> <${Colors.SECONDARY.color}><player><white> verbindet sich. Dein Inventareditor wurde geschlossen; abgeschlossene Änderungen sind gespeichert. <${Colors.TERTIARY.color}>Öffne ihn nach der Anmeldung erneut, um live weiterzubearbeiten."
+        )
+    ),
+    INVENTORY_LOGOUT_HANDOFF(
+        "essentials.inventory.logout_handoff", mapOf(
+            FileTypes.EN to "<prefix> <${Colors.SECONDARY.color}><player><white> disconnected. Your inventory editor was closed; completed changes are saved. <${Colors.TERTIARY.color}>Reopen it to continue editing offline.",
+            FileTypes.DE to "<prefix> <${Colors.SECONDARY.color}><player><white> hat den Server verlassen. Dein Inventareditor wurde geschlossen; abgeschlossene Änderungen sind gespeichert. <${Colors.TERTIARY.color}>Öffne ihn erneut, um offline weiterzubearbeiten."
+        )
+    ),
+    INVENTORY_REOPEN(
+        "essentials.inventory.reopen", mapOf(
+            FileTypes.EN to "<${Colors.SECONDARY.color}><underlined>[Reopen inventory]</underlined>",
+            FileTypes.DE to "<${Colors.SECONDARY.color}><underlined>[Inventar erneut öffnen]</underlined>"
+        )
+    ),
+    INVENTORY_REOPEN_HINT(
+        "essentials.inventory.reopen_hint", mapOf(
+            FileTypes.EN to "<${Colors.TERTIARY.color}>Click to reopen this player's inventory.",
+            FileTypes.DE to "<${Colors.TERTIARY.color}>Klicke, um das Inventar dieses Spielers erneut zu öffnen."
+        )
+    ),
+    INVENTORY_OPEN_EDIT(
+        "essentials.inventory.open_edit", mapOf(
+            FileTypes.EN to "<prefix> <white>Inspecting <${Colors.SECONDARY.color}><player><white>. Left-click: swap; right-click: half/one item; middle-click: copy in creative; shift-click: transfer; drag: distribute. <${Colors.TERTIARY.color}>Changes save immediately.",
+            FileTypes.DE to "<prefix> <white>Du siehst das Inventar von <${Colors.SECONDARY.color}><player><white>. Linksklick: tauschen; Rechtsklick: Hälfte/ein Item; Mittelklick: im Kreativmodus kopieren; Umschalt-Klick: verschieben; Ziehen: verteilen. <${Colors.TERTIARY.color}>Änderungen werden sofort gespeichert."
+        )
+    ),
+    INVENTORY_OPEN_READ_ONLY(
+        "essentials.inventory.open_read_only", mapOf(
+            FileTypes.EN to "<prefix> <white>Inspecting <${Colors.SECONDARY.color}><player><white> in <${Colors.TERTIARY.color}>read-only mode<white>.",
+            FileTypes.DE to "<prefix> <white>Du siehst das Inventar von <${Colors.SECONDARY.color}><player><white> im <${Colors.TERTIARY.color}>Lesemodus<white>."
+        )
+    ),
+    INVENTORY_PLAYER_TITLE(
+        "essentials.inventory.player_title", mapOf(
+            FileTypes.EN to "<${Colors.MAIN.color}>Invsee <dark_gray>» <${Colors.TERTIARY.color}><player>",
+            FileTypes.DE to "<${Colors.MAIN.color}>Invsee <dark_gray>» <${Colors.TERTIARY.color}><player>"
+        )
+    ),
+    INVENTORY_ENDER_TITLE(
+        "essentials.inventory.ender_title", mapOf(
+            FileTypes.EN to "<${Colors.MAIN.color}>ECsee <dark_gray>» <${Colors.TERTIARY.color}><player>",
+            FileTypes.DE to "<${Colors.MAIN.color}>ECsee <dark_gray>» <${Colors.TERTIARY.color}><player>"
+        )
+    ),
+    INVENTORY_INFO(
+        "essentials.inventory.info", mapOf(
+            FileTypes.EN to "<${Colors.SECONDARY.color}>Inventory inspection",
+            FileTypes.DE to "<${Colors.SECONDARY.color}>Inventaransicht"
+        )
+    ),
+    INVENTORY_TARGET(
+        "essentials.inventory.target", mapOf(
+            FileTypes.EN to "<gray>Player: <${Colors.TERTIARY.color}><player>",
+            FileTypes.DE to "<gray>Spieler: <${Colors.TERTIARY.color}><player>"
+        )
+    ),
+    INVENTORY_ONLINE(
+        "essentials.inventory.online", mapOf(
+            FileTypes.EN to "<gray>Status: <${Colors.SECONDARY.color}>Online <gray>• Refreshes live",
+            FileTypes.DE to "<gray>Status: <${Colors.SECONDARY.color}>Online <gray>• Live-Aktualisierung"
+        )
+    ),
+    INVENTORY_OFFLINE(
+        "essentials.inventory.offline", mapOf(
+            FileTypes.EN to "<gray>Status: <${Colors.TERTIARY.color}>Offline <gray>• Saved player data",
+            FileTypes.DE to "<gray>Status: <${Colors.TERTIARY.color}>Offline <gray>• Gespeicherte Spielerdaten"
+        )
+    ),
+    INVENTORY_EDIT_HINT(
+        "essentials.inventory.edit_hint", mapOf(
+            FileTypes.EN to "<${Colors.TERTIARY.color}>Left: swap • Right: half/one • Middle: creative copy<newline>Shift-click: transfer • Drag: distribute",
+            FileTypes.DE to "<${Colors.TERTIARY.color}>Links: tauschen • Rechts: Hälfte/eins • Mitte: Kreativkopie<newline>Umschalt-Klick: verschieben • Ziehen: verteilen"
+        )
+    ),
+    INVENTORY_READ_ONLY_HINT(
+        "essentials.inventory.read_only_hint", mapOf(
+            FileTypes.EN to "<${Colors.TERTIARY.color}>Read-only • Editing is not permitted",
+            FileTypes.DE to "<${Colors.TERTIARY.color}>Lesemodus • Bearbeiten ist nicht erlaubt"
+        )
+    ),
+    INVENTORY_HELMET(
+        "essentials.inventory.helmet", mapOf(
+            FileTypes.EN to "<${Colors.SECONDARY.color}>Helmet", FileTypes.DE to "<${Colors.SECONDARY.color}>Helm"
+        )
+    ),
+    INVENTORY_CHESTPLATE(
+        "essentials.inventory.chestplate", mapOf(
+            FileTypes.EN to "<${Colors.SECONDARY.color}>Chestplate",
+            FileTypes.DE to "<${Colors.SECONDARY.color}>Brustpanzer"
+        )
+    ),
+    INVENTORY_LEGGINGS(
+        "essentials.inventory.leggings", mapOf(
+            FileTypes.EN to "<${Colors.SECONDARY.color}>Leggings",
+            FileTypes.DE to "<${Colors.SECONDARY.color}>Beinschutz"
+        )
+    ),
+    INVENTORY_BOOTS(
+        "essentials.inventory.boots", mapOf(
+            FileTypes.EN to "<${Colors.SECONDARY.color}>Boots", FileTypes.DE to "<${Colors.SECONDARY.color}>Stiefel"
+        )
+    ),
+    INVENTORY_OFFHAND(
+        "essentials.inventory.offhand", mapOf(
+            FileTypes.EN to "<${Colors.SECONDARY.color}>Offhand", FileTypes.DE to "<${Colors.SECONDARY.color}>Nebenhand"
+        )
+    ),
+    INVENTORY_EMPTY(
+        "essentials.inventory.empty", mapOf(
+            FileTypes.EN to "<gray>Empty equipment slot", FileTypes.DE to "<gray>Leerer Ausrüstungsslot"
+        )
+    ),
+    INVENTORY_STORAGE(
+        "essentials.inventory.storage", mapOf(
+            FileTypes.EN to "<${Colors.SECONDARY.color}>↑ Main inventory",
+            FileTypes.DE to "<${Colors.SECONDARY.color}>↑ Hauptinventar"
+        )
+    ),
+    INVENTORY_HOTBAR(
+        "essentials.inventory.hotbar", mapOf(
+            FileTypes.EN to "<${Colors.SECONDARY.color}>↓ Hotbar",
+            FileTypes.DE to "<${Colors.SECONDARY.color}>↓ Schnellzugriffsleiste"
+        )
+    ),
+    INVENTORY_ENDER_CHEST(
+        "essentials.inventory.ender_chest", mapOf(
+            FileTypes.EN to "<${Colors.SECONDARY.color}>↓ Ender chest",
+            FileTypes.DE to "<${Colors.SECONDARY.color}>↓ Endertruhe"
+        )
+    ),
     CONFIG_TITLE(
         "essentials.config.title", mapOf(
             FileTypes.EN to "Essentials Config",

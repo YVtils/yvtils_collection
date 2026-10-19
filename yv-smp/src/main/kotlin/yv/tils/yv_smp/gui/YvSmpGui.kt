@@ -12,8 +12,6 @@
 
 package yv.tils.yv_smp.gui
 
-import yv.tils.gui.utils.GuiWindows
-
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -29,6 +27,7 @@ import xyz.xenondevs.invui.window.addRenameHandler
 import yv.tils.config.language.LanguageHandler
 import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.gui.utils.Filler
+import yv.tils.gui.utils.GuiWindows
 import yv.tils.utils.player.PlayerUtils
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.logic.BorderHandler
@@ -284,13 +283,6 @@ class YvSmpGui {
         ) {
             buildConfirmSetupAllWindow(it).open(it)
         }
-
-        val backItem = Item.builder()
-            .setItemProvider {
-                ItemBuilder(Material.ARROW).setName(LanguageHandler.getMessage("action.gui.nav.back", player))
-            }
-            .addClickHandler { _, click -> buildMainMenu(click.player()).open(click.player()) }
-            .build()
 
         val gui = Gui.builder()
             .setStructure(

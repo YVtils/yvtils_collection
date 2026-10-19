@@ -16,6 +16,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import yv.tils.config.language.LanguageHandler
+import yv.tils.essentials.language.LangStrings
 import yv.tils.utils.modules.Core
 import java.util.*
 
@@ -37,7 +38,7 @@ class GodHandler {
             FlyHandler().flySwitch(player, state = true, silent = true)
             player.sendMessage(
                 LanguageHandler.getMessage(
-                    "command.god.enable.self",
+                    LangStrings.COMMAND_GOD_ENABLE_SELF,
                     player.uniqueId,
                     params = mapOf("prefix" to Core.prefix)
                 )
@@ -47,7 +48,7 @@ class GodHandler {
             FlyHandler().flySwitch(player, state = false, silent = true)
             player.sendMessage(
                 LanguageHandler.getMessage(
-                    "command.god.disable.self",
+                    LangStrings.COMMAND_GOD_DISABLE_SELF,
                     player.uniqueId,
                     params = mapOf("prefix" to Core.prefix)
                 )
@@ -58,7 +59,7 @@ class GodHandler {
             if (god[uuid] == null || god[uuid] == false) {
                 sender.sendMessage(
                     LanguageHandler.getMessage(
-                        "command.god.disable.other",
+                        LangStrings.COMMAND_GOD_DISABLE_OTHER,
                         sender,
                         params = mapOf("prefix" to Core.prefix, "player" to player.name)
                     )
@@ -66,7 +67,7 @@ class GodHandler {
             } else {
                 sender.sendMessage(
                     LanguageHandler.getMessage(
-                        "command.god.enable.other",
+                        LangStrings.COMMAND_GOD_ENABLE_OTHER,
                         sender,
                         params = mapOf("prefix" to Core.prefix, "player" to player.name)
                     )

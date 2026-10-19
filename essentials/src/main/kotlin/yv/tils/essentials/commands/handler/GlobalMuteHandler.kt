@@ -81,7 +81,7 @@ class GlobalMuteHandler {
             if (globalMute) {
                 player.sendMessage(
                     LanguageHandler.getMessage(
-                        "command.globalmute.enable",
+                        LangStrings.COMMAND_GLOBALMUTE_ENABLE,
                         player.uniqueId,
                         params = mapOf(
                             "prefix" to Core.prefix,
@@ -91,7 +91,7 @@ class GlobalMuteHandler {
             } else {
                 player.sendMessage(
                     LanguageHandler.getMessage(
-                        "command.globalmute.disable",
+                        LangStrings.COMMAND_GLOBALMUTE_DISABLE,
                         player.uniqueId,
                         params = mapOf(
                             "prefix" to Core.prefix,
@@ -103,14 +103,14 @@ class GlobalMuteHandler {
 
         if (globalMute) {
             Logger.info(LanguageHandler.getMessage(
-                "command.globalmute.enable",
+                LangStrings.COMMAND_GLOBALMUTE_ENABLE,
                 params = mapOf(
                     "prefix" to Core.prefix,
                 )
             ))
         } else {
             Logger.info(LanguageHandler.getMessage(
-                "command.globalmute.disable",
+                LangStrings.COMMAND_GLOBALMUTE_DISABLE,
                 params = mapOf(
                     "prefix" to Core.prefix,
                 )
@@ -127,7 +127,7 @@ class GlobalMuteHandler {
         if (oldState == globalMute) {
             sender.sendMessage(
                 LanguageHandler.getMessage(
-                    "command.globalmute.already",
+                    LangStrings.COMMAND_GLOBALMUTE_ALREADY,
                     sender,
                     params = mapOf(
                         "prefix" to Core.prefix,

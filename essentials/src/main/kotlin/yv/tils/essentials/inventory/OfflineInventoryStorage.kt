@@ -1,6 +1,7 @@
 package yv.tils.essentials.inventory
 
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -51,6 +52,12 @@ object OfflineInventoryStorage {
     }
 
     private fun hash(bytes: ByteArray) = MessageDigest.getInstance("SHA-256").digest(bytes)
+    private val serverDataVersion: Int by lazy {
+        val tag = read(ItemStack(Material.STONE).serializeAsBytes())
+        val version = call(tag, "getIntOr", "DataVersion", -1) as Int
+        check(version >= 0) { "Serialized item is missing its data version." }
+        version
+    }
     private val equipment = mapOf(36 to "feet", 37 to "legs", 38 to "chest", 39 to "head", 40 to "offhand")
 
     fun load(uuid: UUID, kind: InventoryKind): Loaded {
@@ -59,7 +66,7 @@ object OfflineInventoryStorage {
         val data = Files.readAllBytes(file(uuid))
         val root = read(data)
         val version = call(root, "getIntOr", "DataVersion", -1) as Int
-        require(version == Bukkit.getUnsafe().dataVersion) { "Offline player data must be saved by this server version first." }
+        require(version == serverDataVersion) { "Offline player data must be saved by this server version first." }
         val items = arrayOfNulls<ItemStack>(kind.slots)
         val key = if (kind == InventoryKind.PLAYER) "Inventory" else "EnderItems"
         val rawList = call(root, "get", key)

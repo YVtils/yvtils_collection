@@ -1,17 +1,15 @@
-/* Part of the YVtils Project. Copyright (c) 2026 Lyvric / YVtils.
- * MPL-2.0 with additional terms: https://yvtils.net/license */
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2026 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
 package yv.tils.fusion.gui
-
-import yv.tils.gui.utils.GuiWindows
-
-import yv.tils.fusion.FusionRecipe
-import yv.tils.fusion.Ingredient
-import yv.tils.fusion.FusionYVtils
-import yv.tils.fusion.language.FusionText
-import yv.tils.fusion.logic.crafting.Crafting
-import yv.tils.fusion.logic.crafting.IngredientAllocation
-import yv.tils.fusion.logic.items.FusionItems
-import yv.tils.fusion.utils.BukkitTags
 
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
@@ -26,16 +24,25 @@ import xyz.xenondevs.invui.item.Item
 import xyz.xenondevs.invui.item.ItemWrapper
 import xyz.xenondevs.invui.window.AnvilWindow
 import xyz.xenondevs.invui.window.Window
+import yv.tils.fusion.FusionRecipe
+import yv.tils.fusion.FusionYVtils
+import yv.tils.fusion.Ingredient
+import yv.tils.fusion.api.FusionRegistry
+import yv.tils.fusion.api.OutputSelection
+import yv.tils.fusion.configs.DefaultRecipes
+import yv.tils.fusion.language.FusionText
+import yv.tils.fusion.logic.crafting.Crafting
+import yv.tils.fusion.logic.crafting.IngredientAllocation
+import yv.tils.fusion.logic.items.FusionItems
+import yv.tils.fusion.utils.BukkitTags
 import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.GuiStyle
+import yv.tils.gui.utils.GuiWindows
+import yv.tils.gui.utils.PlayerHeads
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.modules.Core
-import java.util.UUID
-import yv.tils.gui.utils.PlayerHeads
-import yv.tils.fusion.api.OutputSelection
-import yv.tils.fusion.api.FusionRegistry
+import java.util.*
 import java.util.function.Consumer
-import yv.tils.fusion.configs.DefaultRecipes
 
 object FusionGui {
     fun allowed(player: Player, manage: Boolean = false): Boolean {
@@ -251,7 +258,7 @@ object FusionGui {
 
         fun craft(viewer: Player, requested: Int) {
             if (!type.ready(selection)) {
-                type.configure(viewer, recipe, selection, Consumer { details(viewer, recipe, it) }); return
+                type.configure(viewer, recipe, selection) { details(viewer, recipe, it) }; return
             }
             try {
                 val count = FusionRegistry.craft(viewer, recipe.id, requested, selection)
@@ -285,8 +292,8 @@ object FusionGui {
                         viewer,
                         recipe,
                         selection,
-                        event.clickType(),
-                        Consumer { details(viewer, recipe, it) })
+                        event.clickType()
+                    ) { details(viewer, recipe, it) }
                 }.build()
         } ?: Filler.item()
         val ingredients = recipe.ingredients.mapIndexed { index, ingredient ->
