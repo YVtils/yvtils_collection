@@ -17,6 +17,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 import yv.tils.yv_smp.logic.music.MusicHandler
+import yv.tils.yv_smp.logic.start.PhaseHandler
 
 /**
  * Listener to automatically clean up audio resources when players disconnect.
@@ -26,6 +27,9 @@ class PlayerQuitListener : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     fun onPlayerQuit(event: PlayerQuitEvent) {
         val player = event.player
+        if (PhaseHandler.isRunning) {
+            PhaseHandler.stopPhases()
+        }
 
         // Stop any active audio for this player
         if (MusicHandler.hasActiveAudio(player)) {
@@ -33,4 +37,3 @@ class PlayerQuitListener : Listener {
         }
     }
 }
-

@@ -12,7 +12,7 @@
 
 package yv.tils.yv_smp.utils
 
-import org.bukkit.Bukkit
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay

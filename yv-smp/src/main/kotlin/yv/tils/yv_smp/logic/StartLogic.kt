@@ -13,7 +13,7 @@
 package yv.tils.yv_smp.logic
 
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Sound
 import org.bukkit.command.CommandSender
@@ -124,7 +124,12 @@ class StartLogic {
                         Title.Times.times(Duration.ofMillis(0), Duration.ofMillis(900), Duration.ofMillis(100))
                     )
                     player.showTitle(title)
-                    player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.0f + (seconds - secondsLeft) * 0.1f)
+                    player.playSound(
+                        player.location,
+                        Sound.BLOCK_NOTE_BLOCK_PLING,
+                        0.8f,
+                        1.0f + (seconds - secondsLeft) * 0.1f
+                    )
                 }
             }, delayTicks)
         }
@@ -141,6 +146,7 @@ class StartLogic {
      * Called either immediately (warmup disabled) or after [runWarmupCountdown] completes.
      */
     private fun launchSequence(players: List<Player>, generation: Int) {
+        Bukkit.capture(players)
         players.forEach { player ->
             player.stopAllSounds()
             savedGameModes[player.uniqueId] = player.gameMode

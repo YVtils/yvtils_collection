@@ -13,7 +13,7 @@
 package yv.tils.yv_smp.logic.start
 
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -32,7 +32,7 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
 import kotlin.math.PI
 import kotlin.math.sqrt
-import org.bukkit.GameMode
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 class DeathVisualizerPhase : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -55,7 +55,7 @@ class DeathVisualizerPhase : PhasePlugin {
             swingHalfAngle = PI / 2.5,
             swingPeriod = 90L,
         )
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             CinematicCamera.stopAll()
         }, 256L)
 
@@ -82,22 +82,22 @@ class DeathVisualizerPhase : PhasePlugin {
         )
 
         // ── 2. Soul flame pillars erupt from every edge block (t=8) ──────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.SOUL_FIRE_FLAME, riseHeight = 40, count = 2)
         }, 8L)
 
         // ── 3. Sculk soul pillars follow, shorter (t=25) ─────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.SCULK_SOUL, riseHeight = 28, count = 2)
         }, 25L)
 
         // ── 4. WARPED_SPORE pillars at mid-phase (t=60) ───────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.WARPED_SPORE, riseHeight = 22, count = 2)
         }, 60L)
 
         // ── 5. Soul shockwave converges inward — death closing in (t=12) ─────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.SOUL, Particle.SMOKE), waves = 4, waveDelay = 16L, steps = 22
@@ -105,7 +105,7 @@ class DeathVisualizerPhase : PhasePlugin {
         }, 12L)
 
         // ── 6. Second sculk pulse (t=45) ─────────────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.SCULK_SOUL, Particle.LARGE_SMOKE), waves = 3, waveDelay = 20L, steps = 24
@@ -113,7 +113,7 @@ class DeathVisualizerPhase : PhasePlugin {
         }, 45L)
 
         // ── 7. Third dark pulse — squid ink (t=120) ───────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.SQUID_INK, Particle.ASH), waves = 2, waveDelay = 18L, steps = 20
@@ -122,10 +122,10 @@ class DeathVisualizerPhase : PhasePlugin {
 
         // ── 8. Haunting rain — ash, smoke, obsidian tears ─────────────────────
         islandRain(players, spawnLoc, Particle.ASH, areaRadius = islandRadius, duration = 240L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             islandRain(players, spawnLoc, Particle.SMOKE, areaRadius = islandRadius * 0.73, duration = 160L)
         }, 20L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             islandRain(
                 players,
                 spawnLoc,
@@ -136,7 +136,7 @@ class DeathVisualizerPhase : PhasePlugin {
         }, 50L)
 
         // ── 9. Central soul burst (t=55) ─────────────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             players.forEach { player ->
                 player.spawnParticle(Particle.SMOKE, spawnLoc.clone().add(0.0, 1.0, 0.0), 100, 4.0, 2.0, 4.0, 0.08)
                 player.spawnParticle(
@@ -169,36 +169,12 @@ class DeathVisualizerPhase : PhasePlugin {
     }
 
     override fun phaseActions(players: List<Player>) {
-        createTracker()
-        addVisualisation()
-    }
-
-    private fun createTracker() {
-        val scoreboardManager = Bukkit.getScoreboardManager()
-        val scoreboard = scoreboardManager.mainScoreboard
-
-        // TODO: Test if this if statement is actually needed, or if the unregister calls can just be made without checking for null first
-//        if (scoreboard.getObjective("deaths") != null || scoreboard.getObjective("deaths_two") != null) {
-        scoreboard.getObjective("deaths")?.unregister()
-        scoreboard.getObjective("deaths_two")?.unregister()
-//        }
-
+        val scoreboard = Bukkit.getScoreboardManager().newScoreboard
         scoreboard.registerNewObjective("deaths", Criteria.DEATH_COUNT, MessageUtils.convert("<red>☠"))
+            .displaySlot = DisplaySlot.PLAYER_LIST
         scoreboard.registerNewObjective("deaths_two", Criteria.DEATH_COUNT, MessageUtils.convert("<red>☠"))
+            .displaySlot = DisplaySlot.BELOW_NAME
+        players.forEach { it.scoreboard = scoreboard }
     }
 
-    private fun addVisualisation() {
-        val scoreboardManager = Bukkit.getScoreboardManager()
-        val scoreboard = scoreboardManager.mainScoreboard
-        val deathCount = scoreboard.getObjective("deaths")
-        val deathCountTwo = scoreboard.getObjective("deaths_two")
-
-        if (deathCount == null || deathCountTwo == null) {
-            createTracker()
-            return
-        }
-
-        deathCount.displaySlot = DisplaySlot.PLAYER_LIST
-        deathCountTwo.displaySlot = DisplaySlot.BELOW_NAME
-    }
 }

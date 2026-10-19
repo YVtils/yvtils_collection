@@ -13,7 +13,7 @@
 package yv.tils.yv_smp.logic.start
 
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -29,7 +29,7 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeGlow
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveOutward
 import java.time.Duration
-import org.bukkit.GameMode
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 class BorderPhase : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -52,7 +52,7 @@ class BorderPhase : PhasePlugin {
             durationTicks = 235L,
             angularSpeedPerTick = 0.005,
         )
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             CinematicCamera.stopAll()
         }, 236L)
 
@@ -77,7 +77,7 @@ class BorderPhase : PhasePlugin {
 
         // ── 3. Border wall flying outward — END_ROD stream (t=5) ─────────────
         // Particles travel horizontally away from the island like the border wall
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeFlyOut(
                 players, edges, spawnLoc,
                 particle = Particle.END_ROD,
@@ -89,7 +89,7 @@ class BorderPhase : PhasePlugin {
         }, 5L)
 
         // ── 4. GLOW stream follows the END_ROD wall (t=20) ───────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeFlyOut(
                 players, edges, spawnLoc,
                 particle = Particle.GLOW,
@@ -101,7 +101,7 @@ class BorderPhase : PhasePlugin {
         }, 20L)
 
         // ── 5. ELECTRIC_SPARK stream — sparks trail the border (t=35) ────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeFlyOut(
                 players, edges, spawnLoc,
                 particle = Particle.ELECTRIC_SPARK,
@@ -113,7 +113,7 @@ class BorderPhase : PhasePlugin {
         }, 35L)
 
         // ── 6. Second outward burst snap (t=60) ───────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeBurstOutward(players, edges, spawnLoc, Particle.CRIT, speed = 0.5, count = 5)
             edgeShockwaveOutward(
                 players, edges, spawnLoc,
@@ -122,7 +122,7 @@ class BorderPhase : PhasePlugin {
         }, 60L)
 
         // ── 7. Inward compression — shockwave returns to center (t=90) ────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.GLOW, Particle.END_ROD), waves = 2, waveDelay = 14L, steps = 20
@@ -130,7 +130,7 @@ class BorderPhase : PhasePlugin {
         }, 90L)
 
         // ── 8. Final GLOW_SQUID_INK inward pulse (t=130) ─────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.GLOW_SQUID_INK, Particle.ELECTRIC_SPARK), waves = 2, waveDelay = 12L, steps = 18
@@ -138,7 +138,7 @@ class BorderPhase : PhasePlugin {
         }, 130L)
 
         // ── 9. Central burst (t=40) ───────────────────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             players.forEach { player ->
                 player.spawnParticle(Particle.END_ROD, spawnLoc.clone().add(0.0, 1.0, 0.0), 200, 5.0, 3.0, 5.0, 0.2)
                 player.spawnParticle(

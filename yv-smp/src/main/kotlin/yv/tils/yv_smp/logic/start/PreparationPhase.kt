@@ -13,8 +13,8 @@
 package yv.tils.yv_smp.logic.start
 
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
 import org.bukkit.GameMode
+import org.bukkit.HeightMap
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -29,9 +29,9 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgePillarRise
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
-import java.util.UUID
+import java.util.*
 import kotlin.math.sqrt
-import org.bukkit.HeightMap
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 class PreparationPhase : PhasePlugin {
     companion object {
@@ -92,12 +92,12 @@ class PreparationPhase : PhasePlugin {
         edgePillarRise(players, edges, Particle.END_ROD, riseHeight = 45, count = 2)
 
         // ── 3. Second pillar wave with ELECTRIC_SPARK at t=20 ─────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.ELECTRIC_SPARK, riseHeight = 30, count = 2)
         }, 20L)
 
         // ── 4. Shockwave rings converging inward from the edge (t=10) ─────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.GLOW, Particle.SCRAPE), waves = 4, waveDelay = 18L, steps = 22
@@ -105,7 +105,7 @@ class PreparationPhase : PhasePlugin {
         }, 10L)
 
         // ── 5. Second inward shockwave, tighter, later (t=50) ─────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.END_ROD, Particle.WAX_ON), waves = 3, waveDelay = 15L, steps = 18
@@ -114,7 +114,7 @@ class PreparationPhase : PhasePlugin {
 
         // ── 6. Rain over the island interior scaled to actual island size ──────
         islandRain(players, spawnLoc, Particle.GLOW, areaRadius = islandRadius, duration = 120L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             islandRain(
                 players, spawnLoc, Particle.ELECTRIC_SPARK,
                 areaRadius = islandRadius * 0.65, duration = 80L
@@ -122,7 +122,7 @@ class PreparationPhase : PhasePlugin {
         }, 30L)
 
         // ── 7. Central climactic burst at t=60 ────────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             players.forEach { player ->
                 player.spawnParticle(Particle.EXPLOSION_EMITTER, spawnLoc, 3, 0.5, 0.0, 0.5, 0.0)
                 player.spawnParticle(
@@ -163,7 +163,7 @@ class PreparationPhase : PhasePlugin {
 
             var delay = 0L
             bootTexts.forEachIndexed { index, text ->
-                Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                Bukkit.getScheduler().runTaskLater(Core.instance, {
                     val title = Title.title(
                         MessageUtils.convert(
                             "${colors[index]}${

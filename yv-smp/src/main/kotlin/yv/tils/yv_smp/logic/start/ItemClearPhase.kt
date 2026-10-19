@@ -13,7 +13,7 @@
 package yv.tils.yv_smp.logic.start
 
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Item
@@ -29,7 +29,7 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
 import kotlin.math.sqrt
-import org.bukkit.GameMode
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 class ItemClearPhase : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -52,7 +52,7 @@ class ItemClearPhase : PhasePlugin {
             durationTicks = 175L,
             angularSpeedPerTick = 0.007,
         )
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             CinematicCamera.stopAll()
         }, 176L)
 
@@ -78,22 +78,22 @@ class ItemClearPhase : PhasePlugin {
         )
 
         // ── 2. Flame pillars erupt from every edge block (t=6) ────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.FLAME, riseHeight = 30, count = 2)
         }, 6L)
 
         // ── 3. Smoke follows (t=18) ───────────────────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.CLOUD, riseHeight = 20, count = 2)
         }, 18L)
 
         // ── 4. Campfire signal columns erupt from center outward (t=25) ───────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.CAMPFIRE_SIGNAL_SMOKE, riseHeight = 40, count = 1)
         }, 25L)
 
         // ── 5. Electric shockwave converges inward (t=10) ─────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.ELECTRIC_SPARK, Particle.CLOUD), waves = 4, waveDelay = 12L, steps = 20
@@ -101,7 +101,7 @@ class ItemClearPhase : PhasePlugin {
         }, 10L)
 
         // ── 6. Second tighter shockwave — SCRAPE + SMOKE (t=45) ──────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.SCRAPE, Particle.SMOKE), waves = 3, waveDelay = 10L, steps = 16
@@ -110,12 +110,12 @@ class ItemClearPhase : PhasePlugin {
 
         // ── 7. Interior smoke + dripping lava rain ────────────────────────────
         islandRain(players, spawnLoc, Particle.CLOUD, areaRadius = islandRadius, duration = 160L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             islandRain(players, spawnLoc, Particle.DRIPPING_LAVA, areaRadius = islandRadius * 0.6, duration = 100L)
         }, 20L)
 
         // ── 8. Central detonation burst (t=35) ───────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             players.forEach { player ->
                 player.spawnParticle(
                     Particle.EXPLOSION_EMITTER,

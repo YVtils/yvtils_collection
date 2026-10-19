@@ -12,14 +12,14 @@
 
 package yv.tils.yv_smp.utils
 
-import org.bukkit.Bukkit
 import org.bukkit.Color
+import org.bukkit.HeightMap
+import org.bukkit.Location
 import org.bukkit.Particle
 import org.bukkit.entity.Player
 import yv.tils.utils.modules.Core
 import kotlin.math.sqrt
-import org.bukkit.HeightMap
-import org.bukkit.Location
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 class ParticleEffects {
     companion object {
@@ -100,12 +100,12 @@ class ParticleEffects {
                 }
             }
             val taskHolder = IntArray(1)
-            taskHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, Runnable {
+            taskHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, {
                 positions.forEach { (px, py, pz) ->
                     players.forEach { p -> p.spawnParticle(Particle.DUST, px, py, pz, 1, 0.0, 0.0, 0.0, 0.0, dust) }
                 }
             }, 0L, repeatEvery)
-            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, {
                 Bukkit.getScheduler().cancelTask(taskHolder[0])
             }, displayTicks)
         }
@@ -134,7 +134,7 @@ class ParticleEffects {
             val step = digitShowTicks + digitGapTicks
 
             // ── 3 ──
-            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, {
                 particleGlyph(
                     players, center, '3',
                     color = Color.fromRGB(255, 180, 0),
@@ -144,7 +144,7 @@ class ParticleEffects {
             }, startDelay)
 
             // ── 2 ──
-            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, {
                 particleGlyph(
                     players, center, '2',
                     color = Color.fromRGB(255, 90, 0),
@@ -154,7 +154,7 @@ class ParticleEffects {
             }, startDelay + step)
 
             // ── 1 ──
-            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, {
                 particleGlyph(
                     players, center, '1',
                     color = Color.fromRGB(255, 20, 20),
@@ -165,7 +165,7 @@ class ParticleEffects {
 
             // ── GO — two letters side by side ──
             val goGap = 4.0 * scale   // horizontal gap between G and O
-            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, {
                 particleGlyph(
                     players, center, 'G',
                     color = Color.fromRGB(0, 255, 80),
@@ -211,7 +211,7 @@ class ParticleEffects {
                     }
                 }, 0L, 1L)
 
-                Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                Bukkit.getScheduler().runTaskLater(Core.instance, {
                     Bukkit.getScheduler().cancelTask(taskId)
                 }, duration)
             }
@@ -245,7 +245,7 @@ class ParticleEffects {
                     players.forEach { p -> p.spawnParticle(particleB, loc, 1, 0.0, 0.0, 0.0, 0.0) }
                 }
             }, 0L, repeatInterval)
-            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, {
                 Bukkit.getScheduler().cancelTask(taskHolder[0])
             }, duration)
         }
@@ -264,7 +264,7 @@ class ParticleEffects {
         ) {
             if (edges.isEmpty()) return
             for (h in 0 until riseHeight) {
-                Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                Bukkit.getScheduler().runTaskLater(Core.instance, {
                     edges.forEach { base ->
                         val loc = base.clone().add(0.0, h.toDouble(), 0.0)
                         players.forEach { p -> p.spawnParticle(particle, loc, count, 0.1, 0.05, 0.1, 0.0) }
@@ -295,7 +295,7 @@ class ParticleEffects {
                 val startTick = wave * waveDelay
                 for (step in 0..steps) {
                     val t = step.toDouble() / steps          // 0.0 (edge) → 1.0 (center)
-                    Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                    Bukkit.getScheduler().runTaskLater(Core.instance, {
                         edges.forEach { edge ->
                             // Lerp only X/Z — Y stays at the island surface so the
                             // wave travels horizontally and never dives underground.
@@ -332,7 +332,7 @@ class ParticleEffects {
                 val startTick = wave * waveDelay
                 for (step in 0..steps) {
                     val t = step.toDouble() / steps
-                    Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                    Bukkit.getScheduler().runTaskLater(Core.instance, {
                         edges.forEach { edge ->
                             val dx = edge.x - center.x
                             val dz = edge.z - center.z
@@ -379,7 +379,7 @@ class ParticleEffects {
             for (wave in 0 until waves) {
                 val startTick = wave * waveDelay
                 for (step in 1..travelBlocks) {
-                    Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+                    Bukkit.getScheduler().runTaskLater(Core.instance, {
                         dirs.forEach { (edge, ndx, ndz) ->
                             val x = edge.x + ndx * step
                             val z = edge.z + ndz * step
@@ -431,4 +431,3 @@ class ParticleEffects {
         }
     }
 }
-

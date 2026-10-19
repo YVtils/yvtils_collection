@@ -13,7 +13,7 @@
 package yv.tils.yv_smp.logic.start
 
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
+import org.bukkit.HeightMap
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -30,7 +30,7 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.particleCountdown
 import java.time.Duration
 import kotlin.math.sqrt
-import org.bukkit.HeightMap
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 class FinalPhasePartTwo : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -74,27 +74,27 @@ class FinalPhasePartTwo : PhasePlugin {
         )
 
         // ── 2. Edge pulse reveals (existing, kept) ────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             IslandScanner.edgePulse(spawnLoc, players, Particle.TOTEM_OF_UNDYING, pulseHeight = 40.0)
         }, 8L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             IslandScanner.edgePulse(spawnLoc, players, Particle.WAX_ON, pulseHeight = 50.0)
         }, 20L)
 
         // ── 3. Monumental totem pillars from every edge block ─────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.TOTEM_OF_UNDYING, riseHeight = 60, count = 3)
         }, 5L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.WAX_ON, riseHeight = 45, count = 2)
         }, 20L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.GLOW, riseHeight = 50, count = 2)
         }, 38L)
 
         // ── 4. Expanding outward shockwave crescendo ──────────────────────────
         for (i in 0..10) {
-            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, {
                 edgeShockwaveOutward(
                     players, edges, spawnLoc,
                     Pair(Particle.GLOW, Particle.WAX_ON),
@@ -112,7 +112,7 @@ class FinalPhasePartTwo : PhasePlugin {
         }
 
         // ── 5. Inward convergence — all glory focused to the center (t=30) ────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.TOTEM_OF_UNDYING, Particle.ENCHANT),
@@ -122,12 +122,12 @@ class FinalPhasePartTwo : PhasePlugin {
 
         // ── 6. Interior glory rain ────────────────────────────────────────────
         islandRain(players, spawnLoc, Particle.END_ROD, areaRadius = islandRadius, duration = 260L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             islandRain(players, spawnLoc, Particle.WAX_ON, areaRadius = islandRadius * 0.75, duration = 200L)
         }, 15L)
 
         // ── 7. ULTIMATE central detonation (t=60) ────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             players.forEach { player ->
                 player.spawnParticle(
                     Particle.EXPLOSION_EMITTER,
@@ -209,7 +209,7 @@ class FinalPhasePartTwo : PhasePlugin {
         )
 
         // ── "2" — orange outward burst + rising bell (t=20) ──────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             players.forEach { p ->
                 p.playSound(p.location, Sound.BLOCK_NOTE_BLOCK_BELL, 0.95f, 1.2f)
                 p.playSound(p.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.7f, 1.4f)
@@ -222,7 +222,7 @@ class FinalPhasePartTwo : PhasePlugin {
         }, 20L)
 
         // ── "1" — red inward implosion + sharp bell (t=40) ───────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             players.forEach { p ->
                 p.playSound(p.location, Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.6f)
                 p.playSound(p.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.8f)
@@ -235,7 +235,7 @@ class FinalPhasePartTwo : PhasePlugin {
         }, 40L)
 
         // ── "GO" — green outward explosion + triumphal chord (t=60) ─────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             players.forEach { player ->
                 player.spawnParticle(
                     Particle.EXPLOSION_EMITTER,
@@ -268,13 +268,11 @@ class FinalPhasePartTwo : PhasePlugin {
         }, 60L)
 
         // Stop camera and restore players after the GO burst has landed
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             CinematicCamera.stopAll()
             players.forEach { player ->
                 player.clearActivePotionEffects()
-                players.forEach { other -> if (other != player) player.showPlayer(Core.instance, other) }
-                val restored = PreparationPhase.savedGameModes.remove(player.uniqueId)
-                if (restored != null) player.gameMode = restored
+                Bukkit.restore(player, returnToOrigin = false)
             }
         }, 75L)
     }

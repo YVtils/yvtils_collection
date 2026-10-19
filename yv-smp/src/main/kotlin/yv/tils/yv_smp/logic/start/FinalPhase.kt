@@ -13,7 +13,7 @@
 package yv.tils.yv_smp.logic.start
 
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -28,7 +28,7 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
 import kotlin.math.sqrt
-import org.bukkit.GameMode
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 class FinalPhase : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -78,28 +78,28 @@ class FinalPhase : PhasePlugin {
         )
 
         // ── 2. Flame pillars erupt from every edge block (t=5) ───────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.FLAME, riseHeight = 45, count = 2)
         }, 5L)
 
         // ── 3. Enchanted hit pillars follow (t=30) ────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.ENCHANTED_HIT, riseHeight = 35, count = 2)
         }, 30L)
 
         // ── 4. Crit pillars, tallest wave (t=55) ─────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.CRIT, riseHeight = 55, count = 2)
         }, 55L)
 
         // ── 5. MAGMA pillar wave (t=80) — hellfire fully erupts ───────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.LAVA, riseHeight = 25, count = 3)
         }, 80L)
 
         // ── 6. Accelerating inward shockwaves ────────────────────────────────
         for (i in 0..7) {
-            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, {
                 edgeShockwaveInward(
                     players, edges, spawnLoc,
                     Pair(Particle.ENCHANTED_HIT, Particle.CRIT),
@@ -109,7 +109,7 @@ class FinalPhase : PhasePlugin {
         }
 
         // ── 7. CAMPFIRE_COSY_SMOKE inward — dark suffocation (t=100) ─────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.CAMPFIRE_COSY_SMOKE, Particle.FLAME),
@@ -119,15 +119,15 @@ class FinalPhase : PhasePlugin {
 
         // ── 8. Lava/flame interior rain with dripping layer ───────────────────
         islandRain(players, spawnLoc, Particle.LAVA, areaRadius = islandRadius, duration = 260L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             islandRain(players, spawnLoc, Particle.FLAME, areaRadius = islandRadius * 0.71, duration = 200L)
         }, 20L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             islandRain(players, spawnLoc, Particle.DRIPPING_LAVA, areaRadius = islandRadius * 0.5, duration = 150L)
         }, 40L)
 
         // ── 9. Climactic central burst (t=75) ────────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             players.forEach { player ->
                 player.spawnParticle(
                     Particle.EXPLOSION_EMITTER,

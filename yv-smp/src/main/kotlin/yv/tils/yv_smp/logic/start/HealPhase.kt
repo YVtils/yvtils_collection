@@ -13,7 +13,7 @@
 package yv.tils.yv_smp.logic.start
 
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
@@ -30,7 +30,7 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
 import kotlin.math.sqrt
-import org.bukkit.GameMode
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 class HealPhase : PhasePlugin {
     override fun getPhaseDuration(): Long {
@@ -52,7 +52,7 @@ class HealPhase : PhasePlugin {
             durationTicks = 195L,
             angularSpeedPerTick = 0.005,
         )
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             CinematicCamera.stopAll()
         }, 196L)
 
@@ -83,18 +83,18 @@ class HealPhase : PhasePlugin {
         )
 
         // ── 2. Healing pillars erupt from the edge simultaneously (t=5) ──────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.WAX_ON, riseHeight = 35, count = 2)
         }, 5L)
 
         // ── 3. TOTEM pillars follow, shorter, inner warmth (t=20) ─────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgePillarRise(players, edges, Particle.TOTEM_OF_UNDYING, riseHeight = 25, count = 2)
         }, 20L)
 
         // ── 4. Heal pulse converges inward from the edge (t=15) ───────────────
         // Mimics health flowing in from the shoreline toward the center.
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.WAX_ON, Particle.GLOW), waves = 3, waveDelay = 20L, steps = 24
@@ -102,7 +102,7 @@ class HealPhase : PhasePlugin {
         }, 15L)
 
         // ── 5. Second slower pulse, nectar-themed (t=60) ──────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.FALLING_NECTAR, Particle.GLOW), waves = 2, waveDelay = 25L, steps = 28
@@ -111,12 +111,12 @@ class HealPhase : PhasePlugin {
 
         // ── 6. Nectar rain falls over the whole island interior (t=0 & t=30) ──
         islandRain(players, spawnLoc, Particle.FALLING_NECTAR, areaRadius = islandRadius, duration = 180L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             islandRain(players, spawnLoc, Particle.WAX_ON, areaRadius = islandRadius * 0.65, duration = 120L)
         }, 30L)
 
         // ── 7. Central healing burst (t=50) ───────────────────────────────────
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             players.forEach { player ->
                 player.spawnParticle(
                     Particle.TOTEM_OF_UNDYING,
@@ -140,7 +140,7 @@ class HealPhase : PhasePlugin {
 
         // ── 8. Cherry blossom rain (t=0 & t=40) — lush, organic healing ───────
         islandRain(players, spawnLoc, Particle.CHERRY_LEAVES, areaRadius = islandRadius * 0.8, duration = 195L)
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             edgeShockwaveInward(
                 players, edges, spawnLoc,
                 Pair(Particle.COMPOSTER, Particle.FALLING_NECTAR), waves = 2, waveDelay = 22L, steps = 26

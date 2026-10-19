@@ -12,9 +12,10 @@
 
 package yv.tils.yv_smp.logic.start
 
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import yv.tils.utils.modules.Core
+import yv.tils.yv_smp.logic.start.PhaseHandler.Companion.generation
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 class PhaseHandler {
     companion object {
@@ -68,11 +69,15 @@ class PhaseHandler {
 
             if (currentPhase == Phase.NONE) {
                 isRunning = false
+                Bukkit.finish(aborted = false)
                 return
             }
 
-            actions[currentPhase]?.forEach { action ->
-                action(players)
+            try {
+                actions[currentPhase]?.forEach { action -> action(players) }
+            } catch (error: Exception) {
+                stopPhases()
+                throw error
             }
         }
 
@@ -135,6 +140,7 @@ class PhaseHandler {
             isRunning = false
             generation++
             currentPhase = Phase.NONE
+            Bukkit.finish(aborted = true)
         }
 
         fun resetPhases() {
@@ -195,7 +201,7 @@ interface PhasePlugin {
      */
     fun onPhaseEnd(players: List<Player>) {
         val expectedGeneration = PhaseHandler.currentGeneration
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             PhaseHandler.triggerNextPhase(players, expectedGeneration)
         }, getPhaseDuration())
     }

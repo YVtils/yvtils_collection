@@ -12,6 +12,7 @@
 
 package yv.tils.yv_smp.utils
 
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.*
 import org.bukkit.entity.Player
 import yv.tils.utils.logger.Logger
@@ -20,8 +21,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
-import net.kyori.adventure.text.minimessage.MiniMessage
-import org.bukkit.Color
+import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 /**
  * IslandScanner — detects the shoreline of a floating island by casting rays
@@ -107,7 +107,7 @@ object IslandScanner {
 
         val result = edgeMap.values.toList()
         Logger.info(
-            "IslandScanner: scanned ${angleSteps} rays → ${result.size} unique edge blocks " +
+            "IslandScanner: scanned $angleSteps rays → ${result.size} unique edge blocks " +
                     "(center=${cx},${cz}  islandSurfaceY=${centerSurfaceY}  radius=${scanRadius})"
         )
         cache[key] = result
@@ -164,7 +164,7 @@ object IslandScanner {
             }
         }, 0L, repeatInterval)
 
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             Bukkit.getScheduler().cancelTask(taskHolder[0])
         }, duration)
     }
@@ -187,7 +187,7 @@ object IslandScanner {
         if (edgePoints.isEmpty()) return
 
         for (h in 0 until pulseHeight.toInt()) {
-            Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+            Bukkit.getScheduler().runTaskLater(Core.instance, {
                 edgePoints.forEach { base ->
                     val loc = base.clone().add(0.0, h.toDouble(), 0.0)
                     players.forEach { p -> p.spawnParticle(particle, loc, 2, 0.1, 0.0, 0.1, 0.0) }
@@ -305,7 +305,7 @@ object IslandScanner {
         }, 0L, 2L)
 
         // Cancel both after 30 s
-        Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
+        Bukkit.getScheduler().runTaskLater(Core.instance, {
             Bukkit.getScheduler().cancelTask(paintTask[0])
             Bukkit.getScheduler().cancelTask(outlineTask[0])
             val mm = MiniMessage.miniMessage()
