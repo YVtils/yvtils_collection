@@ -18,9 +18,20 @@ import org.bukkit.event.player.PlayerQuitEvent
 import yv.tils.config.language.LanguageBroadcast
 import yv.tils.server.configs.ConfigFile
 import yv.tils.utils.logger.Logger
+import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import org.bukkit.Bukkit
+import yv.tils.config.language.LanguageHandler
+import yv.tils.utils.message.MessageUtils
+import yv.tils.utils.modules.ConnectionMessages
+import yv.tils.utils.modules.Core
 
 class EventMessages {
     fun onPlayerJoin(e: PlayerJoinEvent) {
+        if (ConnectionMessages.hidden.test(e.player)) {
+            e.joinMessage(null)
+            return
+        }
         val resp = messageHandler("event.player.join", e.player)
 
         if (resp) {
@@ -29,6 +40,10 @@ class EventMessages {
     }
 
     fun onPlayerQuit(e: PlayerQuitEvent) {
+        if (ConnectionMessages.hidden.test(e.player)) {
+            e.quitMessage(null)
+            return
+        }
         val resp = messageHandler("event.player.quit", e.player)
 
         if (resp) {
@@ -45,7 +60,6 @@ class EventMessages {
     }
 
     fun onFakePlayerQuit(player: Player, cause: EventCause) {
-        Logger.info("Broadcasting fake player quit message for ${player.name} with cause: ${cause.title}")
         val resp = messageHandler("event.player.quit", player)
 
         if (resp) {
@@ -58,9 +72,21 @@ class EventMessages {
             return false
         }
 
-        LanguageBroadcast.broadcast(messageKey, mapOf(
-            "player" to player.name,
-        ))
+        val template = LanguageHandler.getRawMessage(messageKey)
+        Bukkit.broadcast(
+            MiniMessage.miniMessage().deserialize(
+                template,
+                Placeholder.component(
+                    "player",
+                    ConnectionMessages.displayName.apply(player)
+                ),
+                Placeholder.unparsed("playerName", player.name),
+                Placeholder.component(
+                    "prefix",
+                    MessageUtils.convert(Core.prefix)
+                )
+            )
+        )
 
         return true
     }

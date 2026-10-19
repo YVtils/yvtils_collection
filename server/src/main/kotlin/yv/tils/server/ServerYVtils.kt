@@ -20,6 +20,9 @@ import yv.tils.server.maintenance.MaintenanceCMD
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
 import yv.tils.utils.logger.Logger
+import java.util.function.BiConsumer
+import yv.tils.server.connect.EventMessages
+import yv.tils.utils.modules.ConnectionMessages
 
 class ServerYVtils : Module.YVtilsModule {
     companion object {
@@ -45,6 +48,11 @@ class ServerYVtils : Module.YVtilsModule {
         registerCoroutines()
         registerPermissions()
         loadConfigs()
+        ConnectionMessages.announcer = BiConsumer { player, joining ->
+            val messages = EventMessages()
+            if (joining) messages.onFakePlayerJoin(player, EventMessages.EventCause.VANISH)
+            else messages.onFakePlayerQuit(player, EventMessages.EventCause.VANISH)
+        }
     }
 
     override fun onLateEnablePlugin() {
@@ -52,7 +60,7 @@ class ServerYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
-
+        ConnectionMessages.announcer = null
     }
 
     private fun registerCommands() {

@@ -14,9 +14,9 @@ package yv.tils.common.permissions
 
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
-import yv.tils.utils.modules.Core
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.modules.Core
 
 class PermissionManager {
     companion object {
@@ -52,7 +52,16 @@ class PermissionManager {
                     }
                 }
 
-                created.values.forEach { pluginManager.addPermission(it) }
+                created.values.forEach { permission ->
+                    val existing = pluginManager.getPermission(permission.name)
+                    if (existing == null) pluginManager.addPermission(permission)
+                    else {
+                        existing.setDescription(permission.description)
+                        existing.setDefault(permission.default)
+                        existing.children.putAll(permission.children)
+                        existing.recalculatePermissibles()
+                    }
+                }
             } catch (e: Exception) {
                 Logger.error("An error occurred while registering permissions: ${e.message}")
             }

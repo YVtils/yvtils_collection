@@ -11,8 +11,6 @@
  */
 package yv.tils.fusion.logic.items
 
-import com.destroystokyo.paper.profile.PlayerProfile
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.data.type.Light
 import org.bukkit.entity.Player
@@ -114,10 +112,7 @@ object BuiltinOutputTypes {
                 base.apply {
                     val meta = itemMeta as SkullMeta
                     val profile = selection.profile ?: error("Select a player first")
-                    // Preserve the public addon API's Bukkit profile parameter; new lookups return Paper profiles.
-                    @Suppress("DEPRECATION")
-                    meta.playerProfile = profile as? PlayerProfile
-                        ?: Bukkit.createProfile(profile.uniqueId, profile.name).apply { setTextures(profile.textures) }
+                    meta.playerProfile = profile
                     itemMeta = meta
                     OutputLore.apply(this, recipe, stats = listOf("Player" to (profile.name ?: "Selected player")))
                 }

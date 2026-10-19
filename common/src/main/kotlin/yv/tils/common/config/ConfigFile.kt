@@ -11,6 +11,11 @@ package yv.tils.common.config
 
 import yv.tils.config.files.ConfigFormat
 import yv.tils.config.files.ObjectMapperFileUtils
+import java.time.ZoneId
+import yv.tils.config.language.LanguageHandler
+import yv.tils.utils.logger.Logger
+import yv.tils.utils.server.ServerUtils
+import yv.tils.utils.time.TimeUtils
 
 class ConfigFile {
     companion object {
@@ -40,8 +45,10 @@ class ConfigFile {
 
     fun loadConfig() {
         state = ObjectMapperFileUtils.load(filePath, RootConfigState(), format = ConfigFormat.YAML)
+        validate(state)
         registerStrings()
         syncDerivedView()
+        applyRuntimeSettings()
     }
 
     fun registerStrings() {
@@ -50,8 +57,24 @@ class ConfigFile {
 
     /** Called by [yv.tils.gui.logic.DataClassConfigGui]'s saver after an in-game edit. */
     fun applyState(newState: RootConfigState) {
+        validate(newState)
+        ObjectMapperFileUtils.save(filePath, newState, format = ConfigFormat.YAML)
         state = newState
         syncDerivedView()
-        registerStrings()
+        applyRuntimeSettings()
+    }
+
+    private fun validate(candidate: RootConfigState) {
+        require(candidate.language.isNotBlank()) { "Default language must not be blank" }
+        if (candidate.timezone != "default") ZoneId.of(candidate.timezone)
+        require(candidate.serverPort == -1 || candidate.serverPort in 1..65535) { "Invalid server port" }
+    }
+
+    private fun applyRuntimeSettings() {
+        LanguageHandler().setServerDefaultLanguage(state.language)
+        Logger.setDebugMode(state.debug.active, state.debug.level)
+        TimeUtils.timeZone = state.timezone
+        ServerUtils.serverIP = state.serverIP
+        ServerUtils.serverPort = state.serverPort
     }
 }

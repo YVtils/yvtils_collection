@@ -140,6 +140,8 @@ class PluginVersion {
 
         try {
             val connection = URI(url).toURL().openConnection() as HttpURLConnection
+            connection.connectTimeout = 10_000
+            connection.readTimeout = 10_000
 
             connection.requestMethod = "GET"
 
