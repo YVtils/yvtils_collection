@@ -26,6 +26,11 @@ data class MultiMineConfigState(
     @ConfigDescription("Documentation URL")
     val documentation: String = "https://docs.yvtils.net/multiMine/config.yml",
 
+    @ConfigDescription("Enable multiMine globally for all players; applies immediately without changing personal toggles")
+    @DefaultValue("true")
+    @BooleanIcon(whenTrue = Material.LIME_DYE, whenFalse = Material.RED_DYE)
+    var enabled: Boolean = true,
+
     @ConfigDescription("Set the default state of multiMine for new players")
     @DefaultValue("true")
     @BooleanIcon(whenTrue = Material.LIME_DYE, whenFalse = Material.RED_DYE)

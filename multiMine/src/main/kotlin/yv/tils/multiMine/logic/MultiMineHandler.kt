@@ -20,6 +20,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import yv.tils.common.language.LangStrings
 import yv.tils.config.language.LanguageHandler
+import yv.tils.multiMine.configs.ConfigFile
 import yv.tils.multiMine.configs.MultiMineConfig
 import yv.tils.multiMine.data.Permissions
 import yv.tils.multiMine.utils.BlockUtils
@@ -34,6 +35,7 @@ import yv.tils.multiMine.utils.ChainedBlockBreak
 @OptIn(ExperimentalAtomicApi::class)
 class MultiMineHandler {
     fun trigger(e: BlockBreakEvent) {
+        if (!ConfigFile.state.enabled) return
         if (ChainedBlockBreak.isChained(e.player.uniqueId)) return
         if ((BlockUtils.runningProcessesMap[e.player.uniqueId]?.load() ?: 0) > 0) return
         val loc = e.block.location

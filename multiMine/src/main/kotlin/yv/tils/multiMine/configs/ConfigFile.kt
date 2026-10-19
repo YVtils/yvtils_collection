@@ -42,6 +42,7 @@ class ConfigFile {
         private fun syncDerivedViews() {
             config.clear()
             config["documentation"] = state.documentation
+            config["enabled"] = state.enabled
             config["defaultState"] = state.defaultState
             config["animationTime"] = state.animationTime
             config["cooldownTime"] = state.cooldownTime

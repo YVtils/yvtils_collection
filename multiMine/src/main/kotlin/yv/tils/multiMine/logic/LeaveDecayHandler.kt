@@ -88,6 +88,7 @@ class LeaveDecayHandler {
         maxZ: Int,
         margin: Int = 5,
     ) {
+        if (!ConfigFile.state.enabled) return
         val decayActive = ConfigFile.config["leaveDecay"] as Boolean
         if (!decayActive) {
             Logger.debug("Leaf decay disabled in config")
@@ -135,6 +136,11 @@ class LeaveDecayHandler {
         val maxIdleScans = 3 // allow a few rescans to let server update leaf distances after log breaks
 
         Bukkit.getScheduler().runTaskTimer(Core.instance, Consumer { task ->
+            if (!ConfigFile.state.enabled) {
+                task.cancel()
+                return@Consumer
+            }
+
             if (queue.isEmpty()) {
                 val added = seedScan()
                 if (added == 0) {

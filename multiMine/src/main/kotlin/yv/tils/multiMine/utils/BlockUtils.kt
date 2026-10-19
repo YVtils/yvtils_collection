@@ -75,6 +75,8 @@ class BlockUtils {
      * @return true if the block was broken
      */
     private fun breakBlock(block: Block, player: Player, item: ItemStack, blockList: List<Material>): Boolean {
+        if (!ConfigFile.state.enabled) return false
+
         // Initialize player's broken count if not exists
         if (!brokenMap.containsKey(player.uniqueId)) {
             brokenMap[player.uniqueId] = AtomicInt(0)

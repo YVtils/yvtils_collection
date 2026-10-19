@@ -4,6 +4,12 @@ Connected-block vein mining/timber, per-player toggles, configurable block/tool
 gates, break limits, cooldowns and accelerated leaf decay. Sneaking opts out;
 normal mining activates only in Survival with the required permission.
 
+Use `/mm settings` to change `enabled`, the server-wide toggle. Changes apply
+immediately and are saved to `plugins/yvtils/multiMine/config.yml` when the GUI
+closes, persisting across restarts. Disabling it stops queued chain breaks and
+accelerated leaf decay while preserving each player's personal toggle. The
+default is `true`, including for existing configurations without this setting.
+
 - `MultiMineYVtils.kt`: dynamic lifecycle.
 - `commands/`, `logic/BlockManage.kt`: `/mm` block/toggle administration.
 - `logic/MultiMineHandler.kt`: initial event eligibility and run counters.
