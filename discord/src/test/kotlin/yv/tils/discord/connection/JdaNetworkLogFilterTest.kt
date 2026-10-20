@@ -19,6 +19,9 @@ import org.apache.logging.log4j.core.LoggerContext
 import org.apache.logging.log4j.core.appender.AbstractAppender
 import org.apache.logging.log4j.core.impl.Log4jLogEvent
 import org.apache.logging.log4j.message.SimpleMessage
+import org.apache.logging.log4j.status.StatusData
+import org.apache.logging.log4j.status.StatusListener
+import org.apache.logging.log4j.status.StatusLogger
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -56,6 +59,46 @@ class JdaNetworkLogFilterTest {
             assertEquals(1, notices.drain().size)
         } finally {
             context.stop()
+        }
+    }
+
+    @Test
+    fun `argument arrays do not produce placeholder warnings in the shared logging context`() {
+        val context = LoggerContext("yvtils-placeholder-arguments")
+        val notices = NetworkNotices()
+        val filter = JdaNetworkLogFilter(notices) { true }
+        val warnings = mutableListOf<String>()
+        val listener = object : StatusListener {
+            override fun getStatusLevel() = Level.WARN
+            override fun log(data: StatusData) {
+                warnings += data.message.formattedMessage
+            }
+            override fun close() {}
+        }
+        val statusLogger = StatusLogger.getLogger()
+        statusLogger.registerListener(listener)
+        context.addFilter(filter)
+        try {
+            // The global filter also sees disabled JDA debug messages and unrelated server logs.
+            context.getLogger(JdaNetworkLogFilter.REQUESTER).isEnabled(
+                Level.DEBUG, null, "Finished Request {} {} with code {}", arrayOf<Any?>("GET", "/gateway", 200)
+            )
+            context.getLogger("net.minecraft.server").isEnabled(
+                Level.INFO, null, "{} issued server command: {}", arrayOf<Any?>("Player", "/ping")
+            )
+            assertEquals(
+                Filter.Result.DENY,
+                filter.filter(
+                    context.getLogger(JdaNetworkLogFilter.REQUESTER), Level.ERROR, null,
+                    "There was an I/O error while executing a REST request: {}{}",
+                    arrayOf<Any?>("No route", " to host")
+                )
+            )
+            assertEquals(1, notices.drain().size)
+            assertTrue(warnings.isEmpty(), "Unexpected Log4j status warnings: $warnings")
+        } finally {
+            context.stop()
+            statusLogger.removeListener(listener)
         }
     }
 

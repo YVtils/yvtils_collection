@@ -18,6 +18,14 @@ import yv.tils.config.language.FileTypes
 class RegisterStrings {
     fun registerStrings() {
         registerNewString(
+            "status.permission.denied",
+            mapOf(
+                FileTypes.EN to "<prefix> <red>You do not have permission to do that!",
+                FileTypes.DE to "<prefix> <red>Du hast keine Berechtigung dafür!",
+            )
+        )
+
+        registerNewString(
             "command.status.set",
             mapOf(
                 FileTypes.EN to "<prefix> <white>New status: <status>",

@@ -14,6 +14,7 @@ package yv.tils.utils
 
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.modules.Module
+import yv.tils.utils.server.VersionUtils
 
 class UtilsYVtils : Module.YVtilsModule {
     companion object {
@@ -29,6 +30,7 @@ class UtilsYVtils : Module.YVtilsModule {
     override fun onLoad() {}
 
     override fun enablePlugin() {
+        VersionUtils().loadServerVersion()
         Module.addModule(MODULE)
     }
 

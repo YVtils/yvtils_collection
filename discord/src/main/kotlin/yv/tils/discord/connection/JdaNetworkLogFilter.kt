@@ -72,6 +72,12 @@ class JdaNetworkLogFilter(
         marker: Marker?,
         msg: String?,
         params: Array<out Any?>?
-    ): Filter.Result =
-        result(logger.name, level, ParameterizedMessage(msg, params).formattedMessage)
+    ): Filter.Result {
+        if (!active || level !in setOf(Level.WARN, Level.ERROR) ||
+            logger.name !in setOf(REQUESTER, SOCKET)
+        ) return Filter.Result.NEUTRAL
+
+        // Select the array constructor explicitly; Kotlin otherwise treats params as one Object argument.
+        return result(logger.name, level, ParameterizedMessage(msg, params, null).formattedMessage)
+    }
 }

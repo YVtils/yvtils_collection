@@ -12,6 +12,8 @@
 
 package yv.tils.status
 
+import yv.tils.common.permissions.PermissionManager
+import yv.tils.status.data.PermissionsData
 import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.status.commands.StatusCommand
 import yv.tils.status.configs.ConfigFile
@@ -48,6 +50,7 @@ class StatusYVtils : Module.YVtilsModule {
 
         Module.addModule(MODULE)
 
+        registerPermissions()
         registerCommands()
         registerListeners()
         registerCoroutines()
@@ -90,8 +93,7 @@ class StatusYVtils : Module.YVtilsModule {
     }
 
     private fun registerPermissions() {
-        Core.instance.server.pluginManager
-
+        PermissionManager.registerPermissions(PermissionsData().getPermissionList(true))
     }
 
     private fun loadConfigs() {

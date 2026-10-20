@@ -33,14 +33,31 @@ import yv.tils.gui.utils.Filler
 import yv.tils.gui.utils.HeadUtils
 import yv.tils.gui.utils.Heads
 import yv.tils.status.utils.StatusUtils
+import yv.tils.status.data.Permissions
 import yv.tils.utils.message.MessageUtils
+import yv.tils.utils.modules.Core
 
 class StatusManager {
     fun manageStatus(
         player: Player,
         target: Player = player,
     ) {
+        if (!canManage(player, target)) return
         buildMenuWindow(player, target).open(player)
+    }
+
+    private fun canManage(player: Player, target: Player, action: Permissions? = null): Boolean {
+        val managePermission = if (player.uniqueId == target.uniqueId)
+            Permissions.COMMAND_STATUS_MANAGE_SELF else Permissions.COMMAND_STATUS_MANAGE_OTHERS
+        val allowed = player.hasPermission(Permissions.COMMAND_STATUS.permission.name) &&
+                player.hasPermission(managePermission.permission.name) &&
+                (action == null || player.hasPermission(action.permission.name)) &&
+                (action != Permissions.COMMAND_STATUS_CLEAR || player.uniqueId == target.uniqueId ||
+                        player.hasPermission(Permissions.COMMAND_STATUS_CLEAR_OTHERS.permission.name))
+        if (!allowed) player.sendMessage(LanguageHandler.getMessage(
+            "status.permission.denied", player, mapOf("prefix" to Core.prefix)
+        ))
+        return allowed
     }
 
     private fun buildMenuWindow(player: Player, target: Player): Window.Builder<*, *> {
@@ -54,7 +71,10 @@ class StatusManager {
                 ItemBuilder(Material.NAME_TAG)
                     .setName(LanguageHandler.getMessage("status.gui.menu.edit", player))
             }
-            .addClickHandler { _, _ -> buildEditorWindow(player, target).open(player) }
+            .addClickHandler { _, _ ->
+                if (canManage(player, target, Permissions.COMMAND_STATUS_SET))
+                    buildEditorWindow(player, target).open(player)
+            }
             .build()
 
         val clearItem = Item.builder()
@@ -63,6 +83,7 @@ class StatusManager {
                     .setName(LanguageHandler.getMessage("status.gui.clear", player))
             }
             .addClickHandler { _, _ ->
+                if (!canManage(player, target, Permissions.COMMAND_STATUS_CLEAR)) return@addClickHandler
                 StatusUtils.setStatusDisplay(target, "")
                 buildMenuWindow(player, target).open(player)
             }
@@ -73,7 +94,10 @@ class StatusManager {
                 ItemBuilder(Material.BOOK)
                     .setName(LanguageHandler.getMessage("status.gui.menu.defaults", player))
             }
-            .addClickHandler { _, _ -> buildDefaultsWindow(player, target, 0).open(player) }
+            .addClickHandler { _, _ ->
+                if (canManage(player, target, Permissions.COMMAND_STATUS_DEFAULT))
+                    buildDefaultsWindow(player, target, 0).open(player)
+            }
             .build()
 
         val gui = Gui.builder()
@@ -143,6 +167,7 @@ class StatusManager {
                 }
             )
             .addClickHandler { _, _ ->
+                if (!canManage(player, target, Permissions.COMMAND_STATUS_SET)) return@addClickHandler
                 StatusUtils.setStatusDisplay(target, input.get())
                 buildMenuWindow(player, target).open(player)
             }
@@ -203,6 +228,7 @@ class StatusManager {
                     )
             }
             .addClickHandler { _, _ ->
+                if (!canManage(player, target, Permissions.COMMAND_STATUS_DEFAULT)) return@addClickHandler
                 StatusUtils.setStatusDisplay(target, status)
                 buildMenuWindow(player, target).open(player)
             }
