@@ -79,7 +79,7 @@ class EventMessages {
                     "player",
                     ConnectionMessages.displayName.apply(player)
                 ),
-                Placeholder.unparsed("playerName", player.name),
+                Placeholder.unparsed("playername", player.name),
                 Placeholder.component(
                     "prefix",
                     MessageUtils.convert(Core.prefix)

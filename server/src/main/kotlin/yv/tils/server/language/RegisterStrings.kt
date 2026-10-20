@@ -19,6 +19,43 @@ import yv.tils.utils.colors.Colors
 class RegisterStrings {
     fun registerStrings() {
         registerNewString(
+            "maintenance.player.join.unallowed",
+            mapOf(
+                FileTypes.EN to "<prefix> <red>The server is currently under maintenance. Please try again later.",
+                FileTypes.DE to "<prefix> <red>Der Server befindet sich derzeit im Wartungsmodus. Bitte versuche es später erneut.",
+            )
+        )
+        registerNewString(
+            "maintenance.state.on",
+            mapOf(FileTypes.EN to "<red>enabled</red>", FileTypes.DE to "<red>aktiviert</red>")
+        )
+        registerNewString(
+            "maintenance.state.off",
+            mapOf(FileTypes.EN to "<green>disabled</green>", FileTypes.DE to "<green>deaktiviert</green>")
+        )
+        registerNewString(
+            "maintenance.announcement.global",
+            mapOf(
+                FileTypes.EN to "<prefix> Maintenance mode is now <state>.",
+                FileTypes.DE to "<prefix> Der Wartungsmodus ist jetzt <state>.",
+            )
+        )
+        registerNewString(
+            "maintenance.announcement.sender.changed",
+            mapOf(
+                FileTypes.EN to "<prefix> Maintenance mode has been <state>.",
+                FileTypes.DE to "<prefix> Der Wartungsmodus wurde <state>.",
+            )
+        )
+        registerNewString(
+            "maintenance.announcement.sender.already",
+            mapOf(
+                FileTypes.EN to "<prefix> Maintenance mode is already <state>.",
+                FileTypes.DE to "<prefix> Der Wartungsmodus ist bereits <state>.",
+            )
+        )
+
+        registerNewString(
             "event.player.join",
             mapOf(
                 FileTypes.EN to "<${Colors.GREEN.color}>» <white><player>",

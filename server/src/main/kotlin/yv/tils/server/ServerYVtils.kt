@@ -17,6 +17,9 @@ import yv.tils.server.configs.ManageGUI
 import yv.tils.server.language.RegisterStrings
 import yv.tils.server.listeners.*
 import yv.tils.server.maintenance.MaintenanceCMD
+import yv.tils.server.maintenance.MaintenanceHandler
+import org.bukkit.permissions.Permission
+import org.bukkit.permissions.PermissionDefault
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
 import yv.tils.utils.logger.Logger
@@ -43,11 +46,11 @@ class ServerYVtils : Module.YVtilsModule {
     override fun enablePlugin() {
         Module.addModule(MODULE)
 
+        registerPermissions()
+        loadConfigs()
         registerCommands()
         registerListeners()
         registerCoroutines()
-        registerPermissions()
-        loadConfigs()
         ConnectionMessages.announcer = BiConsumer { player, joining ->
             val messages = EventMessages()
             if (joining) messages.onFakePlayerJoin(player, EventMessages.EventCause.VANISH)
@@ -61,6 +64,7 @@ class ServerYVtils : Module.YVtilsModule {
 
     override fun disablePlugin() {
         ConnectionMessages.announcer = null
+        MaintenanceHandler.applyState(false, announce = false)
     }
 
     private fun registerCommands() {
@@ -82,8 +86,12 @@ class ServerYVtils : Module.YVtilsModule {
     }
 
     private fun registerPermissions() {
-        Core.instance.server.pluginManager
-
+        val manager = Core.instance.server.pluginManager
+        for (name in listOf("yvtils.command.maintenance", MaintenanceHandler.BYPASS_PERMISSION)) {
+            if (manager.getPermission(name) == null) {
+                manager.addPermission(Permission(name, PermissionDefault.OP))
+            }
+        }
     }
 
     private fun loadConfigs() {

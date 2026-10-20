@@ -15,8 +15,7 @@ import yv.tils.config.data.annotations.NotGuiEditable
 /**
  * server's `config.yml`, as a plain (nested) `data class` persisted via
  * `ObjectMapperFileUtils` - replaces the old `ConfigEntry`-list-built-by-hand version of this
- * file. No GUI is wired up yet - the `@ConfigDescription` annotations are already in place so
- * one can be added later with zero further changes to this file.
+ * file. The shared data-class configuration GUI uses the `@ConfigDescription` annotations.
  */
 data class ServerConfigState(
     @NotGuiEditable

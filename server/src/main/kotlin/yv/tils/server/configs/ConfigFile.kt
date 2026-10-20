@@ -12,6 +12,7 @@ package yv.tils.server.configs
 import yv.tils.config.files.ConfigFormat
 import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.utils.logger.Logger
+import yv.tils.server.maintenance.MaintenanceHandler
 
 class ConfigFile {
     companion object {
@@ -20,7 +21,7 @@ class ConfigFile {
 
         /**
          * Flattened `"a.b.c" -> value` view derived from [state], re-synced on every
-         * [loadConfig]/[registerStrings] call - kept around purely so the module's existing
+         * [loadConfig]/[applyState] call - kept around purely so the module's existing
          * `ConfigFile.get("motd.enabled")`-style call sites keep working unchanged on top of
          * the new nested data class.
          */
@@ -46,6 +47,7 @@ class ConfigFile {
 
             syncDerivedView()
             ConfigFile().registerStrings()
+            MaintenanceHandler.applyState(state.maintenance.enabled)
         }
 
         private fun syncDerivedView() {
@@ -60,6 +62,7 @@ class ConfigFile {
         state = ObjectMapperFileUtils.load(filePath, ServerConfigState(), format = ConfigFormat.YAML)
         registerStrings()
         syncDerivedView()
+        MaintenanceHandler().loadState()
     }
 
     fun registerStrings() {
@@ -71,5 +74,6 @@ class ConfigFile {
         state = newState
         syncDerivedView()
         registerStrings()
+        MaintenanceHandler.applyState(state.maintenance.enabled)
     }
 }

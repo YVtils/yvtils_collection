@@ -11,6 +11,12 @@
  */
 
 dependencies {
+    testImplementation(project(":config"))
+    testImplementation(project(":utils"))
+    testImplementation("io.papermc.paper:paper-api:26.1.2.build.74-stable")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     compileOnly(project(":config"))
     compileOnly(project(":utils"))
     // Compile-time only, to reference GUI types - NOT shaded into this module's own
@@ -20,3 +26,5 @@ dependencies {
     // DynamicModuleRegistry.GUI_ARTIFACTS for the full explanation).
     compileOnly(project(":gui-26.1"))
 }
+
+tasks.test { useJUnitPlatform() }

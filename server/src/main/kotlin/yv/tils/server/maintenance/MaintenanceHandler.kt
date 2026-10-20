@@ -23,100 +23,67 @@ import yv.tils.utils.server.ServerUtils
 
 class MaintenanceHandler {
     companion object {
-        var maintenance: Boolean = false
-    }
+        const val BYPASS_PERMISSION = "yvtils.bypass.maintenance"
 
-    private var oldState: Boolean = false
+        var maintenance: Boolean = false
+            private set
+
+        /** Synchronizes shared state before enforcing a configuration change. */
+        fun applyState(enabled: Boolean, announce: Boolean = true) {
+            val changed = maintenance != enabled
+            maintenance = enabled
+            ServerUtils.serverInMaintenance = enabled
+
+            if (!announce || !changed) return
+
+            if (enabled) {
+                PlayerUtils.onlinePlayersAsPlayers(BYPASS_PERMISSION, false).forEach { player ->
+                    player.kick(
+                        LanguageHandler.getMessage(
+                            "maintenance.player.join.unallowed",
+                            player,
+                            mapOf("prefix" to Core.prefix)
+                        )
+                    )
+                }
+            }
+
+            LanguageBroadcast.broadcast(
+                "maintenance.announcement.global",
+                BYPASS_PERMISSION,
+                mapOf(
+                    "prefix" to Core.prefix,
+                    "state" to LanguageHandler.getRawMessage(if (enabled) "maintenance.state.on" else "maintenance.state.off"),
+                )
+            )
+        }
+    }
 
     fun maintenance(sender: CommandSender, args: CommandArguments? = null) {
-        val state = if (args?.get(0) == null) {
-            "toggle"
-        } else {
-            args[0].toString()
+        val enabled = when (args?.get("state")?.toString() ?: "toggle") {
+            "toggle" -> !maintenance
+            "true" -> true
+            "false" -> false
+            else -> return
         }
-
-        when (state) {
-            "toggle" -> {
-                oldState = maintenance
-                maintenance = !maintenance
-            }
-
-            "true" -> {
-                oldState = maintenance
-                maintenance = true
-            }
-
-            "false" -> {
-                oldState = maintenance
-                maintenance = false
-            }
-        }
-
-        globalAnnouncement()
-        senderAnnouncement(sender)
-        saveState()
-    }
-
-    private fun globalAnnouncement() {
-        if (oldState == maintenance) {
-            return
-        }
-
-        PlayerUtils.onlinePlayersAsPlayers("yvtils.bypass.maintenance", false).forEach { player ->
-            player.kick(
-                LanguageHandler.getMessage(
-                    "maintenance.player.join.unallowed",
-                    player.uniqueId,
-                    mapOf(
-                        "prefix" to Core.prefix,
-                    )
-                )
-            )
-        }
-
-        LanguageBroadcast.broadcast(
-            "maintenance.announcement.global",
-            "yvtils.bypass.maintenance",
-            mapOf(
-                "prefix" to Core.prefix,
-                "state" to if (maintenance) LanguageHandler.getMessage("maintenance.state.on") else LanguageHandler.getMessage("maintenance.state.off"),
-            )
-        )
-    }
-
-    private fun senderAnnouncement(sender: CommandSender) {
-        if (oldState == maintenance) {
-            sender.sendMessage(
-                LanguageHandler.getMessage(
-                    "maintenance.announcement.sender.already",
-                    sender,
-                    mapOf(
-                        "prefix" to Core.prefix,
-                        "state" to if (maintenance) LanguageHandler.getMessage("maintenance.state.on") else LanguageHandler.getMessage("maintenance.state.off"),
-                    )
-                )
-            )
-            return
-        }
+        val changed = maintenance != enabled
+        ConfigFile.set("maintenance.enabled", enabled)
 
         sender.sendMessage(
             LanguageHandler.getMessage(
-                "maintenance.announcement.sender.changed",
+                if (changed) "maintenance.announcement.sender.changed" else "maintenance.announcement.sender.already",
                 sender,
                 mapOf(
                     "prefix" to Core.prefix,
-                    "state" to if (maintenance) LanguageHandler.getMessage("maintenance.state.on") else LanguageHandler.getMessage("maintenance.state.off"),
+                    "state" to LanguageHandler.getRawMessage(
+                        if (enabled) "maintenance.state.on" else "maintenance.state.off", sender
+                    ),
                 )
             )
         )
     }
 
-    private fun saveState() {
-        ConfigFile.set("maintenance.enabled", maintenance)
-        ServerUtils.serverInMaintenance = maintenance
-    }
-
     fun loadState() {
-        maintenance = ConfigFile.get("maintenance.enabled") as Boolean
+        applyState(ConfigFile.state.maintenance.enabled, announce = false)
     }
 }
