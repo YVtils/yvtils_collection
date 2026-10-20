@@ -18,9 +18,7 @@ import yv.tils.config.data.annotations.NotGuiEditable
  * this file. Nesting here mirrors the dotted keys the old version used
  * (`"botSettings.onlineStatus"` etc.) as real nested objects instead of dot-path strings.
  *
- * No GUI is wired up for this module yet (see `DataClassConfigGui`/multiMine's `ManageGUI`
- * for the reference implementation) - the `@ConfigDescription` annotations are already in
- * place so one can be added later with zero further changes to this file.
+ * The in-game editor uses a detached copy and commits only after authorization and persistence.
  */
 data class DiscordConfigState(
     @NotGuiEditable
@@ -39,6 +37,34 @@ data class DiscordConfigState(
     var commands: Commands = Commands(),
     var syncFeature: SyncFeature = SyncFeature(),
 ) {
+    fun detachedCopy(): DiscordConfigState = copy(
+        botSettings = botSettings.copy(),
+        general = general.copy(settings = general.settings.copy()),
+        whitelistFeature = whitelistFeature.copy(settings = whitelistFeature.settings.copy()),
+        commands = commands.copy(
+            serverInfoCommand = commands.serverInfoCommand.copy(),
+            whitelistCommand = commands.whitelistCommand.copy(),
+        ),
+        syncFeature = syncFeature.copy(
+            chatSync = syncFeature.chatSync.copy(
+                embedIcon = syncFeature.chatSync.embedIcon.copy(),
+                settings = syncFeature.chatSync.settings.copy(),
+            ),
+            consoleSync = syncFeature.consoleSync.copy(settings = syncFeature.consoleSync.settings.copy()),
+            serverStats = syncFeature.serverStats.copy(
+                settings = syncFeature.serverStats.settings.copy(),
+                design = syncFeature.serverStats.design.let { design ->
+                    design.copy(
+                        status = design.status.copy(emoji = design.status.emoji.copy()),
+                        version = design.version.copy(),
+                        players = design.players.copy(),
+                        lastRefresh = design.lastRefresh.copy(),
+                    )
+                },
+            ),
+        ),
+    )
+
     data class BotSettings(
         @ConfigDescription("Bot online status")
         var onlineStatus: String = "online",

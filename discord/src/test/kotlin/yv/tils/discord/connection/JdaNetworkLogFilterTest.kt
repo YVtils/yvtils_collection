@@ -1,10 +1,21 @@
+/*
+ * Part of the YVtils Project.
+ * Copyright (c) 2026 Lyvric / YVtils
+ *
+ * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
+ * with additional YVtils License Terms.
+ * License information: https://yvtils.net/license
+ *
+ * Use of the YVtils name, logo, or brand assets is subject to
+ * the YVtils Brand Protection Clause.
+ */
+
 package yv.tils.discord.connection
 
 import org.apache.logging.log4j.Level
-import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.Filter
-import org.apache.logging.log4j.core.LoggerContext
 import org.apache.logging.log4j.core.LogEvent
+import org.apache.logging.log4j.core.LoggerContext
 import org.apache.logging.log4j.core.appender.AbstractAppender
 import org.apache.logging.log4j.core.impl.Log4jLogEvent
 import org.apache.logging.log4j.message.SimpleMessage
@@ -15,6 +26,38 @@ class JdaNetworkLogFilterTest {
     private val route = "There was an I/O error while executing a REST request: No route to host"
     private fun event(logger: String, message: String) = Log4jLogEvent.newBuilder()
         .setLoggerName(logger).setLevel(Level.ERROR).setMessage(SimpleMessage(message)).build()
+
+    @Test
+    fun `Log4j accepts null argument arrays from SLF4J and component loggers`() {
+        val context = LoggerContext("yvtils-null-arguments")
+        val notices = NetworkNotices()
+        val filter = JdaNetworkLogFilter(notices) { true }
+        context.addFilter(filter)
+        try {
+            val unrelated = context.getLogger("another.plugin")
+            assertEquals(
+                Filter.Result.NEUTRAL,
+                filter.filter(unrelated, Level.INFO, null, "hello", null as Array<Any?>?)
+            )
+            assertDoesNotThrow {
+                unrelated.isEnabled(Level.ERROR, null, "startup failed", null as Array<Any?>?)
+                unrelated.isEnabled(Level.INFO, null, "server ready", null as Array<Any?>?)
+            }
+            assertEquals(
+                Filter.Result.DENY,
+                filter.filter(
+                    context.getLogger(JdaNetworkLogFilter.REQUESTER),
+                    Level.ERROR,
+                    null,
+                    route,
+                    null as Array<Any?>?
+                )
+            )
+            assertEquals(1, notices.drain().size)
+        } finally {
+            context.stop()
+        }
+    }
 
     @Test
     fun `only known transport diagnostics are replaced`() {

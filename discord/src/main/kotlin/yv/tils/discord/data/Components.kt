@@ -20,11 +20,11 @@ import net.dv8tion.jda.api.components.textdisplay.TextDisplay
 import net.dv8tion.jda.api.components.thumbnail.Thumbnail
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.utils.FileUpload
-import yv.tils.config.language.LanguageHandler
-import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.whitelist.WhitelistLogic
 import yv.tils.utils.colors.ColorUtils
 import yv.tils.utils.colors.Colors
+import yv.tils.utils.modules.ConnectionMessages
+import yv.tils.utils.modules.Core
 import yv.tils.utils.player.PlayerUtils
 import yv.tils.utils.server.ServerUtils
 import yv.tils.utils.server.VersionUtils
@@ -69,7 +69,7 @@ class Components {
         if (serverIP.isEmpty()) {
             serverIP = ""
         } else {
-            if (serverPort != - 1 && serverPort != 25565) {
+            if (serverPort != -1 && serverPort != 25565) {
                 serverIP += ":$serverPort"
             }
         }
@@ -111,7 +111,15 @@ class Components {
                 TextDisplay.of("## Server Information"),
                 TextDisplay.of("**Version:** $version"),
                 TextDisplay.of("**IP:** $serverIP"),
-                TextDisplay.of("**Players:** ${PlayerUtils.onlinePlayersAsCount} / ${PlayerUtils.maxOnlinePlayers}"),
+                TextDisplay.of(
+                    "**Players:** ${
+                        Core.instance.server.onlinePlayers.count {
+                            !ConnectionMessages.hidden.test(
+                                it
+                            )
+                        }
+                    } / ${PlayerUtils.maxOnlinePlayers}"
+                ),
                 TextDisplay.of("**Difficulty:** ${ServerUtils.difficulty}"),
             )
         )
@@ -134,20 +142,5 @@ class Components {
         ).withAccentColor(infoColor)
 
         return container
-    }
-
-    fun actionCancelledComponent(action: String): Container {
-        val title = LanguageHandler.getRawMessage(RegisterStrings.LangStrings.COMPONENT_ACTION_CANCELLED_TITLE.key)
-        val description = LanguageHandler.getRawMessage(
-            RegisterStrings.LangStrings.COMPONENT_ACTION_CANCELLED_DESCRIPTION.key,
-            params = mapOf("action" to action)
-        )
-
-        val children: MutableList<ContainerChildComponent?> = ArrayList()
-        children.add(TextDisplay.of("# $title"))
-        children.add(TextDisplay.of(description))
-        children.add(footerComponent())
-
-        return Container.of(children).withAccentColor(errorColor)
     }
 }

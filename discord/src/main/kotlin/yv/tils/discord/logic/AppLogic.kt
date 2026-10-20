@@ -12,22 +12,24 @@
 
 package yv.tils.discord.logic
 
+import kotlinx.coroutines.*
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.MemberCachePolicy
+import okhttp3.OkHttpClient
 import org.apache.logging.log4j.LogManager
-import yv.tils.config.language.LanguageHandler
+import org.bukkit.scheduler.BukkitTask
 import yv.tils.discord.DiscordYVtils
 import yv.tils.discord.actions.buttons.JDAButtonsListener
 import yv.tils.discord.actions.commands.JDACommandsListener
 import yv.tils.discord.actions.commands.JDACommandsRegister
+import yv.tils.discord.actions.modals.JDARegistration
 import yv.tils.discord.actions.select.JDASelectListener
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.connection.DiscordConnectionLogging
-import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager
 import yv.tils.discord.logic.sync.serverChats.SyncChats
 import yv.tils.discord.logic.sync.serverConsole.GetConsole
@@ -36,27 +38,26 @@ import yv.tils.discord.logic.sync.serverStats.CollectStats
 import yv.tils.discord.logic.whitelist.WhitelistManage
 import yv.tils.discord.utils.emoji.DiscordEmoji
 import yv.tils.discord.utils.emoji.RegistrationEmoji
-import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import java.time.Duration
 import org.apache.logging.log4j.core.Logger as Logger4J
-import org.bukkit.scheduler.BukkitTask
-import yv.tils.discord.actions.modals.JDARegistration
 
 class AppLogic {
     companion object {
         lateinit var instance: AppLogic
         lateinit var jda: JDA
         lateinit var builder: JDABuilder
+
         @Volatile
         var started = false
+
         @Volatile
         private var stopping = false
         private var connectionTask: BukkitTask? = null
-        private fun shutdownPendingConnection() {
-            if (::jda.isInitialized) jda.shutdownNow()
-        }
+        private var consoleAppender: GetConsole? = null
+        fun clearConsoleHistory() = consoleAppender?.clearHistory()
+        private fun hasJDA() = ::jda.isInitialized
 
         lateinit var appID: String
 
@@ -78,57 +79,73 @@ class AppLogic {
     private val status = ConfigFile.getValueAsString("botSettings.onlineStatus") ?: "online"
     private val activity = ConfigFile.getValueAsString("botSettings.activity") ?: "none"
     private val activityMessage = ConfigFile.getValueAsString("botSettings.activityMessage") ?: "Minecraft"
+    private val featureScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var httpClient: OkHttpClient? = null
 
     fun startApp() {
+        instance = this
         stopping = false
-        DiscordConnectionLogging.start()
-        if (checkToken()) {
-            instance = this
-            appearance()
-            intents()
-            eventListeners()
-            buildJDA()
-        } else {
-            DiscordYVtils().unregisterModule()
+        try {
+            DiscordConnectionLogging.start()
+            if (checkToken()) {
+                appearance()
+                intents()
+                eventListeners()
+                buildJDA()
+            } else {
+                stopApp()
+                DiscordYVtils().unregisterModule()
+            }
+        } catch (error: Exception) {
+            stopApp()
+            throw error
         }
     }
 
     fun stopApp() {
         stopping = true
         DiscordConnectionLogging.stopping()
-        connectionTask?.cancel()
-        connectionTask = null
-        if (!started) shutdownPendingConnection()
-        if (started) {
-            Logger.info(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_STOP_SHUTDOWN.key))
-
-            try {
-                runCatching { CollectStats().serverShutdown() }
-                    .onFailure { Logger.warn("Could not publish Discord shutdown statistics: ${it.message}") }
-                GetConsole.active = false
-                runCatching { GetConsole().stop() }
-                builder.setStatus(OnlineStatus.OFFLINE)
+        val wasStarted = started
+        started = false
+        try {
+            connectionTask?.cancel()
+            connectionTask = null
+            featureScope.cancel()
+            GetConsole.active = false
+            consoleAppender?.let { appender ->
+                (LogManager.getRootLogger() as? Logger4J)?.removeAppender(appender)
+                appender.stop()
+            }
+            consoleAppender = null
+            CollectStats().stop()
+            if (hasJDA()) {
+                if (wasStarted) {
+                    runCatching { CollectStats().serverShutdown() }
+                        .onFailure { Logger.warn("Could not publish Discord shutdown statistics: ${it.message}") }
+                }
                 jda.shutdown()
-
                 if (!jda.awaitShutdown(Duration.ofSeconds(10))) {
                     jda.shutdownNow()
                     jda.awaitShutdown(Duration.ofSeconds(2))
                 }
-            } catch (e: Exception) {
-                jda.shutdownNow()
-                Logger.error(
-                    LanguageHandler.getMessage(
-                        RegisterStrings.LangStrings.BOT_STOP_FAILED.key,
-                        mapOf<String, Any>(
-                            "error" to (e.message ?: "Unknown error occurred")
-                        )
-                    )
-                )
             }
-            Logger.info(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_STOP_SUCCESS.key))
-            started = false
-        } else {
-            Logger.warn(LanguageHandler.getMessage(RegisterStrings.LangStrings.BOT_STOP_NOT_RUNNING.key))
+        } catch (error: Exception) {
+            if (hasJDA()) {
+                jda.shutdownNow()
+                runCatching { jda.awaitShutdown(Duration.ofSeconds(2)) }
+            }
+            if (error is InterruptedException) Thread.currentThread().interrupt()
+            Logger.error("Failed to stop Discord app", error)
+        } finally {
+            // JDA does not own the OkHttp dispatcher/pool lifecycle. Close ours before
+            // Paper closes the library classloader, including failed/pending logins.
+            httpClient?.let { client ->
+                client.dispatcher.cancelAll()
+                client.connectionPool.evictAll()
+                client.dispatcher.executorService.shutdownNow()
+            }
+            httpClient = null
+            DiscordConnectionLogging.close()
         }
     }
 
@@ -154,13 +171,15 @@ class AppLogic {
             return false
         }
         builder = JDABuilder.createDefault(appToken)
+        httpClient = OkHttpClient.Builder().build()
+        builder.setHttpClient(httpClient!!)
         return true
     }
 
     private fun appearance() {
         try {
             builder.setStatus(OnlineStatus.fromKey(status))
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             Logger.warn("Invalid online status: $status. Defaulting to 'online'.")
             builder.setStatus(OnlineStatus.ONLINE)
         }
@@ -200,45 +219,50 @@ class AppLogic {
                                     JDACommandsRegister().registerCommands()
                                     Logger.info("Discord connection ready.")
                                 } catch (error: Exception) {
+                                    stopApp()
                                     Logger.error("Discord feature initialization failed", error)
-                                    started = false
-                                    jda.shutdownNow()
                                 }
                             })
                     } catch (error: Exception) {
-                        if (!stopping) Logger.error("Discord connection failed: ${error.message}")
-                        jda.shutdownNow()
+                        val report = !stopping
+                        if (report) stopApp()
+                        if (report) Logger.error("Discord connection failed", error)
                     }
                 })
         } catch (e: Exception) {
-            Logger.error("Failed to start Discord app: ${e.message}")
-            started = false
-
+            stopApp()
+            Logger.error("Failed to start Discord app", e)
             DiscordYVtils().unregisterModule()
         }
     }
 
     private fun launchFeatures() {
         RegistrationEmoji.initialize()
-        CoroutineHandler.launchTask(task = {
+        featureScope.launch {
             if (!stopping) try {
-                DiscordEmoji().setPersistentEmojis()
-                DiscordEmoji().loadPersistentEmojis()
+                runInterruptible {
+                    DiscordEmoji().setPersistentEmojis()
+                    DiscordEmoji().loadPersistentEmojis()
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (e: Exception) {
                 Logger.error("Failed to initialize Discord emojis: ${e.message}")
             }
-        }, isOnce = true)
+        }
 
         ServerChatsSyncManager().loadChannelFromID()
 
         CollectStats().collect()
 
-        val appender = GetConsole()
-        runCatching {
+        if (ConfigFile.getValueAsBoolean("syncFeature.consoleSync.enabled") == true) {
+            val appender = GetConsole()
+            consoleAppender = appender
+            GetConsole.active = true
+            appender.start()
             val logger = LogManager.getRootLogger() as Logger4J
             logger.addAppender(appender)
+            appender.syncTask()
         }
-
-        appender.syncTask()
     }
 }

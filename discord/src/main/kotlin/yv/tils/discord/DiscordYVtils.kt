@@ -12,7 +12,6 @@
 
 package yv.tils.discord
 
-import dev.jorel.commandapi.CommandAPI
 import yv.tils.common.permissions.PermissionManager
 import yv.tils.config.language.LanguageHandler
 import yv.tils.discord.commands.DiscordAccountsCommand
@@ -20,6 +19,7 @@ import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.configs.ManageGUI
 import yv.tils.discord.configs.SaveFile
 import yv.tils.discord.configs.StatsSyncSaveFile
+import yv.tils.discord.connection.DiscordConnectionLogging
 import yv.tils.discord.data.PermissionsData
 import yv.tils.discord.language.RegisterStrings
 import yv.tils.discord.listener.*
@@ -27,9 +27,10 @@ import yv.tils.discord.logic.AppLogic
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
-import yv.tils.discord.connection.DiscordConnectionLogging
 
 class DiscordYVtils : Module.YVtilsModule {
+    private var app: AppLogic? = null
+
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "discord",
@@ -54,7 +55,8 @@ class DiscordYVtils : Module.YVtilsModule {
         loadConfigs()
         DiscordAccountsCommand()
 
-        AppLogic().startApp()
+        app = AppLogic()
+        app!!.startApp()
     }
 
     override fun onLateEnablePlugin() {
@@ -65,10 +67,10 @@ class DiscordYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
-        CommandAPI.unregister("discordaccounts")
         try {
-            AppLogic().stopApp()
+            app?.stopApp()
         } finally {
+            app = null
             DiscordConnectionLogging.close()
             unregisterModule()
         }

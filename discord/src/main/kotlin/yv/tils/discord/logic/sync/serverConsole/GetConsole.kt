@@ -1,166 +1,89 @@
-/*
- * Part of the YVtils Project.
- * Copyright (c) 2026 Lyvric / YVtils
- *
- * Licensed under the Mozilla Public License 2.0 (MPL-2.0)
- * with additional YVtils License Terms.
- * License information: https://yvtils.net/license
- *
- * Use of the YVtils name, logo, or brand assets is subject to
- * the YVtils Brand Protection Clause.
- */
-
 package yv.tils.discord.logic.sync.serverConsole
 
+import net.dv8tion.jda.api.exceptions.ErrorResponseException
+import net.dv8tion.jda.api.requests.ErrorResponse
 import org.apache.logging.log4j.core.LogEvent
 import org.apache.logging.log4j.core.appender.AbstractAppender
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.discord.connection.DiscordConnectionLogging
 import yv.tils.discord.logic.AppLogic.Companion.getJDA
-import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
 import java.text.SimpleDateFormat
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class GetConsole : AbstractAppender("YVtilsLogger", null, null, true, null) {
     companion object {
-        var active = ConfigFile.getValueAsBoolean("syncFeature.consoleSync.enabled") ?: true
-        val channelID = ConfigFile.getValueAsString("syncFeature.consoleSync.channel") ?: ""
-        private const val MAX_MESSAGE_LENGTH = 1900
-        private const val MARKDOWN_OVERHEAD = 8
-        private var currentMessageContent = StringBuilder()
-        private var lastMessageID: String? = null
-
-        private val messageQueue = ConcurrentLinkedQueue<String>()
-        private val isProcessing = AtomicBoolean(false)
         @Volatile
-        private var retryAfter = 0L
-
-        private var lastProcessedTime = System.currentTimeMillis()
-
-        private var lastSentIndex = 0  // Track how much of the buffer we've already sent
-        private val messageIDs = mutableListOf<String>()  // Added missing messageIDs list
+        var active = false
+        val channelID get() = ConfigFile.getValueAsString("syncFeature.consoleSync.channel") ?: ""
     }
 
-    init {
-        start()
+    private val buffer = ConsoleBuffer()
+    private val worker = Executors.newSingleThreadScheduledExecutor { task ->
+        Thread(task, "yvtils-discord-console").apply { isDaemon = true }
     }
+    private var retryAfter = 0L
 
     private fun processMessageQueue() {
-        if (System.nanoTime() < retryAfter) return
-        if (!isProcessing.compareAndSet(false, true)) return
-
-        if (messageQueue.isEmpty()) {
-            isProcessing.set(false)
-            return
-        }
-
+        if (!active || !isStarted || System.nanoTime() < retryAfter) return
         try {
-            while (messageQueue.isNotEmpty()) {
-                val message = messageQueue.poll() ?: break
-
-                // Check if adding this message would exceed the limit
-                if (currentMessageContent.length + message.length >= MAX_MESSAGE_LENGTH - MARKDOWN_OVERHEAD) {
-                    // Send current content and start new message
-                    if (currentMessageContent.isNotEmpty()) {
-                        sendFormattedMessage(currentMessageContent.toString())
-                        currentMessageContent.clear()
-                        lastMessageID = null
+            val channel = getJDA().getTextChannelById(channelID) ?: return
+            while (active && isStarted) {
+                val batch = buffer.next() ?: return
+                try {
+                val formatted = "```ansi\n${batch.content}```"
+                val message = if (batch.messageId == null) {
+                    channel.sendMessage(formatted).complete()
+                } else {
+                    try {
+                        channel.editMessageById(batch.messageId, formatted).complete()
+                    } catch (error: ErrorResponseException) {
+                        // Only a deleted message warrants replacement; never replay uncertain sends.
+                        if (error.errorResponse != ErrorResponse.UNKNOWN_MESSAGE) throw error
+                        channel.sendMessage(formatted).complete()
                     }
                 }
-
-                currentMessageContent.append(message)
-            }
-
-            // Send any remaining content
-            if (currentMessageContent.isNotEmpty()) {
-                sendFormattedMessage(currentMessageContent.toString())
-            }
-        } finally {
-            isProcessing.set(false)
-        }
-    }
-
-    private fun sendFormattedMessage(content: String) {
-        if (System.nanoTime() < retryAfter) return
-        try {
-            if (content.isEmpty()) return
-
-            val formattedContent = "```ansi\n$content```"
-            if (formattedContent.length > 2000) return
-
-            val channel = getJDA().getTextChannelById(channelID) ?: return
-
-            try {
-                if (lastMessageID == null) {
-                    // Create new message
-                    val message = channel.sendMessage(formattedContent).complete()
-                    lastMessageID = message.id
-                    messageIDs.add(lastMessageID!!)
-                } else {
-                    // Try to edit existing message
-                    channel.editMessageById(lastMessageID!!, formattedContent).complete()
+                buffer.sent(batch, message.id)
+                } catch (error: Exception) {
+                    // The server may have accepted a send before its response was lost.
+                    buffer.failed(batch)
+                    throw error
                 }
-            } catch (error: Exception) {
-                if (DiscordConnectionLogging.restFailure(error)) throw error
-                // If edit fails, create new message
-                val message = channel.sendMessage(formattedContent).complete()
-                lastMessageID = message.id
-                messageIDs.add(lastMessageID!!)
             }
-        } catch (e: Exception) {
-            retryAfter = System.nanoTime() + 60_000_000_000L
-            if (!DiscordConnectionLogging.restFailure(e))
-                Logger.error("[Discord] [ConsoleSync] Could not forward console output: ${e.message}")
+        } catch (error: Exception) {
+            if (!isStarted || Thread.currentThread().isInterrupted) return
+            retryAfter = System.nanoTime() + TimeUnit.SECONDS.toNanos(60)
+            if (!DiscordConnectionLogging.restFailure(error))
+                Logger.error("[Discord] [ConsoleSync] Could not forward console output: ${error.message}")
         }
     }
 
     override fun append(event: LogEvent) {
-        if (!active) return
-        // Never send transport failures back through the transport that produced them.
+        if (!active || !isStarted) return
+        val message = event.message.formattedMessage
         if (event.loggerName.startsWith("net.dv8tion.jda.") ||
-            event.message.formattedMessage.let { "[Discord] [Connection]" in it || "[Discord] [ConsoleSync]" in it }
+            "[Discord] [Connection]" in message || "[Discord] [ConsoleSync]" in message
         ) return
-
-        // Only process messages that occurred after the last command
-        if (event.timeMillis < lastProcessedTime) return
-
-        val formattedMessage = formatLogMessage(event)
-        // A long outage must not accumulate unbounded console output in memory.
-        if (messageQueue.size < 1000) messageQueue.offer(formattedMessage)
-    }
-
-    private fun formatLogMessage(event: LogEvent): String {
         val timestamp = SimpleDateFormat("HH:mm:ss").format(event.timeMillis)
-        val name = event.loggerName
-        val level = event.level.toString()
         val color = when (event.level.toString()) {
-            "ERROR" -> "\u001B[31m" // Red
-            "WARN" -> "\u001B[33m"  // Yellow
-            "INFO" -> "\u001B[37m"  // White
-            "DEBUG" -> "\u001B[34m" // Blue
-            else -> "\u001B[37m"    // White
+            "ERROR" -> "\u001B[31m"
+            "WARN" -> "\u001B[33m"
+            "DEBUG" -> "\u001B[34m"
+            else -> "\u001B[37m"
         }
-        return "$color[$timestamp $level] [$name] ${event.message.formattedMessage}\u001B[0m\n"
+        buffer.offer(event.timeMillis, "$color[$timestamp ${event.level}] [${event.loggerName}] $message\u001B[0m\n")
     }
 
     fun syncTask() {
-        if (!active) return
-        CoroutineHandler.launchTask(
-            task = {
-                processMessageQueue()
-            },
-            taskName = "yvtils-discord-consoleSync",
-            afterDelay = 1
-        )
+        worker.scheduleWithFixedDelay(::processMessageQueue, 1, 1, TimeUnit.SECONDS)
     }
 
-    fun clearHistory() {
-        currentMessageContent.clear()
-        messageQueue.clear()
-        lastMessageID = null
-        messageIDs.clear()
-        lastProcessedTime = System.currentTimeMillis()
+    fun clearHistory() = buffer.clear()
+
+    override fun stop() {
+        super.stop()
+        worker.shutdownNow()
+        buffer.clear()
     }
 }

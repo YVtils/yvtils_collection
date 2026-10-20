@@ -20,9 +20,11 @@ import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.a
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.channel
 import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.syncJoinLeaveMessages
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.modules.ConnectionMessages
 
 class SyncPlayerConnectionChange {
     fun syncJoin(e: PlayerJoinEvent) {
+        if (ConnectionMessages.hidden.test(e.player)) return
         if (!active) return
         if (!syncJoinLeaveMessages) return
         if (! e.player.hasPermission(Permissions.SYNC_JOIN.permission.name)) return
@@ -31,6 +33,7 @@ class SyncPlayerConnectionChange {
     }
 
     fun syncQuit(e: PlayerQuitEvent) {
+        if (e.quitMessage() == null || ConnectionMessages.hidden.test(e.player)) return
         if (!active) return
         if (!syncJoinLeaveMessages) return
         if (! e.player.hasPermission(Permissions.SYNC_QUIT.permission.name)) return

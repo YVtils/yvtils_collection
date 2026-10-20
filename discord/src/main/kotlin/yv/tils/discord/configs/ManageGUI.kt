@@ -11,14 +11,22 @@ package yv.tils.discord.configs
 
 import org.bukkit.entity.Player
 import yv.tils.gui.logic.DataClassConfigGui
+import yv.tils.common.permissions.Permissions
 
 class ManageGUI {
     fun openGUI(sender: Player) {
+        if (!sender.hasPermission(Permissions.YVTILS_MANAGE_COMMAND.permission.name)) return
+        var expected = ConfigFile.state.detachedCopy()
         DataClassConfigGui.open(
             sender,
             "Discord Config",
-            ConfigFile.state,
-            saver = { updated -> ConfigFile().applyState(updated) }
+            expected.detachedCopy(),
+            saver = { updated ->
+                check(sender.hasPermission(Permissions.YVTILS_MANAGE_COMMAND.permission.name)) { "No permission to save Discord configuration" }
+                check(ConfigFile.state == expected) { "Discord configuration changed; reopen the editor" }
+                ConfigFile().applyState(updated)
+                expected = ConfigFile.state.detachedCopy()
+            }
         )
     }
 }

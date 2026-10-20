@@ -28,9 +28,9 @@ import yv.tils.discord.logic.sync.serverConsole.GetConsole.Companion.channelID
 
 class SendCMD : ListenerAdapter() {
     override fun onMessageReceived(e: MessageReceivedEvent) {
-        if (!active) return
+        if (!active || !AppLogic.started) return
 
-        if (ConfigFile.getValueAsBoolean("general.settings.ignoreBotMessages") == true && e.author.isBot) {
+        if (ConfigFile.getValueAsBoolean("syncFeature.consoleSync.settings.ignoreBotMessages") == true && e.author.isBot) {
             return
         } else {
             if (e.author.id == AppLogic.appID) return
@@ -44,13 +44,13 @@ class SendCMD : ListenerAdapter() {
         val msg = e.message
         var content = msg.contentDisplay
 
-        content = content.replace("/", "")
+        content = content.removePrefix("/")
 
         CoroutineHandler.launchTask(
             task = {
                 e.message.addReaction(Emoji.fromUnicode("🖥️")).queue()
                 Logger.info(MessageUtils.convert("<gray>[<${Colors.MAIN.color}>DC Console<gray>]<white> $content"))
-                GetConsole().clearHistory()
+                AppLogic.clearConsoleHistory()
                 Core.instance.server.scheduler.runTask(Core.instance, Runnable {
                     try {
                         Core.instance.server.dispatchCommand(Core.instance.server.consoleSender, content)

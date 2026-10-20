@@ -51,8 +51,11 @@ class ConfigFile {
 
     /** Called by [yv.tils.gui.logic.DataClassConfigGui]'s saver after an in-game edit. */
     fun applyState(newState: DiscordConfigState) {
-        state = newState
-        syncDerivedView()
-        registerStrings()
+        val candidate = newState.detachedCopy()
+        val derived = ObjectMapperFileUtils.flatten(candidate, ConfigFormat.YAML)
+        ObjectMapperFileUtils.save(filePath, candidate, format = ConfigFormat.YAML)
+        state = candidate
+        config.clear()
+        config.putAll(derived)
     }
 }

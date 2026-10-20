@@ -71,7 +71,7 @@ class JdaNetworkLogFilter(
         level: Level,
         marker: Marker?,
         msg: String?,
-        vararg params: Any?
+        params: Array<out Any?>?
     ): Filter.Result =
         result(logger.name, level, ParameterizedMessage(msg, params).formattedMessage)
 }

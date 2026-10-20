@@ -32,5 +32,14 @@ replacement outage notices. The filter is removed when the module stops.
 Console forwarding excludes JDA and connection/console-sync diagnostics to avoid
 feeding failures back into Discord. Failed forwarding enters a 60-second cooldown;
 the waiting queue is capped at 1000 entries, so some outage-period output may be
-dropped. Network outages still need investigation if persistent: server routing,
+dropped. Oversized lines are split to fit Discord's message limit. A send with an
+uncertain result is dropped rather than replayed. Resetting history while a request
+is in flight cannot restore the old buffer. Shutdown removes the installed appender,
+stops forwarding/statistics workers and closes the owned HTTP client resources.
+
+Discord connection announcements and public player counts exclude vanished players.
+The configuration GUI edits a detached draft, rechecks management permission and stale
+state when saving, and persists before applying changes to runtime configuration.
+
+Network outages still need investigation if persistent: server routing,
 firewall, DNS or Discord availability cannot be repaired by changing log wording.
