@@ -33,14 +33,16 @@ class MessageHandler {
         }
 
         if (sender == target) {
-            sender.sendMessage(LanguageHandler.getMessage(
-                "command.msg.note",
-                sender,
-                mapOf(
-                    "prefix" to Core.prefix,
-                    "yv/tils/message" to message
+            sender.sendMessage(
+                LanguageHandler.getMessage(
+                    "command.msg.note",
+                    sender,
+                    mapOf(
+                        "prefix" to Core.prefix,
+                        "message" to message
+                    )
                 )
-            ))
+            )
             return
         }
 
@@ -54,7 +56,7 @@ class MessageHandler {
                     "prefix" to Core.prefix,
                     "sender" to senderName,
                     "receiver" to targetName,
-                    "yv/tils/message" to message
+                    "message" to message
                 )
             )
         )
@@ -66,7 +68,7 @@ class MessageHandler {
                     "prefix" to Core.prefix,
                     "sender" to senderName,
                     "receiver" to targetName,
-                    "yv/tils/message" to message
+                    "message" to message
                 )
             )
         )
