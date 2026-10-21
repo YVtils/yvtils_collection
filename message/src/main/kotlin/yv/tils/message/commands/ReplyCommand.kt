@@ -12,7 +12,6 @@
 
 package yv.tils.message.commands
 
-import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.greedyStringArgument
@@ -20,13 +19,13 @@ import dev.jorel.commandapi.kotlindsl.playerExecutor
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
+import yv.tils.message.data.Permissions
 import yv.tils.message.logic.MessageHandler
 import yv.tils.utils.modules.Core
 
 class ReplyCommand {
     val command = commandTree("reply") {
-        withPermission("yvtils.command.reply")
-        withPermission(CommandPermission.NONE)
+        withPermission(Permissions.COMMAND_REPLY.permission.name)
         withUsage("reply <message>")
         withAliases("r")
 
@@ -38,7 +37,8 @@ class ReplyCommand {
     }
 
     private fun reply(sender: Player, args: CommandArguments) {
-        val target = MessageHandler.chatSession[sender.uniqueId] ?: run {
+        val target = MessageHandler.chatSession[sender.uniqueId]?.let(Bukkit::getPlayer) ?: run {
+            MessageHandler.chatSession.remove(sender.uniqueId)
             sender.sendMessage(
                 LanguageHandler.getMessage(
                     "command.reply.noSession",
@@ -52,6 +52,6 @@ class ReplyCommand {
         }
 
         val message = args[0] as String
-        MessageHandler().sendMessage(sender, Bukkit.getPlayer(target)!!, message)
+        MessageHandler().sendMessage(sender, target, message)
     }
 }

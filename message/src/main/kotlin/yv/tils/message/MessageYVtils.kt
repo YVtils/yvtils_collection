@@ -13,8 +13,10 @@
 package yv.tils.message
 
 import dev.jorel.commandapi.CommandAPI
+import yv.tils.common.permissions.PermissionManager
 import yv.tils.message.commands.MSGCommand
 import yv.tils.message.commands.ReplyCommand
+import yv.tils.message.data.PermissionsData
 import yv.tils.message.language.RegisterStrings
 import yv.tils.message.listeners.PlayerQuit
 import yv.tils.message.logic.MessageHandler
@@ -38,6 +40,7 @@ class MessageYVtils : Module.YVtilsModule {
 
     override fun enablePlugin() {
         Module.addModule(MODULE)
+        PermissionManager.registerPermissions(PermissionsData().getPermissionList(true))
 
         unregisterCommands()
 

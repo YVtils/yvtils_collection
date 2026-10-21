@@ -15,6 +15,7 @@ package yv.tils.message.logic
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
+import yv.tils.message.data.Permissions
 import yv.tils.utils.modules.Core
 import java.util.*
 
@@ -24,6 +25,17 @@ class MessageHandler {
     }
 
     fun sendMessage(sender: CommandSender, target: Player, message: String) {
+        if (!target.hasPermission(Permissions.RECEIVE.permission.name)) {
+            sender.sendMessage(
+                LanguageHandler.getMessage(
+                    "command.msg.cannotReceive",
+                    sender,
+                    mapOf("prefix" to Core.prefix, "receiver" to target.name)
+                )
+            )
+            return
+        }
+
         val senderName = if (sender is Player) {
             chatSession[sender.uniqueId] = target.uniqueId
             chatSession[target.uniqueId] = sender.uniqueId
@@ -74,12 +86,30 @@ class MessageHandler {
         )
     }
 
-    fun removeSession(uuid: UUID) {
-        val target = chatSession[uuid]
-        if (target != null) {
-            chatSession.remove(target)
-            chatSession.remove(uuid)
+    fun sendMessages(
+        sender: CommandSender,
+        targets: Collection<Player>,
+        message: String,
+        requiresAllPermission: Boolean = targets.size > 1,
+    ) {
+        if (requiresAllPermission && !sender.hasPermission(Permissions.COMMAND_MSG_ALL.permission.name)) {
+            sender.sendMessage(
+                LanguageHandler.getMessage(
+                    "command.msg.multipleDenied",
+                    sender,
+                    mapOf("prefix" to Core.prefix)
+                )
+            )
+            return
         }
+
+        targets
+            .filter { !requiresAllPermission || it.hasPermission(Permissions.RECEIVE.permission.name) }
+            .forEach { sendMessage(sender, it, message) }
+    }
+
+    fun removeSession(uuid: UUID) {
+        chatSession.entries.removeIf { it.key == uuid || it.value == uuid }
     }
 
     fun clearSessions() {

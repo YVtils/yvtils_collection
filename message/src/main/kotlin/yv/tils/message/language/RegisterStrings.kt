@@ -19,6 +19,22 @@ import yv.tils.utils.colors.Colors
 class RegisterStrings {
     fun registerStrings() {
         registerNewString(
+            "command.msg.multipleDenied",
+            mapOf(
+                FileTypes.EN to "<prefix> <red>You do not have permission to message multiple players!",
+                FileTypes.DE to "<prefix> <red>Du hast keine Berechtigung, mehreren Spielern eine Nachricht zu senden!",
+            )
+        )
+
+        registerNewString(
+            "command.msg.cannotReceive",
+            mapOf(
+                FileTypes.EN to "<prefix> <red><receiver> cannot receive private messages!",
+                FileTypes.DE to "<prefix> <red><receiver> kann keine privaten Nachrichten empfangen!",
+            )
+        )
+
+        registerNewString(
             "command.reply.noSession",
             mapOf(
                 FileTypes.EN to "<prefix> <red>You have no message history!",

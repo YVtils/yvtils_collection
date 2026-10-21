@@ -12,28 +12,31 @@
 
 package yv.tils.message.commands
 
-import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.commandTree
-import dev.jorel.commandapi.kotlindsl.entitySelectorArgumentOnePlayer
+import dev.jorel.commandapi.kotlindsl.entitySelectorArgumentManyPlayers
 import dev.jorel.commandapi.kotlindsl.greedyStringArgument
 import org.bukkit.entity.Player
+import yv.tils.message.data.Permissions
 import yv.tils.message.logic.MessageHandler
 
 class MSGCommand {
     val command = commandTree("msg") {
-        withPermission("yvtils.command.msg")
-        withPermission(CommandPermission.NONE)
-        withUsage("msg <player> <message>")
+        withPermission(Permissions.COMMAND_MSG.permission.name)
+        withUsage("msg <player|@a> <message>")
         withAliases("message", "tell", "whisper", "dm", "w")
 
-        entitySelectorArgumentOnePlayer("player") {
+        entitySelectorArgumentManyPlayers("player", allowEmpty = false) {
             greedyStringArgument("message") {
                 anyExecutor { sender, args ->
-                    val target = args[0] as Player
+                    @Suppress("UNCHECKED_CAST")
+                    val targets = args[0] as Collection<Player>
                     val message = args[1] as String
 
-                    MessageHandler().sendMessage(sender, target, message)
+                    MessageHandler().sendMessages(
+                        sender, targets, message,
+                        requiresAllPermission = targets.size > 1 || args.getRaw(0)?.startsWith("@a") == true
+                    )
                 }
             }
         }
