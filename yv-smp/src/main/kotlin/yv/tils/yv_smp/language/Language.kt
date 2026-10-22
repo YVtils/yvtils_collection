@@ -657,8 +657,8 @@ enum class LangStrings(override val key: String, override val translations: Map<
     ),
     AMBIENT_HELP(
         "command.ambient.help", mapOf(
-            FileTypes.EN to "<gold>Ambient sources</gold><newline><gray>/yvsmp ambient create [name] [sound] [radius] [looping] [interval]<newline>/yvsmp ambient set [name] [sound|radius|looping|interval|particle] [value]<newline>/yvsmp ambient [list|info|play|move|remove] [name]<newline>Intervals: 40t, 10s, 5m, 1h. Particle: Minecraft ID or none.</gray>",
-            FileTypes.DE to "<gold>Umgebungsgeräusche</gold><newline><gray>/yvsmp ambient create [name] [sound] [radius] [looping] [interval]<newline>/yvsmp ambient set [name] [sound|radius|looping|interval|particle] [value]<newline>/yvsmp ambient [list|info|play|move|remove] [name]<newline>Intervalle: 40t, 10s, 5m, 1h. Partikel: Minecraft-ID oder none.</gray>",
+            FileTypes.EN to "<gold>Ambient sources</gold><newline><gray>/yvsmp ambient create [name] [sound] [radius] [looping] [interval]<newline>/yvsmp ambient create-audio [name] [radius] [looping] [file path or URL]<newline>/yvsmp ambient set [name] [sound|audio|radius|looping|interval|particle] [value]<newline>/yvsmp ambient [list|info|play|move|remove] [name]<newline>Intervals apply to Minecraft sounds. SVC audio loops at track end. Particle: Minecraft ID or none.</gray>",
+            FileTypes.DE to "<gold>Umgebungsgeräusche</gold><newline><gray>/yvsmp ambient create [name] [sound] [radius] [looping] [interval]<newline>/yvsmp ambient create-audio [name] [radius] [looping] [Dateipfad oder URL]<newline>/yvsmp ambient set [name] [sound|audio|radius|looping|interval|particle] [Wert]<newline>/yvsmp ambient [list|info|play|move|remove] [name]<newline>Intervalle gelten für Minecraft-Geräusche. SVC-Audio wiederholt sich am Trackende. Partikel: Minecraft-ID oder none.</gray>",
         )
     ),
     AMBIENT_SAVED(
@@ -719,6 +719,12 @@ enum class LangStrings(override val key: String, override val translations: Map<
         "command.ambient.invalid-interval", mapOf(
             FileTypes.EN to "<red>Use a positive whole-tick duration: 40t, 10s, 5m or 1h. Bare numbers are ticks.</red>",
             FileTypes.DE to "<red>Verwende eine positive Dauer in ganzen Ticks: 40t, 10s, 5m oder 1h. Zahlen ohne Einheit sind Ticks.</red>",
+        )
+    ),
+    AMBIENT_INVALID_AUDIO(
+        "command.ambient.invalid-audio", mapOf(
+            FileTypes.EN to "<red>Use a readable server audio file path or a valid HTTP(S) audio URL. Minecraft sound IDs cannot be streamed through SVC.</red>",
+            FileTypes.DE to "<red>Verwende einen lesbaren Server-Audiodateipfad oder eine gültige HTTP(S)-Audio-URL. Minecraft-Sound-IDs können nicht über SVC gestreamt werden.</red>",
         )
     ),
     AMBIENT_SAVE_FAILED(

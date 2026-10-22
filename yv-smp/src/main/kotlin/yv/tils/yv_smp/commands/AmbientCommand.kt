@@ -21,11 +21,42 @@ import yv.tils.yv_smp.logic.ambient.AmbientSource
 import yv.tils.yv_smp.permissions.Permissions
 import java.util.logging.Level
 import yv.tils.utils.modules.Core
+import yv.tils.yv_smp.logic.music.SimpleVoiceChat
 
 object AmbientCommand {
     fun register(root: Argument<*>) = root.apply {
         withPermission(Permissions.COMMAND_AMBIENT.permission.name)
         anyExecutor { sender, _ -> message(sender, LangStrings.AMBIENT_HELP) }
+        literalArgument("create-audio") {
+            stringArgument("name") {
+                doubleArgument("radius", min = 0.1, max = 512.0) {
+                    booleanArgument("looping") {
+                        greedyStringArgument("audio") {
+                            playerExecutor { player, args ->
+                                action(player) {
+                                    require(SimpleVoiceChat.serverAPI != null) { "svc" }
+                                    val name = args["name"] as String
+                                    require(name.matches(Regex("[a-zA-Z0-9_-]{1,64}"))) { "name" }
+                                    require(AmbientSounds.get(name) == null) { "duplicate" }
+                                    val audio = args["audio"] as String
+                                    AmbientSounds.audioIdentifier(audio)
+                                    val location = player.location
+                                    val source = AmbientSource(
+                                        name = name, world = player.world.name,
+                                        x = location.x, y = location.y, z = location.z,
+                                        radius = args["radius"] as Double, looping = args["looping"] as Boolean,
+                                        audio = audio,
+                                    )
+                                    AmbientSounds.put(source)
+                                    AmbientSounds.play(source)
+                                    message(player, LangStrings.AMBIENT_SAVED, "name" to name)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         literalArgument("create") {
             stringArgument("name") {
                 namespacedKeyArgument("sound") {
@@ -73,7 +104,7 @@ object AmbientCommand {
                             sender, LangStrings.AMBIENT_INFO,
                             "name" to source.name, "world" to source.world,
                             "x" to source.x, "y" to source.y, "z" to source.z,
-                            "sound" to source.sound, "radius" to source.radius,
+                            "sound" to (source.audio ?: source.sound), "radius" to source.radius,
                             "looping" to source.looping, "interval" to source.intervalTicks,
                             "particle" to (source.particle ?: "none")
                         )
@@ -122,6 +153,18 @@ object AmbientCommand {
         literalArgument("set") {
             stringArgument("name") {
                 replaceSuggestions(ArgumentSuggestions.strings { AmbientSounds.names() })
+                literalArgument("audio") {
+                    greedyStringArgument("audio") {
+                        anyExecutor { sender, args ->
+                            edit(sender, args["name"] as String) {
+                                require(SimpleVoiceChat.serverAPI != null) { "svc" }
+                                val audio = args["audio"] as String
+                                AmbientSounds.audioIdentifier(audio)
+                                it.copy(audio = audio)
+                            }
+                        }
+                    }
+                }
                 literalArgument("sound") {
                     namespacedKeyArgument("sound") {
                         replaceSuggestions(ArgumentSuggestions.strings {
@@ -129,7 +172,7 @@ object AmbientCommand {
                         })
                         anyExecutor { sender, args ->
                             edit(sender, args["name"] as String) {
-                                it.copy(sound = (args["sound"] as NamespacedKey).toString())
+                                it.copy(sound = (args["sound"] as NamespacedKey).toString(), audio = null)
                             }
                         }
                     }
@@ -207,6 +250,8 @@ object AmbientCommand {
                 "missing" -> LangStrings.AMBIENT_MISSING
                 "particle" -> LangStrings.AMBIENT_INVALID_PARTICLE
                 "interval" -> LangStrings.AMBIENT_INVALID_INTERVAL
+                "audio" -> LangStrings.AMBIENT_INVALID_AUDIO
+                "svc" -> LangStrings.MUSIC_UNAVAILABLE
                 else -> {
                     failure(sender, exception)
                     return

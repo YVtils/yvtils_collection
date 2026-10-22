@@ -13,6 +13,7 @@
 package yv.tils.discord.logic.sync.serverStats
 
 import kotlinx.coroutines.*
+import net.dv8tion.jda.api.requests.RestAction
 import yv.tils.discord.configs.ConfigFile
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.ConnectionMessages
@@ -102,14 +103,14 @@ class CollectStats {
         scope = null
     }
 
-    fun serverShutdown() {
+    fun serverShutdown(): List<RestAction<*>> {
         if (!active) {
-            return
+            return emptyList()
         }
 
         val serverStats = prepareLayout("OFFLINE", "N/A", "0")
 
-        when (statsMode) {
+        return when (statsMode) {
             "channels" -> {
                 StatsAsChannels().serverShutdown(serverStats)
             }
@@ -119,9 +120,10 @@ class CollectStats {
             }
 
             "both" -> {
-                StatsAsChannels().serverShutdown(serverStats)
-                StatsAsDescription().serverShutdown(serverStats)
+                StatsAsChannels().serverShutdown(serverStats) +
+                    StatsAsDescription().serverShutdown(serverStats)
             }
+            else -> emptyList()
         }
     }
 

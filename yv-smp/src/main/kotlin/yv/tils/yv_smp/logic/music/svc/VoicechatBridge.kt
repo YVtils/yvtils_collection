@@ -72,6 +72,7 @@ object VoicechatBridge {
     private lateinit var staticAudioChannelClass: Class<*>
     private lateinit var eventRegistrationClass: Class<*>
     private lateinit var voicechatServerStartedEventClass: Class<*>
+    private lateinit var voicechatServerStoppedEventClass: Class<*>
     private lateinit var volumeCategoryClass: Class<*>
     private lateinit var volumeCategoryBuilderClass: Class<*>
 
@@ -79,6 +80,11 @@ object VoicechatBridge {
     private lateinit var volumeCategoryBuilderMethod: Method
     private lateinit var getConnectionOfMethod: Method
     private lateinit var createStaticAudioChannelMethod: Method
+    private lateinit var createLocationalAudioChannelMethod: Method
+    private lateinit var fromServerLevelMethod: Method
+    private lateinit var createPositionMethod: Method
+    private lateinit var setDistanceMethod: Method
+    private lateinit var flushMethod: Method
     private lateinit var registerVolumeCategoryMethod: Method
     private lateinit var addTargetMethod: Method
     private lateinit var setCategoryMethod: Method
@@ -102,6 +108,7 @@ object VoicechatBridge {
         fun pluginId(): String
         fun onInitialize(api: Any)
         fun onServerStarted(event: Any)
+        fun onServerStopped() {}
     }
 
     val isInitialized: Boolean
@@ -130,6 +137,7 @@ object VoicechatBridge {
         staticAudioChannelClass = clazz("audiochannel.StaticAudioChannel")
         eventRegistrationClass = clazz("events.EventRegistration")
         voicechatServerStartedEventClass = clazz("events.VoicechatServerStartedEvent")
+        voicechatServerStoppedEventClass = clazz("events.VoicechatServerStoppedEvent")
         volumeCategoryClass = clazz("VolumeCategory")
         volumeCategoryBuilderClass = Class.forName("$API_PACKAGE.VolumeCategory\$Builder", true, loader)
 
@@ -138,6 +146,17 @@ object VoicechatBridge {
         getConnectionOfMethod = voicechatServerApiClass.getMethod("getConnectionOf", UUID::class.java)
         createStaticAudioChannelMethod =
             voicechatServerApiClass.getMethod("createStaticAudioChannel", UUID::class.java)
+        createLocationalAudioChannelMethod = voicechatServerApiClass.getMethod(
+            "createLocationalAudioChannel", UUID::class.java, clazz("ServerLevel"), clazz("Position")
+        )
+        fromServerLevelMethod = voicechatApiClass.getMethod("fromServerLevel", Any::class.java)
+        createPositionMethod = voicechatApiClass.getMethod(
+            "createPosition", Double::class.javaPrimitiveType, Double::class.javaPrimitiveType,
+            Double::class.javaPrimitiveType
+        )
+        setDistanceMethod = clazz("audiochannel.LocationalAudioChannel")
+            .getMethod("setDistance", Float::class.javaPrimitiveType)
+        flushMethod = audioChannelClass.getMethod("flush")
         registerVolumeCategoryMethod =
             voicechatServerApiClass.getMethod("registerVolumeCategory", volumeCategoryClass)
         addTargetMethod = staticAudioChannelClass.getMethod("addTarget", voicechatConnectionClass)
@@ -193,6 +212,7 @@ object VoicechatBridge {
     private fun registerServerStartedEvent(registration: Any, handler: PluginHandler) {
         val consumer = Consumer<Any> { event -> handler.onServerStarted(event) }
         registerEventMethod.invoke(registration, voicechatServerStartedEventClass, consumer)
+        registerEventMethod.invoke(registration, voicechatServerStoppedEventClass, Consumer<Any> { handler.onServerStopped() })
     }
 
     fun registerPlugin(service: Any, plugin: Any) {
@@ -227,6 +247,23 @@ object VoicechatBridge {
 
     fun addTarget(channel: Any, connection: Any) {
         addTargetMethod.invoke(channel, connection)
+    }
+
+    /** Called on the server thread with a Bukkit world; no Bukkit objects are used by the audio worker. */
+    fun createLocationalAudioChannel(
+        serverApi: Any, world: Any, x: Double, y: Double, z: Double, radius: Float
+    ): Any {
+        val level = fromServerLevelMethod.invoke(serverApi, world)
+        val position = createPositionMethod.invoke(serverApi, x, y, z)
+        val channel = checkNotNull(createLocationalAudioChannelMethod.invoke(serverApi, UUID.randomUUID(), level, position)) {
+            "Simple Voice Chat could not create a locational channel"
+        }
+        setDistanceMethod.invoke(channel, radius)
+        return channel
+    }
+
+    fun flush(channel: Any) {
+        flushMethod.invoke(channel)
     }
 
     fun setCategory(channel: Any, category: String?) {

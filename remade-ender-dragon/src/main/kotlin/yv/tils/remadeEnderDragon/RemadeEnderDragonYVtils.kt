@@ -64,8 +64,11 @@ class RemadeEnderDragonYVtils : Module.YVtilsModule {
         }
         manager = null
         activeManager = null
-        CommandAPI.unregister("redragon", true)
-        CommandAPI.unregister("remadeenderdragon", true)
+        // Paper command unregistration schedules a reload, which is illegal during plugin shutdown.
+        if (Core.instance.isEnabled) {
+            CommandAPI.unregister("redragon", true)
+            CommandAPI.unregister("remadeenderdragon", true)
+        }
         Module.removeModule(MODULE)
         Logger.info("[Remade Ender Dragon] Disabled; encounter cleanup complete.")
     }

@@ -26,6 +26,8 @@ import yv.tils.yv_smp.logic.ambient.AmbientSounds
 import yv.tils.yv_smp.logic.music.MusicHandler
 import yv.tils.yv_smp.logic.music.SVCManager
 import yv.tils.yv_smp.logic.music.VoiceChatAudioPlayer
+import yv.tils.yv_smp.logic.music.LocationalAudioStream
+import yv.tils.yv_smp.logic.music.SimpleVoiceChat
 import yv.tils.yv_smp.permissions.PermissionsData
 import yv.tils.yv_smp.logic.start.PhaseHandler
 
@@ -65,6 +67,9 @@ class YV_SMPYVtils : Module.YVtilsModule {
     override fun disablePlugin() {
         PhaseHandler.stopPhases()
         AmbientSounds.stop()
+        LocationalAudioStream.shutdown()
+        SimpleVoiceChat.serverAPI = null
+        SimpleVoiceChat.svcAPI = null
         // Stop all active audio players with a short fade-out
         MusicHandler.stopAll(fadeoutTime = 500L)
 

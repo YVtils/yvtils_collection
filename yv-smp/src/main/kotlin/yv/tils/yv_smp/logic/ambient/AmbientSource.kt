@@ -18,6 +18,8 @@ data class AmbientSource(
     val looping: Boolean = true,
     val intervalTicks: Long = 200,
     val particle: String? = null,
+    /** Null preserves existing Minecraft sound sources; otherwise a server file path or HTTP(S) URL. */
+    val audio: String? = null,
 )
 
 object AmbientInterval {

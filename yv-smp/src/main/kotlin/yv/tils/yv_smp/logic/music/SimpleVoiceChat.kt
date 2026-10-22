@@ -29,7 +29,8 @@ import yv.tils.yv_smp.logic.music.svc.VoicechatBridge
 class SimpleVoiceChat : VoicechatBridge.PluginHandler {
     companion object {
         /** The voicechat `VoicechatApi`/`VoicechatServerApi` instance, kept as `Any` - see class doc. */
-        var svcAPI: Any? = null
+        @Volatile var svcAPI: Any? = null
+        @Volatile var serverAPI: Any? = null
         const val AUDIO_CATEGORY = "yvtils"  // Volume category for VoiceMod UI
     }
 
@@ -62,8 +63,13 @@ class SimpleVoiceChat : VoicechatBridge.PluginHandler {
         val volumeCategory = VoicechatBridge.builderBuild(builder)
 
         VoicechatBridge.registerVolumeCategory(api, volumeCategory)
+        serverAPI = api
 
         Logger.info("Registered VoiceMod volume category: $AUDIO_CATEGORY")
+    }
+
+    override fun onServerStopped() {
+        serverAPI = null
     }
 
     private fun createIcon(): Array<IntArray> {

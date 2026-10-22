@@ -21,6 +21,7 @@ import yv.tils.discord.logic.AppLogic.Companion.jda
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.requests.RestAction
 
 class StatsAsChannels {
     companion object {
@@ -139,42 +140,46 @@ class StatsAsChannels {
         return future
     }
 
-    private fun updateChannels(serverStats: CollectStats.ServerStats) {
-        if (channelIDs.isEmpty()) {
+    private fun channelUpdates(
+        serverStats: CollectStats.ServerStats,
+        createMissing: Boolean = true,
+    ): List<RestAction<*>> {
+        if (channelIDs.isEmpty() && createMissing) {
             createChannels()
         }
 
+        val updates = mutableListOf<RestAction<*>>()
         for ((guildID, channelSave) in channelIDs) {
             val guild = jda.getGuildById(guildID) ?: continue
-            val channelList = mutableListOf<String>()
             if (serverStatusActive) {
-                val channel = guild.getVoiceChannelById(channelSave.status) ?: continue
-                channel.manager.setName(serverStats.status).queue()
-                channelList.add(channel.id)
+                guild.getVoiceChannelById(channelSave.status)?.let {
+                    updates.add(it.manager.setName(serverStats.status))
+                }
             }
 
             if (serverVersionActive) {
-                val channel = guild.getVoiceChannelById(channelSave.version) ?: continue
-                channel.manager.setName(serverStats.version).queue()
-                channelList.add(channel.id)
+                guild.getVoiceChannelById(channelSave.version)?.let {
+                    updates.add(it.manager.setName(serverStats.version))
+                }
             }
 
             if (onlinePlayersActive) {
-                val channel = guild.getVoiceChannelById(channelSave.playerCount) ?: continue
-                channel.manager.setName(serverStats.players).queue()
-                channelList.add(channel.id)
+                guild.getVoiceChannelById(channelSave.playerCount)?.let {
+                    updates.add(it.manager.setName(serverStats.players))
+                }
             }
 
             if (lastRefreshTimeActive) {
-                val channel = guild.getVoiceChannelById(channelSave.lastRefreshed) ?: continue
-                channel.manager.setName(serverStats.lastRefreshed).queue()
-                channelList.add(channel.id)
+                guild.getVoiceChannelById(channelSave.lastRefreshed)?.let {
+                    updates.add(it.manager.setName(serverStats.lastRefreshed))
+                }
             }
         }
+        return updates
     }
 
     fun syncStats(serverStats: CollectStats.ServerStats) {
-        updateChannels(serverStats)
+        channelUpdates(serverStats).forEach { it.queue() }
     }
 
     fun deleteChannels() {
@@ -203,7 +208,6 @@ class StatsAsChannels {
         }
     }
 
-    fun serverShutdown(serverStats: CollectStats.ServerStats) {
-        updateChannels(serverStats)
-    }
+    fun serverShutdown(serverStats: CollectStats.ServerStats): List<RestAction<*>> =
+        channelUpdates(serverStats, createMissing = false)
 }

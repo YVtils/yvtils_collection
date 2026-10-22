@@ -33,7 +33,8 @@ class SyncPlayerConnectionChange {
     }
 
     fun syncQuit(e: PlayerQuitEvent) {
-        if (e.quitMessage() == null || ConnectionMessages.hidden.test(e.player)) return
+        // Custom server messages clear the vanilla quit message after broadcasting it.
+        if (ConnectionMessages.hidden.test(e.player)) return
         if (!active) return
         if (!syncJoinLeaveMessages) return
         if (! e.player.hasPermission(Permissions.SYNC_QUIT.permission.name)) return

@@ -41,6 +41,8 @@ import yv.tils.discord.utils.emoji.RegistrationEmoji
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import java.time.Duration
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 import org.apache.logging.log4j.core.Logger as Logger4J
 
 class AppLogic {
@@ -120,8 +122,20 @@ class AppLogic {
             CollectStats().stop()
             if (hasJDA()) {
                 if (wasStarted) {
-                    runCatching { CollectStats().serverShutdown() }
-                        .onFailure { Logger.warn("Could not publish Discord shutdown statistics: ${it.message}") }
+                    runCatching {
+                        val actions = CollectStats().serverShutdown()
+                        runBlocking(Dispatchers.IO) {
+                            val updates = actions.map {
+                                runCatching { it.timeout(5, TimeUnit.SECONDS).submit() }
+                                    .getOrElse { error -> CompletableFuture.failedFuture<Any?>(error) }
+                            }
+                            awaitShutdownUpdates(updates, Duration.ofSeconds(5))
+                        }
+                    }
+                        .onFailure {
+                            if (it is InterruptedException) throw it
+                            Logger.warn("Could not publish Discord shutdown statistics: ${it.message}")
+                        }
                 }
                 jda.shutdown()
                 if (!jda.awaitShutdown(Duration.ofSeconds(10))) {
@@ -171,6 +185,8 @@ class AppLogic {
             return false
         }
         builder = JDABuilder.createDefault(appToken)
+        // Paper owns our lifecycle. JDA's JVM hook calls shutdownNow and races onDisable.
+        builder.setEnableShutdownHook(false)
         httpClient = OkHttpClient.Builder().build()
         builder.setHttpClient(httpClient!!)
         return true
