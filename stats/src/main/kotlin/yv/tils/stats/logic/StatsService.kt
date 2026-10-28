@@ -16,7 +16,7 @@ import kotlinx.serialization.json.Json
 import yv.tils.stats.configs.ConfigFile
 import yv.tils.stats.data.*
 import yv.tils.stats.registry.StatsRegistry
-import org.bukkit.Bukkit
+import yv.tils.utils.stats.ModuleTelemetry
 
 /**
  * Core service for stats serialization and export.
@@ -27,8 +27,8 @@ import org.bukkit.Bukkit
  * - Generate metadata for exports
  *
  * ## Privacy
- * By default, no sensitive PII is collected. The config option `metadata.region`
- * controls whether region information is included in exports.
+ * Default metrics contain no player identities. Custom metric authors are responsible
+ * for keeping identifying data out of their values. Exports never query Bukkit.
  */
 class StatsService {
     companion object {
@@ -50,53 +50,54 @@ class StatsService {
          * @return Prometheus-formatted text
          */
         fun exportAsPrometheusText(): String {
+            ModuleTelemetry.publishModules()
             val sb = StringBuilder()
-            val stats = StatsRegistry.getAllStats()
+            val stats = StatsRegistry.snapshot()
 
             // Add metadata as comments
             sb.appendLine("# YVtils Stats Export")
             sb.appendLine("# Generated: ${System.currentTimeMillis()}")
             sb.appendLine()
 
-            for ((key, stat) in stats.entries.sortedBy { it.key }) {
-                when (stat.type) {
+            for (stat in stats) {
+                val key = stat.key
+                when (StatType.valueOf(stat.type)) {
                     StatType.COUNTER -> {
                         sb.appendLine("# HELP $key ${escapeHelp(stat.help)}")
                         sb.appendLine("# TYPE $key counter")
-                        sb.appendLine("$key ${stat.atomicValue.get()}")
+                        sb.appendLine("$key ${stat.value.longValue}")
                         sb.appendLine()
                     }
                     StatType.GAUGE -> {
                         sb.appendLine("# HELP $key ${escapeHelp(stat.help)}")
                         sb.appendLine("# TYPE $key gauge")
-                        sb.appendLine("$key ${stat.atomicValue.get()}")
+                        sb.appendLine("$key ${stat.value.doubleValue ?: stat.value.longValue}")
                         sb.appendLine()
                     }
                     StatType.TIMESTAMP -> {
                         // Timestamps are exported as gauges with Unix timestamp value
                         sb.appendLine("# HELP $key ${escapeHelp(stat.help)}")
                         sb.appendLine("# TYPE $key gauge")
-                        sb.appendLine("$key ${stat.atomicValue.get()}")
+                        sb.appendLine("$key ${stat.value.longValue}")
                         sb.appendLine()
                     }
                     StatType.HISTOGRAM -> {
-                        val histData = stat.histogramData.toHistogramData()
+                        val histData = stat.value.histogramValue ?: HistogramData()
                         sb.appendLine("# HELP $key ${escapeHelp(stat.help)}")
                         sb.appendLine("# TYPE $key histogram")
+                        sb.appendLine("${key}_bucket{le=\"+Inf\"} ${histData.count}")
                         sb.appendLine("${key}_count ${histData.count}")
                         sb.appendLine("${key}_sum ${histData.sum}")
                         sb.appendLine()
                     }
                     StatType.STRING -> {
                         // Strings are included as info comments
-                        sb.appendLine("# INFO $key: ${stat.stringValue}")
+                        sb.appendLine("# INFO $key: ${escapeHelp(stat.value.stringValue.orEmpty())}")
                         sb.appendLine()
                     }
                     StatType.STRING_LIST -> {
                         // Lists are included as JSON comment
-                        synchronized(stat.lock) {
-                            sb.appendLine("# INFO $key: ${stat.listValue.joinToString(", ")}")
-                        }
+                        sb.appendLine("# INFO $key: ${escapeHelp(stat.value.listValue.orEmpty().joinToString(", "))}")
                         sb.appendLine()
                     }
                 }
@@ -131,17 +132,11 @@ class StatsService {
          * Build metadata for the export.
          */
         private fun buildMetadata(): StatsMetadata {
-            val serverVersion = try {
-                Bukkit.getVersion()
-            } catch (_: Exception) {
-                "Unknown"
-            }
-
             return StatsMetadata(
-                serverName = ConfigFile.getString("metadata.server_name") ?: "",
-                serverVersion = serverVersion,
+                serverName = ConfigFile.state.metadata.server_name,
+                serverVersion = StatsRegistry.getValue("server_version")?.stringValue ?: "Unknown",
                 collectTimestamp = System.currentTimeMillis(),
-                region = ConfigFile.getBoolean("metadata.region") ?: false
+                region = false
             )
         }
 
@@ -149,40 +144,15 @@ class StatsService {
          * Build stat entries for export.
          */
         private fun buildStatEntries(): List<StatEntry> {
-            val stats = StatsRegistry.getAllStats()
-            val entries = mutableListOf<StatEntry>()
-
-            for ((key, stat) in stats) {
-                val value = synchronized(stat.lock) {
-                    when (stat.type) {
-                        StatType.COUNTER, StatType.GAUGE, StatType.TIMESTAMP ->
-                            StatValue.ofLong(stat.atomicValue.get())
-                        StatType.STRING ->
-                            StatValue.ofString(stat.stringValue)
-                        StatType.STRING_LIST ->
-                            StatValue.ofList(stat.listValue.toList())
-                        StatType.HISTOGRAM ->
-                            StatValue.ofHistogram(stat.histogramData.toHistogramData())
-                    }
-                }
-
-                entries.add(StatEntry(
-                    key = key,
-                    type = stat.type.name,
-                    help = stat.help,
-                    value = value,
-                    lastUpdated = stat.lastUpdated
-                ))
-            }
-
-            return entries.sortedBy { it.key }
+            ModuleTelemetry.publishModules()
+            return StatsRegistry.snapshot()
         }
 
         /**
          * Escape help text for Prometheus format.
          */
         private fun escapeHelp(help: String): String {
-            return help.replace("\\", "\\\\").replace("\n", "\\n")
+            return help.replace("\\", "\\\\").replace("\r", "\\r").replace("\n", "\\n")
         }
     }
 }

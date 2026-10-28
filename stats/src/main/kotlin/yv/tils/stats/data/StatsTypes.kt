@@ -69,8 +69,8 @@ enum class StatType {
     /**
      * A histogram for observing distributions.
      * Use for timing/duration measurements (e.g., response times, load times).
-     * Tracks count, sum, and can compute percentiles.
-     * Prometheus: Exported as histogram type with _count, _sum, and bucket suffixes.
+     * Tracks count and sum; finite buckets and percentiles are not implemented.
+     * Prometheus: Exported with _count, _sum, and the required +Inf bucket.
      */
     HISTOGRAM;
 

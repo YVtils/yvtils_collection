@@ -20,6 +20,7 @@ import yv.tils.config.language.LanguageBroadcast
 import yv.tils.config.language.LanguageHandler
 import yv.tils.moderation.data.Permissions
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.stats.ModuleTelemetry
 
 class PlayerUtils {
     companion object {
@@ -32,6 +33,7 @@ class PlayerUtils {
             action: ModerationAction = ModerationAction.OTHER,
             offlineTarget: OfflinePlayer? = null,
         ) {
+            ModuleTelemetry.record(ModuleTelemetry.Event.MODERATION_ACTIONS)
             if (silent) return
 
             val langKey = if (duration == null) {

@@ -16,10 +16,13 @@ import dev.jorel.commandapi.kotlindsl.anyExecutor
 import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.literalArgument
 import dev.jorel.commandapi.kotlindsl.playerExecutor
+import dev.jorel.commandapi.kotlindsl.stringArgument
+import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import yv.tils.common.permissions.Permissions
 import yv.tils.core.commands.gui.YVtilsConfigGui
 import yv.tils.core.commands.gui.YVtilsModulesGui
 import yv.tils.core.commands.handler.YVtilsHandler
+import yv.tils.utils.modules.Module
 
 class YVtilsCommand {
     val command = commandTree("yvtils") {
@@ -41,6 +44,14 @@ class YVtilsCommand {
         literalArgument("config", false) {
             playerExecutor { player, _ ->
                 YVtilsConfigGui.open(player)
+            }
+            stringArgument("module") {
+                replaceSuggestions(ArgumentSuggestions.strings { _ ->
+                    Module.getModules(sort = true).filter { it.configGuiOpener != null }.map { it.name }.toTypedArray()
+                })
+                playerExecutor { player, args ->
+                    YVtilsConfigGui.openModule(player, args["module"] as String)
+                }
             }
         }
     }

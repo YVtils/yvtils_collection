@@ -20,6 +20,7 @@ import yv.tils.server.configs.ConfigFile
 import yv.tils.utils.modules.Core
 import yv.tils.utils.player.PlayerUtils
 import yv.tils.utils.server.ServerUtils
+import yv.tils.utils.stats.ModuleTelemetry
 
 class MaintenanceHandler {
     companion object {
@@ -35,6 +36,7 @@ class MaintenanceHandler {
             ServerUtils.serverInMaintenance = enabled
 
             if (!announce || !changed) return
+            ModuleTelemetry.record(ModuleTelemetry.Event.SERVER_MAINTENANCE_CHANGES)
 
             if (enabled) {
                 PlayerUtils.onlinePlayersAsPlayers(BYPASS_PERMISSION, false).forEach { player ->

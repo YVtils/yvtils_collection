@@ -34,6 +34,7 @@ import net.kyori.adventure.text.Component
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
+import yv.tils.utils.stats.ModuleTelemetry
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
@@ -118,6 +119,7 @@ object DataClassConfigGui {
         InvUIBootstrap.ensure()
         val root = RootState(configName, instance, saver, back)
         buildLevelWindow(player, root, instance, configName, parent = null).open(player)
+        ModuleTelemetry.record(ModuleTelemetry.Event.GUI_CONFIG_EDITOR_OPENS)
     }
 
     // ---------------------------------------------------------------------

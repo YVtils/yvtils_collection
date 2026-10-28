@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack
 import java.util.UUID
 import yv.tils.fusion.api.FusionRegistry
 import yv.tils.fusion.api.FusionCraftContext
+import yv.tils.utils.stats.ModuleTelemetry
 
 object Crafting {
     private val busy = mutableSetOf<UUID>()
@@ -99,6 +100,7 @@ object Crafting {
                 player.exp = progress
                 throw error
             }
+            ModuleTelemetry.record(ModuleTelemetry.Event.FUSION_CRAFTS, count.toLong())
             FusionRegistry.notifyCraft(context)
             return count
         } finally {

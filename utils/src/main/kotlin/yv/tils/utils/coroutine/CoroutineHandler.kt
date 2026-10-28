@@ -15,6 +15,7 @@ package yv.tils.utils.coroutine
 import kotlinx.coroutines.*
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.stats.ModuleTelemetry
 
 class CoroutineHandler {
     companion object {
@@ -49,12 +50,14 @@ class CoroutineHandler {
                 if (isOnce) {
                     Logger.debug("Launching one-time task $taskName with beforeDelay: $beforeDelay", DEBUG_LEVEL.BASIC)
                     val taskData = launchOnceTaskLogic(task, taskName, beforeDelay)
+                    ModuleTelemetry.record(ModuleTelemetry.Event.UTILS_TASKS_SCHEDULED)
                     return taskData.taskId
                 }
 
                 Logger.debug("Launching task $taskName with beforeDelay: $beforeDelay and afterDelay: $afterDelay",
                     DEBUG_LEVEL.BASIC)
                 val taskData = launchTaskLogic(task, taskName, beforeDelay, afterDelay)
+                ModuleTelemetry.record(ModuleTelemetry.Event.UTILS_TASKS_SCHEDULED)
                 return taskData.taskId
             } catch (e: Exception) {
                 Logger.error("Failed to launch task: ${e.message}")

@@ -35,11 +35,16 @@ data class StatsConfigState(
     @ConfigDescription("Documentation URL")
     val documentation: String = "https://docs.yvtils.net/stats/config.yml",
 
+    @NotGuiEditable
     @ConfigDescription(
         "Whether you have opted in to anonymous stats collection. Set to true to enable, " +
             "false to disable. Stats are sent to api.yvtils.net/stats"
     )
     var opt_in: Boolean? = null,
+
+    @NotGuiEditable
+    @ConfigDescription("Random installation identifier. Never derived from world seeds, names or IP addresses.")
+    var server_id: String = "",
 
     var metadata: Metadata = Metadata(),
 

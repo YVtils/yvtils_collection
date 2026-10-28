@@ -19,6 +19,7 @@ import org.spongepowered.configurate.yaml.NodeStyle
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
+import yv.tils.utils.stats.ModuleTelemetry
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.Files
@@ -148,6 +149,7 @@ class ConfigurateFileUtils {
             Logger.debug("Loading ${format.name} file: $path")
 
             val node = loaderFor(file, format).load()
+            ModuleTelemetry.record(ModuleTelemetry.Event.CONFIG_LOADS)
             return ConfigFile(file, node, format)
         }
 
@@ -228,6 +230,7 @@ class ConfigurateFileUtils {
             try {
                 loaderFor(temporary.toFile(), configFile.format).save(configFile.node)
                 Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+                ModuleTelemetry.record(ModuleTelemetry.Event.CONFIG_SAVES)
             } finally {
                 Files.deleteIfExists(temporary)
             }

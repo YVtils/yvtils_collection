@@ -16,10 +16,12 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerLocaleChangeEvent
 import yv.tils.common.language.LoadPlayerLanguage
+import yv.tils.utils.stats.ModuleTelemetry
 
 class PlayerLocaleChange : Listener {
     @EventHandler
     fun onEvent(e: PlayerLocaleChangeEvent) {
         LoadPlayerLanguage().localChange(e)
+        ModuleTelemetry.record(ModuleTelemetry.Event.COMMON_LOCALE_CHANGES)
     }
 }

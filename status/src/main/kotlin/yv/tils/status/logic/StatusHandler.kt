@@ -20,6 +20,7 @@ import yv.tils.status.utils.StatusUtils.Companion.generateDefaultStatus
 import yv.tils.status.utils.StatusUtils.Companion.setStatusDisplay
 import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.modules.Core
+import yv.tils.utils.stats.ModuleTelemetry
 
 class StatusHandler {
     fun setStatus(player: Player, status: String) {
@@ -89,6 +90,7 @@ class StatusHandler {
 
     private fun setStatusDisplayHandler(player: Player, status: String) {
         if (setStatusDisplay(player, status)) {
+            ModuleTelemetry.record(ModuleTelemetry.Event.STATUS_UPDATES)
             val display = ConfigFile.config["display"] as String
 
             val displayCompo = MessageUtils.replacer(

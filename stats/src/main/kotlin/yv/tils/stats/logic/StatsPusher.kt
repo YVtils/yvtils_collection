@@ -12,23 +12,33 @@
 
 package yv.tils.stats.logic
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.bukkit.Bukkit
 import yv.tils.stats.configs.ConfigFile
-import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.modules.Core
-import yv.tils.utils.logger.DEBUG_LEVEL
+import yv.tils.stats.registry.StatsRegistry
 import yv.tils.utils.logger.Logger
+import yv.tils.utils.modules.Core
+import yv.tils.utils.stats.ModuleTelemetry
 import java.io.OutputStreamWriter
+import java.net.ConnectException
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URI
-import java.security.MessageDigest
+import java.net.UnknownHostException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Service for pushing stats to the YVtils API at api.yvtils.net/stats.
@@ -38,12 +48,12 @@ import java.net.UnknownHostException
  * - Uses HTTPS POST to send JSON payload
  * - Push interval: 1 hour (not configurable)
  * - Automatically retries on failure with exponential backoff
- * - Thread-safe and non-blocking
+ * - Scheduled requests run on IO workers; synchronous APIs must also run on a worker
  *
  * ## Privacy
- * - Server ID is hashed and anonymized
- * - No player names or UUIDs are sent
- * - No IP addresses are stored (server-side responsibility)
+ * - Server ID is a persisted random UUID, never derived from world data
+ * - Default metrics contain no player identities; custom metric authors must avoid PII
+ * - The receiver can see the connection IP address; its retention is server-side policy
  *
  * ## Note
  * The API endpoint and push settings are hardcoded and cannot be changed by users.
@@ -57,26 +67,28 @@ object StatsPusher {
 
     private val isPushing = AtomicBoolean(false)
     private val lastPushTime = AtomicLong(0)
-    private val consecutiveFailures = AtomicLong(0)
+    private val backoff = PushBackoff()
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val generation = AtomicLong(0)
+    private val activeConnection = AtomicReference<HttpURLConnection?>()
+    @Volatile private var enabled = false
 
     // Hardcoded configuration - not user-configurable
     private const val API_ENDPOINT = "https://api.yvtils.net/stats"
     private const val PUSH_INTERVAL_SECONDS = 3600 // 1 hour
     private const val HTTP_TIMEOUT_SECONDS = 30
-    private const val MAX_CONSECUTIVE_FAILURES = 5
+    private const val MAX_RESPONSE_BYTES = 16 * 1024
 
-    // Push task identifier
-    private var pushTaskId: String? = null
+    // Owned job, independent of the shared task registry's millisecond IDs.
+    @Volatile internal var pushJob: Job? = null
+        private set
 
     /**
      * Data class representing the push payload sent to the API.
-     * 
-     * See API-SPECIFICATION.md for full documentation on what the API
-     * should do with this payload.
      */
     @Serializable
     data class PushPayload(
-        /** Anonymized server identifier (UUID format) */
+        /** Random installation identifier (UUID format) */
         val serverId: String,
         /** Server and plugin metadata */
         val metadata: PushMetadata,
@@ -90,7 +102,7 @@ object StatsPusher {
         val collectTimestamp: Long,
         /** Current online player count (null if collection disabled) */
         val playerCount: Int? = null,
-        /** Server region (if enabled) */
+        /** Reserved for wire compatibility; this module does not perform geolocation. */
         val region: String? = null,
         /** Optional human-readable server name (user-configured) */
         val serverName: String,
@@ -114,7 +126,11 @@ object StatsPusher {
         val histogramValue: HistogramValueDto? = null,
         val listValue: List<String>? = null,
         val longValue: Long? = null,
-        val stringValue: String? = null
+        val stringValue: String? = null,
+        // Keep the existing wire shape unchanged for integer/default metrics.
+        @OptIn(ExperimentalSerializationApi::class)
+        @EncodeDefault(EncodeDefault.Mode.NEVER)
+        val doubleValue: Double? = null,
     )
 
     @Serializable
@@ -163,111 +179,78 @@ object StatsPusher {
      * Start the automatic push scheduler.
      * This should be called when the module is enabled.
      *
-     * @return The task ID for the scheduled push task
+     * @return An opaque scheduler identifier, or null when disabled/not opted in.
+     * Use [stopScheduledPush] to cancel it, not the shared coroutine task registry.
      */
+    @Synchronized
     fun startScheduledPush(): String? {
-        if (!ConfigFile.isOptedIn()) {
+        if (!enabled || !ConfigFile.isOptedIn()) {
             Logger.debug("[Stats] Not starting push scheduler - user has not opted in")
             return null
         }
 
-        val intervalMillis = PUSH_INTERVAL_SECONDS * 1000L
+        if (pushJob?.isActive == true) return "yvtils-stats-push"
 
-        Logger.info("[Stats] Starting stats push scheduler (interval: ${PUSH_INTERVAL_SECONDS}s)")
+        Logger.debug("[Stats] Starting stats push scheduler (interval: ${PUSH_INTERVAL_SECONDS}s)")
 
-        pushTaskId = CoroutineHandler.launchTask(
-            suspend {
-                pushAsync() // Return value ignored - we just log results internally
-                Unit
-            },
-            "yvtils-stats-push",
-            beforeDelay = 60_000L, // Wait 1 minute after server start before first push
-            afterDelay = intervalMillis,
-            isOnce = false
-        )
+        pushJob = scope.launch {
+            delay(60_000L)
+            while (isActive && enabled && ConfigFile.isOptedIn()) {
+                val result = push()
+                val retryDelay = synchronized(backoff) { backoff.remainingMillis() }
+                delay(if (result is PushResult.Error || result == PushResult.Skipped) {
+                    retryDelay.coerceAtLeast(1000L)
+                } else PUSH_INTERVAL_SECONDS * 1000L)
+            }
+        }
 
-        return pushTaskId
+        return "yvtils-stats-push"
     }
 
     /**
      * Stop the automatic push scheduler.
      * This should be called when the module is disabled.
      */
+    @Synchronized
     fun stopScheduledPush() {
-        pushTaskId?.let { taskId ->
-            CoroutineHandler.cancelTask(taskId)
-            Logger.debug("[Stats] Stopped stats push scheduler")
-        }
-        pushTaskId = null
+        generation.incrementAndGet()
+        pushJob?.cancel()
+        pushJob = null
+        activeConnection.getAndSet(null)?.disconnect()
+    }
+
+    internal fun setEnabled(value: Boolean) {
+        enabled = value
+        if (!value) stopScheduledPush()
     }
 
     /**
-     * Generate an anonymized server ID in UUID format.
-     * Creates a consistent but privacy-preserving identifier based on server properties.
-     * 
-     * The ID is formatted as a UUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx) for API compatibility.
-     */
-    private fun generateServerId(): String {
-        return try {
-            val serverVersion = Bukkit.getVersion()
-            val serverName = ConfigFile.getString("metadata.server_name") ?: ""
-            val worldName = Bukkit.getWorlds().firstOrNull()?.name ?: "world"
-            val worldSeed = Bukkit.getWorlds().firstOrNull()?.seed ?: 0L
-            
-            // Create a hash of these properties for anonymity
-            // Using world seed makes the ID stable but unique per server
-            val input = "$serverVersion:$serverName:$worldName:$worldSeed"
-            val bytes = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
-            formatAsUuidV4(bytes)
-        } catch (_: Exception) {
-            // Fallback to a random-ish ID based on current time
-            val bytes = MessageDigest.getInstance("SHA-256")
-                .digest("${System.currentTimeMillis()}:${System.nanoTime()}".toByteArray())
-            formatAsUuidV4(bytes)
-        }
-    }
-
-    /**
-     * Format bytes as a valid UUIDv4 string.
-     * 
-     * UUIDv4 format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-     * where x is any hex digit and y is one of 8, 9, a, or b
-     */
-    private fun formatAsUuidV4(bytes: ByteArray): String {
-        require(bytes.size >= 16) { "Need at least 16 bytes for UUID" }
-        
-        // Copy first 16 bytes and modify for UUIDv4 compliance
-        val uuidBytes = bytes.take(16).toByteArray()
-        
-        // Set version to 4 (byte 6, high nibble)
-        uuidBytes[6] = ((uuidBytes[6].toInt() and 0x0F) or 0x40).toByte()
-        
-        // Set variant to RFC 4122 (byte 8, high bits = 10xx)
-        uuidBytes[8] = ((uuidBytes[8].toInt() and 0x3F) or 0x80).toByte()
-        
-        val hex = uuidBytes.joinToString("") { "%02x".format(it) }
-        return "${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}"
-    }
-
-    /**
-     * Push stats to the API asynchronously.
-     * This is the method called by the scheduler.
+     * Legacy synchronous alias. Call from a worker, or use [pushOnIo].
      */
     fun pushAsync(): PushResult {
         return push()
     }
+
+    suspend fun pushOnIo(): PushResult = withContext(Dispatchers.IO) { push() }
 
     /**
      * Push stats to the API.
      *
      * @return The result of the push operation
      */
-    fun push(): PushResult {
+    fun push(): PushResult = pushInternal(force = false)
+
+    private fun pushInternal(force: Boolean): PushResult {
         // Check if opted in
         if (!ConfigFile.isOptedIn()) {
             Logger.debug("[Stats] Not pushing - user has not opted in")
             return PushResult.NotOptedIn
         }
+        if (!enabled) return PushResult.Skipped
+        if (runCatching { Bukkit.isPrimaryThread() }.getOrDefault(false)) {
+            return PushResult.Error("Remote stats push must run on a worker thread; use pushOnIo()")
+        }
+        val requestGeneration = generation.get()
 
         // Prevent concurrent pushes
         if (!isPushing.compareAndSet(false, true)) {
@@ -276,19 +259,7 @@ object StatsPusher {
         }
 
         try {
-            // Check if we've had too many consecutive failures
-            if (consecutiveFailures.get() >= MAX_CONSECUTIVE_FAILURES) {
-                val timeSinceLastPush = System.currentTimeMillis() - lastPushTime.get()
-                val backoffTime = 3600_000L // 1 hour backoff after too many failures
-                
-                if (timeSinceLastPush < backoffTime) {
-                    Logger.debug("[Stats] Too many consecutive failures, waiting for backoff")
-                    return PushResult.Skipped
-                }
-                
-                // Reset failure count after backoff period
-                consecutiveFailures.set(0)
-            }
+            if (!force && synchronized(backoff) { backoff.isWaiting() }) return PushResult.Skipped
 
             // Build the payload
             val payload = buildPayload()
@@ -297,23 +268,29 @@ object StatsPusher {
             Logger.debug("[Stats] Pushing stats to $API_ENDPOINT")
 
             // Send HTTP request
-            val result = sendHttpPost(API_ENDPOINT, jsonPayload, payload.serverId)
+            val result = sendHttpPost(API_ENDPOINT, jsonPayload, payload.serverId, requestGeneration)
+            if (!canSend(requestGeneration)) return PushResult.Skipped
 
             when (result) {
                 is PushResult.Success -> {
                     lastPushTime.set(System.currentTimeMillis())
-                    consecutiveFailures.set(0)
+                    synchronized(backoff) { backoff.reset() }
+                    ModuleTelemetry.record(ModuleTelemetry.Event.STATS_PUSH_SUCCESSES)
                     Logger.info("[Stats] Successfully pushed stats to YVtils API")
                 }
                 is PushResult.Error -> {
-                    consecutiveFailures.incrementAndGet()
+                    synchronized(backoff) { backoff.failed() }
                     Logger.warn("[Stats] Failed to push stats: ${result.message} (code: ${result.code})")
-                    Logger.debug("[Stats] Payload was: $jsonPayload", DEBUG_LEVEL.DETAILED)
                 }
                 else -> {}
             }
 
             return result
+        } catch (e: Exception) {
+            if (!canSend(requestGeneration)) return PushResult.Skipped
+            synchronized(backoff) { backoff.failed() }
+            Logger.warn("[Stats] Could not prepare stats push: ${e.message}")
+            return PushResult.Error("Could not prepare stats push: ${e.message}")
         } finally {
             isPushing.set(false)
         }
@@ -322,22 +299,12 @@ object StatsPusher {
     /**
      * Build the payload to send to the API.
      */
-    private fun buildPayload(): PushPayload {
-        val serverVersion = try {
-            Bukkit.getVersion()
-        } catch (e: Exception) {
-            "Unknown"
-        }
-
-        val playerCount = try {
-            if (ConfigFile.getBoolean("metadata.collect_player_count") != false) {
-                Bukkit.getOnlinePlayers().size
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            null
-        }
+    internal fun buildPayload(): PushPayload {
+        val settings = ConfigFile.state
+        val serverVersion = StatsRegistry.getValue("server_version")?.stringValue ?: "Unknown"
+        val playerCount = if (settings.metadata.collect_player_count) {
+            StatsRegistry.getValue("player_count")?.longValue?.toInt()
+        } else null
 
         val pluginVersion = try {
             Core.yvtilsVersion
@@ -345,31 +312,18 @@ object StatsPusher {
             "Unknown"
         }
 
-        val region = try {
-            val regionEnabled = ConfigFile.getBoolean("metadata.region") == true
-            if (regionEnabled) {
-                ConfigFile.getString("metadata.region_value") ?: null
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            null
-        }
-
-        val serverName = ConfigFile.getString("metadata.server_name") ?: ""
-
         val metadata = PushMetadata(
             collectTimestamp = System.currentTimeMillis(),
             playerCount = playerCount,
-            region = region,
-            serverName = serverName,
+            region = null,
+            serverName = settings.metadata.server_name,
             serverVersion = serverVersion,
             yvtilsVersion = pluginVersion
         )
 
         // Build stats from the service
         val statsExport = StatsService.buildExport()
-        val stats = statsExport.stats.map { stat ->
+        val stats = statsExport.stats.filter { settings.metadata.collect_player_count || it.key != "player_count" }.map { stat ->
             StatEntryDto(
                 help = stat.help,
                 key = stat.key,
@@ -387,13 +341,14 @@ object StatsPusher {
                     },
                     listValue = stat.value.listValue,
                     longValue = stat.value.longValue,
+                    doubleValue = stat.value.doubleValue,
                     stringValue = stat.value.stringValue
                 )
             )
         }
 
         return PushPayload(
-            serverId = generateServerId(),
+            serverId = settings.server_id,
             metadata = metadata,
             stats = stats
         )
@@ -407,11 +362,14 @@ object StatsPusher {
      * @param serverId The server ID to include in the X-Server-ID header
      * @return The result of the request
      */
-    private fun sendHttpPost(url: String, jsonBody: String, serverId: String): PushResult {
+    internal fun sendHttpPost(url: String, jsonBody: String, serverId: String, requestGeneration: Long = generation.get()): PushResult {
         var connection: HttpURLConnection? = null
         
         try {
+            if (!canSend(requestGeneration)) return PushResult.Skipped
             connection = URI(url).toURL().openConnection() as HttpURLConnection
+            activeConnection.set(connection)
+            if (!canSend(requestGeneration)) return PushResult.Skipped
             
             connection.requestMethod = "POST"
             connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
@@ -420,37 +378,46 @@ object StatsPusher {
             connection.setRequestProperty("X-Server-ID", serverId)
             connection.doOutput = true
             connection.doInput = true
+            // Never forward the installation ID or payload to a redirect target.
+            connection.instanceFollowRedirects = false
             connection.connectTimeout = HTTP_TIMEOUT_SECONDS * 1000
             connection.readTimeout = HTTP_TIMEOUT_SECONDS * 1000
 
             // Write the JSON body
+            if (!canSend(requestGeneration)) return PushResult.Skipped
             OutputStreamWriter(connection.outputStream, Charsets.UTF_8).use { writer ->
+                if (!canSend(requestGeneration)) return PushResult.Skipped
                 writer.write(jsonBody)
                 writer.flush()
             }
 
             val responseCode = connection.responseCode
 
-            if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
+            if (responseCode in 200..299) {
                 // Read response
-                val responseBody = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                val responseBody = connection.inputStream.use {
+                    val bytes = it.readNBytes(MAX_RESPONSE_BYTES + 1)
+                    if (bytes.size > MAX_RESPONSE_BYTES) return PushResult.Error("API response exceeded size limit", responseCode)
+                    bytes.toString(Charsets.UTF_8)
+                }
+                if (responseBody.isBlank()) return PushResult.Success(PushResponse(true))
                 
                 return try {
                     val response = json.decodeFromString<PushResponse>(responseBody)
-                    PushResult.Success(response)
+                    if (response.success) PushResult.Success(response)
+                    else PushResult.Error(response.message ?: "API rejected stats", responseCode)
                 } catch (e: Exception) {
-                    // If we can't parse the response but got a 2xx, consider it a success
-                    PushResult.Success(PushResponse(success = true, message = "OK"))
+                    PushResult.Error("Invalid API response", responseCode)
                 }
             } else {
                 // Read error response
                 val errorBody = try {
-                    connection.errorStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() } ?: "No error body"
+                    connection.errorStream?.use { it.readNBytes(MAX_RESPONSE_BYTES).toString(Charsets.UTF_8) } ?: "No error body"
                 } catch (e: Exception) {
                     "Could not read error body"
                 }
                 
-                return PushResult.Error("HTTP $responseCode: $errorBody", responseCode)
+                return PushResult.Error("HTTP $responseCode: ${errorBody.replace('\n', ' ').replace('\r', ' ')}", responseCode)
             }
         } catch (e: SocketTimeoutException) {
             return PushResult.Error("Connection timed out")
@@ -461,6 +428,7 @@ object StatsPusher {
         } catch (e: Exception) {
             return PushResult.Error("Request failed: ${e.message}")
         } finally {
+            activeConnection.compareAndSet(connection, null)
             connection?.disconnect()
         }
     }
@@ -473,7 +441,7 @@ object StatsPusher {
      */
     fun forcePush(): PushResult {
         Logger.info("[Stats] Force pushing stats to YVtils API")
-        return push()
+        return pushInternal(force = true)
     }
 
     /**
@@ -488,5 +456,8 @@ object StatsPusher {
      *
      * @return Number of consecutive push failures
      */
-    fun getConsecutiveFailures(): Long = consecutiveFailures.get()
+    fun getConsecutiveFailures(): Long = synchronized(backoff) { backoff.failures }
+
+    private fun canSend(requestGeneration: Long): Boolean =
+        enabled && ConfigFile.isOptedIn() && requestGeneration == generation.get()
 }

@@ -21,6 +21,7 @@ import org.bukkit.scheduler.BukkitTask
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
+import yv.tils.utils.stats.ModuleTelemetry
 import yv.tils.waypoint.Waypoint
 import yv.tils.waypoint.config.ConfigFile
 import yv.tils.waypoint.language.WaypointText
@@ -43,6 +44,7 @@ class WaypointNavigation {
         if (same) WaypointText.send(player, "stopped")
         else {
             runs[player.uniqueId] = Run(point)
+            ModuleTelemetry.record(ModuleTelemetry.Event.WAYPOINT_NAVIGATIONS_STARTED)
             WaypointText.send(player, "started", mapOf("waypoint" to point.name))
             tick()
         }

@@ -15,6 +15,7 @@ package yv.tils.yv_smp.logic.music
 import org.bukkit.entity.Player
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.player.PlayerUtils
+import yv.tils.utils.stats.ModuleTelemetry
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -173,6 +174,7 @@ object MusicHandler {
 
         audioPlayer.load(audioUrl,
             onLoaded = {
+                ModuleTelemetry.record(ModuleTelemetry.Event.YV_SMP_AUDIO_LOADS)
                 Logger.info("Audio loaded successfully for ${player.name}")
             },
             onEnd = {

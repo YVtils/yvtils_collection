@@ -13,6 +13,7 @@
 package yv.tils.utils.modules
 
 import org.bukkit.entity.Player
+import yv.tils.utils.stats.ModuleTelemetry
 import java.util.Properties
 import java.util.function.Consumer
 
@@ -54,10 +55,12 @@ class Module {
 
         fun addModule(module: YVtilsModuleData) {
             loadedModules.add(module)
+            ModuleTelemetry.register(module.name, module.version)
         }
 
         fun removeModule(module: YVtilsModuleData) {
             loadedModules.remove(module)
+            ModuleTelemetry.unregister(module.name)
         }
 
         fun getModule(moduleName: String): YVtilsModuleData? {

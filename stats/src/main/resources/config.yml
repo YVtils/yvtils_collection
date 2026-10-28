@@ -3,8 +3,10 @@
 # ==============================================================================
 # Documentation: https://docs.yvtils.net/stats/config.yml
 #
-# This module collects anonymous usage statistics to help improve YVtils.
-# All data collection is opt-in and respects your privacy.
+# Optional YVtils usage telemetry. This is NOT the player/server metrics module.
+# Nothing is sent before opt-in. The receiver can see the connection IP address.
+# Default metrics contain no player identities or world seeds; custom metric
+# authors must avoid personal data. An optional server name is sent verbatim.
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
@@ -15,12 +17,18 @@
 # Values:
 #   true  - Stats collection is enabled
 #   false - Stats collection is disabled
-#   (not set) - You will be prompted to choose when an admin joins
+#   null / not set - The first joining operator each boot is prompted
 #
-# You can change this at any time. Setting to false will stop all data
-# collection immediately.
+# Edit this file and restart to apply changes. GUI/API changes apply live.
+# Opting out stops default collection and remote push and clears in-memory stats.
+# In game: /yvtilsstats or /yvtils config stats.
+# Accept: /yvtilsstats optin accept; withdraw: /yvtilsstats optin decline.
 # ------------------------------------------------------------------------------
-# opt_in: false
+opt_in: null
+
+# Generated and persisted when first opting in. Do not copy between servers.
+# Random UUID, never derived from world seeds, server names or IP addresses.
+server_id: ""
 
 # ------------------------------------------------------------------------------
 # METADATA SETTINGS
@@ -28,14 +36,6 @@
 # These settings control what metadata is included in stats exports.
 # ------------------------------------------------------------------------------
 metadata:
-  # Enable/disable region tracking based on server IP.
-  #
-  # PRIVACY NOTE: When enabled, region information may be derived from your
-  # server's IP address. This is disabled by default for privacy.
-  #
-  # Default: false
-  region: false
-
   # Optional human-readable name for the server.
   #
   # This name is included in stats exports to help you identify your server
@@ -54,19 +54,6 @@ metadata:
   collect_player_count: true
 
 # ------------------------------------------------------------------------------
-# AUTO-SAVE SETTINGS
-# ------------------------------------------------------------------------------
-# Stats are saved to disk periodically to survive server restarts.
-# ------------------------------------------------------------------------------
-
-# How often to auto-save stats to disk (in seconds).
-#
-# Set to 0 to disable auto-save (stats will only be saved on server shutdown).
-#
-# Default: 300 (5 minutes)
-auto_save_interval_seconds: 300
-
-# ------------------------------------------------------------------------------
 # SAFETY LIMITS
 # ------------------------------------------------------------------------------
 # These limits prevent resource exhaustion from runaway stat registrations.
@@ -78,6 +65,7 @@ auto_save_interval_seconds: 300
 # This prevents memory issues from unbounded list growth.
 #
 # Default: 1000
+# Allowed: 1..1000 (values outside this range are clamped).
 max_list_size: 1000
 
 # Maximum number of stats that can be registered.
@@ -86,4 +74,5 @@ max_list_size: 1000
 # This prevents high cardinality issues.
 #
 # Default: 10000
+# Allowed: 1..10000 (values outside this range are clamped).
 max_stats_count: 10000

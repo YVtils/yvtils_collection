@@ -11,8 +11,9 @@ package yv.tils.stats.configs
 
 import yv.tils.config.files.ConfigFormat
 import yv.tils.config.files.ObjectMapperFileUtils
-import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.logger.Logger
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Configuration file handler for the stats module.
@@ -28,15 +29,20 @@ import yv.tils.utils.logger.Logger
 class ConfigFile {
     companion object {
         /** The single source of truth. */
+        @Volatile
         var state: StatsConfigState = StatsConfigState()
+
+        @Volatile internal var onChange: (() -> Unit)? = null
+        private val stateLock = Any()
+        private const val FILE_PATH = "/stats/config.yml"
 
         /**
          * Flattened `"a.b.c" -> value` view derived from [state], re-synced on every
-         * [loadConfig]/[registerStrings] call - kept around purely so the module's existing
+         * configuration change - kept around purely so the module's existing
          * `ConfigFile.getString("metadata.server_name")`-style call sites keep working
          * unchanged on top of the new nested data class.
          */
-        val config: MutableMap<String, Any> = mutableMapOf()
+        val config: MutableMap<String, Any> = ConcurrentHashMap()
 
         fun get(key: String): Any? = config[key]
         fun getString(key: String): String? = get(key)?.toString()
@@ -62,16 +68,36 @@ class ConfigFile {
          * Persist the opt-in decision.
          */
         fun markOptIn(decision: Boolean) {
-            state = state.copy(opt_in = decision)
-            syncDerivedView()
-
-            CoroutineHandler.launchTask(
-                suspend { ConfigFile().registerStrings() },
-                null,
-                isOnce = true,
-            )
-
+            synchronized(stateLock) {
+                persistAndPublish(state.copy(opt_in = decision))
+            }
+            onChange?.invoke()
             Logger.info("[Stats] Opt-in decision recorded: $decision")
+        }
+
+        private fun persistAndPublish(candidate: StatsConfigState) {
+            val normalized = candidate.copy(
+                metadata = candidate.metadata.copy(),
+                max_list_size = candidate.max_list_size.coerceIn(1, 1000),
+                max_stats_count = candidate.max_stats_count.coerceIn(1, 10000),
+                server_id = candidate.server_id.takeIf { runCatching { UUID.fromString(it) }.isSuccess }
+                    ?: if (candidate.opt_in == true) UUID.randomUUID().toString() else "",
+            )
+            // Persist first: a failed save must not silently enable telemetry.
+            try {
+                ObjectMapperFileUtils.save(FILE_PATH, normalized, format = ConfigFormat.YAML)
+            } catch (e: Exception) {
+                // Withdrawal still takes effect in memory when storage fails. Report the
+                // failure so the administrator knows it cannot survive a restart yet.
+                if (normalized.opt_in != true) {
+                    state = normalized
+                    syncDerivedView()
+                    onChange?.invoke()
+                }
+                throw e
+            }
+            state = normalized
+            syncDerivedView()
         }
 
         private fun syncDerivedView() {
@@ -80,22 +106,25 @@ class ConfigFile {
         }
     }
 
-    private val filePath = "/stats/config.yml"
-
     fun loadConfig() {
-        state = ObjectMapperFileUtils.load(filePath, StatsConfigState(), format = ConfigFormat.YAML)
-        registerStrings()
-        syncDerivedView()
+        synchronized(stateLock) {
+            val loaded = ObjectMapperFileUtils.load(FILE_PATH, StatsConfigState(), format = ConfigFormat.YAML)
+            persistAndPublish(loaded)
+        }
+        onChange?.invoke()
     }
 
     fun registerStrings() {
-        ObjectMapperFileUtils.save(filePath, state, format = ConfigFormat.YAML)
+        synchronized(stateLock) {
+            persistAndPublish(state)
+        }
     }
 
     /** Called by [yv.tils.gui.logic.DataClassConfigGui]'s saver after an in-game edit. */
     fun applyState(newState: StatsConfigState) {
-        state = newState
-        syncDerivedView()
-        registerStrings()
+        synchronized(stateLock) {
+            persistAndPublish(newState.copy(server_id = state.server_id))
+        }
+        onChange?.invoke()
     }
 }

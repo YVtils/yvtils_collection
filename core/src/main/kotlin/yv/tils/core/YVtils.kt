@@ -22,11 +22,13 @@ import yv.tils.core.commands.register.YVtilsCommand
 import yv.tils.core.loader.DynamicModuleDriver
 import yv.tils.core.loader.ModuleConfig
 import yv.tils.gui.logic.CommonConfigGui
+import yv.tils.gui.core.InvUIBootstrap
 import yv.tils.utils.UtilsYVtils
 import yv.tils.utils.logger.DEBUG_LEVEL
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
+import yv.tils.utils.stats.ModuleTelemetry
 import java.util.function.Consumer
 
 class YVtils : JavaPlugin() {
@@ -142,6 +144,8 @@ class YVtils : JavaPlugin() {
             server.pluginManager.disablePlugin(this)
             return
         }
+        ModuleTelemetry.register("core", yvtilsVersion)
+        InvUIBootstrap.registerTelemetry()
         if (!phase("enable", modules + dynamicModules) { it.enablePlugin() }) {
             server.pluginManager.disablePlugin(this)
             return
@@ -235,6 +239,7 @@ class YVtils : JavaPlugin() {
 
         phase("disable", initializedModules.asReversed()) { it.disablePlugin() }
         initializedModules.clear()
+        ModuleTelemetry.unregister("core")
         if (CommandAPI.isLoaded()) CommandAPI.onDisable()
 
         Logger.info("----------")

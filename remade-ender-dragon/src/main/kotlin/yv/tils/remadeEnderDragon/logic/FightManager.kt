@@ -23,6 +23,7 @@ import org.bukkit.scheduler.BukkitTask
 import yv.tils.config.files.ObjectMapperFileUtils
 import yv.tils.remadeEnderDragon.configs.*
 import yv.tils.utils.modules.Core
+import yv.tils.utils.stats.ModuleTelemetry
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.player.PlayerUtils.Companion.isSupported
 import java.util.UUID
@@ -109,6 +110,7 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
         val fight = DragonFight(dragon, ConfigFile.state, terrain, this, preview)
         fights[dragon.uniqueId] = fight
         fight.tick(tick)
+        if (!preview) ModuleTelemetry.record(ModuleTelemetry.Event.DRAGON_ENCOUNTERS_STARTED)
         Logger.info("[Remade Ender Dragon] Started ${if (preview) "preview" else "encounter"} in ${dragon.world.name}, dragon=${dragon.uniqueId}.")
         return fight
     }
@@ -123,8 +125,11 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
     }
 
     private fun finish(fight: DragonFight) {
-        fights.remove(fight.dragon.uniqueId)
-        if (fight.dragon.isDead || fight.dragon.phase == EnderDragon.Phase.DYING) markCompleted(fight.world)
+        val removed = fights.remove(fight.dragon.uniqueId)
+        if (fight.dragon.isDead || fight.dragon.phase == EnderDragon.Phase.DYING) {
+            markCompleted(fight.world)
+            if (removed != null && !fight.preview) ModuleTelemetry.record(ModuleTelemetry.Event.DRAGON_ENCOUNTERS_COMPLETED)
+        }
         fight.close()
         rewardedCrystals.clear()
         Logger.info("[Remade Ender Dragon] Encounter finished in ${fight.world.name}.")

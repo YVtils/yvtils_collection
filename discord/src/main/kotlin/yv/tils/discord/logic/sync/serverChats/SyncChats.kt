@@ -27,6 +27,7 @@ import yv.tils.discord.logic.sync.serverChats.ServerChatsSyncManager.Companion.s
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.player.PlayerUtils
+import yv.tils.utils.stats.ModuleTelemetry
 
 
 class SyncChats : ListenerAdapter() {
@@ -47,7 +48,9 @@ class SyncChats : ListenerAdapter() {
                     sender,
                     message
                 )
-            ).useComponentsV2().queue()
+            ).useComponentsV2().queue({
+                ModuleTelemetry.record(ModuleTelemetry.Event.MINECRAFT_TO_DISCORD_MESSAGES)
+            })
         } catch (_: UninitializedPropertyAccessException) {
             Logger.warn("Discord app was not able to establish chat sync bridge between minecraft and discord. Please check your channel configuration.")
             active = false
@@ -80,6 +83,7 @@ class SyncChats : ListenerAdapter() {
         val compMessage = MessageUtils.convert("<gray>[<#7289da>DISCORD<gray>]<white> $author<gray>:<white> $message")
 
         PlayerUtils.broadcast(compMessage)
+        ModuleTelemetry.record(ModuleTelemetry.Event.DISCORD_TO_MINECRAFT_MESSAGES)
         Logger.info(compMessage)
     }
 

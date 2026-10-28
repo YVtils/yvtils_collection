@@ -17,6 +17,7 @@ import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
+import yv.tils.utils.stats.ModuleTelemetry
 import java.util.*
 
 class SitManager {
@@ -33,7 +34,9 @@ class SitManager {
 
         sittingPlayers.add(uuid)
 
-        sitDown(0.0, 1.975, 0.0, player.location).addPassenger(player)
+        if (sitDown(0.0, 1.975, 0.0, player.location).addPassenger(player)) {
+            ModuleTelemetry.record(ModuleTelemetry.Event.SIT_SESSIONS_STARTED)
+        }
     }
 
     fun sitGetter(player: Player) {

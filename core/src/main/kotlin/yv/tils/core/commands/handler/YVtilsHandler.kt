@@ -19,9 +19,11 @@ import yv.tils.common.updateChecker.VersionState
 import yv.tils.config.language.LanguageHandler
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
+import yv.tils.utils.stats.ModuleTelemetry
 
 class YVtilsHandler {
     fun pluginInformation(sender: CommandSender) {
+        ModuleTelemetry.record(ModuleTelemetry.Event.CORE_INFO_VIEWS)
         val version = Core.yvtilsVersion
         val modules = Module.getModules(sort = true)
         val moduleNames = if (modules.isEmpty()) "-" else modules.joinToString(", ") { "${it.name} v${it.version}" }

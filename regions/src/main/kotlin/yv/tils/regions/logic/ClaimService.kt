@@ -16,6 +16,7 @@ import org.bukkit.entity.Player
 import yv.tils.regions.configs.ConfigFile
 import yv.tils.regions.data.*
 import yv.tils.regions.language.LangStrings.*
+import yv.tils.utils.stats.ModuleTelemetry
 import java.util.UUID
 import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.command.RemoteConsoleCommandSender
@@ -190,6 +191,7 @@ object ClaimService {
                 throw IllegalStateException(CREATE_SAVE_FAILED.key, e)
             }
         }
+        ModuleTelemetry.record(ModuleTelemetry.Event.REGIONS_CLAIMS_CREATED)
         return claim
     }
 
@@ -275,6 +277,7 @@ object ClaimService {
                 e
             )
         }
+        ModuleTelemetry.record(ModuleTelemetry.Event.REGIONS_CLAIMS_DELETED)
     }
 
     fun resize(sender: CommandSender, claim: Claim, bounds: ClaimBounds): Claim {

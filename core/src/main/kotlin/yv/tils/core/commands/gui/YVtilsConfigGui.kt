@@ -26,6 +26,7 @@ import yv.tils.gui.utils.Heads
 import yv.tils.utils.colors.Colors
 import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.modules.Module
+import yv.tils.utils.stats.ModuleTelemetry
 
 /**
  * InvUI-powered GUI for `/yvtils config`, listing every currently-active module that
@@ -42,11 +43,19 @@ import yv.tils.utils.modules.Module
  * advertised modules independently of whether they expose a configuration editor.
  */
 object YVtilsConfigGui {
+    /** Direct module shortcut without a compile-time dependency on any optional feature. */
+    fun openModule(player: Player, name: String) {
+        val opener = Module.getModule(name)?.configGuiOpener
+        // Fall back to the existing browser for disabled/unknown modules, not a dead GUI.
+        if (opener == null) open(player) else opener.accept(player)
+    }
+
     fun open(player: Player) {
         InvUIBootstrap.ensure()
 
         val entries = Module.getModules(sort = true).filter { it.configGuiOpener != null }
         buildWindow(player, entries).open(player)
+        ModuleTelemetry.record(ModuleTelemetry.Event.CORE_CONFIG_BROWSER_OPENS)
     }
 
     private fun buildWindow(player: Player, entries: List<Module.YVtilsModuleData>): Window.Builder<*, *> {

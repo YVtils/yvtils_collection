@@ -28,6 +28,7 @@ import yv.tils.multiMine.utils.BlockUtils.Companion.blocks
 import yv.tils.multiMine.utils.CooldownUtils
 import yv.tils.multiMine.utils.ToolUtils
 import yv.tils.utils.modules.Core
+import yv.tils.utils.stats.ModuleTelemetry
 import yv.tils.utils.logger.Logger
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import yv.tils.multiMine.utils.ChainedBlockBreak
@@ -59,6 +60,7 @@ class MultiMineHandler {
 
         CooldownUtils().setCooldown(player.uniqueId)
         BlockUtils().registerBlocks(loc, player, item)
+        ModuleTelemetry.record(ModuleTelemetry.Event.MULTIMINE_RUNS_REQUESTED)
     }
 
     fun cleanup(player: Player) {

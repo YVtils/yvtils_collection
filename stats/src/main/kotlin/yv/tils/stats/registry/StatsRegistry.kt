@@ -15,10 +15,10 @@ package yv.tils.stats.registry
 import yv.tils.stats.data.HistogramData
 import yv.tils.stats.data.StatType
 import yv.tils.stats.data.StatValue
+import yv.tils.stats.data.StatEntry
 import yv.tils.utils.logger.Logger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
-import java.lang.Double as JavaDouble
 import yv.tils.stats.data.PersistedStat
 
 /**
@@ -26,28 +26,30 @@ import yv.tils.stats.data.PersistedStat
  *
  * ## Thread Safety
  * All public methods are thread-safe and can be called from any thread.
- * - Counter and gauge operations use atomic primitives for lock-free updates
+ * - Counters use atomic primitives; gauge updates synchronize their numeric representation
  * - String and list operations are synchronized per-stat
  * - Registration methods use ConcurrentHashMap for safe concurrent access
  *
  * ## Concurrency Expectations
- * - `increment()`, `set()` for numeric types: Lock-free, O(1)
+ * - `increment()`, `set()` for counters: Lock-free, O(1)
+ * - Gauge updates: Synchronized per stat, O(1)
  * - `set()` for strings: Synchronized on the stat entry, O(1)
  * - `appendToList()`: Synchronized on the stat entry, O(1) amortized
  * - `exportAsJson()`, `exportAsPrometheusText()`: Read-only snapshot, may briefly block writes
  *
  * ## Key Validation
- * Keys must match pattern `[a-zA-Z0-9_:]+`. Invalid keys are rejected with a warning.
+ * Keys must match pattern `[a-zA-Z_:][a-zA-Z0-9_:]*`. Invalid keys are rejected with a warning.
  */
 object StatsRegistry {
     // Regex for valid stat keys (Prometheus-compatible)
     private val KEY_PATTERN = Regex("^[a-zA-Z_:][a-zA-Z0-9_:]*$")
 
     // Maximum list size to prevent memory issues
-    private const val MAX_LIST_SIZE = 1000
+    @Volatile private var maxListSize = 1000
 
     // Maximum number of stats to prevent high cardinality
-    private const val MAX_STATS_COUNT = 10000
+    @Volatile private var maxStatsCount = 10000
+    private val exportedNames = mutableMapOf<String, String>()
 
     // Internal stat storage
     private val stats = ConcurrentHashMap<String, RegisteredStat>()
@@ -60,6 +62,7 @@ object StatsRegistry {
         val type: StatType,
         val help: String,
         val atomicValue: AtomicLong = AtomicLong(0),
+        @Volatile var doubleGauge: Boolean = false,
         @Volatile var stringValue: String = "",
         val listValue: MutableList<String> = mutableListOf(),
         val histogramData: HistogramDataHolder = HistogramDataHolder(),
@@ -73,28 +76,30 @@ object StatsRegistry {
      * Mutable holder for histogram data with thread-safe operations.
      */
     internal class HistogramDataHolder {
-        private val count = AtomicLong(0)
-        private val sum = AtomicLong(0) // Stored as long bits for atomicity
+        private var count = 0L
+        private var sum = 0.0
 
+        @Synchronized
         fun observe(value: Double) {
-            count.incrementAndGet()
-            // Use compareAndSet loop for atomic double addition
-            var current: Long
-            var next: Long
-            do {
-                current = sum.get()
-                val currentDouble = JavaDouble.longBitsToDouble(current)
-                next = JavaDouble.doubleToLongBits(currentDouble + value)
-            } while (!sum.compareAndSet(current, next))
+            require(value.isFinite() && value >= 0) { "Histogram observations must be finite and non-negative" }
+            val nextSum = sum + value
+            require(nextSum.isFinite()) { "Histogram sum overflow" }
+            count = Math.addExact(count, 1)
+            sum = nextSum
         }
 
-        fun getCount(): Long = count.get()
-        fun getSum(): Double = JavaDouble.longBitsToDouble(sum.get())
-
+        @Synchronized
         fun toHistogramData(): HistogramData = HistogramData(
-            count = getCount(),
-            sum = getSum()
+            count = count,
+            sum = sum
         )
+
+        @Synchronized
+        fun restore(data: HistogramData) {
+            require(data.count >= 0 && data.sum.isFinite() && data.sum >= 0) { "Invalid histogram data" }
+            count = data.count
+            sum = data.sum
+        }
     }
 
     // ========================
@@ -135,9 +140,9 @@ object StatsRegistry {
         fun set(value: Long) = set(key, value)
 
         /**
-         * Set the gauge to a specific double value (stored as long bits).
+         * Set the gauge to a finite double value without losing fractional precision.
          */
-        fun set(value: Double) = set(key, JavaDouble.doubleToLongBits(value))
+        fun set(value: Double) = set(key, value)
 
         /**
          * Increment the gauge by 1.
@@ -157,7 +162,9 @@ object StatsRegistry {
         /**
          * Get the current value of the gauge.
          */
-        fun get(): Long = stats[key]?.atomicValue?.get() ?: 0
+        fun get(): Long = getValue(key)?.let { it.longValue ?: it.doubleValue?.toLong() } ?: 0
+
+        fun getDouble(): Double = getValue(key)?.let { it.doubleValue ?: it.longValue?.toDouble() } ?: 0.0
     }
 
     /**
@@ -212,7 +219,7 @@ object StatsRegistry {
         /**
          * Observe a value (e.g., a duration in milliseconds).
          */
-        fun observe(value: Double) = observeDuration(key, value.toLong())
+        fun observe(value: Double) = observeValue(key, value)
 
         /**
          * Observe a duration in milliseconds.
@@ -336,6 +343,7 @@ object StatsRegistry {
      * @param help Description of what this metric measures
      * @return true if registration succeeded, false otherwise
      */
+    @Synchronized
     fun registerStat(key: String, type: StatType, initialValue: Any? = null, help: String = ""): Boolean {
         // Validate key
         if (!isValidKey(key)) {
@@ -343,16 +351,24 @@ object StatsRegistry {
             return false
         }
 
-        // Check cardinality limit
-        if (stats.size >= MAX_STATS_COUNT) {
-            Logger.warn("[Stats] Maximum stats count ($MAX_STATS_COUNT) reached. Cannot register '$key'")
-            return false
+        stats[key]?.let { existing ->
+            if (existing.type != type) {
+                Logger.warn("[Stats] Stat '$key' is already registered as ${existing.type}, not $type")
+                return false
+            }
+            return true
         }
 
-        // Check if already registered
-        if (stats.containsKey(key)) {
-            Logger.debug("[Stats] Stat '$key' is already registered")
-            return true // Return true since the stat exists
+        if (stats.size >= maxStatsCount) {
+            Logger.warn("[Stats] Maximum stats count ($maxStatsCount) reached. Cannot register '$key'")
+            return false
+        }
+        val names = if (type == StatType.HISTOGRAM) {
+            listOf(key, "${key}_bucket", "${key}_count", "${key}_sum")
+        } else listOf(key)
+        if (names.any { it in exportedNames }) {
+            Logger.warn("[Stats] Stat '$key' conflicts with an existing Prometheus metric family")
+            return false
         }
 
         val stat = RegisteredStat(key, type, help)
@@ -360,22 +376,12 @@ object StatsRegistry {
         // Set initial value if provided
         if (initialValue != null) {
             when (type) {
-                StatType.COUNTER, StatType.GAUGE, StatType.TIMESTAMP -> {
-                    val longVal = when (initialValue) {
-                        is Long -> initialValue
-                        is Int -> initialValue.toLong()
-                        is Number -> initialValue.toLong()
-                        else -> 0L
-                    }
-                    stat.atomicValue.set(longVal)
-                }
+                StatType.COUNTER, StatType.GAUGE, StatType.TIMESTAMP -> setNumeric(stat, initialValue)
                 StatType.STRING -> {
                     stat.stringValue = initialValue.toString()
                 }
                 StatType.STRING_LIST -> {
-                    @Suppress("UNCHECKED_CAST")
-                    val list = initialValue as? List<String> ?: listOf(initialValue.toString())
-                    stat.listValue.addAll(list.take(MAX_LIST_SIZE))
+                    stat.listValue.addAll(asStringList(initialValue).take(maxListSize))
                 }
                 StatType.HISTOGRAM -> {
                     // Histogram doesn't support initial value
@@ -384,6 +390,7 @@ object StatsRegistry {
         }
 
         stats[key] = stat
+        names.forEach { exportedNames[it] = key }
         Logger.debug("[Stats] Registered stat: $key (type: $type)")
         return true
     }
@@ -407,29 +414,20 @@ object StatsRegistry {
         }
 
         when (stat.type) {
-            StatType.COUNTER, StatType.GAUGE, StatType.TIMESTAMP -> {
-                val longVal = when (value) {
-                    is Long -> value
-                    is Int -> value.toLong()
-                    is Number -> value.toLong()
-                    else -> throw IllegalArgumentException("Expected numeric value for ${stat.type}")
-                }
-                stat.atomicValue.set(longVal)
-            }
+            StatType.COUNTER, StatType.GAUGE, StatType.TIMESTAMP -> setNumeric(stat, value)
             StatType.STRING -> {
                 synchronized(stat.lock) {
                     stat.stringValue = value.toString()
                 }
             }
             StatType.STRING_LIST -> {
+                val list = asStringList(value)
                 synchronized(stat.lock) {
                     stat.listValue.clear()
-                    @Suppress("UNCHECKED_CAST")
-                    val list = value as? List<String> ?: listOf(value.toString())
-                    if (list.size > MAX_LIST_SIZE) {
-                        Logger.warn("[Stats] List for '$key' exceeds max size ($MAX_LIST_SIZE). Truncating.")
+                    if (list.size > maxListSize) {
+                        Logger.warn("[Stats] List for '$key' exceeds max size ($maxListSize). Truncating.")
                     }
-                    stat.listValue.addAll(list.take(MAX_LIST_SIZE))
+                    stat.listValue.addAll(list.take(maxListSize))
                 }
             }
             StatType.HISTOGRAM -> {
@@ -459,10 +457,18 @@ object StatsRegistry {
                     Logger.warn("[Stats] Cannot decrement counter '$key'. Use a gauge instead.")
                     return
                 }
-                stat.atomicValue.addAndGet(delta)
+                stat.atomicValue.updateAndGet { Math.addExact(it, delta) }
             }
             StatType.GAUGE -> {
-                stat.atomicValue.addAndGet(delta)
+                synchronized(stat.lock) {
+                    if (stat.doubleGauge) {
+                        val next = Double.fromBits(stat.atomicValue.get()) + delta
+                        require(next.isFinite()) { "Gauge overflow" }
+                        stat.atomicValue.set(next.toBits())
+                    } else {
+                        stat.atomicValue.updateAndGet { Math.addExact(it, delta) }
+                    }
+                }
             }
             else -> {
                 Logger.warn("[Stats] Cannot increment ${stat.type} stat '$key'")
@@ -478,7 +484,9 @@ object StatsRegistry {
      * @param key The histogram stat key
      * @param durationMillis The observed duration in milliseconds
      */
-    fun observeDuration(key: String, durationMillis: Long) {
+    fun observeDuration(key: String, durationMillis: Long) = observeValue(key, durationMillis.toDouble())
+
+    private fun observeValue(key: String, value: Double) {
         val stat = stats[key]
         if (stat == null) {
             Logger.warn("[Stats] Cannot observe duration for unregistered stat '$key'")
@@ -490,7 +498,7 @@ object StatsRegistry {
             return
         }
 
-        stat.histogramData.observe(durationMillis.toDouble())
+        stat.histogramData.observe(value)
         stat.lastUpdated = System.currentTimeMillis()
     }
 
@@ -513,8 +521,8 @@ object StatsRegistry {
         }
 
         synchronized(stat.lock) {
-            if (stat.listValue.size >= MAX_LIST_SIZE) {
-                Logger.warn("[Stats] List for '$key' at max size ($MAX_LIST_SIZE). Ignoring append.")
+            if (stat.listValue.size >= maxListSize) {
+                Logger.warn("[Stats] List for '$key' at max size ($maxListSize). Ignoring append.")
                 return
             }
             stat.listValue.add(value)
@@ -546,9 +554,16 @@ object StatsRegistry {
      */
     fun getValue(key: String): StatValue? {
         val stat = stats[key] ?: return null
+        return valueOf(stat)
+    }
+
+    private fun valueOf(stat: RegisteredStat): StatValue {
         return synchronized(stat.lock) {
             when (stat.type) {
-                StatType.COUNTER, StatType.GAUGE, StatType.TIMESTAMP ->
+                StatType.GAUGE -> if (stat.doubleGauge) {
+                    StatValue.ofDouble(Double.fromBits(stat.atomicValue.get()))
+                } else StatValue.ofLong(stat.atomicValue.get())
+                StatType.COUNTER, StatType.TIMESTAMP ->
                     StatValue.ofLong(stat.atomicValue.get())
                 StatType.STRING ->
                     StatValue.ofString(stat.stringValue)
@@ -564,16 +579,38 @@ object StatsRegistry {
     // Internal Access for Service
     // ========================
 
-    /**
-     * Get all registered stats. Internal use only.
-     */
-    internal fun getAllStats(): Map<String, RegisteredStat> = stats.toMap()
+    internal fun snapshot(): List<StatEntry> = stats.values.map { stat ->
+        synchronized(stat.lock) {
+            StatEntry(stat.key, stat.type.name, stat.help, valueOf(stat), stat.lastUpdated)
+        }
+    }.sortedBy { it.key }
 
     /**
-     * Clear all stats. Used for testing.
+     * Clear all stats on withdrawal/disable, and in tests.
      */
+    @Synchronized
     internal fun clear() {
         stats.clear()
+        exportedNames.clear()
+    }
+
+    @Synchronized
+    internal fun unregister(key: String) {
+        stats.remove(key)
+        exportedNames.entries.removeIf { it.value == key }
+    }
+
+    @Synchronized
+    internal fun configureLimits(listSize: Int, statsCount: Int) {
+        maxListSize = listSize.coerceIn(1, 1000)
+        maxStatsCount = statsCount.coerceIn(1, 10000)
+        stats.values.forEach { stat ->
+            synchronized(stat.lock) {
+                if (stat.listValue.size > maxListSize) {
+                    stat.listValue.subList(maxListSize, stat.listValue.size).clear()
+                }
+            }
+        }
     }
 
     /**
@@ -591,7 +628,10 @@ object StatsRegistry {
             if (registerStat(key, type, help = persisted.help)) {
                 val value = persisted.value
                 when (type) {
-                    StatType.COUNTER, StatType.GAUGE, StatType.TIMESTAMP -> {
+                    StatType.GAUGE -> {
+                        (value.doubleValue ?: value.longValue)?.let { set(key, it) }
+                    }
+                    StatType.COUNTER, StatType.TIMESTAMP -> {
                         value.longValue?.let { set(key, it) }
                     }
                     StatType.STRING -> {
@@ -603,17 +643,7 @@ object StatsRegistry {
                     StatType.HISTOGRAM -> {
                         // Histogram data is observation-based, we restore count and sum
                         value.histogramValue?.let { hist ->
-                            val stat = stats[key]
-                            if (stat != null) {
-                                // Can't perfectly restore histogram, but we can approximate
-                                // by observing the average value 'count' times
-                                if (hist.count > 0) {
-                                    val avg = hist.sum / hist.count
-                                    repeat(hist.count.toInt().coerceAtMost(1000)) {
-                                        stat.histogramData.observe(avg)
-                                    }
-                                }
-                            }
+                            stats[key]?.histogramData?.restore(hist)
                         }
                     }
                 }
@@ -624,6 +654,32 @@ object StatsRegistry {
     // ========================
     // Utility Methods
     // ========================
+
+    private fun asStringList(value: Any): List<String> {
+        require(value is List<*> && value.all { it is String }) { "Expected a list of strings" }
+        return value.map { it as String }
+    }
+
+    private fun setNumeric(stat: RegisteredStat, value: Any) {
+        require(value is Number) { "Expected numeric value for ${stat.type}" }
+        if (stat.type == StatType.GAUGE) {
+            synchronized(stat.lock) {
+                val floatingPoint = value is Double || value is Float
+                require(!floatingPoint || value.toDouble().isFinite()) { "Gauge must be finite" }
+                stat.atomicValue.set(if (floatingPoint) value.toDouble().toBits() else value.toLong())
+                stat.doubleGauge = floatingPoint
+            }
+        } else {
+            require(value is Long || value is Int || value is Short || value is Byte) { "Expected an integer for ${stat.type}" }
+            val next = value.toLong()
+            if (stat.type == StatType.COUNTER) {
+                stat.atomicValue.updateAndGet { current ->
+                    require(next >= current) { "Counters cannot decrease" }
+                    next
+                }
+            } else stat.atomicValue.set(next)
+        }
+    }
 
     private fun isValidKey(key: String): Boolean {
         return key.isNotBlank() && KEY_PATTERN.matches(key)

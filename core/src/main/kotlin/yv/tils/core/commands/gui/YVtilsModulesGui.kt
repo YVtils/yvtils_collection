@@ -34,6 +34,7 @@ import yv.tils.utils.colors.Colors
 import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
+import yv.tils.utils.stats.ModuleTelemetry
 import java.nio.file.Path
 
 /**
@@ -88,6 +89,7 @@ object YVtilsModulesGui {
 
         val state = State(ModuleConfig.sharedDataDirectory(Core.instance.dataFolder.toPath()))
         buildWindow(player, state).open(player)
+        ModuleTelemetry.record(ModuleTelemetry.Event.CORE_MODULE_BROWSER_OPENS)
     }
 
     private class State(val dataDirectory: Path) {

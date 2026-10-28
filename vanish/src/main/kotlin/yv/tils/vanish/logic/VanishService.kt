@@ -19,6 +19,7 @@ import org.bukkit.entity.Mob
 import org.bukkit.entity.Player
 import yv.tils.utils.modules.ConnectionMessages
 import yv.tils.utils.modules.Core
+import yv.tils.utils.stats.ModuleTelemetry
 import yv.tils.vanish.VanishPolicy
 import yv.tils.vanish.configs.ConfigFile
 import yv.tils.vanish.configs.PlayerSettings
@@ -65,6 +66,7 @@ class VanishService {
             }
         } else player.isCollidable = previous.collidable
         refresh()
+        ModuleTelemetry.record(ModuleTelemetry.Event.VANISH_TOGGLES)
         if (!silent && PlayerSettings.get(player.uniqueId).announce) announce(
             player,
             previous != null

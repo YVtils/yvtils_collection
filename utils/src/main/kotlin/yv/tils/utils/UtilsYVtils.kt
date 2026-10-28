@@ -15,6 +15,7 @@ package yv.tils.utils
 import yv.tils.utils.coroutine.CoroutineHandler
 import yv.tils.utils.modules.Module
 import yv.tils.utils.server.VersionUtils
+import yv.tils.utils.stats.ModuleTelemetry
 
 class UtilsYVtils : Module.YVtilsModule {
     companion object {
@@ -41,5 +42,6 @@ class UtilsYVtils : Module.YVtilsModule {
     override fun disablePlugin() {
         CoroutineHandler.cancelAllTasks()
         Module.removeModule(MODULE)
+        ModuleTelemetry.clear()
     }
 }

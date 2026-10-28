@@ -21,6 +21,7 @@ import net.kyori.adventure.text.event.ClickEvent
 import yv.tils.essentials.language.LangStrings
 import yv.tils.utils.logger.Logger
 import yv.tils.utils.modules.Core
+import yv.tils.utils.stats.ModuleTelemetry
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -89,6 +90,7 @@ object InventoryEditor : Listener {
                 sessions.remove(target.uniqueId, session)
                 return
             }
+            ModuleTelemetry.record(ModuleTelemetry.Event.ESSENTIALS_INVENTORY_VIEWS)
             viewer.sendMessage(
                 InventoryPresentation.message(
                     if (viewer.hasPermission(kind.editPermission)) LangStrings.INVENTORY_OPEN_EDIT

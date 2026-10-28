@@ -17,6 +17,7 @@ import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
 import yv.tils.message.data.Permissions
 import yv.tils.utils.modules.Core
+import yv.tils.utils.stats.ModuleTelemetry
 import java.util.*
 
 class MessageHandler {
@@ -84,6 +85,7 @@ class MessageHandler {
                 )
             )
         )
+        ModuleTelemetry.record(ModuleTelemetry.Event.MESSAGE_DELIVERIES)
     }
 
     fun sendMessages(

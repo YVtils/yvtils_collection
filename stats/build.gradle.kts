@@ -20,6 +20,13 @@ dependencies {
     // version (InvUI, which `gui` wraps, dropped multi-version support in v2 - see
     // DynamicModuleRegistry.GUI_ARTIFACTS for the full explanation).
     compileOnly(project(":gui-26.1"))
+
+    testImplementation(project(":utils"))
+    testImplementation(project(":config"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.test {

@@ -15,6 +15,8 @@ package yv.tils.gui.core
 import xyz.xenondevs.invui.InvUI
 import yv.tils.gui.language.RegisterStrings
 import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
+import yv.tils.utils.stats.ModuleTelemetry
 
 /**
  * One-time setup required before any `gui`/InvUI window is opened:
@@ -103,8 +105,17 @@ object InvUIBootstrap {
             }
 
             RegisterStrings.registerStrings()
+            registerTelemetry()
 
             initialized = true
         }
+    }
+
+    /** The selected GUI library is loaded even when no feature has opened an InvUI window. */
+    fun registerTelemetry() {
+        val version = listOf("gui-26.1", "gui-26.2", "gui-26.3")
+            .map { Module.readVersion(InvUIBootstrap::class.java, it) }
+            .firstOrNull { it != "unknown" } ?: "unknown"
+        ModuleTelemetry.register("gui", version)
     }
 }

@@ -14,20 +14,26 @@ package yv.tils.stats
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.event.HandlerList
+import org.bukkit.scheduler.BukkitTask
+import yv.tils.config.language.LanguageHandler
+import yv.tils.stats.api.RegistryStatsBackend
+import yv.tils.stats.commands.StatsCommand
 import yv.tils.stats.configs.ConfigFile
 import yv.tils.stats.configs.ManageGUI
-import yv.tils.stats.data.StatType
 import yv.tils.stats.language.RegisterStrings
+import yv.tils.stats.listeners.FirstOperatorJoin
+import yv.tils.stats.logic.StatsAdministration
 import yv.tils.stats.logic.StatsPusher
 import yv.tils.stats.logic.StatsService
 import yv.tils.stats.registry.StatsRegistry
-import yv.tils.utils.coroutine.CoroutineHandler
-import yv.tils.utils.modules.Module
 import yv.tils.utils.logger.Logger
-import org.bukkit.Bukkit
+import yv.tils.utils.modules.Core
+import yv.tils.utils.modules.Module
+import yv.tils.utils.stats.StatsApi
+import yv.tils.utils.stats.ModuleTelemetry
 
 /**
  * Main module class for the stats module.
@@ -52,6 +58,10 @@ import org.bukkit.Bukkit
  * - [requestOptInPrompt] - Show opt-in prompt to admin
  */
 class StatsYVtils : Module.YVtilsModule {
+    private var joinListener: FirstOperatorJoin? = null
+    private var commandRegistered = false
+    private var bootAnnounced = false
+
     companion object {
         val MODULE = Module.YVtilsModuleData(
             "stats",
@@ -62,7 +72,9 @@ class StatsYVtils : Module.YVtilsModule {
             configGuiOpener = { player -> ManageGUI().openGUI(player) },
         )
 
-        private var pushTaskId: String? = null
+        @Volatile private var enabled = false
+        private var playerCountTask: BukkitTask? = null
+        private var statsBackend: RegistryStatsBackend? = null
 
         // ========================
         // Public API
@@ -86,25 +98,17 @@ class StatsYVtils : Module.YVtilsModule {
          */
         fun markOptIn(decision: Boolean) {
             ConfigFile.markOptIn(decision)
-            if (decision) {
-                registerDefaultStats()
-                // Start remote push if enabled
-                startRemotePush()
-            } else {
-                // Stop remote push if running
-                stopRemotePush()
-            }
         }
 
         /**
          * Check if remote push is enabled.
-         * This is always true when opted in.
+         * Requires both an enabled module and persisted consent.
          */
-        fun isRemotePushEnabled(): Boolean = isOptedIn()
+        fun isRemotePushEnabled(): Boolean = enabled && isOptedIn()
 
         /**
          * Manually trigger a push to the remote API server.
-         * Useful for testing or commands.
+         * Synchronous: call from a worker thread, or use StatsPusher.pushOnIo().
          *
          * @return The result of the push operation
          */
@@ -122,10 +126,7 @@ class StatsYVtils : Module.YVtilsModule {
          * Called automatically when opted in.
          */
         private fun startRemotePush() {
-            if (isOptedIn()) {
-                pushTaskId = StatsPusher.startScheduledPush()
-                Logger.info("[Stats] Remote push enabled")
-            }
+            if (isRemotePushEnabled()) StatsPusher.startScheduledPush()
         }
 
         /**
@@ -133,7 +134,26 @@ class StatsYVtils : Module.YVtilsModule {
          */
         private fun stopRemotePush() {
             StatsPusher.stopScheduledPush()
-            pushTaskId = null
+        }
+
+        private fun refreshConfiguration() {
+            // Revoke network access immediately, even when called by a worker.
+            if (!isOptedIn()) stopRemotePush()
+            if (!enabled) return
+            if (!Bukkit.isPrimaryThread()) {
+                Bukkit.getScheduler().runTask(Core.instance, Runnable { refreshConfiguration() })
+                return
+            }
+            StatsRegistry.configureLimits(ConfigFile.state.max_list_size, ConfigFile.state.max_stats_count)
+            if (!isOptedIn()) {
+                playerCountTask?.cancel()
+                playerCountTask = null
+                statsBackend?.clearRegistry() ?: StatsRegistry.clear()
+                return
+            }
+            registerDefaultStats()
+            ModuleTelemetry.publishModules()
+            startRemotePush()
         }
 
         /**
@@ -143,7 +163,7 @@ class StatsYVtils : Module.YVtilsModule {
          * The prompt includes:
          * - Explanation of what data is collected
          * - Privacy information
-         * - Clickable accept/decline buttons
+         * - Clickable, permission-checked in-game accept/decline/settings actions
          *
          * @param triggeringPlayer The admin player to show the prompt to
          */
@@ -153,60 +173,23 @@ class StatsYVtils : Module.YVtilsModule {
                 return
             }
 
-            if (!triggeringPlayer.hasPermission("yvtils.stats.optin")) {
+            if (!StatsAdministration.canConfigure(triggeringPlayer)) {
                 Logger.debug("[Stats] Player ${triggeringPlayer.name} lacks permission for opt-in")
                 return
             }
 
-            // Build the prompt message
-            val prefix = Component.text("[YVtils Stats] ", NamedTextColor.GOLD)
-            
-            val message = Component.empty()
-                .append(prefix)
-                .append(Component.text("We would like to collect anonymous usage statistics ", NamedTextColor.WHITE))
-                .append(Component.text("to help improve YVtils.", NamedTextColor.WHITE))
-                .append(Component.newline())
-                .append(Component.newline())
-                .append(prefix)
-                .append(Component.text("What we collect:", NamedTextColor.YELLOW, TextDecoration.BOLD))
-                .append(Component.newline())
-                .append(Component.text("  • Server version (Paper/Spigot)", NamedTextColor.GRAY))
-                .append(Component.newline())
-                .append(Component.text("  • Active YVtils modules", NamedTextColor.GRAY))
-                .append(Component.newline())
-                .append(Component.text("  • Player count (optional)", NamedTextColor.GRAY))
-                .append(Component.newline())
-                .append(Component.newline())
-                .append(prefix)
-                .append(Component.text("What we DON'T collect:", NamedTextColor.GREEN, TextDecoration.BOLD))
-                .append(Component.newline())
-                .append(Component.text("  • Player names or UUIDs", NamedTextColor.GRAY))
-                .append(Component.newline())
-                .append(Component.text("  • Server IP addresses (by default)", NamedTextColor.GRAY))
-                .append(Component.newline())
-                .append(Component.text("  • Any personal information", NamedTextColor.GRAY))
-                .append(Component.newline())
-                .append(Component.newline())
-                .append(prefix)
-                .append(Component.text("Data is sent to: ", NamedTextColor.GRAY))
-                .append(Component.text("api.yvtils.net/stats", NamedTextColor.AQUA))
-                .append(Component.newline())
-                .append(Component.newline())
-                .append(prefix)
-                .append(Component.text("[ACCEPT]", NamedTextColor.GREEN, TextDecoration.BOLD)
-                    .clickEvent(ClickEvent.runCommand("/yvtils stats optin accept"))
-                    .hoverEvent(Component.text("Click to accept stats collection")))
-                .append(Component.text("  ", NamedTextColor.WHITE))
-                .append(Component.text("[DECLINE]", NamedTextColor.RED, TextDecoration.BOLD)
-                    .clickEvent(ClickEvent.runCommand("/yvtils stats optin decline"))
-                    .hoverEvent(Component.text("Click to decline stats collection")))
-                .append(Component.newline())
-                .append(Component.newline())
-                .append(prefix)
-                .append(Component.text("You can change this later in ", NamedTextColor.GRAY))
-                .append(Component.text("plugins/yvtils/stats/config.yml", NamedTextColor.AQUA))
-
-            triggeringPlayer.sendMessage(message)
+            triggeringPlayer.sendMessage(RegisterStrings.formatOptInPrompt(
+                LanguageHandler.getMessage(RegisterStrings.LangStrings.OPTIN_PROMPT.key, triggeringPlayer),
+            ))
+            triggeringPlayer.sendMessage(Component.empty()
+                .append(LanguageHandler.getMessage(RegisterStrings.LangStrings.GUI_ACCEPT.key, triggeringPlayer)
+                    .clickEvent(ClickEvent.runCommand("/yvtilsstats optin accept")))
+                .append(Component.text("  "))
+                .append(LanguageHandler.getMessage(RegisterStrings.LangStrings.GUI_DECLINE.key, triggeringPlayer)
+                    .clickEvent(ClickEvent.runCommand("/yvtilsstats optin decline")))
+                .append(Component.text("  "))
+                .append(LanguageHandler.getMessage(RegisterStrings.LangStrings.GUI_SETTINGS.key, triggeringPlayer)
+                    .clickEvent(ClickEvent.runCommand("/yvtilsstats config"))))
         }
 
         /**
@@ -246,7 +229,7 @@ class StatsYVtils : Module.YVtilsModule {
             }
 
             // Player count (if enabled)
-            if (ConfigFile.getBoolean("metadata.collect_player_count") != false) {
+            if (ConfigFile.state.metadata.collect_player_count) {
                 val playerCountHandle = StatsRegistry.registerGauge("player_count", "Current online player count")
                 try {
                     playerCountHandle?.set(Bukkit.getOnlinePlayers().size.toLong())
@@ -254,23 +237,26 @@ class StatsYVtils : Module.YVtilsModule {
                     // Bukkit might not be available in tests
                 }
 
-                // Schedule periodic player count updates
-                CoroutineHandler.launchTask(
-                    suspend {
-                        try {
-                            StatsRegistry.set("player_count", Bukkit.getOnlinePlayers().size.toLong())
-                        } catch (e: Exception) {
-                            // Ignore if Bukkit not available
-                        }
-                    },
-                    "yvtils-stats-playercount",
-                    beforeDelay = 60_000L, // 1 minute
-                    afterDelay = 60_000L,
-                    isOnce = false
-                )
+                // Bukkit reads must stay on Paper's server thread. Keep exactly one collector.
+                if (playerCountHandle != null && (playerCountTask == null || playerCountTask?.isCancelled == true)) {
+                    playerCountTask = Bukkit.getScheduler().runTaskTimer(
+                        Core.instance,
+                        Runnable {
+                            if (enabled && isOptedIn() && ConfigFile.state.metadata.collect_player_count) {
+                                StatsRegistry.set("player_count", Bukkit.getOnlinePlayers().size.toLong())
+                            }
+                        },
+                        1200L,
+                        1200L,
+                    )
+                }
+            } else {
+                playerCountTask?.cancel()
+                playerCountTask = null
+                StatsRegistry.unregister("player_count")
             }
 
-            Logger.info("[Stats] Default stats registered")
+            Logger.debug("[Stats] Default stats registered")
         }
     }
 
@@ -279,25 +265,29 @@ class StatsYVtils : Module.YVtilsModule {
     }
 
     override fun enablePlugin() {
-        Module.addModule(MODULE)
-
-        registerCommands()
-        registerCoroutines()
-
         loadConfigs()
-
-        // Register default stats if opted in
-        if (isOptedIn()) {
-            registerDefaultStats()
+        Module.addModule(MODULE)
+        enabled = true
+        bootAnnounced = false
+        StatsPusher.setEnabled(true)
+        statsBackend = RegistryStatsBackend(::isRemotePushEnabled).also(StatsApi::installBackend)
+        ConfigFile.onChange = ::refreshConfiguration
+        refreshConfiguration()
+        joinListener = FirstOperatorJoin().also {
+            Bukkit.getPluginManager().registerEvents(it, Core.instance)
         }
+        StatsCommand.register()
+        commandRegistered = true
 
-        // Start remote push if opted in
-        startRemotePush()
-
-        Logger.info("[Stats] Module enabled")
+        Logger.debug("[Stats] Module enabled")
     }
 
     override fun onLateEnablePlugin() {
+        ModuleTelemetry.publishModules()
+        if (!bootAnnounced) {
+            bootAnnounced = true
+            Logger.info(bootMessage(ConfigFile.state.opt_in))
+        }
         // Update module list after all modules are loaded
         if (isOptedIn()) {
             val pluginsHandle = StatsRegistry.registerList("used_yvtils_plugins", "List of YVtils modules in use")
@@ -306,26 +296,35 @@ class StatsYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
-        // Stop remote push scheduler
-        stopRemotePush()
+        enabled = false
+        ConfigFile.onChange = null
+        StatsPusher.setEnabled(false)
+        statsBackend?.let {
+            it.close()
+            StatsApi.uninstallBackend(it)
+        }
+        statsBackend = null
+        playerCountTask?.cancel()
+        playerCountTask = null
 
         // Clear registry
         StatsRegistry.clear()
+
+        joinListener?.let(HandlerList::unregisterAll)
+        joinListener = null
+        if (commandRegistered) StatsCommand.unregister()
+        commandRegistered = false
 
         Module.removeModule(MODULE)
         Logger.info("[Stats] Module disabled")
     }
 
-    private fun registerCommands() {
-        // Commands will be registered by the main plugin
-        // This module only provides the API
-    }
-
-    private fun registerCoroutines() {
-        // Coroutines are registered in enablePlugin and registerDefaultStats
-    }
-
     private fun loadConfigs() {
         ConfigFile().loadConfig()
+    }
+
+    internal fun bootMessage(decision: Boolean?): String {
+        val status = when (decision) { true -> "enabled"; false -> "declined"; null -> "not configured (off)" }
+        return "[Stats] Optional usage telemetry: $status; in-game settings/consent: /yvtilsstats"
     }
 }
