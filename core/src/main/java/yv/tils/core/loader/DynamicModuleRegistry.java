@@ -180,6 +180,9 @@ public final class DynamicModuleRegistry {
                 "stats", versionOf("stats"), "yv.tils.stats.StatsYVtils",
                 "Player and server statistics tracking.",
                 false, false, true));
+        modules.put("metrics", new ModuleArtifact(
+                "metrics", versionOf("metrics"), "yv.tils.metrics.MetricsYVtils",
+                "Single-server player statistics, SQLite leaderboards and Prometheus monitoring."));
         modules.put("yv-smp", new ModuleArtifact(
                 "yv-smp", versionOf("yv-smp"), "yv.tils.yv_smp.YV_SMPYVtils",
                 "YV SMP module for YVtils",

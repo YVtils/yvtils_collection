@@ -22,7 +22,7 @@ then enable desired modules in `plugins/yvtils/modules.yml` and restart.
 
 - One [core launcher](core/) with selectable feature libraries.
 - Discord integration, MultiMine, WorldGuard-backed Regions, Essentials,
-  Moderation, Fusion, Sit, Status, Message, Server, Stats, Vanish and Waypoints.
+  Moderation, Fusion, Sit, Status, Message, Server, Stats, Metrics, Vanish and Waypoints.
 - Optional YV SMP cinematics/music/ambient sounds and Remade Ender Dragon.
 
 The old standalone plugin launchers are retired. Their Modrinth pages and older
@@ -44,7 +44,7 @@ Each module README describes features, settings, structure and verification:
 [Utils](utils/README.md) · [Discord](discord/README.md) · [Essentials](essentials/README.md) ·
 [Fusion](fusion/README.md) · [Moderation](moderation/README.md) · [MultiMine](multiMine/README.md) ·
 [Regions](regions/README.md) · [Server](server/README.md) · [Sit](sit/README.md) ·
-[Stats](stats/README.md) · [Status](status/README.md) · [Message](message/README.md) ·
+[Stats](stats/README.md) · [Metrics](metrics/README.md) · [Status](status/README.md) · [Message](message/README.md) ·
 [Vanish](vanish/README.md) · [Waypoints](waypoint/README.md) · [YV SMP](yv-smp/README.md) ·
 [Remade Ender Dragon](remade-ender-dragon/README.md).
 

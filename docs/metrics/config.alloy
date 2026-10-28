@@ -1,0 +1,17 @@
+// Run on the Paper host. The module itself never pushes to a dashboard URL.
+prometheus.scrape "yvtils" {
+  targets = [{ "__address__" = "127.0.0.1:9108", "job" = "yvtils" }]
+  scrape_interval = "15s"
+  bearer_token = sys.env("YVTILS_METRICS_TOKEN")
+  forward_to = [prometheus.remote_write.yvtils.receiver]
+}
+
+prometheus.remote_write "yvtils" {
+  endpoint {
+    url = sys.env("YVTILS_REMOTE_WRITE_URL")
+    basic_auth {
+      username = sys.env("YVTILS_REMOTE_WRITE_USER")
+      password = sys.env("YVTILS_REMOTE_WRITE_TOKEN")
+    }
+  }
+}

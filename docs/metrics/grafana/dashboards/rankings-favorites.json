@@ -1,0 +1,23 @@
+{
+  "uid": "yvtils-rankings-favorites",
+  "title": "YVtils — Rankings and Favorites",
+  "tags": ["minecraft", "yvtils", "rankings", "favorites", "privacy"],
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {"from": "now-24h", "to": "now"},
+  "templating": {"list": [
+    {"name": "instance", "label": "Server", "type": "query", "datasource": {"type": "prometheus", "uid": "prometheus"}, "query": "label_values(yvtils_players_online, instance)", "refresh": 1, "includeAll": true, "allValue": ".*"},
+    {"name": "leaderboard_stat", "label": "Leaderboard statistic", "type": "custom", "query": "playtime_seconds,joins,deaths,mob_kills,monster_kills,animal_kills,player_kills,blocks_broken,blocks_placed,distance_meters,walk_distance_meters,swim_distance_meters,fly_distance_meters,vehicle_distance_meters,other_distance_meters,fall_distance_meters,totems_used,damage_dealt_health_points,damage_taken_health_points,food_eaten,items_crafted,fish_caught,jumps,items_picked_up,items_dropped,raids_won,animals_bred,villager_trades,chests_opened,items_enchanted,bells_rung,sneak_seconds,afk_seconds,advancements,dimension_changes", "current": {"text": "playtime_seconds", "value": "playtime_seconds"}},
+    {"name": "favorite_player", "label": "Favorites player (UUID)", "type": "query", "datasource": {"type": "prometheus", "uid": "prometheus"}, "query": "label_values(yvtils_player_favorite_value{instance=\"$instance\"}, player_uuid)", "refresh": 2},
+    {"name": "favorite_category", "label": "Favorites category", "type": "custom", "query": "blocks_broken,blocks_placed,mobs_killed,animals_killed", "current": {"text": "blocks_broken", "value": "blocks_broken"}}
+  ]},
+  "panels": [
+    {"id": 1, "type": "stat", "title": "Unique players — all time", "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4}, "datasource": {"type": "prometheus", "uid": "prometheus"}, "targets": [{"refId": "A", "expr": "yvtils_players_unique{instance=~\"$instance\",period=\"all_time\"}", "instant": true}]},
+    {"id": 2, "type": "stat", "title": "Unique players — today", "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4}, "datasource": {"type": "prometheus", "uid": "prometheus"}, "targets": [{"refId": "A", "expr": "yvtils_players_unique{instance=~\"$instance\",period=\"day\"}", "instant": true}]},
+    {"id": 3, "type": "stat", "title": "Unique players — month", "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4}, "datasource": {"type": "prometheus", "uid": "prometheus"}, "targets": [{"refId": "A", "expr": "yvtils_players_unique{instance=~\"$instance\",period=\"month\"}", "instant": true}]},
+    {"id": 4, "type": "stat", "title": "Current online", "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4}, "datasource": {"type": "prometheus", "uid": "prometheus"}, "targets": [{"refId": "A", "expr": "yvtils_players_online{instance=~\"$instance\"}", "instant": true}]},
+    {"id": 5, "type": "table", "title": "Player leaderboard — requires publishLeaderboards", "description": "Player names and UUIDs are exported only when explicitly enabled. Select the statistic above; values use seconds, metres, health points, or counts as appropriate.", "gridPos": {"x": 0, "y": 4, "w": 24, "h": 10}, "datasource": {"type": "prometheus", "uid": "prometheus"}, "targets": [{"refId": "A", "expr": "yvtils_player_leaderboard_value{instance=~\"$instance\",stat=\"$leaderboard_stat\"}", "instant": true, "format": "table"}], "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true, "__name__": true, "instance": true, "job": true, "stat": true, "player_uuid": true}, "renameByName": {"rank": "Rank", "player_name": "Player", "Value": "Total"}}}, {"id": "sortBy", "options": {"sort": [{"field": "Total", "desc": true}]}}]},
+    {"id": 6, "type": "table", "title": "Favorites — requires publishFavorites", "description": "Identifying per-player material/entity breakdowns require collectBreakdowns and the separate publishFavorites opt-in. The player selector will be empty otherwise.", "gridPos": {"x": 0, "y": 14, "w": 24, "h": 10}, "datasource": {"type": "prometheus", "uid": "prometheus"}, "targets": [{"refId": "A", "expr": "yvtils_player_favorite_value{instance=\"$instance\",player_uuid=\"$favorite_player\",category=\"$favorite_category\"}", "instant": true, "format": "table"}], "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true, "__name__": true, "instance": true, "job": true, "category": true, "player_uuid": true}, "renameByName": {"rank": "Rank", "player_name": "Player", "subject": "Block / entity", "Value": "Count"}}}, {"id": "sortBy", "options": {"sort": [{"field": "Count", "desc": true}]}}]}
+  ]
+}

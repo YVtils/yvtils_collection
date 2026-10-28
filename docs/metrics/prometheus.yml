@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - alerts.yml
+
+scrape_configs:
+  - job_name: yvtils
+    static_configs:
+      - targets: ['127.0.0.1:9108']
+    # If bearerTokenEnvironment is enabled in the module, create
+    # secrets/yvtils-metrics-token containing only the token, then enable:
+    # authorization:
+    #   type: Bearer
+    #   credentials_file: /etc/prometheus/secrets/yvtils-metrics-token

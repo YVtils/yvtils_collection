@@ -1,0 +1,45 @@
+groups:
+  - name: yvtils-minecraft
+    rules:
+      - alert: MinecraftMetricsUnavailable
+        expr: up{job="yvtils"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Minecraft metrics are unreachable on {{ $labels.instance }}'
+      - alert: MinecraftTickLoopStalled
+        expr: (time() - yvtils_tick_heartbeat_seconds > 30) and on(job, instance) (yvtils_players_online > 0)
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Minecraft tick heartbeat is stale on {{ $labels.instance }}'
+      - alert: MinecraftCollectionNotReady
+        expr: yvtils_collection_ready == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Minecraft statistics collection has not initialized'
+      - alert: MinecraftMetricsStorageFailure
+        expr: (yvtils_storage_healthy == 0) or (time() - yvtils_storage_last_success_seconds > 90)
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Minecraft statistics storage is unhealthy or stale'
+      - alert: MinecraftSustainedLag
+        expr: yvtils_tick_duration_average_seconds > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Average Minecraft tick duration exceeds 50 ms'
+      - alert: MinecraftHeapPressure
+        expr: yvtils_jvm_heap_bytes{kind="used"} / ignoring(kind) yvtils_jvm_heap_bytes{kind="max"} > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Minecraft JVM heap usage is above 90%'
