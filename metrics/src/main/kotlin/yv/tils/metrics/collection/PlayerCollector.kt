@@ -124,9 +124,7 @@ class PlayerCollector(
         metrics.online.set(players.size.toDouble())
         metrics.capacity.set(server.maxPlayers.toDouble())
         metrics.maintenance.set(if (ServerUtils.serverInMaintenance) 1.0 else 0.0)
-        server.tps.forEachIndexed { index, value ->
-            metrics.tps.labelValues(listOf("1m", "5m", "15m")[index]).set(value)
-        }
+        metrics.sampleTps(server.tps)
         metrics.tickAverage.set(server.averageTickTime / 1000.0)
         metrics.tickMax.set(maxTickSeconds)
         maxTickSeconds = 0.0

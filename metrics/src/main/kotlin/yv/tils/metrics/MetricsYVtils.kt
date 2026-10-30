@@ -87,7 +87,7 @@ class MetricsYVtils : Module.YVtilsModule {
                                 metrics.ready.set(0.0)
                                 sampleTask?.cancel()
                                 HandlerList.unregisterAll(listener)
-                                Logger.error("[Metrics] Player/server sampler failed; collection stopped until restart: ${failure.message}")
+                                Logger.error("[Metrics] Player/server sampler failed; collection stopped until restart: ${failure.message}", failure)
                             }
                         }, settings.sampleTicks, settings.sampleTicks)
                         metrics.ready.set(if (buffer.saturated) 0.0 else 1.0)
@@ -95,7 +95,7 @@ class MetricsYVtils : Module.YVtilsModule {
                     } catch (failure: Exception) {
                         HandlerList.unregisterAll(listener)
                         metrics.ready.set(0.0)
-                        Logger.error("[Metrics] Collector initialization failed; collection stopped until restart: ${failure.message}")
+                        Logger.error("[Metrics] Collector initialization failed; collection stopped until restart: ${failure.message}", failure)
                     }
                 })
             } catch (failure: Exception) {

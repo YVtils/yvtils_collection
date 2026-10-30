@@ -14,6 +14,7 @@ import dev.jorel.commandapi.kotlindsl.literalArgument
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import yv.tils.stats.configs.ManageGUI
 import yv.tils.stats.logic.StatsAdministration
+import yv.tils.utils.modules.Core
 
 /** Own root avoids coupling core's command tree to an optional feature module. */
 internal object StatsCommand {
@@ -37,6 +38,9 @@ internal object StatsCommand {
     }
 
     fun unregister() {
+        // Paper command unregistration schedules a reload, which is illegal once the host plugin is disabled.
+        // Core shuts CommandAPI down after module cleanup; only unregister explicitly for a live module disable.
+        if (!Core.instance.isEnabled) return
         if (CommandAPI.isLoaded()) CommandAPI.unregister("yvtilsstats", true)
     }
 }

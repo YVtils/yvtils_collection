@@ -12,6 +12,40 @@ import yv.tils.metrics.data.*
 import java.util.UUID
 
 class PrometheusMetricsTest {
+    @Test fun `Paper TPS values retain their one five and fifteen minute labels`() {
+        val metrics = PrometheusMetrics(false)
+        metrics.sampleTps(doubleArrayOf(19.0, 18.0, 17.0))
+        metrics.render()
+        val text = metrics.body().toString(Charsets.UTF_8)
+        assertTrue(text.contains("yvtils_server_tps{window=\"1m\"} 19.0"))
+        assertTrue(text.contains("yvtils_server_tps{window=\"5m\"} 18.0"))
+        assertTrue(text.contains("yvtils_server_tps{window=\"15m\"} 17.0"))
+    }
+
+    @Test fun `Purpur TPS skips the prepended five second average without shifting minute labels`() {
+        val metrics = PrometheusMetrics(false)
+        metrics.sampleTps(doubleArrayOf(10.0, 19.0, 18.0, 17.0))
+        metrics.render()
+        val text = metrics.body().toString(Charsets.UTF_8)
+        assertTrue(text.contains("yvtils_server_tps{window=\"1m\"} 19.0"))
+        assertTrue(text.contains("yvtils_server_tps{window=\"5m\"} 18.0"))
+        assertTrue(text.contains("yvtils_server_tps{window=\"15m\"} 17.0"))
+        assertFalse(text.contains("yvtils_server_tps{window=\"5s\"}"))
+    }
+
+    @Test fun `unknown TPS layouts omit stale windows without stopping other metrics`() {
+        val metrics = PrometheusMetrics(false)
+        for (values in listOf(doubleArrayOf(), doubleArrayOf(20.0), doubleArrayOf(20.0, 19.0), DoubleArray(5) { 20.0 })) {
+            metrics.sampleTps(doubleArrayOf(19.0, 18.0, 17.0))
+            assertDoesNotThrow { metrics.sampleTps(values) }
+            metrics.online.set(2.0)
+            metrics.render()
+            val text = metrics.body().toString(Charsets.UTF_8)
+            assertFalse(text.contains("yvtils_server_tps{window="))
+            assertTrue(text.contains("yvtils_players_online 2.0"))
+        }
+    }
+
     @Test fun `export converts storage units and emits proper cumulative histogram buckets`() {
         val metrics = PrometheusMetrics(false)
         metrics.database = DatabaseSnapshot(totals = mapOf(

@@ -117,7 +117,9 @@ erase database history or time series already retained by Prometheus.
 
 ### Server health
 
-- TPS over 1/5/15 minutes; Paper average tick duration.
+- TPS over 1/5/15 minutes; Paper average tick duration. Purpur's additional leading
+  5-second TPS average is skipped, preserving the same minute-window labels.
+  Unrecognized TPS array layouts omit TPS samples rather than stopping collection.
 - A real tick duration histogram, maximum since the last sample, and counts of
   ticks exceeding 50/100/250 ms. Tick metrics reset on module/process restart.
 - Last completed tick's timestamp: an external scraper can detect a frozen tick loop.
@@ -436,6 +438,8 @@ identity, session crash recovery, retention, unsupported schemas, UTC splitting,
 writer retries, metric units/histogram buckets, opt-in label escaping and HTTP auth.
 They also cover the schema-1 upgrade, independent Favorites opt-in/limits,
 per-category breakdowns, new vanilla mappings, sneaking units and AFK threshold bounds.
+TPS export tests cover Paper's three-value and Purpur's four-value layouts and
+omission of unknown layouts without retaining stale window samples.
 
 Paper acceptance checklist (requires a running server; not covered by unit tests):
 
@@ -458,3 +462,5 @@ Paper acceptance checklist (requires a running server; not covered by unit tests
 9. Test graceful shutdown and abrupt kill; verify documented loss window and interrupted
    session recovery, then exercise backup/restore on a copy.
 10. Check bearer auth/firewall rules and Alloy forwarding with your actual backend.
+11. Start on Purpur 26.3 and verify `[Metrics] Collection active`, readiness of `1`,
+    and correctly labelled `1m`/`5m`/`15m` TPS samples without an index error.

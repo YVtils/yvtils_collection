@@ -263,6 +263,10 @@ Paper acceptance checks (not replaced by unit tests):
    the registry must remain empty until re-acceptance, when counters start afresh.
 10. With `metrics` enabled, verify its local exporter/database continue working when
     stats is off and its gameplay/leaderboard contents do not enter telemetry.
+11. Stop the server with stats enabled, both with and without consent. Verify stats
+    finishes cleanup without `IllegalPluginAccessException` or a scheduled command
+    reload. When disabling only stats while YVtils remains enabled, verify
+    `/yvtilsstats` (including its namespaced form) is unregistered.
 
 For deployment, publish the dynamic library using the root repository's local-Maven
 workflow. Its JAR is not an independently installable Bukkit plugin.

@@ -119,6 +119,22 @@ class PrometheusMetrics(publishLeaderboards: Boolean, publishFavorites: Boolean 
     private fun gauge(name: String, help: String): Gauge =
         Gauge.builder().name("yvtils_$name").help(help).register(registry)
 
+    /** Paper returns 1m/5m/15m; Purpur 26.3 prepends a 5s average. Keep the exported windows stable. */
+    fun sampleTps(values: DoubleArray) {
+        val offset = when (values.size) {
+            3 -> 0
+            4 -> 1
+            else -> {
+                // Do not guess window labels for an unknown layout or retain stale samples.
+                tps.clear()
+                return
+            }
+        }
+        listOf("1m", "5m", "15m").forEachIndexed { index, window ->
+            tps.labelValues(window).set(values[index + offset])
+        }
+    }
+
     /** Called on the background worker, never on a scrape or the server tick thread. */
     fun render() {
         val memory = ManagementFactory.getMemoryMXBean().heapMemoryUsage
