@@ -58,7 +58,10 @@ class FusionYVtils : Module.YVtilsModule {
     override fun disablePlugin() {
         active = false
         listeners.forEach(HandlerList::unregisterAll)
-        CommandAPI.unregister("fusion")
+        // Paper command unregistration schedules a reload; core handles CommandAPI shutdown once disabled.
+        if (Core.instance.isEnabled && CommandAPI.isLoaded()) {
+            CommandAPI.unregister("fusion")
+        }
         Crafting.clear()
         NourishingFlask.clear()
         Core.instance.server.servicesManager.unregister(FusionApi::class.java, FusionRegistry)

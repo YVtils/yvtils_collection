@@ -66,8 +66,11 @@ class VanishYVtils : Module.YVtilsModule {
         containers.close()
         service.close()
         ConnectionMessages.hidden = Predicate { false }
-        CommandAPI.unregister("vanish")
-        CommandAPI.unregister("v")
+        // Paper command unregistration schedules a reload; core handles CommandAPI shutdown once disabled.
+        if (Core.instance.isEnabled && CommandAPI.isLoaded()) {
+            CommandAPI.unregister("vanish")
+            CommandAPI.unregister("v")
+        }
         Module.removeModule(MODULE)
     }
 }

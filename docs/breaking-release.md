@@ -44,6 +44,9 @@ PR/push CI runs the same command. Compiler heap and worker limits are committed 
 
 - A module lifecycle exception aborts collection startup. Cleanup is attempted for
   every initialized module in reverse order; one cleanup failure does not skip others.
+- Module command unregistration runs only while the host plugin is enabled. During
+  plugin shutdown, modules still release their resources and registry entries, but
+  leave CommandAPI teardown to core to avoid scheduling a command reload while disabled.
 - Existing malformed/unreadable typed state fails loading. It is not replaced with
   defaults. Repair the reported file and restart. Missing files receive defaults.
 - Configuration writes use same-directory temporary files and atomic replacement.
@@ -62,6 +65,10 @@ published GUI artifact, using fresh server library caches:
 
 - Core-only boot; enable/disable modules across restarts; inspect `/yvtils modules`
   and config editors. Verify module versions and GUI classes come from intended JARs.
+- Stop with Fusion, Vanish, Waypoint and Stats enabled on Paper/Purpur. Verify no
+  `IllegalPluginAccessException` from command unregistration and no skipped resource
+  cleanup. Disable these modules individually while core stays enabled and verify
+  their existing command-unregistration behavior is retained.
 - Place eligible ore/logs across a WorldGuard boundary. Mine from the permitted
   side: denied blocks must remain intact with no drops or durability charge. Test
   concurrent players, broken tools, swapped tools, disconnects and break limits.

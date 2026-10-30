@@ -54,8 +54,11 @@ class WaypointYVtils : Module.YVtilsModule {
 
     override fun disablePlugin() {
         navigation.close()
-        CommandAPI.unregister("waypoint")
-        CommandAPI.unregister("wp")
+        // Paper command unregistration schedules a reload; core handles CommandAPI shutdown once disabled.
+        if (Core.instance.isEnabled && CommandAPI.isLoaded()) {
+            CommandAPI.unregister("waypoint")
+            CommandAPI.unregister("wp")
+        }
         Module.removeModule(MODULE)
     }
 }
