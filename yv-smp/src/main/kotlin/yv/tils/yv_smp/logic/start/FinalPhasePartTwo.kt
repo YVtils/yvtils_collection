@@ -269,11 +269,7 @@ class FinalPhasePartTwo : PhasePlugin {
 
         // Stop camera and restore players after the GO burst has landed
         Bukkit.getScheduler().runTaskLater(Core.instance, {
-            CinematicCamera.stopAll()
-            players.forEach { player ->
-                player.clearActivePotionEffects()
-                Bukkit.restore(player, returnToOrigin = false)
-            }
+            Bukkit.releasePlayers()
         }, 75L)
     }
 }

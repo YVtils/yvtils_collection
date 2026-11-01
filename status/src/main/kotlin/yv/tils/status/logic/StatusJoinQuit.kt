@@ -15,10 +15,9 @@ package yv.tils.status.logic
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import yv.tils.config.language.LanguageHandler
-import yv.tils.status.configs.ConfigFile
+import yv.tils.status.utils.StatusDisplay
 import yv.tils.status.utils.StatusUtils
 import yv.tils.status.utils.StatusUtils.Companion.setStatusDisplay
-import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.modules.Core
 
 class StatusJoinQuit {
@@ -27,24 +26,11 @@ class StatusJoinQuit {
         val status = StatusUtils.currentStatus(player) ?: return
 
         if (setStatusDisplay(player, status.content)) {
-            val display = ConfigFile.config["display"] as String
-
-            val displayCompo = MessageUtils.replacer(
-                MessageUtils.convert(display),
-                mapOf(
-                    "status" to status.content,
-                    "playerName" to player.name
-                )
-            )
-
             player.sendMessage(
-                LanguageHandler.getMessage(
-                    "status.server.join",
-                    player,
-                    mapOf(
-                        "prefix" to Core.prefix,
-                        "status" to MessageUtils.convert(displayCompo),
-                    )
+                StatusDisplay.message(
+                    LanguageHandler.getRawMessage("status.server.join", player),
+                    player.displayName(),
+                    Core.prefix,
                 )
             )
         }

@@ -16,6 +16,26 @@ with `yv-smp: true`; its runtime name/data folder is `yv_smp`.
 Build with `./gradlew :yv-smp:build`. Music requires Simple Voice Chat; ambient
 effects do not. The commands below describe ambient source administration.
 
+### SMP start behavior
+
+- Warmup countdowns include players who join before the cinematic begins.
+- Players joining an active cinematic are moved into its current camera shot and
+  included in subsequent phases, without restarting the sequence. After the GO
+  handoff, new arrivals stay in normal gameplay.
+- Borrowed spectator mode, potion effects, flight and scoreboards are restored on
+  completion or abort. Temporary spawn-elytra flight is released before capture,
+  rather than being restored as unrestricted survival flight.
+- After the GO handoff, death counts appear in tab and below player names on the
+  players' normal scoreboards, without replacing status teams. Values include
+  existing vanilla death statistics and are populated even for players with zero
+  deaths. Activation is saved in `plugins/yvtils/yv_smp/death-counter.json` and
+  reapplied on reconnect and server restart.
+
+Paper checks: start with survival and creative players; join during warmup,
+mid-phase and after GO; abort mid-phase; reconnect after completion and die once.
+Confirm camera participation, normal flight permissions, both death displays,
+and retained status prefixes.
+
 Named sound sources are managed with `/yvsmp ambient`. Creation and movement use
 the player's current position; other operations also work from the console.
 Permission: `yvtils.yv_smp.command.ambient` (operators by default).

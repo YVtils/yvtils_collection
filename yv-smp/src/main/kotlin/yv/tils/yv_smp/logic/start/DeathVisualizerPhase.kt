@@ -17,10 +17,7 @@ import org.bukkit.GameMode
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
-import org.bukkit.scoreboard.Criteria
-import org.bukkit.scoreboard.DisplaySlot
 import yv.tils.config.language.LanguageHandler
-import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.modules.Core
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.utils.CinematicCamera
@@ -170,10 +167,7 @@ class DeathVisualizerPhase : PhasePlugin {
 
     override fun phaseActions(players: List<Player>) {
         val scoreboard = Bukkit.getScoreboardManager().newScoreboard
-        scoreboard.registerNewObjective("deaths", Criteria.DEATH_COUNT, MessageUtils.convert("<red>☠"))
-            .displaySlot = DisplaySlot.PLAYER_LIST
-        scoreboard.registerNewObjective("deaths_two", Criteria.DEATH_COUNT, MessageUtils.convert("<red>☠"))
-            .displaySlot = DisplaySlot.BELOW_NAME
+        DeathCounter.configure(scoreboard, players)
         players.forEach { it.scoreboard = scoreboard }
     }
 

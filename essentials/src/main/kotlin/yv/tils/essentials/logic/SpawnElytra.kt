@@ -29,7 +29,9 @@ import yv.tils.essentials.config.ConfigFile
 import yv.tils.essentials.language.LangStrings
 import yv.tils.utils.modules.Core
 import yv.tils.utils.player.PlayerUtils.Companion.isSupported
+import yv.tils.utils.player.TemporaryFlight
 import java.util.*
+import java.util.function.Consumer
 import org.bukkit.event.HandlerList
 
 /** Temporary spawn gliding, coordinated with essentials' normal /fly ownership. */
@@ -42,6 +44,7 @@ object SpawnElytra : Listener {
 
     fun start() {
         stop()
+        TemporaryFlight.release = Consumer { release(it) }
         Core.instance.server.pluginManager.registerEvents(this, Core.instance)
         task = Core.instance.server.scheduler.runTaskTimer(Core.instance, Runnable {
             Core.instance.server.onlinePlayers.forEach { update(it) }
@@ -49,6 +52,7 @@ object SpawnElytra : Listener {
     }
 
     fun stop() {
+        TemporaryFlight.release = Consumer { }
         task?.cancel()
         task = null
         Core.instance.server.onlinePlayers.forEach { release(it) }

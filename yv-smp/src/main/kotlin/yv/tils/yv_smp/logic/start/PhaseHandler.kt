@@ -116,6 +116,16 @@ class PhaseHandler {
          */
         fun isReservationValid(reservedGeneration: Int): Boolean = isRunning && reservedGeneration == generation
 
+        fun addPlayer(player: Player) {
+            if (!isRunning || currentPhase == Phase.NONE) return
+            try {
+                Bukkit.addPlayer(player)
+            } catch (error: Exception) {
+                stopPhases()
+                throw error
+            }
+        }
+
         /**
          * Begins the actual cinematic phase machine for a previously-[reserveRun]'d
          * generation. No-ops (returning `false`) if that reservation is no longer

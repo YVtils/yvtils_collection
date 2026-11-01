@@ -16,6 +16,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
 import yv.tils.status.configs.ConfigFile
+import yv.tils.status.utils.StatusDisplay
 import yv.tils.status.utils.StatusUtils.Companion.generateDefaultStatus
 import yv.tils.status.utils.StatusUtils.Companion.setStatusDisplay
 import yv.tils.utils.message.MessageUtils
@@ -91,24 +92,11 @@ class StatusHandler {
     private fun setStatusDisplayHandler(player: Player, status: String) {
         if (setStatusDisplay(player, status)) {
             ModuleTelemetry.record(ModuleTelemetry.Event.STATUS_UPDATES)
-            val display = ConfigFile.config["display"] as String
-
-            val displayCompo = MessageUtils.replacer(
-                MessageUtils.convert(display),
-                mapOf(
-                    "status" to status,
-                    "playerName" to player.name
-                )
-            )
-
             player.sendMessage(
-                LanguageHandler.getMessage(
-                    "command.status.set",
-                    player,
-                    mapOf(
-                        "prefix" to Core.prefix,
-                        "status" to MessageUtils.convert(displayCompo)
-                    )
+                StatusDisplay.message(
+                    LanguageHandler.getRawMessage("command.status.set", player),
+                    player.displayName(),
+                    Core.prefix,
                 )
             )
         }

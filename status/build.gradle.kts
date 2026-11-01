@@ -15,4 +15,11 @@ dependencies {
     compileOnly(project(":utils"))
     compileOnly(project(":config"))
     compileOnly(project(":gui-26.1"))
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

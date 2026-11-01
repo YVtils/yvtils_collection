@@ -22,6 +22,7 @@ import yv.tils.yv_smp.commands.YVSmpCommand
 import yv.tils.yv_smp.configs.ConfigFile
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.listeners.PlayerQuitListener
+import yv.tils.yv_smp.listeners.PlayerJoinListener
 import yv.tils.yv_smp.logic.ambient.AmbientSounds
 import yv.tils.yv_smp.logic.music.MusicHandler
 import yv.tils.yv_smp.logic.music.SVCManager
@@ -30,6 +31,7 @@ import yv.tils.yv_smp.logic.music.LocationalAudioStream
 import yv.tils.yv_smp.logic.music.SimpleVoiceChat
 import yv.tils.yv_smp.permissions.PermissionsData
 import yv.tils.yv_smp.logic.start.PhaseHandler
+import yv.tils.yv_smp.logic.start.DeathCounter
 
 class YV_SMPYVtils : Module.YVtilsModule {
     companion object {
@@ -87,6 +89,7 @@ class YV_SMPYVtils : Module.YVtilsModule {
         val pm = plugin.server.pluginManager
 
         pm.registerEvents(PlayerQuitListener(), plugin)
+        pm.registerEvents(PlayerJoinListener(), plugin)
     }
 
     private fun registerCoroutines() {
@@ -99,5 +102,6 @@ class YV_SMPYVtils : Module.YVtilsModule {
 
     private fun loadConfigs() {
         ConfigFile().loadConfig()
+        DeathCounter.load()
     }
 }

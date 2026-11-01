@@ -342,6 +342,25 @@ object CinematicCamera {
         }
     }
 
+    /** Attach a late joiner to the currently running shot without restarting the phase. */
+    fun join(player: Player): Boolean {
+        val source = cameraEntities.values.firstOrNull { it.isValid } ?: return false
+        mountCamera(player, source.location)
+        val taskIdHolder = IntArray(1)
+        taskIdHolder[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Core.instance, Runnable {
+            val display = cameraEntities[player.uniqueId]
+            if (display == null || !source.isValid) {
+                Bukkit.getScheduler().cancelTask(taskIdHolder[0])
+                activeTasks.remove(taskIdHolder[0])
+                if (display != null) dismountCamera(player)
+                return@Runnable
+            }
+            smoothMove(player, display, source.location)
+        }, 0L, INTERPOLATION_INTERVAL.toLong())
+        activeTasks.add(taskIdHolder[0])
+        return true
+    }
+
     /** Releases all players, removes all display entities and cancels all tasks. */
     fun stopAll() {
         activeTasks.forEach { Bukkit.getScheduler().cancelTask(it) }

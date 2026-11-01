@@ -14,7 +14,6 @@ package yv.tils.yv_smp.logic
 
 import net.kyori.adventure.title.Title
 import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
-import org.bukkit.GameMode
 import org.bukkit.Sound
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -25,7 +24,6 @@ import yv.tils.yv_smp.configs.ConfigFile
 import yv.tils.yv_smp.language.LangStrings
 import yv.tils.yv_smp.logic.music.MusicAPI
 import yv.tils.yv_smp.logic.start.PhaseHandler
-import yv.tils.yv_smp.logic.start.PreparationPhase.Companion.savedGameModes
 import java.time.Duration
 
 class StartLogic {
@@ -79,7 +77,7 @@ class StartLogic {
         if (warmupSeconds <= 0) {
             launchSequence(players, generation)
         } else {
-            runWarmupCountdown(players, warmupSeconds, generation)
+            runWarmupCountdown(warmupSeconds, generation)
         }
 
         return true
@@ -103,17 +101,17 @@ class StartLogic {
     }
 
     /**
-     * Broadcasts a per-second countdown (title + sound) to [players], then hands off
+     * Broadcasts a per-second countdown (title + sound) to all online players, then hands off
      * to [launchSequence] once it reaches zero - unless [generation] was invalidated
      * (via [PhaseHandler.stopPhases]) at any point during the countdown.
      */
-    private fun runWarmupCountdown(players: List<Player>, seconds: Long, generation: Int) {
+    private fun runWarmupCountdown(seconds: Long, generation: Int) {
         for (secondsLeft in seconds downTo 1) {
             val delayTicks = (seconds - secondsLeft) * 20L
             Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
                 if (!PhaseHandler.isReservationValid(generation)) return@Runnable
 
-                players.forEach { player ->
+                PlayerUtils.onlinePlayersAsPlayers.forEach { player ->
                     val title = Title.title(
                         LanguageHandler.getMessage(
                             LangStrings.START_WARMUP_TITLE,
@@ -136,7 +134,7 @@ class StartLogic {
 
         Bukkit.getScheduler().runTaskLater(Core.instance, Runnable {
             if (!PhaseHandler.isReservationValid(generation)) return@Runnable
-            launchSequence(players, generation)
+            launchSequence(PlayerUtils.onlinePlayersAsPlayers, generation)
         }, seconds * 20L)
     }
 
@@ -146,18 +144,17 @@ class StartLogic {
      * Called either immediately (warmup disabled) or after [runWarmupCountdown] completes.
      */
     private fun launchSequence(players: List<Player>, generation: Int) {
-        Bukkit.capture(players)
-        players.forEach { player ->
-            player.stopAllSounds()
-            savedGameModes[player.uniqueId] = player.gameMode
-            player.gameMode = GameMode.SPECTATOR
-            players.forEach { other -> if (other != player) player.hidePlayer(Core.instance, other) }
+        try {
+            val participants = Bukkit.prepare(players)
+
+            MusicAPI.broadcastUrl(
+                "https://soundcloud.com/tunetankcom/victor-wayne-battle-phase-dark-epic-tension-music-copyright-free",
+            )
+
+            PhaseHandler.beginPhasesForReservedRun(participants, generation)
+        } catch (error: Exception) {
+            PhaseHandler.stopPhases()
+            throw error
         }
-
-        MusicAPI.broadcastUrl(
-            "https://soundcloud.com/tunetankcom/victor-wayne-battle-phase-dark-epic-tension-music-copyright-free",
-        )
-
-        PhaseHandler.beginPhasesForReservedRun(players, generation)
     }
 }

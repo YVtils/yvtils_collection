@@ -33,7 +33,14 @@ dependencies {
     implementation("dev.lavalink.youtube:v2:${lavalinkYoutubeVersion}")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testImplementation(project(":utils"))
+    testImplementation(project(":config"))
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    testImplementation("io.papermc.paper:paper-api:26.1.2.build.74-stable")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-tasks.test { useJUnitPlatform() }
+tasks.test {
+    useJUnitPlatform()
+    workingDir = layout.buildDirectory.get().asFile
+}

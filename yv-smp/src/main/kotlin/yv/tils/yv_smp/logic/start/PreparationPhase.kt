@@ -13,7 +13,6 @@
 package yv.tils.yv_smp.logic.start
 
 import net.kyori.adventure.title.Title
-import org.bukkit.GameMode
 import org.bukkit.HeightMap
 import org.bukkit.Particle
 import org.bukkit.Sound
@@ -29,16 +28,10 @@ import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgePillarRise
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.edgeShockwaveInward
 import yv.tils.yv_smp.utils.ParticleEffects.Companion.islandRain
 import java.time.Duration
-import java.util.*
 import kotlin.math.sqrt
 import yv.tils.yv_smp.logic.start.CinematicRuntime as Bukkit
 
 class PreparationPhase : PhasePlugin {
-    companion object {
-        /** Game modes to restore after spectator cinematic ends (set in phaseActions, read in FinalPhasePartTwo). */
-        val savedGameModes = mutableMapOf<UUID, GameMode>()
-    }
-
     override fun getPhaseDuration(): Long {
         // Duration: 12L * 6 = 72 ticks for title loop + island cinematic runs for 100 ticks + buffer = 140 ticks
         return 140L

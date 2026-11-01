@@ -12,13 +12,13 @@
 
 package yv.tils.status.utils
 
+import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
 import yv.tils.status.configs.ConfigFile
 import yv.tils.status.configs.SaveFile
 import yv.tils.status.logic.StatusTeamManager
 import yv.tils.utils.logger.Logger
-import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.modules.Core
 
 class StatusUtils {
@@ -27,10 +27,13 @@ class StatusUtils {
             return SaveFile.saves[player.uniqueId]
         }
 
+        fun renderDisplay(status: String, playerName: String): Component =
+            StatusDisplay.render(ConfigFile.state.display, status, playerName, Core.prefix)
+
         fun setStatusDisplay(player: Player, status: String): Boolean {
             if (status == "") {
-                player.displayName(MessageUtils.convert(player.name))
-                player.playerListName(MessageUtils.convert(player.name))
+                player.displayName(Component.text(player.name))
+                player.playerListName(Component.text(player.name))
                 StatusTeamManager().removePlayer(player)
                 SaveFile().updatePlayerSetting(player.uniqueId, "")
                 return false
@@ -52,23 +55,8 @@ class StatusUtils {
                 return false
             }
 
-            val display = ConfigFile.config["display"] as String
-
-            val displayCompo = MessageUtils.replacer(
-                MessageUtils.convert(display),
-                mapOf(
-                    "status" to status,
-                    "playerName" to player.name
-                )
-            )
-
-            val displayCompoNameTag = MessageUtils.replacer(
-                MessageUtils.convert(display),
-                mapOf(
-                    "status" to status,
-                    "playerName" to ""
-                )
-            )
+            val displayCompo = renderDisplay(status, player.name)
+            val displayCompoNameTag = renderDisplay(status, "")
 
             player.displayName(displayCompo)
             player.playerListName(displayCompo)

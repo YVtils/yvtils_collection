@@ -22,11 +22,11 @@ import yv.tils.status.configs.SaveFile
 import yv.tils.status.language.RegisterStrings
 import yv.tils.status.listeners.PlayerJoin
 import yv.tils.status.listeners.PlayerQuit
+import yv.tils.status.utils.StatusUtils
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
 import java.util.function.Function
 import net.kyori.adventure.text.Component
-import yv.tils.utils.message.MessageUtils
 import yv.tils.utils.modules.ConnectionMessages
 
 class StatusYVtils : Module.YVtilsModule {
@@ -59,10 +59,7 @@ class StatusYVtils : Module.YVtilsModule {
         ConnectionMessages.displayName = Function { player ->
             val status = SaveFile.saves[player.uniqueId]?.content.orEmpty()
             if (status.isBlank()) Component.text(player.name)
-            else MessageUtils.replacer(
-                ConfigFile.config["display"] as String,
-                mapOf("status" to status, "playerName" to player.name)
-            )
+            else StatusUtils.renderDisplay(status, player.name)
         }
     }
 
