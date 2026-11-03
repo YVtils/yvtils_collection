@@ -55,6 +55,31 @@ class StatusDisplayTest {
     }
 
     @Test
+    fun `appending chat text to a status display does not inherit dark gray`() {
+        val display = StatusDisplay.render(template, "<green>Online", "Alice")
+        val chat = display.append(Component.text(": Hello"))
+
+        assertEquals("[Online] | Alice: Hello", plain.serialize(chat))
+        assertEquals(glyphs(Component.text(": Hello")), glyphs(chat).takeLast(7))
+        assertEquals(Style.empty(), display.style())
+    }
+
+    @Test
+    fun `appended text does not inherit custom template decorations or events`() {
+        val custom = "<red><bold><click:run_command:'/help'><playerName> [<status>]"
+        val display = StatusDisplay.render(custom, "Busy", "Alice")
+        val chat = display.append(Component.text(": Hello"))
+
+        assertEquals(glyphs(Component.text(": Hello")), glyphs(chat).takeLast(7))
+        assertEquals(Style.empty(), display.style())
+        assertTrue(glyphs(display).all {
+            it.second.color() == NamedTextColor.RED &&
+                it.second.decoration(TextDecoration.BOLD) == TextDecoration.State.TRUE &&
+                it.second.clickEvent() != null
+        })
+    }
+
+    @Test
     fun `status cannot expand template placeholders or reparse escaped tags`() {
         val status = "<playerName><prefix>\\<red>Busy"
         val rendered = StatusDisplay.render(template, status, "Alice", "<gold>Server")

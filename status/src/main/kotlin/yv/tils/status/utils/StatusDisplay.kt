@@ -16,11 +16,15 @@ internal object StatusDisplay {
     private val miniMessage = MiniMessage.miniMessage()
 
     fun render(template: String, status: String, playerName: String, prefix: String = ""): Component =
-        miniMessage.deserialize(
-            template,
-            Placeholder.component("status", miniMessage.deserialize(status)),
-            Placeholder.unparsed("playername", playerName),
-            Placeholder.component("prefix", miniMessage.deserialize(prefix)),
+        // MiniMessage may put the template's first style on its root. Keep that root
+        // inside a neutral parent so callers appending chat text cannot inherit it.
+        Component.empty().append(
+            miniMessage.deserialize(
+                template,
+                Placeholder.component("status", miniMessage.deserialize(status)),
+                Placeholder.unparsed("playername", playerName),
+                Placeholder.component("prefix", miniMessage.deserialize(prefix)),
+            )
         )
 
     /** Keep an already-rendered display intact when embedding it in a localized message. */
