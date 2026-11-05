@@ -98,6 +98,7 @@ class EssentialYVtils : Module.YVtilsModule {
         pm.registerEvents(PlayerGameModeChange(), plugin)
         pm.registerEvents(PlayerJoin(), plugin)
         pm.registerEvents(PlayerPortal(), plugin)
+        pm.registerEvents(PlayerTeleport(), plugin)
         pm.registerEvents(AntiTooExpensive(), plugin)
     }
 

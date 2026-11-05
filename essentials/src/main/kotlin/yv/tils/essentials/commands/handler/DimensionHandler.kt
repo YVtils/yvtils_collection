@@ -15,7 +15,7 @@ package yv.tils.essentials.commands.handler
 import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerPortalEvent
+import org.bukkit.event.player.PlayerTeleportEvent
 import yv.tils.config.language.LanguageHandler
 import yv.tils.essentials.config.StatesFile
 import yv.tils.essentials.language.LangStrings
@@ -79,7 +79,9 @@ class DimensionHandler {
         }
     }
 
-    fun onTravelAttempt(e: PlayerPortalEvent) {
+    fun onTravelAttempt(e: PlayerTeleportEvent) {
+        if (e.isCancelled) return
+
         val player = e.player
         val fromWorld = e.from.world
         val toWorld = e.to.world ?: return
