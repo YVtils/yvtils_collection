@@ -220,14 +220,12 @@ class SqliteStore(path: Path) : AutoCloseable {
     }
 
     fun snapshot(
-        leaderboardSize: Int,
         publishLeaderboards: Boolean,
         now: Instant = Instant.now(),
         publishFavorites: Boolean = false,
         favoriteSize: Int = 10,
         favoritePlayerLimit: Int = 25,
     ): DatabaseSnapshot {
-        require(leaderboardSize in 1..100) { "Leaderboard size must be between 1 and 100" }
         require(favoriteSize in 1..100 && favoritePlayerLimit in 1..100) { "Favorite limits must be between 1 and 100" }
         val totals = mutableMapOf<PlayerStat, Long>()
         connection.createStatement().use { statement ->
@@ -238,10 +236,9 @@ class SqliteStore(path: Path) : AutoCloseable {
         val rankings = if (!publishLeaderboards) emptyMap() else PlayerStat.entries.associateWith { stat ->
             connection.prepareStatement(
                 """SELECT t.uuid, p.name, t.value FROM player_totals t JOIN players p ON p.uuid = t.uuid
-                    WHERE stat = ? AND value > 0 ORDER BY value DESC, t.uuid LIMIT ?"""
+                    WHERE stat = ? AND value > 0 ORDER BY value DESC, t.uuid"""
             ).use { statement ->
                 statement.setString(1, stat.name)
-                statement.setInt(2, leaderboardSize)
                 statement.executeQuery().use { result ->
                     buildList {
                         while (result.next()) add(LeaderboardEntry(UUID.fromString(result.getString(1)), result.getString(2), result.getLong(3)))

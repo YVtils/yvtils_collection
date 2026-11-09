@@ -37,12 +37,33 @@ class SqliteStoreTest {
         SqliteStore(path).use {
             it.apply(batch, now)
             it.apply(batch, now)
-            assertEquals(3L, it.snapshot(10, true, now).totals[PlayerStat.DEATHS])
+            assertEquals(3L, it.snapshot(true, now).totals[PlayerStat.DEATHS])
         }
         SqliteStore(path).use {
             it.apply(batch, now)
-            assertEquals(3L, it.snapshot(10, true, now).totals[PlayerStat.DEATHS])
-            assertEquals("Player", it.snapshot(10, true, now).leaderboards[PlayerStat.DEATHS]!!.single().name)
+            assertEquals(3L, it.snapshot(true, now).totals[PlayerStat.DEATHS])
+            assertEquals("Player", it.snapshot(true, now).leaderboards[PlayerStat.DEATHS]!!.single().name)
+        }
+    }
+
+    @Test fun `leaderboard snapshot includes every player with a recorded value`() {
+        val players = (1..12).map { index ->
+            val uuid = UUID(0, index.toLong())
+            PlayerIdentity(uuid, "Player$index", now.toEpochMilli(), now.toEpochMilli())
+        }
+        val batch = WriteBatch(
+            players = players,
+            deltas = players.associate { identity ->
+                DeltaKey(identity.uuid, PlayerStat.DEATHS, day) to 1L
+            },
+            sessions = emptyList(),
+        )
+
+        SqliteStore(path).use { store ->
+            store.apply(batch, now)
+            val entries = store.snapshot(true, now).leaderboards[PlayerStat.DEATHS]!!
+            assertEquals(12, entries.size)
+            assertEquals(players.map { it.uuid }.toSet(), entries.map { it.player }.toSet())
         }
     }
 
@@ -50,10 +71,10 @@ class SqliteStoreTest {
         val invalid = batch().copy(deltas = mapOf(DeltaKey(UUID.randomUUID(), PlayerStat.DEATHS, day) to 1L))
         SqliteStore(path).use {
             assertThrows(Exception::class.java) { it.apply(invalid, now) }
-            assertEquals(0L, it.snapshot(10, true, now).players)
+            assertEquals(0L, it.snapshot(true, now).players)
             // Same ID is still usable: the failed marker was rolled back along with the player insert.
             it.apply(batch().copy(id = invalid.id), now)
-            assertEquals(3L, it.snapshot(10, true, now).totals[PlayerStat.DEATHS])
+            assertEquals(3L, it.snapshot(true, now).totals[PlayerStat.DEATHS])
         }
     }
 
@@ -74,8 +95,8 @@ class SqliteStoreTest {
             buffer.breakdown(player, key, 3, now)
             loseAcknowledgement = false
             writer.flush()
-            assertEquals(5L, store.snapshot(10, false, now).totals[PlayerStat.DEATHS])
-            assertEquals(5L, store.snapshot(10, false, now, publishFavorites = true).favorites.single().value)
+            assertEquals(5L, store.snapshot(false, now).totals[PlayerStat.DEATHS])
+            assertEquals(5L, store.snapshot(false, now, publishFavorites = true).favorites.single().value)
         }
     }
 
@@ -83,7 +104,7 @@ class SqliteStoreTest {
         SqliteStore(path).use {
             it.apply(batch(baseline = mapOf(PlayerStat.DEATHS to 100L)), now)
             it.apply(batch(name = "Renamed", baseline = mapOf(PlayerStat.DEATHS to 200L)), now)
-            val snapshot = it.snapshot(10, true, now)
+            val snapshot = it.snapshot(true, now)
             assertEquals(106L, snapshot.totals[PlayerStat.DEATHS])
             assertEquals(1L, snapshot.players)
             assertEquals("Renamed", snapshot.leaderboards[PlayerStat.DEATHS]!!.single().name)
@@ -101,7 +122,7 @@ class SqliteStoreTest {
         SqliteStore(path).use {
             it.apply(batch(), now)
             it.apply(batch(baseline = mapOf(PlayerStat.DEATHS to 100L)), now)
-            assertEquals(6L, it.snapshot(10, true, now).totals[PlayerStat.DEATHS])
+            assertEquals(6L, it.snapshot(true, now).totals[PlayerStat.DEATHS])
         }
     }
 
@@ -125,8 +146,8 @@ class SqliteStoreTest {
         SqliteStore(path).use {
             it.apply(batch(), now)
             it.prune(1, 1, now.plusSeconds(2 * 86400))
-            assertEquals(3L, it.snapshot(10, false, now).totals[PlayerStat.DEATHS])
-            assertTrue(it.snapshot(10, false, now).leaderboards.isEmpty())
+            assertEquals(3L, it.snapshot(false, now).totals[PlayerStat.DEATHS])
+            assertTrue(it.snapshot(false, now).leaderboards.isEmpty())
         }
         connection().use { c -> c.createStatement().use { s ->
             s.executeQuery("SELECT COUNT(*) FROM player_daily_stats").use { it.next(); assertEquals(0, it.getInt(1)) }
@@ -157,7 +178,7 @@ class SqliteStoreTest {
             )
             store.apply(update, now)
             store.apply(update, now)
-            val snapshot = store.snapshot(10, true, now, publishFavorites = true)
+            val snapshot = store.snapshot(true, now, publishFavorites = true)
             assertEquals(6L, snapshot.totals[PlayerStat.DEATHS])
             assertEquals(4L, snapshot.favorites.single().value)
         }
@@ -175,15 +196,15 @@ class SqliteStoreTest {
         SqliteStore(path).use { store ->
             store.apply(update, now)
             store.apply(update, now)
-            assertTrue(store.snapshot(10, true, now).favorites.isEmpty())
-            assertEquals(104L, store.snapshot(10, true, now, publishFavorites = true).favorites.single().value)
+            assertTrue(store.snapshot(true, now).favorites.isEmpty())
+            assertEquals(104L, store.snapshot(true, now, publishFavorites = true).favorites.single().value)
         }
         connection().use { c -> c.createStatement().use { s ->
             s.executeQuery("SELECT value FROM player_breakdown_daily").use { it.next(); assertEquals(4L, it.getLong(1)) }
         } }
         SqliteStore(path).use { store ->
             store.prune(1, 1, now.plusSeconds(86400 * 2))
-            assertEquals(104L, store.snapshot(10, true, now, publishFavorites = true).favorites.single().value)
+            assertEquals(104L, store.snapshot(true, now, publishFavorites = true).favorites.single().value)
         }
         connection().use { c -> c.createStatement().use { s ->
             s.executeQuery("SELECT COUNT(*) FROM player_breakdown_daily").use { it.next(); assertEquals(0, it.getInt(1)) }
@@ -204,7 +225,7 @@ class SqliteStoreTest {
         )
         SqliteStore(path).use { store ->
             store.apply(update, now)
-            val favorite = store.snapshot(10, false, now, publishFavorites = true, favoriteSize = 1, favoritePlayerLimit = 1).favorites.single()
+            val favorite = store.snapshot(false, now, publishFavorites = true, favoriteSize = 1, favoritePlayerLimit = 1).favorites.single()
             assertEquals(newer, favorite.player)
             assertEquals("minecraft:dirt", favorite.subject)
             assertEquals(1, favorite.rank)

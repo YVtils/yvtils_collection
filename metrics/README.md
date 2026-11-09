@@ -8,7 +8,7 @@ This is **not** YVtils plugin-usage telemetry; the existing `stats` module is se
 - Player playtime, deaths, kills, blocks, distance, totems, damage and food statistics.
 - Jumps, pickup/drop counts, raids, breeding/trades, chest opens, enchanting, bells,
   sneaking/AFK time and optional per-block/per-entity Favorites.
-- Private-by-default Prometheus endpoint; optional bounded, identifying leaderboards.
+- Private-by-default Prometheus endpoint; optional identifying totals for all recorded players.
 - Prometheus/Grafana setup or local Alloy forwarding to Grafana Cloud/Mimir.
 
 Enable `metrics` in `plugins/yvtils/modules.yml` and restart. Configuration is generated

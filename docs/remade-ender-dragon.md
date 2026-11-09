@@ -20,10 +20,13 @@ Open the module from `/yvtils config` or use `/redragon config`.
 The module uses the collection's shared InvUI bootstrap, styled paged menus,
 and `DataClassConfigGui` editor. The menu offers:
 
-- **General settings:** edit scalar and string-list configuration values.
+- **General settings:** edit scalar and string-list configuration values, including
+  `keepInventoryDuringFight`.
 - **Activation:** cycle between EVERY, ADMIN and FIRST.
 - **Attacks and support:** edit each attack's full settings, including cooldown,
   use budget, health gates, warning time, damage, radius, and scaling counts.
+- **Dragon egg:** toggle ender-chest storage, container storage, void loss,
+  keeping carried eggs on logout, and forced egg drops on death.
 
 Enum/map navigation is supplied by the module because the shared generic
 editor does not edit those types directly. Settings are edited in detached
@@ -55,6 +58,84 @@ module is loaded. Attack budgets reset on a new encounter or server restart.
 
 `/redragon stop` suppresses automatic restart for that dragon until an explicit
 start or server restart. Only one custom encounter runs in each End world.
+
+## Temporary keep-inventory during fights
+
+Set `keepInventoryDuringFight: true` in YAML or **General settings** to temporarily
+enable the vanilla keep-inventory gamerule **only in the End world hosting the
+dragon fight**. This includes players outside the island in that same world.
+The Overworld, Nether, and other End worlds without an active encounter are
+unaffected; their existing rules are not changed. Activation also has an
+explicit End-dimension safeguard. Preview encounters do not activate it. The
+default is `false`, leaving the world's rule untouched.
+
+Players in that End world receive localized English/German chat announcements
+when temporary keep-inventory activates and when the previous rule is restored.
+The restoration message distinguishes returning to disabled from remaining
+enabled when it was enabled before the fight. Players joining or entering that
+End world mid-fight are also informed; other dimensions receive no broadcast.
+When `dragonEgg.alwaysDropOnDeath` is enabled, activation/entry messages include
+a warning that egg-bearing stacks still drop. These rule announcements are
+independent of `announceAttacks`.
+
+The previous rule is captured before activation and restored on dragon
+death/dying/despawn, `/redragon stop`, reload/configuration saves, world unload,
+and module disable. A world that already had keep-inventory enabled stays
+enabled afterward. Vanilla keep-inventory XP behavior applies during the fight.
+Automatic discovery can begin another eligible fight after reload, capturing
+the restored baseline again.
+
+Original values are journaled by world UUID in `keep-inventory-journal.json`
+before the rule changes. Interrupted encounters are recovered before discovery
+on startup, and late-loaded worlds recover when they load. Do not delete this
+journal while an override is active or recovery is pending. Rejected rule
+activation prevents that fight from starting; rejected restoration is logged
+and retains the journal for recovery.
+
+## Dragon egg rules
+
+The **Dragon egg** screen in `/redragon config` edits these settings. They can
+also be changed in YAML and applied with `/redragon reload`:
+
+```yaml
+dragonEgg:
+  enderChestPuttable: true
+  chestPuttable: true
+  voidDisappearing: true
+  logoutable: true
+  alwaysDropOnDeath: false
+```
+
+The original four options default to `true`, preserving vanilla behavior on
+existing servers. Set one to `false` to enable its restriction/protection:
+
+| Setting | Behavior when `false` |
+|---|---|
+| `enderChestPuttable` | Prevent putting eggs in ender chests. Independent of ordinary container storage. |
+| `chestPuttable` | Prevent putting eggs in chests, barrels, shulker boxes, storage minecarts, hoppers, dispensers/droppers, furnaces, brewing stands, crafters, pots, and shelves. Blocks automatic transfers/pickup as well as manual insertion. |
+| `voidDisappearing` | Return dropped egg items and falling egg blocks approaching the world's lower boundary to the surface above that world's spawn. Void damage is also intercepted. Other items and normal item despawn/fire/explosion behavior are unchanged. |
+| `logoutable` | Drop carried egg-bearing stacks at the player's logout location instead of saving them in the offline inventory. This includes offhand and cursor items; the inventory is closed first to return temporary crafting/menu inputs. Disconnects, kicks, and timeouts all count as logout. |
+
+`alwaysDropOnDeath` defaults to `false`. Set it to **`true`** to force carried
+eggs to drop on every non-cancelled player death, even with keep-inventory
+enabled by the world rule, the temporary fight option, or another plugin.
+Eggs are removed from the inventory and the death event's retained-items list,
+without changing keep-inventory/XP flags for other items. Already-queued egg
+drops are counted rather than added twice. Offhand, cursor, returned menu inputs,
+and egg-bearing portable containers are included. Cancelled deaths are untouched.
+
+Eggs nested in bundles or shulker boxes are detected. Storage restrictions also
+prevent placing an already-filled portable container. Death/logout and void recovery
+drop/recover the **whole egg-bearing stack/container**, preserving its contents
+and metadata rather than extracting or duplicating the egg. Player pickup
+and manual retrieval of eggs already in a restricted container remain allowed; changing
+a toggle does not purge existing container/ender-chest contents.
+
+These rules apply to **all dragon eggs in all worlds** while the module is loaded,
+not only eggs from custom fights. They do not depend on `activation`, `worlds`,
+`enabled` (the encounter switch), or having a fight in progress. This prevents
+carrying an egg into another dimension from bypassing the rules. Disabling the
+module itself removes the rules and cancels its egg-recovery task.
 
 ## Scaling and pacing
 
@@ -188,6 +269,7 @@ distances are blocks. Lists use Minecraft registry IDs (e.g. `poison` or
 | Keys | Defaults | Purpose |
 |---|---|---|
 | `enabled`, `activation`, `worlds` | `true`, `EVERY`, `[]` | Master switch, start policy, exact End world names; empty list allows all End worlds. |
+| `keepInventoryDuringFight` | `false` | Temporarily enable the world's keep-inventory rule during normal encounters, then restore its previous value. Previews do not change it; `dragonEgg.alwaysDropOnDeath` can force eggs to drop anyway. |
 | `centerX`, `centerZ`, `islandRadius` | `0`, `0`, `96` | Fighter boundary, wave coverage, terrain scan; radius accepts 16–160. |
 | `groundMinY`, `groundMaxY` | `40`, `90` | Surface scan height bounds; widen for customized islands. |
 | `maxScalingPlayers`, `baseHealth`, `healthPerExtraPlayer`, `maxHealth` | `20`, `1200`, `900`, `18000` | Effective party/HP scaling and hard cap. |
@@ -337,7 +419,7 @@ Debug examples:
   records as well as new dry grass. Only still-matching grass is removed; unrelated replacement blocks
   are preserved. Do not delete `terrain-journal.json` while markers exist.
 - Server restarts reset attack cooldown/use budgets. Completion history and
-  terrain recovery persist; live encounter timers do not.
+  terrain/keep-inventory recovery persist; live encounter timers do not.
 - Announcements/command messages are registered with config language files.
   English and German messages are provided; attack labels are editable per locale.
 - Shared `Logger` records module lifecycle, encounter starts/stops, configuration
@@ -365,6 +447,15 @@ Automated checks:
 Pure-rule tests cover party/count caps, nonfatal-but-damaging magnet landings,
 ±45° cone boundaries, breath angle wrapping, forward-only stages, disabled and
 sustained budgets, attack compatibility and follow-up selection. Compilation validates the Paper and CommandAPI calls.
+Egg tests cover default/independent toggles, detached settings drafts, nested
+portable containers, insertion versus retrieval actions, logout stack/cursor
+handling, death drops with both keep-inventory states, retained items, duplicate
+prevention, cancelled deaths, and void-damage recovery without protecting unrelated
+items. Temporary-rule tests cover original true/false values, preview/disabled
+behavior, separate worlds, journal-before-change, interrupted/late-world recovery,
+idempotent cleanup, and rejected activation/restoration. Additional checks verify
+the End-only guard, activation/restoration notification timing and deduplication,
+and active-rule eligibility for entry messages.
 The module uses the repository's default Paper target (26.1.2).
 
 In-game tuning still requires a Paper server and players:
@@ -403,6 +494,36 @@ In-game tuning still requires a Paper server and players:
 17. Play with 5/10/15 mixed-gear fighters. Record duration/deaths and damage
     windows. Verify bed/melee/projectile damage and crystal healing against
     effective HP. Tune HP before damage to approach the 30-minute goal.
+18. Toggle each egg option in YAML and InvUI, reload/restart, and verify that the
+    values persist. With storage disabled, try normal/right/shift clicks, dragging,
+    hotbar/offhand swaps, bundle insertion/extraction, hopper transfer/pickup, pots,
+    shelves, storage minecarts, and placing filled shulker boxes. Retrieval and
+    player-inventory rearrangement must still work. Test ender-chest storage
+    independently of ordinary storage, including nested bundles/shulker boxes.
+19. With void loss disabled, throw an egg and an egg-bearing shulker box into the
+    void, let a placed egg fall into it, and die below the island carrying an egg.
+    Confirm recovery above that world's spawn without duplication. Check eggs
+    already dropped before enabling protection and entities loaded with chunks.
+20. Disable egg logout: disconnect/kick/timeout with eggs in normal slots, offhand,
+    cursor, crafting inputs, and portable containers. Only egg-bearing stacks
+    should drop at logout, once each, and not remain after reconnect. Repeat with
+    logout allowed and in other dimensions with no custom fight running.
+21. Enable `dragonEgg.alwaysDropOnDeath` and die with keep-inventory both off and
+    on, including the temporary fight rule and plugin-provided retained items.
+    Check multiple egg stacks, offhand/cursor/menu inputs, and nested portable
+    containers. Eggs must drop exactly once and not survive in the respawned
+    inventory; non-egg items/XP must still follow the original death rules.
+22. Enable `keepInventoryDuringFight` with the world's original rule false, then
+    true. Test start, dragon death/despawn, stop, reload, world unload and disable:
+    the original value must return every time. Previews must leave it untouched.
+    Test concurrent fights in separate End worlds, interrupted-fight recovery
+    after restart, and a world loaded later. Verify other dimensions are unaffected.
+23. With players in the End, Overworld, Nether, and an unrelated End world, start
+    and stop a protected fight. Only players in its End world should receive
+    activation/restoration announcements. Enter/rejoin that world mid-fight and
+    check the notice and optional egg-drop warning in English and German. Test
+    original rule values both false and true, and ensure the end message does not
+    incorrectly claim keep-inventory was disabled when it remains enabled.
 
 ## Longer encounter design (schema 3)
 

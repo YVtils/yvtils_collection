@@ -6,6 +6,11 @@ Three forward-only stages, a compatibility-aware attack director, sustained basi
 casts, crystal convergence, echo waves, hunter marks, optional rift anchors and a
 directional breath sweep support longer group encounters. Default feedback uses
 subtle sounds and visuals without naming attacks to fighters.
+Optional dragon-egg rules control ender-chest/container storage, void loss,
+keeping carried eggs on logout, and forced egg drops on death through YAML or
+the shared configuration GUI. Normal fights can also temporarily enable
+keep-inventory only in their End world, with localized activation/restoration
+announcements and restoration of the previous rule on cleanup.
 
 - Module/artifact ID: `remade-ender-dragon`
 - Display name: **Remade Ender Dragon**
@@ -23,4 +28,6 @@ available through the configured module repository, then restart.
 - `logic/FightManager.kt`: encounter discovery, scheduling and recovery.
 - `logic/DragonFight.kt`: attack/stage orchestration and team objectives.
 - `logic/TemporaryTerrain.kt`: journaled temporary-block ownership/recovery.
+- `logic/TemporaryKeepInventory.kt`: temporary world-rule ownership/recovery.
+- `logic/DragonEggProtection.kt`, `DragonEggRules.kt`: global egg rules and inventory/void handling.
 - `logic/FightMath.kt`, `AttackDirector.kt`, `src/test/`: pure encounter rules.

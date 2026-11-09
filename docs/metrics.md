@@ -12,7 +12,7 @@ Implemented deployment: **one Paper server, one local SQLite database**.
 ```text
 Paper server thread -> bounded-category in-memory counters -> background SQLite transactions
        |                                                        |
-       +-> numeric observations                  durable totals / optional Top-N
+       +-> numeric observations                  durable totals / optional player totals
                          \                         /
                           background Prometheus renderer
                                       |
@@ -70,8 +70,7 @@ require a restart; malformed/invalid configuration is not replaced with defaults
 | `trackAfk`                 | `true`      | Estimate AFK time from Paper's idle-duration signal          |
 | `afkThresholdSeconds`      | `300`       | Idle grace period before time counts as AFK                  |
 | `importVanillaOnFirstJoin` | `false`     | One-time baseline for a newly recorded player                |
-| `publishLeaderboards`      | `false`     | Export identifying Top-N ranking samples                     |
-| `leaderboardSize`          | `10`        | Top-N per statistic; 1–100                                   |
+| `publishLeaderboards`      | `false`     | Export identifying totals for all recorded players           |
 | `publishFavorites`         | `false`     | Separately opt in to identifying per-player Favorites       |
 | `favoritePlayerLimit`      | `25`        | Maximum recently seen players whose Favorites are exported |
 | `favoriteSize`             | `10`        | Maximum entries per player/category; 1–100                  |
@@ -102,10 +101,11 @@ without scheduling server-thread work or querying SQLite.
 Local player history contains UUIDs, names and visit timestamps. Operators should
 disclose collection and choose appropriate retention/access policies. The private
 online count includes hidden players; it is not the public Discord player count.
-Setting `publishLeaderboards: true` explicitly exports names and UUIDs for Top-N
-players. It does not enable an unbounded per-player/per-material metric matrix.
-Ranking churn and name changes still create historical series until the metrics
-backend's retention expires; consider storage costs before enabling it.
+Setting `publishLeaderboards: true` explicitly exports names and UUIDs for all
+players with recorded totals, so Grafana can filter across the complete player set.
+This does not enable per-player/per-material metric matrices. Player growth and name
+changes create historical series until the metrics backend's retention expires;
+consider storage costs before enabling it.
 
 `publishFavorites` is a separate opt-in, not implied by `publishLeaderboards`.
 It exports up to four categories × `favoriteSize` × `favoritePlayerLimit` series
@@ -222,8 +222,8 @@ Restart the server, refresh the provisioned dashboard or re-import
 and select a Favorites player and category. Publication is intentionally bounded; full individual totals and
 daily breakdowns can be queried locally even if the player is not in the published
 recent-player window. Existing `publishLeaderboards: true` continues to publish
-Top-N player totals for all the newly added numeric statistics without enabling
-Favorites implicitly.
+all recorded player totals for the numeric statistics without enabling Favorites
+implicitly.
 
 ### AFK semantics
 
@@ -339,7 +339,7 @@ ORDER BY value DESC, subject LIMIT 10;
 ```
 
 SQLite CLI supports JSON/CSV export for these queries. Grafana's built-in
-Prometheus data source can display the opt-in Top-N metrics without a SQLite
+Prometheus data source can display the opt-in per-player metrics without a SQLite
 plugin. Arbitrary individual histories or SQL period rankings need an explicitly
 installed SQLite-compatible data source or another read-only integration. Do not
 assume Grafana has built-in SQLite support. Provision a separate read-only backup
@@ -453,8 +453,8 @@ Paper acceptance checklist (requires a running server; not covered by unit tests
    that feature awards them.
 5. Verify imported baselines do not repeat or appear in daily history; compare playtime
    and distance against Minecraft's statistics screen.
-6. Confirm the default endpoint contains no UUID/name labels. Enable Top-N publication
-   deliberately and verify rankings and the Grafana table.
+6. Confirm the default endpoint contains no UUID/name labels. Enable player-total
+    publication deliberately and verify all recorded players are available for Grafana filters.
 7. Freeze the tick thread in an isolated test environment: cached HTTP remains responsive
    and the tick heartbeat becomes stale. Stop the process: Prometheus `up` becomes zero.
 8. Test unavailable/read-only/full storage on a disposable deployment: health drops,

@@ -86,7 +86,7 @@ class PrometheusMetrics(publishLeaderboards: Boolean, publishFavorites: Boolean 
                 it.call(snapshot.monthlyPlayers.toDouble(), "month")
             }.register(registry)
         if (publishLeaderboards) GaugeWithCallback.builder().name("yvtils_player_leaderboard_value")
-            .help("Top-N player totals in base units; stat identifies units. Opt-in, identifying player data.")
+            .help("Recorded player totals in base units; stat identifies units. Opt-in, identifying player data.")
             .labelNames("stat", "rank", "player_uuid", "player_name").callback { callback ->
                 database.leaderboards.forEach { (stat, entries) ->
                     entries.forEachIndexed { index, entry ->

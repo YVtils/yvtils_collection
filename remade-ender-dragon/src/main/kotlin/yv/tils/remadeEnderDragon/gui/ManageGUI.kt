@@ -32,8 +32,9 @@ class ManageGUI(private val manager: FightManager) {
                 val draft = ConfigFile.state.copy(attacks = ConfigFile.state.attacks.mapValues { it.value.copy() })
                 DataClassConfigGui.openWithBack(player, Messages.plain("gui.general", player), draft,
                     saver = { updated -> save(player) {
-                        // The separate mode/attack screens may have been saved by another editor.
-                        manager.applyConfiguration(updated.copy(activation = ConfigFile.state.activation, attacks = ConfigFile.state.attacks))
+                        // Separate screens may have been saved by another editor.
+                        manager.applyConfiguration(updated.copy(activation = ConfigFile.state.activation,
+                            attacks = ConfigFile.state.attacks, dragonEgg = ConfigFile.state.dragonEgg))
                     } }, back = { openGUI(player) })
             },
             Item.builder().setItemProvider {
@@ -49,8 +50,18 @@ class ManageGUI(private val manager: FightManager) {
                 openGUI(player)
             }.build(),
             button(player, Material.DRAGON_HEAD, "gui.attacks") { openAttacks(player) },
+            button(player, Material.DRAGON_EGG, "gui.dragon-egg") { openDragonEgg(player) },
         )
         DataClassConfigGui.openItems(player, Messages.plain("gui.title", player), items) { GuiWindows.close(player) }
+    }
+
+    private fun openDragonEgg(player: Player) {
+        if (!allowed(player)) return
+        val draft = ConfigFile.state.dragonEgg.copy()
+        DataClassConfigGui.openWithBack(player, Messages.plain("gui.dragon-egg", player), draft,
+            saver = { updated -> save(player) {
+                manager.applyConfiguration(ConfigFile.state.copy(dragonEgg = updated.copy()))
+            } }, back = { openGUI(player) })
     }
 
     private fun openAttacks(player: Player) {

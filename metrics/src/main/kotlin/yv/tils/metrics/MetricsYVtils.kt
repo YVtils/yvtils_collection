@@ -137,7 +137,7 @@ class MetricsYVtils : Module.YVtilsModule {
             lastPruneDay = day
         }
         metrics.database = if (settings.collectPlayerStats) database.snapshot(
-            settings.leaderboardSize, settings.publishLeaderboards,
+            settings.publishLeaderboards,
             publishFavorites = settings.publishFavorites, favoriteSize = settings.favoriteSize, favoritePlayerLimit = settings.favoritePlayerLimit,
         )
         else DatabaseSnapshot(updatedSeconds = System.currentTimeMillis() / 1000.0)

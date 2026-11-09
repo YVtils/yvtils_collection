@@ -18,6 +18,7 @@ import yv.tils.remadeEnderDragon.commands.DragonCommand
 import yv.tils.remadeEnderDragon.configs.ConfigFile
 import yv.tils.remadeEnderDragon.language.Messages
 import yv.tils.remadeEnderDragon.logic.FightManager
+import yv.tils.remadeEnderDragon.logic.DragonEggProtection
 import yv.tils.remadeEnderDragon.logic.TemporaryTerrain
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
@@ -35,6 +36,7 @@ class RemadeEnderDragonYVtils : Module.YVtilsModule {
     }
 
     private var manager: FightManager? = null
+    private var eggProtection: DragonEggProtection? = null
 
     override fun onLoad() { Messages.register() }
 
@@ -48,6 +50,10 @@ class RemadeEnderDragonYVtils : Module.YVtilsModule {
         PermissionManager.registerPermissions(PermissionsData().getPermissionList(true))
         Core.instance.server.pluginManager.registerEvents(terrain, Core.instance)
         Core.instance.server.pluginManager.registerEvents(fights, Core.instance)
+        val eggs = DragonEggProtection()
+        eggProtection = eggs
+        Core.instance.server.pluginManager.registerEvents(eggs, Core.instance)
+        eggs.enable()
         fights.enable()
         DragonCommand(fights)
         Module.addModule(MODULE)
@@ -55,6 +61,11 @@ class RemadeEnderDragonYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
+        eggProtection?.let {
+            it.close()
+            HandlerList.unregisterAll(it)
+        }
+        eggProtection = null
         manager?.let {
             it.close()
             if (Core.instance.isEnabled) {

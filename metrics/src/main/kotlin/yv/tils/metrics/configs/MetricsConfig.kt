@@ -30,9 +30,8 @@ data class MetricsConfig(
     val afkThresholdSeconds: Long = 300,
     @ConfigDescription("Import supported vanilla totals only when a player is first recorded. Historical imports do not enter daily buckets.")
     val importVanillaOnFirstJoin: Boolean = false,
-    @ConfigDescription("Expose names/UUIDs in the Prometheus leaderboard. Disabled by default; SQLite rankings remain available locally.")
+    @ConfigDescription("Expose names/UUIDs for all recorded players in Prometheus metrics. Disabled by default.")
     val publishLeaderboards: Boolean = false,
-    val leaderboardSize: Int = 10,
     @ConfigDescription("Explicitly publish identifying per-player Favorites. Only the most recently seen favoritePlayerLimit players are exported.")
     val publishFavorites: Boolean = false,
     val favoritePlayerLimit: Int = 25,
@@ -50,7 +49,6 @@ data class MetricsConfig(
         require(port in 1..65535) { "metrics.port must be between 1 and 65535" }
         require(flushSeconds in 1..3600) { "metrics.flushSeconds must be between 1 and 3600" }
         require(sampleTicks in 20..1200) { "metrics.sampleTicks must be between 20 and 1200" }
-        require(leaderboardSize in 1..100) { "metrics.leaderboardSize must be between 1 and 100" }
         require(favoriteSize in 1..100 && favoritePlayerLimit in 1..100) { "metrics favorite limits must be between 1 and 100" }
         require(afkThresholdSeconds in 1..86400) { "metrics.afkThresholdSeconds must be between 1 and 86400" }
         require(dailyRetentionDays >= 0 && sessionRetentionDays >= 0) { "metrics retention must not be negative" }
