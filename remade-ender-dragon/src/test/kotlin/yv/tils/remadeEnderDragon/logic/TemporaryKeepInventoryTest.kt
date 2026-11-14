@@ -8,9 +8,152 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class TemporaryKeepInventoryTest {
+    @Test
+    fun `death grace keeps the original journal and world rule until the exact minute deadline`() {
+        listOf(false, true).forEach { original ->
+            val state = Rules()
+            val world = state.world(original)
+            val rules = state.controller()
+            rules.begin(world, enabled = true, preview = false)
+            assertTrue(rules.afterDeath(world, minutes = 2))
+            assertTrue(rules.isActive(world))
+            assertEquals(original, state.saved.originalRules[world.uid.toString()])
+            assertEquals(120L, rules.remainingGraceSeconds(world))
+            assertEquals(listOf(world.uid to 120L), state.graces)
+            state.now += 119_999L
+            assertTrue(rules.expiredWorlds().isEmpty())
+            assertEquals(1L, rules.remainingGraceSeconds(world))
+            state.now++
+            assertEquals(setOf(world.uid), rules.expiredWorlds())
+            assertEquals(0L, rules.remainingGraceSeconds(world))
+            assertTrue(rules.restore(world))
+            assertEquals(original, state.get(world))
+            assertNull(rules.remainingGraceSeconds(world))
+            assertTrue(state.saved.originalRules.isEmpty())
+            assertEquals(listOf(world.uid to original), state.restorations)
+        }
+    }
+
+    @Test
+    fun `duplicate death handling does not restart a running grace timer`() {
+        val state = Rules()
+        val world = state.world(false)
+        val rules = state.controller()
+        rules.begin(world, enabled = true, preview = false)
+        rules.afterDeath(world, minutes = 1)
+        state.now += 30_000L
+        rules.afterDeath(world, minutes = 1)
+        assertEquals(30L, rules.remainingGraceSeconds(world))
+        assertEquals(listOf(world.uid to 60L), state.graces)
+    }
+
+    @Test
+    fun `new fights cancel grace without capturing the temporary true rule as the baseline`() {
+        val state = Rules()
+        val world = state.world(false)
+        val rules = state.controller()
+        rules.begin(world, enabled = true, preview = false)
+        rules.afterDeath(world, minutes = 1)
+        state.now += 30_000L
+        rules.begin(world, enabled = true, preview = false)
+        assertNull(rules.remainingGraceSeconds(world))
+        state.now += 30_000L
+        assertTrue(rules.expiredWorlds().isEmpty())
+        assertTrue(rules.isActive(world))
+        assertEquals(false, state.saved.originalRules[world.uid.toString()])
+        rules.restore(world)
+        assertFalse(state.get(world))
+    }
+
+    @Test
+    fun `preview during grace does not cancel or extend protection`() {
+        val state = Rules()
+        val world = state.world(false)
+        val rules = state.controller()
+        rules.begin(world, enabled = true, preview = false)
+        rules.afterDeath(world, minutes = 1)
+        state.now += 30_000L
+        rules.begin(world, enabled = true, preview = true)
+        assertEquals(30L, rules.remainingGraceSeconds(world))
+        state.now += 30_000L
+        assertEquals(setOf(world.uid), rules.expiredWorlds())
+    }
+
+    @Test
+    fun `nondeath cleanup and disabled grace restore immediately and cancel countdowns`() {
+        val state = Rules()
+        val first = state.world(false)
+        val second = state.world(false)
+        val rules = state.controller()
+        rules.begin(first, enabled = true, preview = false)
+        rules.begin(second, enabled = true, preview = false)
+        rules.afterDeath(first, minutes = 1)
+        rules.restore(first) // Stop, reload, unload, or disable.
+        rules.afterDeath(second, minutes = 0)
+        assertFalse(state.get(first))
+        assertFalse(state.get(second))
+        assertNull(rules.remainingGraceSeconds(first))
+        assertNull(rules.remainingGraceSeconds(second))
+        state.now += 60_000L
+        assertTrue(rules.expiredWorlds().isEmpty())
+    }
+
+    @Test
+    fun `grace cannot create keep inventory without an active normal End encounter`() {
+        val state = Rules()
+        val rules = state.controller()
+        val end = state.world(false)
+        val overworld = state.world(false, World.Environment.NORMAL)
+        rules.begin(end, enabled = true, preview = true)
+        rules.begin(overworld, enabled = true, preview = false)
+        assertTrue(rules.afterDeath(end, minutes = 1))
+        assertTrue(rules.afterDeath(overworld, minutes = 1))
+        assertFalse(state.get(end))
+        assertFalse(state.get(overworld))
+        assertTrue(state.graces.isEmpty())
+        assertTrue(state.saved.originalRules.isEmpty())
+    }
+
+    @Test
+    fun `restart recovers a grace lease immediately instead of leaving keep inventory on`() {
+        val state = Rules()
+        val world = state.world(false)
+        val before = state.controller()
+        before.begin(world, enabled = true, preview = false)
+        before.afterDeath(world, minutes = 2)
+        val after = state.controller()
+        assertTrue(after.recover(world))
+        assertFalse(state.get(world))
+        assertNull(after.remainingGraceSeconds(world))
+        assertTrue(state.saved.originalRules.isEmpty())
+    }
+
+    @Test
+    fun `separate world grace timers expire independently and failed restores remain recoverable`() {
+        val state = Rules()
+        val first = state.world(false)
+        val second = state.world(false)
+        val rules = state.controller()
+        rules.begin(first, enabled = true, preview = false)
+        rules.begin(second, enabled = true, preview = false)
+        rules.afterDeath(first, minutes = 1)
+        rules.afterDeath(second, minutes = 2)
+        state.now += 60_000L
+        assertEquals(setOf(first.uid), rules.expiredWorlds())
+        state.rejectChanges = true
+        assertFalse(rules.restore(first))
+        assertEquals(false, state.saved.originalRules[first.uid.toString()])
+        assertEquals(60L, rules.remainingGraceSeconds(second))
+        assertTrue(state.get(second))
+        state.rejectChanges = false
+        assertTrue(rules.recover(first))
+        assertFalse(state.get(first))
+    }
+
     @Test
     fun `disabled setting and preview never change the rule or create a recovery entry`() {
         val state = Rules()
@@ -247,6 +390,7 @@ class TemporaryKeepInventoryTest {
     }
 
     private class Rules {
+        var now = 1_000_000L
         var saved = KeepInventoryJournal()
         var writes = 0
         var saves = 0
@@ -254,6 +398,7 @@ class TemporaryKeepInventoryTest {
         var rejectChanges = false
         val activations = mutableListOf<UUID>()
         val restorations = mutableListOf<Pair<UUID, Boolean>>()
+        val graces = mutableListOf<Pair<UUID, Long>>()
         private val values = mutableMapOf<UUID, Boolean>()
 
         fun world(initial: Boolean, environment: World.Environment = World.Environment.THE_END): World {
@@ -293,6 +438,12 @@ class TemporaryKeepInventoryTest {
                 assertEquals(original, get(world))
                 assertFalse(world.uid.toString() in saved.originalRules)
                 restorations += world.uid to original
-            })
+            },
+            onGraceStarted = { world, seconds ->
+                assertTrue(get(world))
+                assertTrue(world.uid.toString() in saved.originalRules)
+                graces += world.uid to seconds
+            },
+            nowMillis = { now })
     }
 }

@@ -34,6 +34,14 @@ class RegisterStrings {
         )
 
         registerNewString(
+            "command.status.setOther",
+            mapOf(
+                FileTypes.EN to "<prefix> <white>New status for <yellow><player><white>: <status>",
+                FileTypes.DE to "<prefix> <white>Neuer Status für <yellow><player><white>: <status>",
+            )
+        )
+
+        registerNewString(
             "command.status.clear.cleared.self",
             mapOf(
                 FileTypes.EN to "<prefix> <white>You successfully cleared your status!",

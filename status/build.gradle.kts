@@ -17,6 +17,7 @@ dependencies {
     compileOnly(project(":gui-26.1"))
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.14.0")
+    testImplementation(project(":common"))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

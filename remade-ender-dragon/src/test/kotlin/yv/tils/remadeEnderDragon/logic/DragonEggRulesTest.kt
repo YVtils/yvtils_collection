@@ -14,6 +14,8 @@ import yv.tils.remadeEnderDragon.configs.DragonEggSettings
 import yv.tils.remadeEnderDragon.configs.DragonConfig
 import java.lang.reflect.Proxy
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -26,7 +28,11 @@ class DragonEggRulesTest {
         assertTrue(settings.voidDisappearing)
         assertTrue(settings.logoutable)
         assertFalse(settings.alwaysDropOnDeath)
+        assertFalse(settings.logoutAfterDragonDeathEnabled)
+        assertEquals(5, settings.logoutAfterDragonDeathMinutes)
         assertFalse(DragonConfig().keepInventoryDuringFight)
+        assertFalse(DragonConfig().keepInventoryAfterDeathEnabled)
+        assertEquals(5, DragonConfig().keepInventoryAfterDeathMinutes)
     }
 
     @Test
@@ -49,8 +55,29 @@ class DragonEggRulesTest {
         draft.voidDisappearing = false
         draft.logoutable = false
         draft.alwaysDropOnDeath = true
+        draft.logoutAfterDragonDeathEnabled = true
+        draft.logoutAfterDragonDeathMinutes = 10
         assertTrue(live.enderChestPuttable && live.chestPuttable && live.voidDisappearing && live.logoutable)
         assertFalse(live.alwaysDropOnDeath)
+        assertFalse(live.logoutAfterDragonDeathEnabled)
+        assertEquals(5, live.logoutAfterDragonDeathMinutes)
+    }
+
+    @Test
+    fun `timer configuration validates minute ranges before publishing changes`() {
+        DragonConfig().validate()
+        listOf(0, -1, 1441, Int.MAX_VALUE).forEach { minutes ->
+            assertFailsWith<IllegalArgumentException> {
+                DragonConfig(dragonEgg = DragonEggSettings(logoutAfterDragonDeathMinutes = minutes)).validate()
+            }
+            assertFailsWith<IllegalArgumentException> {
+                DragonConfig(keepInventoryAfterDeathMinutes = minutes).validate()
+            }
+        }
+        listOf(1, 1440).forEach { minutes ->
+            DragonConfig(keepInventoryAfterDeathMinutes = minutes,
+                dragonEgg = DragonEggSettings(logoutAfterDragonDeathMinutes = minutes)).validate()
+        }
     }
 
     @Test

@@ -21,12 +21,13 @@ The module uses the collection's shared InvUI bootstrap, styled paged menus,
 and `DataClassConfigGui` editor. The menu offers:
 
 - **General settings:** edit scalar and string-list configuration values, including
-  `keepInventoryDuringFight`.
+  `keepInventoryDuringFight` and its optional post-death timer.
 - **Activation:** cycle between EVERY, ADMIN and FIRST.
 - **Attacks and support:** edit each attack's full settings, including cooldown,
   use budget, health gates, warning time, damage, radius, and scaling counts.
 - **Dragon egg:** toggle ender-chest storage, container storage, void loss,
-  keeping carried eggs on logout, and forced egg drops on death.
+  keeping carried eggs on logout, the optional wait after dragon death, and forced
+  egg drops on death.
 
 Enum/map navigation is supplied by the module because the shared generic
 editor does not edit those types directly. Settings are edited in detached
@@ -78,12 +79,31 @@ When `dragonEgg.alwaysDropOnDeath` is enabled, activation/entry messages include
 a warning that egg-bearing stacks still drop. These rule announcements are
 independent of `announceAttacks`.
 
-The previous rule is captured before activation and restored on dragon
+By default, the previous rule is captured before activation and restored on dragon
 death/dying/despawn, `/redragon stop`, reload/configuration saves, world unload,
 and module disable. A world that already had keep-inventory enabled stays
 enabled afterward. Vanilla keep-inventory XP behavior applies during the fight.
 Automatic discovery can begin another eligible fight after reload, capturing
 the restored baseline again.
+
+To extend this protection after the dragon dies, enable these **General settings**:
+
+```yaml
+keepInventoryDuringFight: true
+keepInventoryAfterDeathEnabled: true
+keepInventoryAfterDeathMinutes: 5
+```
+
+The timer is optional (disabled by default), measured in **minutes** (1–1440), and
+starts at the actual dragon death, not the start of its dying animation. Hazards
+are still cleaned up during that animation. Only the normal encounter's End world
+stays protected; previews and dragon deaths without an active protected encounter
+do not create protection. Players there receive the remaining duration in chat,
+including players entering/rejoining during the grace period. Expiry restores the
+original rule. Stop, reload/config saves, world unload, module disable, and restart
+end the grace immediately. Starting another protected encounter cancels its old
+countdown while retaining the original journalled baseline. Forced egg drops on
+death remain independent of this protection.
 
 Original values are journaled by world UUID in `keep-inventory-journal.json`
 before the rule changes. Interrupted encounters are recovered before discovery
@@ -94,6 +114,50 @@ and retains the journal for recovery.
 
 ## Dragon egg rules
 
+Players carrying a dragon egg have a continuous **glowing outline** and
+leave an **End portal/dragon-breath particle trail behind them while walking**. This is
+always active while the module is loaded, in every world and without an active
+fight. Inventory slots, offhand, cursor, and eggs nested in bundles/shulker boxes
+all count; selecting the egg in the hotbar is not required. Standing still,
+turning, flying, riding, and teleporting do not generate a walking trail.
+Dropping/storing the last carried egg removes the visuals within five ticks;
+death, logout, and module disable also clean them up. Existing glow state is
+preserved, and scoreboard/team membership, nametag colors, and status text are
+never modified. Minecraft shares a team color between its outline and nametag,
+so the player's outline follows the existing team color (white by default) rather
+than forcing purple. Dropped egg displays still glow purple independently.
+
+Trail movement is sampled every two ticks and uses server-side collision support,
+not the unreliable client-reported on-ground flag. Particles appear slightly above
+the feet behind the movement direction, including slow walking/backwards movement.
+They use forced rendering so reduced vanilla particle settings do not suppress
+them; source-player visibility checks still apply.
+
+Dropped eggs never despawn from lying on the ground. Instead of the small item
+model, they appear as a **1.5× purple-glowing dragon-egg block display**. A hidden
+non-ageing item retains the original stack, quantity, metadata, pickup delay,
+owner restrictions, and normal player/hopper pickup. Gravity is disabled and throw
+velocity is cleared, so eggs hover where released instead of falling or flying
+away. The display gently bobs up/down by 0.1 blocks over a four-second cycle,
+without moving the backing pickup position. Egg-bearing bundles
+and shulker boxes use the same marker and retain their full contents on pickup.
+The display follows the item, including void recovery, and is removed on pickup,
+merging, destruction, chunk unload, or module disable. Loaded drops are discovered
+on startup/chunk load; displays are recreated rather than saved as duplicate eggs.
+Entity-add/remove and entity-chunk-unload callbacks only register display work; display
+creation/removal is deferred to the main-thread ticker to avoid re-entering Paper's
+chunk-status updates. Items are rechecked for validity, world membership, and a
+loaded chunk before spawning a visual. Pickup or unload before that tick cancels
+the pending visual instead of leaving an orphan or loading the chunk again.
+Disabling the module restores normal item rendering and the previous ageing/gravity flags.
+Dropped eggs and egg-bearing portable containers cannot ignite or be destroyed
+by lava, fire, burning ticks, cactus/block contact, or hot floors such as magma.
+This protects the hidden pickup stack even before its display is created; already
+burning eggs are extinguished. The cosmetic display is also invulnerable, but the
+backing item is **not** made globally invulnerable: explosions and the configured
+void rule still apply normally. Unrelated item drops and players retain their
+normal hazard behavior, and pickup still preserves the full stack and contents.
+
 The **Dragon egg** screen in `/redragon config` edits these settings. They can
 also be changed in YAML and applied with `/redragon reload`:
 
@@ -103,6 +167,8 @@ dragonEgg:
   chestPuttable: true
   voidDisappearing: true
   logoutable: true
+  logoutAfterDragonDeathEnabled: false
+  logoutAfterDragonDeathMinutes: 5
   alwaysDropOnDeath: false
 ```
 
@@ -113,8 +179,28 @@ existing servers. Set one to `false` to enable its restriction/protection:
 |---|---|
 | `enderChestPuttable` | Prevent putting eggs in ender chests. Independent of ordinary container storage. |
 | `chestPuttable` | Prevent putting eggs in chests, barrels, shulker boxes, storage minecarts, hoppers, dispensers/droppers, furnaces, brewing stands, crafters, pots, and shelves. Blocks automatic transfers/pickup as well as manual insertion. |
-| `voidDisappearing` | Return dropped egg items and falling egg blocks approaching the world's lower boundary to the surface above that world's spawn. Void damage is also intercepted. Other items and normal item despawn/fire/explosion behavior are unchanged. |
+| `voidDisappearing` | Return dropped egg items and falling egg blocks approaching the world's lower boundary to the surface above that world's spawn. Void damage is also intercepted. Other items are unchanged; egg age/fire/lava/contact protection applies independently, while explosion damage remains vanilla. |
 | `logoutable` | Drop carried egg-bearing stacks at the player's logout location instead of saving them in the offline inventory. This includes offhand and cursor items; the inventory is closed first to return temporary crafting/menu inputs. Disconnects, kicks, and timeouts all count as logout. |
+
+For timed egg logout, keep `logoutable: true` and set
+`logoutAfterDragonDeathEnabled: true`. Players may retain eggs on logout only
+after **`logoutAfterDragonDeathMinutes` minutes (1–1440) have passed since the
+latest actual End dragon death**. Disconnecting earlier drops the whole carried
+egg-bearing stacks using the existing logout rule; a player cannot be forced to
+remain connected. Egg carriers see an action-bar warning while logout is locked.
+The remaining time uses readable duration units, such as `4 m 59 s` or
+`1 h 2 m 3 s` (a full day displays as `1 d`). The warning uses the new
+`redragon.egg.logout-countdown` translation key and its `<time>` placeholder;
+existing language files receive the new default without deleting custom text.
+`logoutable: false` remains an unconditional restriction regardless of the timer.
+
+This is a **global post-death wait**, not a pickup/carrying timer: transferring an
+egg, changing worlds, reconnecting, or restarting does not restart that same wait.
+Every subsequent End dragon death resets it, including vanilla deaths without a
+custom fight or outside the encounter allowlist. The latest death timestamp is
+saved in `history.json`, so elapsed offline time counts. Old history without a
+timestamp does not invent a death time: egg logout remains locked until a real End
+dragon death is observed while the module is loaded. Cancelled deaths do not count.
 
 `alwaysDropOnDeath` defaults to `false`. Set it to **`true`** to force carried
 eggs to drop on every non-cancelled player death, even with keep-inventory
@@ -270,6 +356,7 @@ distances are blocks. Lists use Minecraft registry IDs (e.g. `poison` or
 |---|---|---|
 | `enabled`, `activation`, `worlds` | `true`, `EVERY`, `[]` | Master switch, start policy, exact End world names; empty list allows all End worlds. |
 | `keepInventoryDuringFight` | `false` | Temporarily enable the world's keep-inventory rule during normal encounters, then restore its previous value. Previews do not change it; `dragonEgg.alwaysDropOnDeath` can force eggs to drop anyway. |
+| `keepInventoryAfterDeathEnabled`, `keepInventoryAfterDeathMinutes` | `false`, `5` | Optional extension of that End-world protection for 1–1440 **minutes** after actual dragon death. Requires `keepInventoryDuringFight`. Other cleanup ends it immediately. |
 | `centerX`, `centerZ`, `islandRadius` | `0`, `0`, `96` | Fighter boundary, wave coverage, terrain scan; radius accepts 16–160. |
 | `groundMinY`, `groundMaxY` | `40`, `90` | Surface scan height bounds; widen for customized islands. |
 | `maxScalingPlayers`, `baseHealth`, `healthPerExtraPlayer`, `maxHealth` | `20`, `1200`, `900`, `18000` | Effective party/HP scaling and hard cap. |
@@ -455,7 +542,24 @@ items. Temporary-rule tests cover original true/false values, preview/disabled
 behavior, separate worlds, journal-before-change, interrupted/late-world recovery,
 idempotent cleanup, and rejected activation/restoration. Additional checks verify
 the End-only guard, activation/restoration notification timing and deduplication,
-and active-rule eligibility for entry messages.
+and active-rule eligibility for entry messages. Timer checks cover default/validated
+minute settings, egg logout before/at/after the latest death deadline, repeated
+dragon deaths, restart-safe timestamps, grace expiry, independent worlds, previews,
+new encounters during grace, immediate non-death cleanup, and rejected restorations.
+Carrier/display tests cover sustained
+glow, nested/offhand/cursor detection, unchanged nametag colors/teams across viewer
+scoreboard changes, cancelled deaths, server-grounded/forced directional walking
+trails and slow movement, timed-despawn
+prevention, unchanged backing stacks, display sizing/movement, chunk cleanup,
+restart baselines, hovering/bobbing and gravity restoration, and replacement of
+removed visuals without duplicating stacks.
+Regression checks prohibit display spawn/removal inside entity/chunk callbacks,
+and cover duplicate add notifications, disappearing/unloaded items before the
+queued spawn, remove/re-add ordering, disable with pending work, and formatted
+logout countdown units.
+Hazard tests cover fire/lava/cactus/hot-floor damage before and after display
+creation, ignition and extinguishing, egg-bearing containers, unchanged stacks,
+unrelated items/players, and leaving explosions and void damage to their existing rules.
 The module uses the repository's default Paper target (26.1.2).
 
 In-game tuning still requires a Paper server and players:
@@ -524,6 +628,42 @@ In-game tuning still requires a Paper server and players:
     check the notice and optional egg-drop warning in English and German. Test
     original rule values both false and true, and ensure the end message does not
     incorrectly claim keep-inventory was disabled when it remains enabled.
+24. Carry an egg in a normal slot, offhand, cursor, and nested portable container.
+    Observe the outline from another player, including a late joiner and
+    viewers with different scoreboards/status prefixes; nametag colors and team
+    membership must not change. Walk forwards/backwards and slowly, including
+    with reduced vanilla particle settings: End particles should appear behind
+    movement, not while idle/turning or
+    after teleporting. Drop/store the last egg, die, reconnect, and disable the
+    module; verify outline/trail cleanup and restoration of previous glow state.
+25. Drop an egg and an egg-bearing portable container; both should hover in the air
+    as enlarged glowing eggs with gentle bobbing and remain beyond the normal
+    despawn time. Verify throw velocity/gravity do not make them fall or fly away,
+    and unrelated drops still fall normally. Test pickup
+    with full/partially-full inventories, pickup delays, hopper restrictions,
+    item merging, void recovery, chunk unload/reload, restart, destruction, and
+    module disable. Confirm original stack contents/quantities, no duplicate
+    pickups or orphan displays, and unchanged despawn for unrelated drops.
+    Drop/reload chunks on Paper 26.3 and check that no nested chunk-status errors
+    are logged, including rapid pickup/unload before a display can be spawned.
+    Test lava/fire/campfires, magma, and cactus with eggs, egg-bearing containers,
+    and unrelated drops. Only eggs/egg-bearing stacks should survive those hazards;
+    pickup must retain the original contents. Explosions and both void-setting
+    states must still follow their existing behavior.
+26. Enable the egg post-death logout timer for one minute. Before any recorded
+    dragon death, and during the minute after a kill, disconnect with eggs in
+    normal slots/offhand/cursor/portable containers: stacks must drop intact.
+    After expiry they must remain in the offline inventory. Test another kill,
+    reconnect/restart, changing worlds, vanilla dragon deaths, and cancelled
+    deaths. Check both disabled timer and unconditional `logoutable: false`.
+    Check readable hours/minutes/seconds in the action bar with existing language
+    files, including transitions at minute/hour boundaries.
+27. Enable keep-inventory during fights and a one-minute post-death extension.
+    Protection must remain through the dying animation and for the full minute
+    after actual death, then restore the original true/false world rule. Enter
+    mid-countdown and check remaining-time/egg-drop warnings. Test a new fight,
+    previews, separate End worlds, stop/reload/unload/disable/restart during grace,
+    and dragon despawn without death; no stale timer may disable a later fight's rule.
 
 ## Longer encounter design (schema 3)
 

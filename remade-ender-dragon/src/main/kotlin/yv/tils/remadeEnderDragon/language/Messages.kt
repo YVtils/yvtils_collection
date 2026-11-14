@@ -32,6 +32,7 @@ object Messages {
             "no-permission" to ("<red>You do not have permission to edit this configuration." to "<red>Du hast keine Berechtigung, diese Konfiguration zu bearbeiten."),
             "saved" to ("<green>Dragon configuration saved; active encounters cleaned up." to "<green>Drachenkonfiguration gespeichert; aktive Kämpfe bereinigt."),
             "keep-inventory.enabled" to ("<green>Keep inventory is enabled in <world> during the dragon fight. <gray>This applies only to this End world." to "<green>Inventar behalten ist während des Drachenkampfs in <world> aktiviert. <gray>Dies gilt nur in dieser End-Welt."),
+            "keep-inventory.after-death" to ("<green>The dragon has died. Keep inventory remains enabled in <world> for <seconds> seconds. <gray>Only this End world is protected." to "<green>Der Drache ist gestorben. Inventar behalten bleibt in <world> noch <seconds> Sekunden aktiviert. <gray>Nur diese End-Welt ist geschützt."),
             "keep-inventory.restored-disabled" to ("<yellow>The dragon fight's temporary keep inventory has ended in <world>. <red>Keep inventory is now disabled here." to "<yellow>Das vorübergehende Inventar-Behalten des Drachenkampfs ist in <world> beendet. <red>Inventar behalten ist hier wieder deaktiviert."),
             "keep-inventory.restored-enabled" to ("<yellow>The dragon fight's temporary protection has ended in <world>. <green>Keep inventory remains enabled here, as before." to "<yellow>Der vorübergehende Schutz des Drachenkampfs ist in <world> beendet. <green>Inventar behalten bleibt hier wie zuvor aktiviert."),
             "keep-inventory.egg-warning" to ("<gold>Dragon eggs, including egg-bearing containers, still drop on death." to "<gold>Dracheneier, auch in tragbaren Behältern, werden beim Tod weiterhin fallen gelassen."),
@@ -45,6 +46,10 @@ object Messages {
             "gui.dragon-egg" to ("Dragon egg" to "Drachenei"),
             "egg.ender-chest-blocked" to ("<red>Dragon eggs cannot be stored in ender chests." to "<red>Dracheneier dürfen nicht in Endertruhen gelagert werden."),
             "egg.chest-blocked" to ("<red>Dragon eggs cannot be stored in containers." to "<red>Dracheneier dürfen nicht in Behältern gelagert werden."),
+            "egg.logout-awaiting-dragon" to ("<gold>Egg logout is locked until an End dragon dies; disconnecting now drops your eggs." to "<gold>Ausloggen mit Eiern ist bis zum Tod eines Enderdrachen gesperrt; beim Verlassen werden deine Eier fallen gelassen."),
+            "egg.logout-wait" to ("<gold>Egg logout unlocks in <seconds>s; disconnecting now drops your eggs." to "<gold>Ausloggen mit Eiern wird in <seconds>s freigegeben; beim Verlassen werden deine Eier fallen gelassen."),
+            // New key supplies the formatted countdown to existing language files without overwriting custom text.
+            "egg.logout-countdown" to ("<gold>Egg logout unlocks in <time>; disconnecting now drops your eggs." to "<gold>Ausloggen mit Eiern wird in <time> freigegeben; beim Verlassen werden deine Eier fallen gelassen."),
             "gui.activation" to ("Activation: <mode>" to "Aktivierung: <mode>"),
             "gui.activation-lore" to ("Click to cycle activation policy" to "Klicken, um den Aktivierungsmodus zu wechseln"),
             "gui.edit-lore" to ("Click to edit; validated changes save when closing the editor" to "Klicken zum Bearbeiten; gültige Änderungen werden beim Schließen gespeichert"),

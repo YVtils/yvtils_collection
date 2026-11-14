@@ -12,6 +12,7 @@ dependencies {
     compileOnly(project(":gui-26.1"))
     compileOnly(kotlin("reflect"))
     testImplementation(kotlin("test"))
+    testImplementation(project(":config"))
 }
 
 tasks.test { useJUnitPlatform() }

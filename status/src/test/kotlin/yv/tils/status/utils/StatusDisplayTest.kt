@@ -117,6 +117,28 @@ class StatusDisplayTest {
         })
     }
 
+    @Test
+    fun `other player confirmation includes the target name and keeps its status formatting isolated`() {
+        val display = StatusDisplay.render(template, "<bold>\\<red>Busy", "Alex")
+        val message = StatusDisplay.message("<prefix> <white>New status for <yellow><player><white>: <status><white> done",
+            display, "<gold>Server", "Alex")
+        assertEquals("Server New status for Alex: [<red>Busy] | Alex done", plain.serialize(message))
+        val rendered = glyphs(message)
+        val nameStart = "Server New status for ".length
+        assertTrue(rendered.subList(nameStart, nameStart + 4).all { it.second.color() == NamedTextColor.YELLOW })
+        assertTrue(rendered.takeLast(5).all {
+            it.second.color() == NamedTextColor.WHITE &&
+                it.second.decoration(TextDecoration.BOLD) != TextDecoration.State.TRUE
+        })
+    }
+
+    @Test
+    fun `target name in an administrator confirmation is inserted without parsing tags`() {
+        val message = StatusDisplay.message("Updated <yellow><player><white>: <status>", Component.text("Busy"), "", "<red>Alex")
+        assertEquals("Updated <red>Alex: Busy", plain.serialize(message))
+        assertTrue(glyphs(message).none { it.second.color() == NamedTextColor.RED })
+    }
+
     /** Compare effective styles, including styles inherited from parent components. */
     private fun glyphs(component: Component, inherited: Style = Style.empty()): List<Pair<Char, Style>> {
         val style = component.style().merge(inherited, Style.Merge.Strategy.IF_ABSENT_ON_TARGET)

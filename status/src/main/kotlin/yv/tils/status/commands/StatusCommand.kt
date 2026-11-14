@@ -23,7 +23,8 @@ import yv.tils.status.logic.StatusHandler as handler
 class StatusCommand {
     val command = commandTree("status") {
         withPermission(Permissions.COMMAND_STATUS.permission.name)
-        withUsage("status <set/default/clear> [status/player]")
+        withUsage("status [player]", "status <set/default> <status>",
+            "status <player> <set/default> <status>", "status clear [player]")
         withAliases("prefix", "role")
 
         playerExecutor { sender, _ ->
@@ -35,13 +36,32 @@ class StatusCommand {
             playerExecutor { sender, args ->
                 StatusManager().manageStatus(sender, args["player"] as Player)
             }
+
+            literalArgument("set", false) {
+                withPermission(Permissions.COMMAND_STATUS_SET.permission.name)
+                greedyStringArgument("status", false) {
+                    anyExecutor { sender, args ->
+                        handler().setStatus(args["player"] as Player, args["status"] as String, sender)
+                    }
+                }
+            }
+
+            literalArgument("default", false) {
+                withPermission(Permissions.COMMAND_STATUS_DEFAULT.permission.name)
+                greedyStringArgument("status", false) {
+                    replaceSuggestions(ArgumentSuggestions.strings { _ -> generateDefaultStatus().toTypedArray() })
+                    anyExecutor { sender, args ->
+                        handler().setDefaultStatus(args["player"] as Player, args["status"] as String, sender)
+                    }
+                }
+            }
         }
 
         literalArgument("set", false) {
             withPermission(Permissions.COMMAND_STATUS_SET.permission.name)
             greedyStringArgument("status", false) {
                 playerExecutor { player, args ->
-                    handler().setStatus(player, args[0] as String)
+                    handler().setStatus(player, args["status"] as String)
                 }
             }
         }
@@ -55,7 +75,7 @@ class StatusCommand {
                 })
 
                 playerExecutor { player, args ->
-                    handler().setDefaultStatus(player, args[0] as String)
+                    handler().setDefaultStatus(player, args["status"] as String)
                 }
             }
         }

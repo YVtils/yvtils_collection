@@ -31,11 +31,15 @@ import yv.tils.utils.logger.Logger
 import yv.tils.utils.player.PlayerUtils.Companion.isSupported
 import java.util.UUID
 
-data class FightHistory(var completedWorlds: List<String> = emptyList())
+data class FightHistory(
+    var completedWorlds: List<String> = emptyList(),
+    var lastDragonDeathAtMillis: Long? = null,
+)
 private data class Landing(val world: UUID, val cap: Double, var expires: Long, var airborne: Boolean = false)
 
 class FightManager(val terrain: TemporaryTerrain) : Listener {
     private val fights = mutableMapOf<UUID, DragonFight>()
+    private val waitingForDragonDeath = mutableSetOf<UUID>()
     private val stopped = mutableSetOf<UUID>()
     private val landings = mutableMapOf<UUID, Landing>()
     private var history = ObjectMapperFileUtils.load("/remade-ender-dragon/history.json", FightHistory())
@@ -49,6 +53,8 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
         onActivated = { world -> announceKeepInventory(world, "keep-inventory.enabled") },
         onRestored = { world, enabled -> announceKeepInventory(world,
             if (enabled) "keep-inventory.restored-enabled" else "keep-inventory.restored-disabled") },
+        onGraceStarted = { world, seconds -> announceKeepInventory(world, "keep-inventory.after-death",
+            mapOf("seconds" to seconds)) },
     )
 
     /** Scope piercing to our synchronous scripted hit, never vanilla dragon/melee damage. */
@@ -67,9 +73,19 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
         Bukkit.getWorlds().forEach { w -> w.entities.forEach(::removeOrphan) }
         task = Bukkit.getScheduler().runTaskTimer(Core.instance, Runnable {
             tick += 2
+            keepInventory.expiredWorlds().forEach { id -> Bukkit.getWorld(id)?.let(::restoreKeepInventory) }
             if (tick % 40L == 0L) discover()
             fights.values.toList().forEach { fight ->
-                if (!fight.dragon.isValid || fight.dragon.isDead || fight.dragon.phase == EnderDragon.Phase.DYING) {
+                if (!fight.dragon.isValid || fight.dragon.isDead) {
+                    finish(fight)
+                } else if (fight.dragon.phase == EnderDragon.Phase.DYING) {
+                    if (!fight.preview && fight.config.keepInventoryDuringFight && fight.config.keepInventoryAfterDeathEnabled) {
+                        // Clean hazards now, but start the grace timer only on the actual death event.
+                        waitingForDragonDeath += fight.dragon.uniqueId
+                        fight.close()
+                    } else finish(fight)
+                } else if (fight.dragon.uniqueId in waitingForDragonDeath) {
+                    // A cancelled death/revival must not leave a closed encounter registered forever.
                     finish(fight)
                 } else fight.tick(tick)
             }
@@ -100,6 +116,8 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
     }
 
     fun here(world: World): DragonFight? = fights.values.firstOrNull { it.world == world }
+
+    fun lastDragonDeathMillis(): Long? = history.lastDragonDeathAtMillis
 
     fun startHere(world: World, preview: Boolean = false): DragonFight? {
         if (!ConfigFile.state.enabled || !allowed(world)) return null
@@ -141,23 +159,29 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
     }
 
     fun stop(world: World): Boolean {
-        val fight = here(world) ?: return false
+        val fight = here(world)
+        if (fight == null) {
+            if (keepInventory.remainingGraceSeconds(world) == null) return false
+            restoreKeepInventory(world)
+            return true
+        }
         stopped += fight.dragon.uniqueId
         fights.remove(fight.dragon.uniqueId)
         closeFight(fight)
+        if (fight.preview) restoreKeepInventory(world)
         Logger.info("[Remade Ender Dragon] Encounter stopped in ${world.name}.")
         return true
     }
 
-    private fun finish(fight: DragonFight) {
+    private fun finish(fight: DragonFight, confirmedDeath: Boolean = false) {
         val removed = fights.remove(fight.dragon.uniqueId)
         try {
-            if (fight.dragon.isDead || fight.dragon.phase == EnderDragon.Phase.DYING) {
+            if (confirmedDeath || fight.dragon.isDead || fight.dragon.phase == EnderDragon.Phase.DYING) {
                 markCompleted(fight.world)
                 if (removed != null && !fight.preview) ModuleTelemetry.record(ModuleTelemetry.Event.DRAGON_ENCOUNTERS_COMPLETED)
             }
         } finally {
-            closeFight(fight)
+            closeFight(fight, afterDeath = confirmedDeath || fight.dragon.isDead)
             rewardedCrystals.clear()
         }
         Logger.info("[Remade Ender Dragon] Encounter finished in ${fight.world.name}.")
@@ -181,16 +205,18 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
     }
 
     private fun resetEncounters() {
-        fights.values.toList().forEach(::closeFight)
+        fights.values.toList().forEach { closeFight(it) }
         fights.clear()
+        Bukkit.getWorlds().forEach(::restoreKeepInventory)
         rewardedCrystals.clear()
     }
 
     fun close() {
         task?.cancel()
-        fights.values.toList().forEach(::closeFight)
+        task = null
+        fights.values.toList().forEach { closeFight(it) }
         fights.clear()
-        Bukkit.getWorlds().forEach(::recoverKeepInventory)
+        Bukkit.getWorlds().forEach(::restoreKeepInventory)
         terrain.close()
         // Keep outstanding landing caps briefly on module disable; unregistering only this
         // listener would otherwise make the final descent unexpectedly lethal.
@@ -199,11 +225,18 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
         }
     }
 
-    private fun closeFight(fight: DragonFight) {
+    private fun closeFight(fight: DragonFight, afterDeath: Boolean = false) {
+        waitingForDragonDeath.remove(fight.dragon.uniqueId)
         try {
             fight.close()
         } finally {
-            if (!fight.preview) restoreKeepInventory(fight.world)
+            if (!fight.preview) {
+                if (afterDeath && fight.config.keepInventoryDuringFight && fight.config.keepInventoryAfterDeathEnabled) {
+                    runCatching { keepInventory.afterDeath(fight.world, fight.config.keepInventoryAfterDeathMinutes) }
+                        .onSuccess { if (!it) Logger.warn("[Remade Ender Dragon] Could not finish keep-inventory in ${fight.world.name}; recovery journal retained.") }
+                        .onFailure { Logger.error("[Remade Ender Dragon] Could not start keep-inventory grace in ${fight.world.name}: ${it.message}", it) }
+                } else restoreKeepInventory(fight.world)
+            }
         }
     }
 
@@ -219,22 +252,25 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
             .onFailure { Logger.error("[Remade Ender Dragon] Could not recover keep-inventory in ${world.name}: ${it.message}", it) }
     }
 
-    private fun announceKeepInventory(world: World, key: String) {
+    private fun announceKeepInventory(world: World, key: String, params: Map<String, Any> = emptyMap()) {
         // Never use a server-wide broadcast for a dimension-local protection rule.
         runCatching {
             if (world.environment == World.Environment.THE_END)
-                world.players.forEach { sendKeepInventory(it, key) }
+                world.players.forEach { sendKeepInventory(it, key, params) }
         }.onFailure { Logger.error("[Remade Ender Dragon] Could not announce keep-inventory in ${world.name}: ${it.message}", it) }
     }
 
-    private fun sendKeepInventory(player: Player, key: String) {
-        Messages.send(player, key, mapOf("world" to player.world.name))
-        if (key == "keep-inventory.enabled" && ConfigFile.state.dragonEgg.alwaysDropOnDeath)
+    private fun sendKeepInventory(player: Player, key: String, params: Map<String, Any> = emptyMap()) {
+        Messages.send(player, key, mapOf("world" to player.world.name) + params)
+        if ((key == "keep-inventory.enabled" || key == "keep-inventory.after-death") && ConfigFile.state.dragonEgg.alwaysDropOnDeath)
             Messages.send(player, "keep-inventory.egg-warning")
     }
 
     private fun notifyKeepInventory(player: Player) {
-        if (keepInventory.isActive(player.world)) sendKeepInventory(player, "keep-inventory.enabled")
+        if (!keepInventory.isActive(player.world)) return
+        val remaining = keepInventory.remainingGraceSeconds(player.world)
+        if (remaining == null) sendKeepInventory(player, "keep-inventory.enabled")
+        else sendKeepInventory(player, "keep-inventory.after-death", mapOf("seconds" to remaining))
     }
 
     fun trackLanding(player: Player, cap: Double) {
@@ -404,17 +440,24 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
 
     @EventHandler
     fun died(event: EntityDeathEvent) {
-        val dragon = event.entity as? EnderDragon
-        if (dragon != null && allowed(dragon.world)) {
-            val fight = fights[dragon.uniqueId]
-            if (fight != null) finish(fight) else markCompleted(dragon.world)
-            stopped.remove(dragon.uniqueId)
-            return
-        }
+        if (event.entity is EnderDragon) return
         val fight = owner(event.entity) ?: return
         event.drops.clear()
         event.droppedExp = 0
         fight.summonDied(event.entity, event.entity.killer)
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun dragonDied(event: EntityDeathEvent) {
+        val dragon = event.entity as? EnderDragon ?: return
+        if (event.isCancelled || dragon.world.environment != World.Environment.THE_END) return
+        // The egg rule is global, so vanilla End dragon deaths count even outside the encounter allowlist.
+        history.lastDragonDeathAtMillis = System.currentTimeMillis()
+        ObjectMapperFileUtils.save("/remade-ender-dragon/history.json", history)
+        if (!allowed(dragon.world)) return
+        val fight = fights[dragon.uniqueId]
+        if (fight != null) finish(fight, confirmedDeath = true) else markCompleted(dragon.world)
+        stopped.remove(dragon.uniqueId)
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -467,6 +510,7 @@ class FightManager(val terrain: TemporaryTerrain) : Listener {
         fights.values.filter { it.world == event.world }.toList().forEach {
             fights.remove(it.dragon.uniqueId); closeFight(it)
         }
+        restoreKeepInventory(event.world)
     }
 
     @EventHandler

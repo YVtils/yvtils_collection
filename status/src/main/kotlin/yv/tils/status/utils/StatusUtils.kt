@@ -13,6 +13,7 @@
 package yv.tils.status.utils
 
 import net.kyori.adventure.text.Component
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
 import yv.tils.status.configs.ConfigFile
@@ -30,7 +31,7 @@ class StatusUtils {
         fun renderDisplay(status: String, playerName: String): Component =
             StatusDisplay.render(ConfigFile.state.display, status, playerName, Core.prefix)
 
-        fun setStatusDisplay(player: Player, status: String): Boolean {
+        fun setStatusDisplay(player: Player, status: String, sender: CommandSender = player): Boolean {
             if (status == "") {
                 player.displayName(Component.text(player.name))
                 player.playerListName(Component.text(player.name))
@@ -40,10 +41,10 @@ class StatusUtils {
             }
 
             if (checkBlacklist(status)) {
-                player.sendMessage(
+                sender.sendMessage(
                     LanguageHandler.getMessage(
                         "command.status.input.invalid",
-                        player,
+                        sender,
                         mapOf(
                             "prefix" to Core.prefix,
                             "status" to status,
@@ -51,7 +52,7 @@ class StatusUtils {
                     )
                 )
 
-                setStatusDisplay(player, "")
+                // Reject the input without clearing a status the sender may not be allowed to clear.
                 return false
             }
 

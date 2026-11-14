@@ -29,6 +29,81 @@ import kotlin.test.assertTrue
 
 class DragonEggProtectionTest {
     @Test
+    fun `egg logout countdown formats duration units instead of a raw second count`() {
+        val protection = DragonEggProtection { DragonEggSettings() }
+        mapOf(
+            0L to "0 s", 1L to "1 s", 59L to "59 s", 60L to "1 m",
+            61L to "1 m 1 s", 3599L to "59 m 59 s", 3600L to "1 h",
+            3661L to "1 h 1 m 1 s", 86400L to "1 d",
+        ).forEach { (seconds, expected) -> assertEquals(expected, protection.formatLogoutWait(seconds)) }
+    }
+
+    @Test
+    fun `optional egg logout lock requires a recorded death and the configured minutes`() {
+        var now = 1_000_000L
+        var death: Long? = null
+        val settings = DragonEggSettings(logoutAfterDragonDeathEnabled = true, logoutAfterDragonDeathMinutes = 2)
+        val protection = DragonEggProtection(lastDragonDeathMillis = { death }, nowMillis = { now }) { settings }
+        assertFalse(protection.canLogoutWithEgg())
+        assertNull(protection.logoutWaitSeconds())
+        death = now
+        assertFalse(protection.canLogoutWithEgg())
+        assertEquals(120L, protection.logoutWaitSeconds())
+        now += 119_999L
+        assertFalse(protection.canLogoutWithEgg())
+        assertEquals(1L, protection.logoutWaitSeconds())
+        now++
+        assertTrue(protection.canLogoutWithEgg())
+        assertEquals(0L, protection.logoutWaitSeconds())
+        settings.logoutable = false
+        assertFalse(protection.canLogoutWithEgg()) // Permanent restriction still takes precedence.
+        settings.logoutable = true
+        settings.logoutAfterDragonDeathEnabled = false
+        death = null
+        assertTrue(protection.canLogoutWithEgg())
+    }
+
+    @Test
+    fun `a later dragon death relocks egg logout and settings changes use the same death time`() {
+        var now = 1_000_000L
+        var death = now - 60_000L
+        val settings = DragonEggSettings(logoutAfterDragonDeathEnabled = true, logoutAfterDragonDeathMinutes = 1)
+        val protection = DragonEggProtection(lastDragonDeathMillis = { death }, nowMillis = { now }) { settings }
+        assertTrue(protection.canLogoutWithEgg())
+        death = now
+        assertFalse(protection.canLogoutWithEgg())
+        now += 60_000L
+        assertTrue(protection.canLogoutWithEgg())
+        settings.logoutAfterDragonDeathMinutes = 2
+        assertFalse(protection.canLogoutWithEgg())
+        assertEquals(60L, protection.logoutWaitSeconds())
+    }
+
+    @Test
+    fun `timed logout drops eggs before expiry but preserves them after expiry including across restart`() {
+        var now = 1_000_000L
+        val death = now
+        val settings = DragonEggSettings(logoutAfterDragonDeathEnabled = true, logoutAfterDragonDeathMinutes = 1)
+        val protection = DragonEggProtection(lastDragonDeathMillis = { death }, nowMillis = { now }) { settings }
+        val early = LogoutPlayer()
+        val egg = EggTestStack(Material.DRAGON_EGG)
+        early.slots[40] = egg
+        early.cursor = EggTestStack(Material.DRAGON_EGG)
+        protection.quit(early.event())
+        assertNull(early.slots[40])
+        assertEquals(Material.AIR, early.cursor.type)
+        assertEquals(2, early.drops.size)
+        now += 60_000L
+        val later = LogoutPlayer()
+        later.slots[40] = egg
+        val restarted = DragonEggProtection(lastDragonDeathMillis = { death }, nowMillis = { now }) { settings }
+        restarted.quit(later.event())
+        assertSame(egg, later.slots[40])
+        assertTrue(later.drops.isEmpty())
+        assertEquals(0, later.closes)
+    }
+
+    @Test
     fun `forced egg death drops override both keep inventory states without dropping other inventory items`() {
         listOf(false, true).forEach { keepInventory ->
             val player = LogoutPlayer()

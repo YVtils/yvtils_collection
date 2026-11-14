@@ -16,6 +16,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import yv.tils.config.language.LanguageHandler
 import yv.tils.status.configs.ConfigFile
+import yv.tils.status.data.Permissions
 import yv.tils.status.utils.StatusDisplay
 import yv.tils.status.utils.StatusUtils.Companion.generateDefaultStatus
 import yv.tils.status.utils.StatusUtils.Companion.setStatusDisplay
@@ -24,14 +25,15 @@ import yv.tils.utils.modules.Core
 import yv.tils.utils.stats.ModuleTelemetry
 
 class StatusHandler {
-    fun setStatus(player: Player, status: String) {
-        val maxLength = ConfigFile.config["maxLength"] as Int
+    fun setStatus(player: Player, status: String, sender: CommandSender = player) {
+        if (!checkPermission(sender, player, Permissions.COMMAND_STATUS_SET)) return
+        val maxLength = ConfigFile.state.maxLength
 
         if (MessageUtils.strip(status).length > maxLength) {
-            player.sendMessage(
+            sender.sendMessage(
                 LanguageHandler.getMessage(
                     "command.status.input.tooLong",
-                    player,
+                    sender,
                     mapOf(
                         "prefix" to Core.prefix,
                         "maxLength" to maxLength.toString()
@@ -41,16 +43,17 @@ class StatusHandler {
             return
         }
 
-        setStatusDisplayHandler(player, status)
+        setStatusDisplayHandler(player, status, sender)
     }
 
-    fun setDefaultStatus(player: Player, status: String) {
+    fun setDefaultStatus(player: Player, status: String, sender: CommandSender = player) {
+        if (!checkPermission(sender, player, Permissions.COMMAND_STATUS_DEFAULT)) return
         val suggestions = generateDefaultStatus()
         if (!suggestions.contains(status)) {
-            player.sendMessage(
+            sender.sendMessage(
                 LanguageHandler.getMessage(
                     "command.status.default.notFound",
-                    player,
+                    sender,
                     mapOf(
                         "prefix" to Core.prefix,
                         "status" to status,
@@ -60,15 +63,16 @@ class StatusHandler {
             return
         }
 
-        setStatusDisplayHandler(player, status)
+        setStatusDisplayHandler(player, status, sender)
     }
 
     fun clearStatus(player: Player, sender: CommandSender = player) {
+        if (!checkPermission(sender, player, Permissions.COMMAND_STATUS_CLEAR)) return
         setStatusDisplay(player, "")
         player.sendMessage(
             LanguageHandler.getMessage(
                 "command.status.clear.cleared.self",
-                sender,
+                player,
                 mapOf(
                     "prefix" to Core.prefix,
                 )
@@ -89,8 +93,20 @@ class StatusHandler {
         }
     }
 
-    private fun setStatusDisplayHandler(player: Player, status: String) {
-        if (setStatusDisplay(player, status)) {
+    private fun checkPermission(sender: CommandSender, target: Player, action: Permissions): Boolean {
+        if (StatusAuthorization.canChange(sender, target, action)) return true
+        sender.sendMessage(LanguageHandler.getMessage(
+            "status.permission.denied", sender, mapOf("prefix" to Core.prefix)
+        ))
+        return false
+    }
+
+    private fun setStatusDisplayHandler(player: Player, status: String, sender: CommandSender) {
+        if (status.isEmpty()) {
+            clearStatus(player, sender)
+            return
+        }
+        if (setStatusDisplay(player, status, sender)) {
             ModuleTelemetry.record(ModuleTelemetry.Event.STATUS_UPDATES)
             player.sendMessage(
                 StatusDisplay.message(
@@ -99,6 +115,12 @@ class StatusHandler {
                     Core.prefix,
                 )
             )
+            if (sender != player) {
+                sender.sendMessage(StatusDisplay.message(
+                    LanguageHandler.getRawMessage("command.status.setOther", sender),
+                    player.displayName(), Core.prefix, player.name,
+                ))
+            }
         }
     }
 }

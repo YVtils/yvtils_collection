@@ -28,10 +28,11 @@ internal object StatusDisplay {
         )
 
     /** Keep an already-rendered display intact when embedding it in a localized message. */
-    fun message(template: String, display: Component, prefix: String): Component =
+    fun message(template: String, display: Component, prefix: String, playerName: String = ""): Component =
         miniMessage.deserialize(
             template,
             Placeholder.component("status", display),
             Placeholder.component("prefix", miniMessage.deserialize(prefix)),
+            Placeholder.unparsed("player", playerName),
         )
 }

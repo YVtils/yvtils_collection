@@ -84,7 +84,7 @@ class StatusManager {
             }
             .addClickHandler { _, _ ->
                 if (!canManage(player, target, Permissions.COMMAND_STATUS_CLEAR)) return@addClickHandler
-                StatusUtils.setStatusDisplay(target, "")
+                StatusUtils.setStatusDisplay(target, "", player)
                 buildMenuWindow(player, target).open(player)
             }
             .build()
@@ -167,8 +167,10 @@ class StatusManager {
                 }
             )
             .addClickHandler { _, _ ->
-                if (!canManage(player, target, Permissions.COMMAND_STATUS_SET)) return@addClickHandler
-                StatusUtils.setStatusDisplay(target, input.get())
+                val status = input.get()
+                val action = if (status.isEmpty()) Permissions.COMMAND_STATUS_CLEAR else Permissions.COMMAND_STATUS_SET
+                if (!canManage(player, target, action)) return@addClickHandler
+                StatusUtils.setStatusDisplay(target, status, player)
                 buildMenuWindow(player, target).open(player)
             }
             .build()
@@ -228,8 +230,9 @@ class StatusManager {
                     )
             }
             .addClickHandler { _, _ ->
-                if (!canManage(player, target, Permissions.COMMAND_STATUS_DEFAULT)) return@addClickHandler
-                StatusUtils.setStatusDisplay(target, status)
+                val action = if (status.isEmpty()) Permissions.COMMAND_STATUS_CLEAR else Permissions.COMMAND_STATUS_DEFAULT
+                if (!canManage(player, target, action)) return@addClickHandler
+                StatusUtils.setStatusDisplay(target, status, player)
                 buildMenuWindow(player, target).open(player)
             }
             .build()

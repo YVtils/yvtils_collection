@@ -34,18 +34,27 @@ import yv.tils.remadeEnderDragon.configs.ConfigFile
 import yv.tils.remadeEnderDragon.configs.DragonEggSettings
 import yv.tils.remadeEnderDragon.language.Messages
 import yv.tils.utils.modules.Core
+import yv.tils.utils.time.TimeUtils
 import java.util.UUID
 
 /** Global egg rules: carrying an egg outside the End must not bypass protection. */
 class DragonEggProtection(
+    private val lastDragonDeathMillis: () -> Long? = { null },
+    private val nowMillis: () -> Long = System::currentTimeMillis,
     private val settings: () -> DragonEggSettings = { ConfigFile.state.dragonEgg },
 ) : Listener {
     private val fallingEggs = mutableMapOf<UUID, Entity>()
     private var protectingVoid = false
     private var task: BukkitTask? = null
+    private var noticeTicks = 0
+    private val timeUtils = TimeUtils()
 
     fun enable() {
         task = Bukkit.getScheduler().runTaskTimer(Core.instance, Runnable {
+            if (++noticeTicks >= 20) {
+                noticeTicks = 0
+                notifyLogoutWait()
+            }
             if (settings().voidDisappearing) {
                 fallingEggs.clear()
                 protectingVoid = false
@@ -154,9 +163,38 @@ class DragonEggProtection(
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun quit(event: PlayerQuitEvent) {
-        if (settings().logoutable) return
+        if (canLogoutWithEgg()) return
         val player = event.player
         takeCarriedEggs(player).forEach { player.world.dropItem(player.location, it) }
+    }
+
+    /** null means no actual End dragon death has been recorded yet. */
+    internal fun logoutWaitSeconds(): Long? {
+        val death = lastDragonDeathMillis() ?: return null
+        val wait = settings().logoutAfterDragonDeathMinutes * 60_000L
+        val remaining = (wait - (nowMillis() - death)).coerceAtLeast(0L)
+        return (remaining + 999L) / 1000L
+    }
+
+    internal fun canLogoutWithEgg(): Boolean {
+        val config = settings()
+        return config.logoutable && (!config.logoutAfterDragonDeathEnabled || logoutWaitSeconds() == 0L)
+    }
+
+    internal fun formatLogoutWait(seconds: Long): String = timeUtils.formatDuration(seconds.coerceAtLeast(0L) * 1000L)
+
+    private fun notifyLogoutWait() {
+        val config = settings()
+        if (!config.logoutable || !config.logoutAfterDragonDeathEnabled) return
+        val remaining = logoutWaitSeconds()
+        if (remaining == 0L) return
+        val display = remaining?.let(::formatLogoutWait)
+        Bukkit.getOnlinePlayers().filter { player ->
+            player.inventory.contents.any(DragonEggRules::containsEgg) || DragonEggRules.containsEgg(player.itemOnCursor)
+        }.forEach { player ->
+            if (remaining == null) Messages.actionBar(player, "egg.logout-awaiting-dragon")
+            else Messages.actionBar(player, "egg.logout-countdown", mapOf("time" to checkNotNull(display)))
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

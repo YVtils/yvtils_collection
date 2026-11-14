@@ -78,9 +78,15 @@ data class DragonEggSettings(
     @ConfigDescription("Allow dragon eggs to disappear in the void; false returns dropped/falling eggs to the world's spawn surface")
     @BooleanIcon(whenTrue = Material.ENDER_EYE, whenFalse = Material.BARRIER)
     var voidDisappearing: Boolean = true,
-    @ConfigDescription("Allow players to keep carried dragon eggs when logging out; false drops egg-bearing stacks at their location")
+    @ConfigDescription("Allow players to keep carried dragon eggs when logging out, subject to the optional post-death wait; false always drops egg-bearing stacks at their location")
     @BooleanIcon(whenTrue = Material.PLAYER_HEAD, whenFalse = Material.BARRIER)
     var logoutable: Boolean = true,
+    @ConfigDescription("When egg logout is allowed, only let players keep eggs on logout after the latest End dragon death plus the configured wait; leaving earlier drops them")
+    @BooleanIcon(whenTrue = Material.CLOCK, whenFalse = Material.BARRIER)
+    var logoutAfterDragonDeathEnabled: Boolean = false,
+    @ConfigDescription("Minutes after the latest End dragon death before players may log out with eggs; 1..1440; no recorded death means logout still drops eggs")
+    @ConfigIcon(Material.CLOCK)
+    var logoutAfterDragonDeathMinutes: Int = 5,
     @ConfigDescription("Always drop carried dragon eggs on death, even with keep-inventory; egg-bearing containers drop intact")
     @BooleanIcon(whenTrue = Material.DRAGON_EGG, whenFalse = Material.BARRIER)
     var alwaysDropOnDeath: Boolean = false,
@@ -92,9 +98,15 @@ data class DragonConfig(
     @ConfigDescription("Master switch for custom encounters")
     @BooleanIcon(whenTrue = Material.LIME_DYE, whenFalse = Material.RED_DYE)
     var enabled: Boolean = true,
-    @ConfigDescription("Temporarily enable keep-inventory only in the End world hosting a normal dragon fight; announce changes there and restore the previous rule on cleanup; previews do not change it")
+    @ConfigDescription("Temporarily enable keep-inventory only in the End world hosting a normal dragon fight; restore on cleanup or after the optional post-death timer; previews do not change it")
     @BooleanIcon(whenTrue = Material.TOTEM_OF_UNDYING, whenFalse = Material.BARRIER)
     var keepInventoryDuringFight: Boolean = false,
+    @ConfigDescription("Extend the fight's End-world keep-inventory protection for a timer after the dragon actually dies; requires keepInventoryDuringFight; stop/reload/unload/disable still restore immediately")
+    @BooleanIcon(whenTrue = Material.CLOCK, whenFalse = Material.BARRIER)
+    var keepInventoryAfterDeathEnabled: Boolean = false,
+    @ConfigDescription("Minutes to keep the fight's keep-inventory protection after dragon death; 1..1440")
+    @ConfigIcon(Material.CLOCK)
+    var keepInventoryAfterDeathMinutes: Int = 5,
     @NotGuiEditable
     var dragonEgg: DragonEggSettings = DragonEggSettings(),
     @ConfigDescription("EVERY: all fights; ADMIN: command only; FIRST: first dragon kill per world")
@@ -215,6 +227,8 @@ data class DragonConfig(
     fun settings(attack: Attack): AttackSettings = attacks[attack.id] ?: defaultAttacks().getValue(attack.id)
 
     fun validate() {
+        require(dragonEgg.logoutAfterDragonDeathMinutes in 1..1440) { "dragonEgg.logoutAfterDragonDeathMinutes must be 1..1440" }
+        require(keepInventoryAfterDeathMinutes in 1..1440) { "keepInventoryAfterDeathMinutes must be 1..1440" }
         require(finalPhaseHealth in 0.05..0.8 && middlePhaseHealth in 0.1..0.95 && finalPhaseHealth < middlePhaseHealth)
         require(middlePhaseIntervalMultiplier in 0.5..1.0 && finalPhaseIntervalMultiplier in 0.5..1.0)
         require(recoverySeconds in 1.0..30.0 && phaseRecoverySeconds in 2.0..60.0 && customHitRecoverySeconds in 0.5..5.0)

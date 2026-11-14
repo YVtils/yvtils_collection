@@ -19,6 +19,8 @@ import yv.tils.remadeEnderDragon.configs.ConfigFile
 import yv.tils.remadeEnderDragon.language.Messages
 import yv.tils.remadeEnderDragon.logic.FightManager
 import yv.tils.remadeEnderDragon.logic.DragonEggProtection
+import yv.tils.remadeEnderDragon.logic.DragonEggCarrierEffects
+import yv.tils.remadeEnderDragon.logic.DroppedDragonEggDisplay
 import yv.tils.remadeEnderDragon.logic.TemporaryTerrain
 import yv.tils.utils.modules.Core
 import yv.tils.utils.modules.Module
@@ -37,6 +39,8 @@ class RemadeEnderDragonYVtils : Module.YVtilsModule {
 
     private var manager: FightManager? = null
     private var eggProtection: DragonEggProtection? = null
+    private var eggEffects: DragonEggCarrierEffects? = null
+    private var droppedEggs: DroppedDragonEggDisplay? = null
 
     override fun onLoad() { Messages.register() }
 
@@ -50,10 +54,18 @@ class RemadeEnderDragonYVtils : Module.YVtilsModule {
         PermissionManager.registerPermissions(PermissionsData().getPermissionList(true))
         Core.instance.server.pluginManager.registerEvents(terrain, Core.instance)
         Core.instance.server.pluginManager.registerEvents(fights, Core.instance)
-        val eggs = DragonEggProtection()
+        val eggs = DragonEggProtection(lastDragonDeathMillis = fights::lastDragonDeathMillis)
         eggProtection = eggs
         Core.instance.server.pluginManager.registerEvents(eggs, Core.instance)
         eggs.enable()
+        val effects = DragonEggCarrierEffects()
+        eggEffects = effects
+        Core.instance.server.pluginManager.registerEvents(effects, Core.instance)
+        effects.enable()
+        val drops = DroppedDragonEggDisplay()
+        droppedEggs = drops
+        Core.instance.server.pluginManager.registerEvents(drops, Core.instance)
+        drops.enable()
         fights.enable()
         DragonCommand(fights)
         Module.addModule(MODULE)
@@ -61,6 +73,16 @@ class RemadeEnderDragonYVtils : Module.YVtilsModule {
     }
 
     override fun disablePlugin() {
+        droppedEggs?.let {
+            it.close()
+            HandlerList.unregisterAll(it)
+        }
+        droppedEggs = null
+        eggEffects?.let {
+            it.close()
+            HandlerList.unregisterAll(it)
+        }
+        eggEffects = null
         eggProtection?.let {
             it.close()
             HandlerList.unregisterAll(it)

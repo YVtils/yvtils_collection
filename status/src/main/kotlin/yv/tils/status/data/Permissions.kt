@@ -41,7 +41,7 @@ enum class Permissions(val permission: PermissionManager.YVtilsPermission) {
         "${PermissionsData.permissionBase}.command.manage.self", "Open your status management GUI", default = true
     )),
     COMMAND_STATUS_MANAGE_OTHERS(PermissionManager.YVtilsPermission(
-        "${PermissionsData.permissionBase}.command.manage.others", "Manage another player's status through the GUI"
+        "${PermissionsData.permissionBase}.command.manage.others", "Manage another player's status through the GUI or set/default commands"
     )),
     COMMAND_STATUS_SET(PermissionManager.YVtilsPermission(
         "${PermissionsData.permissionBase}.command.set", "Set custom status text", default = true

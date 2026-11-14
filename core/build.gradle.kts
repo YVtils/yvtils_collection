@@ -10,7 +10,7 @@
  * the YVtils Brand Protection Clause.
  */
 
-import java.util.Properties
+import java.util.*
 
 dependencies {
     compileOnly(project(":common"))
@@ -134,12 +134,12 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 tasks {
     runServer {
-        minecraftVersion("26.1.2")
+        minecraftVersion("26.3")
 
         downloadPlugins {
-            modrinth("simple-voice-chat", "bukkit-2.6.20")
-            modrinth("worldguard", "7.0.18")
-            modrinth("fastasyncworldedit", "2.15.3")
+            //modrinth("simple-voice-chat", "bukkit-2.6.20")
+            //modrinth("worldguard", "7.0.18")
+            //modrinth("fastasyncworldedit", "2.15.3")
         }
     }
 

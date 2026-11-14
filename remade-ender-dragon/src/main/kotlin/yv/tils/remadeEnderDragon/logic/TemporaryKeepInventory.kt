@@ -19,12 +19,20 @@ internal class TemporaryKeepInventory(
     private val writeRule: (World, Boolean) -> Boolean = { world, value -> world.setGameRule(GameRules.KEEP_INVENTORY, value) },
     private val onActivated: (World) -> Unit = {},
     private val onRestored: (World, Boolean) -> Unit = { _, _ -> },
+    private val onGraceStarted: (World, Long) -> Unit = { _, _ -> },
+    private val nowMillis: () -> Long = { System.nanoTime() / 1_000_000L },
 ) {
     private var journal = initial.copy(originalRules = initial.originalRules.toMap())
     private val active = mutableSetOf<UUID>()
+    private val graceDeadlines = mutableMapOf<UUID, Long>()
 
     fun begin(world: World, enabled: Boolean, preview: Boolean): Boolean {
-        if (!enabled || preview || world.environment != World.Environment.THE_END || world.uid in active) return true
+        if (!enabled || preview || world.environment != World.Environment.THE_END) return true
+        if (world.uid in active) {
+            // A new encounter inherits the same journalled baseline, not the temporary true rule.
+            if (graceDeadlines.remove(world.uid) != null) onActivated(world)
+            return true
+        }
         if (!recover(world)) return false
         val original = readRule(world)
         save(journal.copy(originalRules = journal.originalRules + (world.uid.toString() to original)))
@@ -38,6 +46,7 @@ internal class TemporaryKeepInventory(
     }
 
     fun restore(world: World): Boolean {
+        graceDeadlines.remove(world.uid)
         val wasActive = active.remove(world.uid)
         val original = journal.originalRules[world.uid.toString()] ?: return true
         val changed = readRule(world) != original
@@ -45,6 +54,22 @@ internal class TemporaryKeepInventory(
         save(journal.copy(originalRules = journal.originalRules - world.uid.toString()))
         if (world.environment == World.Environment.THE_END && (wasActive || changed)) onRestored(world, original)
         return true
+    }
+
+    /** Only a confirmed dragon death requests a grace period; all other cleanup restores immediately. */
+    fun afterDeath(world: World, minutes: Int): Boolean {
+        if (minutes <= 0 || !isActive(world)) return restore(world)
+        if (world.uid !in graceDeadlines) {
+            graceDeadlines[world.uid] = nowMillis() + minutes * 60_000L
+            onGraceStarted(world, minutes * 60L)
+        }
+        return true
+    }
+
+    fun expiredWorlds(): Set<UUID> = graceDeadlines.filterValues { it <= nowMillis() }.keys
+
+    fun remainingGraceSeconds(world: World): Long? = graceDeadlines[world.uid]?.let {
+        ((it - nowMillis()).coerceAtLeast(0L) + 999L) / 1000L
     }
 
     /** Loaded worlds recover before discovery; late-loaded worlds recover on WorldLoadEvent. */
